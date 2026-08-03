@@ -84,7 +84,7 @@ class Runner {
 	 * Reschedule a deferred scheduled scan for ~24h out.
 	 *
 	 * The SaaS defers (rather than partial-runs) a scheduled scan when the
-	 * license's shared daily page budget can't fit it today. Retrying daily —
+	 * license's shared daily page budget can't fit it today. Retrying daily -
 	 * instead of waiting for the next weekly/monthly cycle - means the scan runs
 	 * as soon as the budget resets. Nothing actually scanned, so drop the
 	 * auto-run marker to avoid mislabeling a later manual scan.
@@ -133,6 +133,11 @@ class Runner {
 
 		// Mark this scan as auto-triggered for the completion recorder (TTL > scan ceiling).
 		set_transient( self::ACTIVE_TRANSIENT, 1, 45 * MINUTE_IN_SECONDS );
+
+		// Start this run with a clean log, exactly as the manual scan entry point
+		// does. Deliberately after the in-progress and lock guards so a duplicate
+		// cron tick can never wipe the log of the scan that is already running.
+		Logger::get_instance()->cleanup_logs();
 
 		Logger::get_instance()->save_log( __( 'Starting automatic (scheduled) scan.', 'surecookie' ) );
 

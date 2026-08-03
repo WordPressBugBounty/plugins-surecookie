@@ -480,7 +480,12 @@ class ConsentLogs extends Base {
 	public function update_consent_log( $request ): void {
 		$consent_logging_enabled = Settings::get( 'consent_logging_enabled' );
 		if ( ! $consent_logging_enabled ) {
-			SendJson::error(
+			// Logging is intentionally disabled: recording the log is a
+			// successful no-op, not an error. Returning an error envelope here
+			// made the client treat a normal "logging off" response as a
+			// failure (the message already says "successfully"). Consent itself
+			// is persisted client-side regardless of this call.
+			SendJson::success(
 				[
 					'message' => __( 'Consent processed successfully (logging disabled)', 'surecookie' ),
 				]
@@ -619,13 +624,22 @@ class ConsentLogs extends Base {
 		$country    = self::get_country_name_from_ip( $raw_ip );
 		$ip_address = self::anonymize_ip( $raw_ip );
 
-		$result = DBConsentLog::upsert( $ip_address, $user_id, $session_id, $preferences, $action_type, $country );
+		// Record which geo preset governed this consent, resolved server-side by
+		// Pro's geo module (empty on the free / no-geo path). Kept out of the
+		// client POST so the proof-of-consent record can't be spoofed.
+		$geo_preset_id = (string) apply_filters( 'surecookie_active_geo_preset_id', '' );
+
+		$result = DBConsentLog::upsert( $ip_address, $user_id, $session_id, $preferences, $action_type, $country, null, $geo_preset_id );
 
 		if ( $result ) {
-			// Gather consent log counts for analytics.
-			$existing_count = Settings::get( 'total_logs' );
-			$new_count      = $existing_count + 1;
-			Settings::update( 'total_logs', $new_count );
+			// Gather consent log counts for analytics. A same-second duplicate
+			// resolves to the existing row without writing, so counting it would
+			// drift the total away from the table it is meant to describe.
+			if ( DBConsentLog::last_upsert_stored() ) {
+				$existing_count = Settings::get( 'total_logs' );
+				$new_count      = $existing_count + 1;
+				Settings::update( 'total_logs', $new_count );
+			}
 			SendJson::success(
 				[
 					'message'    => __( 'Consent saved successfully.', 'surecookie' ),

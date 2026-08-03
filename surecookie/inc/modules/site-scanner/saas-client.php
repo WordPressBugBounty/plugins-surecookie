@@ -11,6 +11,7 @@
 namespace SureCookie\Inc\Modules\SiteScanner;
 
 use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Traits\IpManager;
 use SureCookie\Inc\Utils\Logger;
@@ -33,6 +34,16 @@ class SaasClient {
 	 * Option key for storing active scan data.
 	 */
 	public const SCAN_OPTION_KEY = 'surecookie_active_scan';
+
+	/**
+	 * Set once this site's host has ever blocked our remote scanner.
+	 *
+	 * Durable on purpose: the outcome itself lives in a transient, but the analytics
+	 * state event needs the fact to survive so the installed base can be counted.
+	 *
+	 * @since 1.3.0
+	 */
+	public const BLOCKED_FLAG_OPTION = 'surecookie_cloud_scan_blocked_flag';
 
 	/**
 	 * Transient key storing the temporary scan bypass token.
@@ -69,6 +80,31 @@ class SaasClient {
 	 * Cron hook name for polling scan status.
 	 */
 	public const POLL_SCAN_HOOK = 'surecookie_poll_scan_status';
+
+	/**
+	 * Single-event hook that runs the first-party loopback fallback in the
+	 * background after a host-blocked scan (see run_first_party_detection).
+	 *
+	 * @since 1.3.0
+	 */
+	public const FIRST_PARTY_DETECT_HOOK = 'surecookie_first_party_detect';
+
+	/**
+	 * Transient counting scanner page-loads that actually reached WordPress
+	 * during the active scan. Zero reach on a 0-cookie scan means the host
+	 * firewall blocked the crawl at the edge (see classify_scan_outcome).
+	 *
+	 * @since 1.3.0
+	 */
+	public const SCAN_REACH_TRANSIENT = 'surecookie_scan_reach';
+
+	/**
+	 * Transient holding the last scan's outcome classification, surfaced to the
+	 * admin UI so a blocked/empty scan reports honestly instead of "0 cookies".
+	 *
+	 * @since 1.3.0
+	 */
+	public const LAST_OUTCOME_TRANSIENT = 'surecookie_last_scan_outcome';
 
 	/**
 	 * Polling interval in seconds.
@@ -118,6 +154,119 @@ class SaasClient {
 	public function __construct() {
 		add_action( self::POLL_SCAN_HOOK, [ $this, 'poll_scan_status' ] );
 		add_filter( 'cron_schedules', [ $this, 'add_cron_interval' ] ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected -- Safe to adjust for plugin needs.
+		add_action( 'surecookie_scanner_request_detected', [ $this, 'record_scanner_reach' ] );
+		add_action( self::FIRST_PARTY_DETECT_HOOK, [ $this, 'run_first_party_detection' ] );
+	}
+
+	/**
+	 * Record that a scanner page request actually reached WordPress. Fired by
+	 * the Blocker when it sees a valid X-SureCookie-Scan request. Presence
+	 * (not the exact count) is what classify_scan_outcome cares about.
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function record_scanner_reach(): void {
+		$count = (int) get_transient( self::SCAN_REACH_TRANSIENT );
+
+		// Cap so a large crawl can't grow the value unbounded.
+		if ( $count >= 100000 ) {
+			return;
+		}
+
+		$ttl = ( self::MAX_POLL_ATTEMPTS * self::POLL_INTERVAL ) + 600;
+		set_transient( self::SCAN_REACH_TRANSIENT, $count + 1, $ttl );
+	}
+
+	/**
+	 * How many scanner requests reached WordPress during the active scan.
+	 *
+	 * @since 1.3.0
+	 * @return int
+	 */
+	public function get_scanner_reach(): int {
+		return (int) get_transient( self::SCAN_REACH_TRANSIENT );
+	}
+
+	/**
+	 * Classify a finished scan so the UI can report honestly:
+	 *  - ok              : cookies were found.
+	 *  - blocked_by_host : nothing found AND the scanner never reached WP - the
+	 *                      host firewall/anti-bot blocked the crawl at the edge.
+	 *  - empty           : nothing found but the scanner did reach WP (genuinely
+	 *                      cookie-free, or scripts only load after consent).
+	 *
+	 * @param int $findings Number of cookies discovered.
+	 * @param int $reach    Scanner requests that reached WordPress.
+	 * @since 1.3.0
+	 * @return string
+	 */
+	public static function classify_scan_outcome( int $findings, int $reach ): string {
+		if ( $findings > 0 ) {
+			return 'ok';
+		}
+
+		return $reach === 0 ? 'blocked_by_host' : 'empty';
+	}
+
+	/**
+	 * Persist the last scan's outcome for the admin UI to surface.
+	 *
+	 * @param int $findings Number of cookies discovered.
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function store_scan_outcome( int $findings ): void {
+		$reach   = $this->get_scanner_reach();
+		$outcome = self::classify_scan_outcome( $findings, $reach );
+
+		$data = [
+			'outcome'  => $outcome,
+			'findings' => $findings,
+			'reach'    => $reach,
+			'at'       => time(),
+		];
+
+		// When the host blocked the crawl, run the first-party loopback fallback so the
+		// user still learns which known services are present (and can declare them). Deferred
+		// to a background event, not run inline: the loopback fetches several pages and can
+		// take seconds, while this method runs in the scan-results pipeline reachable from
+		// the foreground status poll, which must stay fast.
+		if ( $outcome === 'blocked_by_host' ) {
+			$data['first_party_pending'] = true;
+			$this->schedule_first_party_detection();
+
+			// Durable flag for the analytics state event. The outcome lives in a transient
+			// that expires, but "this host blocked our scanner" is the fleet-wide number that
+			// should decide how much effort goes into scanner reachability, so it must survive.
+			if ( ! get_option( self::BLOCKED_FLAG_OPTION, false ) ) {
+				update_option( self::BLOCKED_FLAG_OPTION, true, false );
+			}
+		}
+
+		set_transient( self::LAST_OUTCOME_TRANSIENT, $data, DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Background handler: run the first-party loopback detector and merge the
+	 * services it finds into the stored outcome, so the admin UI can list them
+	 * after a host-blocked scan. Idempotent and self-guarding - a no-op unless a
+	 * blocked scan is still awaiting its fallback pass.
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function run_first_party_detection(): void {
+		$outcome = get_transient( self::LAST_OUTCOME_TRANSIENT );
+
+		if ( ! is_array( $outcome ) || ( $outcome['outcome'] ?? '' ) !== 'blocked_by_host' ) {
+			return;
+		}
+
+		$outcome['detected_services'] = $this->detect_services_first_party();
+		unset( $outcome['first_party_pending'] );
+
+		set_transient( self::LAST_OUTCOME_TRANSIENT, $outcome, DAY_IN_SECONDS );
 	}
 
 	/**
@@ -147,10 +296,9 @@ class SaasClient {
 	/**
 	 * Get the plaintext API key for HMAC signing.
 	 *
-	 * Issue #473: replaced the deterministic `md5(base64_encode($domain))` with
-	 * a per-site `sk_*` key issued by the SaaS register flow. Credentials are
-	 * stored in a dedicated non-autoloaded option and bound to the registered
-	 * domain - a clone/migration to a new domain invalidates them automatically.
+	 * Issue #473: replaced the deterministic `md5(base64_encode($domain))` with a per-site
+	 * `sk_*` key from the SaaS register flow. Stored in a dedicated non-autoloaded option
+	 * bound to the registered domain - a clone/migration to a new domain invalidates it.
 	 *
 	 * @since 0.0.1-beta.3
 	 * @return string The plaintext sk_* key, or empty string when not registered.
@@ -279,6 +427,10 @@ class SaasClient {
 		$bypass_ttl = ( self::MAX_POLL_ATTEMPTS * self::POLL_INTERVAL ) + 600;
 		set_transient( self::SCAN_BYPASS_TRANSIENT_KEY, $scan_bypass_token, $bypass_ttl );
 
+		// Reset per-scan reach + outcome so this scan's block detection is clean.
+		delete_transient( self::SCAN_REACH_TRANSIENT );
+		delete_transient( self::LAST_OUTCOME_TRANSIENT );
+
 		$request_body = [
 			'site_id'           => $site_id,
 			'base_url'          => $base_url,
@@ -297,9 +449,8 @@ class SaasClient {
 			];
 		}
 
-		// Issue #473: lazily register with the SaaS on first scan. The registration
-		// completes a domain-control verification challenge before issuing the key,
-		// so this is the only place where the network handshake happens.
+		// Issue #473: lazily register on first scan - a domain-control verification
+		// challenge issues the key here, the only place the network handshake happens.
 		$registration = $this->ensure_registered();
 		if ( ! $registration['success'] ) {
 			$this->clear_scan_bypass_token();
@@ -316,9 +467,8 @@ class SaasClient {
 			]
 		);
 
-		// One-shot retry if the SaaS reports an authentication problem (e.g. our
-		// stored key was invalidated by the MD5-key-cleanup migration on the
-		// server). clear_credentials() + ensure_registered() rebuilds.
+		// One-shot retry if the SaaS reports an auth problem (e.g. our stored key was
+		// invalidated by the server's MD5-key-cleanup migration); ensure_registered() rebuilds.
 		if ( $this->handle_unauthorized_response( $response ) ) {
 			$retry = $this->ensure_registered();
 			if ( $retry['success'] ) {
@@ -352,10 +502,9 @@ class SaasClient {
 
 		// SaaS API returns group_id instead of scan_id (group-based scanning system).
 		if ( $response_code !== 201 || empty( $data['group_id'] ) ) {
-			// Scheduled scan the SaaS deferred because this site's daily page budget
-			// is exhausted (see X-Scan-Trigger). Not a hard failure - signal the
-			// automatic-scanning runner to retry in ~24h instead of waiting for the
-			// next weekly/monthly cycle.
+			// Scheduled scan the SaaS deferred because the daily page budget is exhausted
+			// (see X-Scan-Trigger). Not a hard failure - signal the auto-scanning runner to
+			// retry in ~24h instead of waiting for the next weekly/monthly cycle.
 			if ( is_array( $data ) && ( $data['reason'] ?? null ) === 'defer' ) {
 				$this->clear_scan_bypass_token();
 
@@ -412,9 +561,8 @@ class SaasClient {
 			];
 		}
 
-		// Persist the live quota snapshot returned with the start response so the
-		// scanner banner can show the just-decremented remaining-count without a
-		// second round-trip.
+		// Persist the live quota snapshot from the start response so the banner shows the
+		// just-decremented remaining-count without a second round-trip.
 		if ( ! empty( $data['quota'] ) && is_array( $data['quota'] ) ) {
 			$this->persist_quota( $data['quota'] );
 		}
@@ -431,12 +579,13 @@ class SaasClient {
 			'poll_attempts' => 0,
 		];
 
-		update_option( self::SCAN_OPTION_KEY, $scan_data );
+		// Non-autoloaded: this payload carries the full page list and is only read by the
+		// scanner UI and poll cron, so it must not bloat the alloptions cache every request.
+		Update::option( self::SCAN_OPTION_KEY, $scan_data );
 
-		// Analytics: flag the first scan as started for the state-based tracker
-		// (`first_scan_started`). Written here - the single entry point both the
-		// manual REST scan and the scheduled cron handler funnel through - so the
-		// flag is set regardless of how the scan was triggered.
+		// Analytics: flag the first scan started for the state-based tracker
+		// (`first_scan_started`). Written here - the single entry point both the manual
+		// REST scan and scheduled cron funnel through - so it's set however the scan began.
 		if ( ! get_option( 'surecookie_first_scan_started_flag', false ) ) {
 			update_option( 'surecookie_first_scan_started_flag', true, false );
 			update_option( 'surecookie_first_scan_pages_count', count( $pages ), false );
@@ -516,10 +665,11 @@ class SaasClient {
 			];
 
 			/**
-			 * Derive phase-aware progress from the SaaS per-scan payload (PR 1 Phase A addition).
-			 * The SaaS now returns current_phase + progress_percent + pages_processed on each scan entry. Aggregate across scans so a multi-URL group bar behaves sensibly:
-			 * - percent  = average of per-scan percents.
-			 * - phase    = most-active phase among still-running scans (capturing > analyzing …).
+			 * Derive phase-aware progress from the SaaS per-scan payload (PR 1 Phase A).
+			 * Each scan entry carries current_phase + progress_percent + pages_processed;
+			 * aggregate across scans for a sensible multi-URL group bar:
+			 * - percent = average of per-scan percents.
+			 * - phase   = most-active phase among running scans (capturing > analyzing …).
 			 *
 			 * @since 0.0.1-beta.3
 			 */
@@ -675,8 +825,7 @@ class SaasClient {
 				continue;
 			}
 
-			// The individual scan results endpoint returns a 'pages' array.
-			// Merge these pages into our main pages array.
+			// The individual scan results endpoint returns a 'pages' array; merge into ours.
 			if ( isset( $scan_data['pages'] ) && is_array( $scan_data['pages'] ) ) {
 				foreach ( $scan_data['pages'] as $page ) {
 					$pages[] = $page;
@@ -691,6 +840,45 @@ class SaasClient {
 			'success' => true,
 			'data'    => [ 'pages' => $pages ],
 		];
+	}
+
+	/**
+	 * Sync the active scan status from the SaaS on-demand (read-path trigger).
+	 *
+	 * The admin UI polls status every few seconds while a scan runs. Normally the
+	 * WP-Cron hook {@see self::poll_scan_status()} advances the stored status, but where
+	 * WP-Cron is unreliable (DISABLE_WP_CRON with no server cron, or full-page caching)
+	 * it never runs and the scan looks stuck at "queued" though the SaaS already finished.
+	 *
+	 * This bridges the gap: on a status read with a non-terminal scan active, pull the
+	 * live status (throttled to one call per {@see self::POLL_INTERVAL}s) so the scan
+	 * resolves regardless of WP-Cron health. The cron poll stays as a backup.
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function sync_active_scan_status(): void {
+		$active_scan = $this->get_active_scan();
+
+		// Nothing to sync without an active scan tied to a SaaS group. A completed/failed
+		// scan is already cleaned up, so this is also a no-op once terminal.
+		if ( empty( $active_scan['group_id'] ) ) {
+			return;
+		}
+
+		// Throttle: at most one on-demand SaaS pull per poll interval, so the UI's frequent
+		// polling neither hammers the SaaS nor burns MAX_POLL_ATTEMPTS faster than cron.
+		$last_sync = (int) ( $active_scan['last_on_demand_sync_at'] ?? 0 );
+		if ( time() - $last_sync < self::POLL_INTERVAL ) {
+			return;
+		}
+
+		$active_scan['last_on_demand_sync_at'] = time();
+		Update::option( self::SCAN_OPTION_KEY, $active_scan );
+
+		// Reuse the full cron poll routine so progress, completion, failure handling and
+		// result fetching behave identically whether triggered by WP-Cron or this sync.
+		$this->poll_scan_status();
 	}
 
 	/**
@@ -721,7 +909,7 @@ class SaasClient {
 
 		// Increment poll attempts.
 		$active_scan['poll_attempts'] = $poll_attempts + 1;
-		update_option( self::SCAN_OPTION_KEY, $active_scan );
+		Update::option( self::SCAN_OPTION_KEY, $active_scan );
 
 		// Check status.
 		$status_result = $this->check_scan_status( $group_id );
@@ -781,7 +969,7 @@ class SaasClient {
 		}
 
 		if ( $needs_update ) {
-			update_option( self::SCAN_OPTION_KEY, $active_scan );
+			Update::option( self::SCAN_OPTION_KEY, $active_scan );
 		}
 
 		switch ( $status_result['status'] ) {
@@ -846,9 +1034,8 @@ class SaasClient {
 	public function get_quota(): array {
 		$site_url = Utils::get_site_url();
 
-		// Localhost / dev sites can't reach the SaaS - the request would 404 on
-		// every poll and spam the log. Surface a dedicated error_code so the UI
-		// can show an appropriate message.
+		// Localhost / dev sites can't reach the SaaS - the request would 404 every poll
+		// and spam the log. Surface a dedicated error_code so the UI can react.
 		if ( self::is_local_url( $site_url ) ) {
 			Logger::get_instance()->save_log( 'Quota fetch blocked: localhost sites are not supported.' );
 			return [
@@ -859,11 +1046,10 @@ class SaasClient {
 			];
 		}
 
-		// Issue #473: a fresh install with no scan history has no credentials
-		// yet. Surface a typed error_code so the UI can render a "register
-		// first" state instead of an unhelpful 401. We deliberately do NOT
-		// auto-register here - registration is initiated by an explicit user
-		// action (clicking Scan), not by a passive quota fetch on page load.
+		// Issue #473: a fresh install has no credentials yet. Surface a typed error_code so
+		// the UI renders a "register first" state instead of an unhelpful 401. We do NOT
+		// auto-register here - registration needs an explicit user action (clicking Scan),
+		// not a passive quota fetch on page load.
 		if ( $this->get_api_key() === '' ) {
 			return [
 				'success'    => false,
@@ -873,7 +1059,7 @@ class SaasClient {
 			];
 		}
 
-		// AuthenticateScanRequest derives the site from the signed key prefix —
+		// AuthenticateScanRequest derives the site from the signed key prefix -
 		// base_url/site_id in the query are kept for log/debug usefulness only.
 		$url = add_query_arg(
 			[
@@ -941,10 +1127,9 @@ class SaasClient {
 				'error'
 			);
 
-			// Distinguish auth failures (the user's plan / connection actually changed
-			// - bust cache so we don't keep showing stale tier numbers) from transient
-			// HTTP errors like 5xx / 429 / JSON parse failures (cache stays so the
-			// banner doesn't flicker during a backend hiccup).
+			// Distinguish auth failures (plan/connection actually changed - bust cache so we
+			// don't show stale tier numbers) from transient HTTP errors like 5xx/429/JSON
+			// parse failures (cache stays so the banner doesn't flicker during a hiccup).
 			$is_auth_error = in_array( $response_code, [ 401, 403 ], true )
 				|| in_array(
 					$saas_error_code,
@@ -979,9 +1164,8 @@ class SaasClient {
 
 		$quota = is_array( $data['quota'] ?? null ) ? $data['quota'] : [];
 		$plan  = (string) ( $data['plan'] ?? '' );
-		// Persist plan alongside quota so cache-hit reads return the SaaS-reported
-		// plan instead of falling back to the local `surecookie_plan_type` filter
-		// default ("free"), which would mislabel paid tiers.
+		// Persist plan alongside quota so cache-hit reads return the SaaS-reported plan
+		// instead of the local `surecookie_plan_type` default ("free"), mislabeling paid tiers.
 		$this->persist_quota( $quota, $plan );
 
 		return [
@@ -1003,10 +1187,9 @@ class SaasClient {
 	}
 
 	/**
-	 * Persist a quota snapshot to the 10-min transient and the long-lived offline-fallback option.
-	 * Optionally caches the SaaS-reported plan tier alongside (under the `_plan` key)
-	 * so cache-hit reads can return the actual plan instead of falling back to the
-	 * local `surecookie_plan_type` filter default.
+	 * Persist a quota snapshot to the 10-min transient and long-lived fallback option.
+	 * Optionally caches the SaaS-reported plan tier (under `_plan`) so cache-hit reads
+	 * return the actual plan instead of the local `surecookie_plan_type` default.
 	 *
 	 * @param array<string, mixed> $quota Quota snapshot from SaaS.
 	 * @param string|null          $plan  Plan tier reported by SaaS (e.g. 'free', 'team', 'agency', 'solo').
@@ -1109,6 +1292,99 @@ class SaasClient {
 	}
 
 	/**
+	 * Queue the first-party loopback fallback to run once in the background.
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	private function schedule_first_party_detection(): void {
+		if ( ! wp_next_scheduled( self::FIRST_PARTY_DETECT_HOOK ) ) {
+			wp_schedule_single_event( time(), self::FIRST_PARTY_DETECT_HOOK );
+		}
+	}
+
+	/**
+	 * Run the first-party loopback detector over the configured scan pages.
+	 * Never throws - detection is best-effort and must not break the results
+	 * pipeline.
+	 *
+	 * @since 1.3.0
+	 * @return array<string, string> Detected services as id => label.
+	 */
+	private function detect_services_first_party(): array {
+		try {
+			$urls = Cron::get_instance()->get_pages_urls_to_scan();
+			if ( empty( $urls ) ) {
+				return [];
+			}
+			return LoopbackScanner::get_instance()->detect_services( $urls );
+		} catch ( \Throwable $e ) {
+			Logger::get_instance()->save_log( 'First-party fallback detection failed: ' . $e->getMessage() );
+			return [];
+		}
+	}
+
+	/**
+	 * Diagnose why domain verification (the SaaS's inbound GET to our public
+	 * /wp-json verify route) failed, by probing that route over a loopback
+	 * request to ourselves:
+	 *  - An SSL-validating HTTPS request failing with a cert error means the certificate
+	 *    is self-signed, expired, or wrong-domain. A common silent cause: humans click
+	 *    past the browser warning, but our server cannot.
+	 *  - A reachable route replying 404 {"error":"not_found"} to a bad token means an
+	 *    EXTERNAL block (host firewall/anti-bot).
+	 *  - Anything else (timeout, non-JSON, redirect) means the REST API is unreachable
+	 *    (permalinks off / security plugin disabling REST).
+	 *
+	 * @since 1.3.0
+	 * @return string 'ssl_invalid' | 'external_block' | 'rest_unreachable'
+	 */
+	private function diagnose_verification_failure(): string {
+		$probe_url = rest_url( 'surecookie/v1/site-verify/' . str_repeat( '0', 64 ) );
+
+		// First validate the certificate the way the SaaS does (HTTPS, SSL verify on): a
+		// self-signed/expired/mismatched cert fails with a cert-specific error, never reaching the route.
+		$ssl_probe = wp_remote_get(
+			$probe_url,
+			[
+				'timeout'   => 10,
+				'sslverify' => true,
+			]
+		);
+
+		if ( is_wp_error( $ssl_probe ) ) {
+			$error = strtolower( $ssl_probe->get_error_message() );
+			if ( strpos( $error, 'certificate' ) !== false || strpos( $error, 'ssl' ) !== false ) {
+				return 'ssl_invalid';
+			}
+		}
+
+		// Then check reachability with SSL verification off, so a bad certificate
+		// does not mask an actual block or an unreachable REST API.
+		$response = wp_remote_get(
+			$probe_url,
+			[
+				'timeout'   => 10,
+				// Loopback to ourselves; some local/staging stacks use self-signed certs.
+				'sslverify' => false,
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return 'rest_unreachable';
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		$body = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+
+		if ( $code === 404 && is_array( $body ) && ( $body['error'] ?? '' ) === 'not_found' ) {
+			return 'external_block';
+		}
+
+		return 'rest_unreachable';
+	}
+
+	/**
 	 * Generate a site-context-bound scan bypass token.
 	 *
 	 * Keeps a 64-char hex shape so blocker validation remains unchanged.
@@ -1137,9 +1413,8 @@ class SaasClient {
 	 * Read the stored credentials, returning [] if absent or if the registered
 	 * domain no longer matches the current site URL (clone/migration drift).
 	 *
-	 * The domain-drift purge is critical: copying a WP install to a new host
-	 * must not let the new host use the original's credentials. The next scan
-	 * triggers a fresh registration from the new domain.
+	 * The domain-drift purge is critical: copying a WP install to a new host must not let
+	 * it use the original's credentials. The next scan triggers a fresh registration.
 	 *
 	 * @since 0.0.1-beta.3
 	 * @return array<string, mixed>
@@ -1311,11 +1586,10 @@ class SaasClient {
 		$verification_token = (string) $step1_data['verification_token'];
 		$wp_site_id         = (string) $step1_data['site_id'];
 
-		// The REST verification route only matches 64-char lowercase hex
-		// (see VerificationHandler::register_routes). If the SaaS ever returns
-		// a token that doesn't conform - uppercase, wrong length, base64 - the
-		// callback would never find the route and registration would silently
-		// hang for the full 5s timeout. Surface the mismatch immediately.
+		// The REST verification route only matches 64-char lowercase hex (see
+		// VerificationHandler::register_routes). A non-conforming token (uppercase, wrong
+		// length, base64) would never match the route, hanging registration for the full
+		// 5s timeout - surface the mismatch immediately.
 		if ( ! preg_match( '/^[a-f0-9]{64}$/', $verification_token ) ) {
 			Logger::get_instance()->save_log( 'Registration step 1 returned a malformed verification token.' );
 			return [
@@ -1369,17 +1643,30 @@ class SaasClient {
 		$step2_data = json_decode( (string) wp_remote_retrieve_body( $complete_resp ), true );
 		if ( $step2_code !== 201 || ! is_array( $step2_data ) || empty( $step2_data['api_key'] ) || empty( $step2_data['key_prefix'] ) ) {
 			Logger::get_instance()->save_log( sprintf( 'Registration step 2 returned unexpected response (HTTP %d).', $step2_code ) );
+
+			// Verification requires the SaaS to reach our public /wp-json verify endpoint.
+			// A 422 almost always means that inbound GET was blocked or the REST API is
+			// unreachable - diagnose locally to tell the user the real cause + fix.
+			$diagnosis = $this->diagnose_verification_failure();
+
+			if ( $diagnosis === 'ssl_invalid' ) {
+				$message = __( 'We could not verify your domain because your site\'s SSL certificate could not be validated (it may be self-signed, expired, or issued for a different domain). Install a valid certificate (for example Let\'s Encrypt), or scan your live domain that already has one, then retry.', 'surecookie' );
+			} elseif ( $diagnosis === 'external_block' ) {
+				$message = __( 'We could not verify your domain because your host is blocking our verification request to /wp-json/. This is common on SiteGround. Allowlist our scanner IPs/User-Agent (or ask your host to) and retry - or add your services manually in the meantime.', 'surecookie' );
+			} else {
+				$message = __( 'We could not reach your site\'s REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry.', 'surecookie' );
+			}
+
 			return [
-				'success' => false,
-				'message' => is_array( $step2_data ) && ! empty( $step2_data['message'] )
-					? (string) $step2_data['message']
-					: __( 'Domain verification failed - please retry the scan.', 'surecookie' ),
+				'success'   => false,
+				'code'      => 'verification_failed',
+				'diagnosis' => $diagnosis,
+				'message'   => $message,
 			];
 		}
 
-		// install_nonce is intentionally NOT persisted - it's only meaningful
-		// during the in-flight handshake (idempotency window on the SaaS side).
-		// Keeping it out of wp_options reduces the long-lived sensitive surface.
+		// install_nonce is intentionally NOT persisted - it's only meaningful during the
+		// in-flight handshake, so keeping it out of wp_options shrinks the sensitive surface.
 		$payload = [
 			'api_key'           => (string) $step2_data['api_key'],
 			'key_prefix'        => (string) $step2_data['key_prefix'],
@@ -1429,10 +1716,9 @@ class SaasClient {
 		}
 
 		$timestamp = (string) time();
-		// random_bytes() can throw if the CSPRNG is unavailable. Returning an
-		// empty header set lets the SaaS reject with a clean 401 (which the
-		// caller's handle_unauthorized_response path then triggers a retry on)
-		// rather than fataling the whole scan request.
+		// random_bytes() can throw if the CSPRNG is unavailable. Returning an empty header
+		// set lets the SaaS reject with a clean 401 (which handle_unauthorized_response
+		// retries on) rather than fataling the whole scan request.
 		try {
 			$nonce = bin2hex( random_bytes( 16 ) ); // 32 hex chars matching the SaaS validator.
 		} catch ( \Throwable $e ) {
@@ -1512,11 +1798,10 @@ class SaasClient {
 	/**
 	 * Build the headers for an outgoing SaaS request, including HMAC signature.
 	 *
-	 * Issue #473: the deterministic `X-API-Key` header is replaced by a
-	 * timestamped/nonced HMAC signature. The Pro plugin's filter
-	 * (`surecookie_saas_request_args`) composes cleanly - Pro adds X-License-Id
-	 * + X-License-Sig (HMAC over the same canonical request), proving
-	 * possession of the license key without ever transmitting it.
+	 * Issue #473: the deterministic `X-API-Key` header is replaced by a timestamped/nonced
+	 * HMAC signature. The Pro filter (`surecookie_saas_request_args`) composes cleanly - Pro
+	 * adds X-License-Id + X-License-Sig (HMAC over the same canonical request), proving
+	 * license-key possession without ever transmitting it.
 	 *
 	 * @since 0.0.1-beta.3
 	 * @param string $method HTTP method for the request being signed.
@@ -1529,9 +1814,8 @@ class SaasClient {
 			'Content-Type'     => 'application/json',
 			'Accept'           => 'application/json',
 			'X-Plugin-Version' => SURECOOKIE_VERSION,
-			// 'scheduled' only while the automatic-scanning runner is firing this
-			// request (it adds the filter for that window); 'manual' otherwise.
-			// Lets the SaaS defer/route scheduled scans without mislabeling manual ones.
+			// 'scheduled' only while the auto-scanning runner is firing this request (it adds
+			// the filter for that window); 'manual' otherwise, so the SaaS can defer/route scheduled scans.
 			'X-Scan-Trigger'   => apply_filters( 'surecookie_saas_scan_trigger', 'manual' ),
 		];
 
@@ -1652,8 +1936,7 @@ class SaasClient {
 	private function process_scan_results( array $data ): void {
 		Logger::get_instance()->save_log( 'Processing scan results...' );
 
-		// Trigger the action to process results.
-		// This allows sync.php to handle the data storage.
+		// Fire the action so sync.php handles the data storage.
 		do_action( 'surecookie_saas_scan_results_received', $data );
 
 		Logger::get_instance()->save_log( 'Scan results processed.' );

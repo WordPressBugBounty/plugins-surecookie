@@ -326,6 +326,13 @@ class SureCookie_Loader {
 		}
 		DB_Initializer::create_db_tables();
 		Maintenance::store_db_version();
+
+		// Warm the remote datasets shortly after activation (off-request) so the
+		// blocking + declared-cookie catalogs are current without waiting for the
+		// first daily cron tick. Bundled floors cover the interim.
+		if ( ! wp_next_scheduled( 'surecookie_refresh_datasets' ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'surecookie_refresh_datasets' );
+		}
 	}
 
 	/**
@@ -338,6 +345,9 @@ class SureCookie_Loader {
 		wp_clear_scheduled_hook( 'surecookie_cleanup_consent_logs' );
 		wp_clear_scheduled_hook( 'surecookie_poll_scan_status' );
 		wp_clear_scheduled_hook( 'surecookie_auto_scan_run' );
+		wp_clear_scheduled_hook( 'surecookie_auto_scan_retry' );
+		wp_clear_scheduled_hook( 'surecookie_refresh_datasets' );
+		wp_clear_scheduled_hook( 'surecookie_first_party_detect' );
 	}
 }
 

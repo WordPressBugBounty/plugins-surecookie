@@ -164,7 +164,7 @@ if ( ! class_exists( 'BSF_Analytics' ) ) {
 		 */
 		public function is_tracking_enabled() {
 
-			// Global kill switch — allows hosting providers, compliance plugins,
+			// Global kill switch - allows hosting providers, compliance plugins,
 			// or agency developers to disable all BSF tracking with one filter.
 			if ( ! apply_filters( 'bsf_usage_tracking_enabled', true ) ) {
 				return false;
@@ -275,7 +275,7 @@ if ( ! class_exists( 'BSF_Analytics' ) ) {
 					),
 					esc_html( $data['product_name'] )
 				);
-				
+
 				if ( is_multisite() ) {
 					$notice_string .= __( 'This will be applicable for all sites from the network.' );
 				}
@@ -482,7 +482,7 @@ if ( ! class_exists( 'BSF_Analytics' ) ) {
 				 * Introducing a new key 'hide_optin_checkbox, which allows individual plugin  to hide optin checkbox
 				 * If they are providing providing in-plugin option to manage this option.
 				 * from General > Settings page.
-				 * 
+				 *
 				 * @since 1.1.14
 				 */
 				if( ! empty( $data['hide_optin_checkbox'] ) && true === $data['hide_optin_checkbox'] ) {
@@ -545,7 +545,7 @@ if ( ! class_exists( 'BSF_Analytics' ) ) {
 				<input id="<?php echo esc_attr( $args['id'] ); ?>" type="checkbox" value="1" name="<?php echo esc_attr( $args['name'] ); ?>" <?php checked( $is_checked ); ?>>
 				<?php
 				/* translators: %s Product title */
-				echo esc_html( sprintf( __( 'Help improve %s by sharing non-sensitive usage data — like PHP version and features used.' ), $args['title'] ) );// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+				echo esc_html( sprintf( __( 'Help improve %s by sharing non-sensitive usage data - like PHP version and features used.' ), $args['title'] ) );// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 
 				if ( is_multisite() ) {
 					esc_html_e( ' This will be applicable for all sites from the network.' );

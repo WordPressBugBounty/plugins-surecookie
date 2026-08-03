@@ -43,7 +43,7 @@
 		body.append( 'nonce', surecookieRatingNotice.nonce );
 		body.append( 'button', button );
 
-		// Fire and forget — tracking must never block the notice interaction.
+		// Fire and forget - tracking must never block the notice interaction.
 		fetch( surecookieRatingNotice.ajaxurl, {
 			method: 'POST',
 			body,

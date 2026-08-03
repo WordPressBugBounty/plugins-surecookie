@@ -12,6 +12,7 @@ namespace SureCookie\Inc\Modules\Nudges;
 
 use SureCookie\Inc\API\Base;
 use SureCookie\Inc\Functions\SendJson;
+use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -86,7 +87,10 @@ class Api extends Base {
 		$nudges[ $type ]['next_time_to_display'] = time() + ( 7 * DAY_IN_SECONDS );
 		$nudges[ $type ]['display']              = $nudges[ $type ]['count'] < 2;
 
-		if ( ! update_option( SURECOOKIE_NUDGES, $nudges ) ) {
+		// Non-autoloaded - dismissal state is only read by the admin app (via
+		// LocalizeData::get_admin_data()) and the analytics collector, never by the
+		// front-end banner, so it has no business in the alloptions cache.
+		if ( ! Update::option( SURECOOKIE_NUDGES, $nudges ) ) {
 			SendJson::error( [ 'message' => __( 'Could not disable the nudge. Please try again.', 'surecookie' ) ] );
 			return;
 		}

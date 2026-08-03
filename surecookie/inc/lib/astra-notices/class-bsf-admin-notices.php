@@ -149,7 +149,7 @@ if ( ! class_exists( 'BSF_Admin_Notices' ) ) :
 			 * Filters whether the current user passes the capability check for notice dismissal.
 			 *
 			 * Both the legacy and new filter names are fired for backward compatibility.
-			 * Filters can only restrict access (return false), never grant it — if the
+			 * Filters can only restrict access (return false), never grant it - if the
 			 * underlying current_user_can() check fails, filters cannot override to true.
 			 */
 			$cap_check = apply_filters( 'astra_notices_user_cap_check', $has_cap );

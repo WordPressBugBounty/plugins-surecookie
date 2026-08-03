@@ -58,6 +58,13 @@ class Cookies extends Base {
 	protected const UPDATE_SCANNED_COOKIE_CATEGORY = '/cookies/scanned-cookie/category';
 
 	/**
+	 * Route: assign multiple cookies (custom and/or scanned) to one category.
+	 *
+	 * @since 1.3.0
+	 */
+	protected const BULK_UPDATE_COOKIE_CATEGORY = '/cookies/bulk-category';
+
+	/**
 	 * Register API routes.
 	 *
 	 * @since 0.0.1
@@ -214,6 +221,36 @@ class Cookies extends Base {
 						'required' => true,
 						'type'     => 'string',
 					],
+					// Optional: tells two same-named cookies apart when both sit
+					// in the source category. Older clients that omit it keep the
+					// previous name-only match.
+					'domain'           => [
+						'required' => false,
+						'type'     => 'string',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->get_api_namespace(),
+			self::BULK_UPDATE_COOKIE_CATEGORY,
+			[
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => [ $this, 'bulk_update_cookie_category' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					'items'        => [
+						'required' => true,
+						'type'     => 'array',
+						// Cap mirrored by CookieService::MAX_BULK_ITEMS.
+						'maxItems' => 100,
+						'items'    => [ 'type' => 'object' ],
+					],
+					'new_category' => [
+						'required' => true,
+						'type'     => 'string',
+					],
 				],
 			]
 		);
@@ -324,14 +361,38 @@ class Cookies extends Base {
 			$cookie_name      = sanitize_text_field( $request->get_param( 'cookie_name' ) );
 			$current_category = sanitize_text_field( $request->get_param( 'current_category' ) );
 			$new_category     = sanitize_text_field( $request->get_param( 'new_category' ) );
+			$domain           = sanitize_text_field( (string) $request->get_param( 'domain' ) );
 
 			$service = new CookieService();
-			$result  = $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category );
+			$result  = $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category, $domain );
 
 			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
 		} catch ( \Exception $e ) {
 			SendJson::error(
 				[ 'message' => __( 'Failed to update cookie category: ', 'surecookie' ) . $e->getMessage() ]
+			);
+		}
+	}
+
+	/**
+	 * Assign multiple cookies (custom and/or scanned) to one category.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full data about the request.
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function bulk_update_cookie_category( $request ): void {
+		try {
+			$items        = $request->get_param( 'items' );
+			$new_category = sanitize_text_field( $request->get_param( 'new_category' ) );
+
+			$service = new CookieService();
+			$result  = $service->bulk_update_cookie_category( is_array( $items ) ? $items : [], $new_category );
+
+			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
+		} catch ( \Exception $e ) {
+			SendJson::error(
+				[ 'message' => __( 'Failed to update cookie categories: ', 'surecookie' ) . $e->getMessage() ]
 			);
 		}
 	}

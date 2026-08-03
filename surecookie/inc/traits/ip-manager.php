@@ -52,11 +52,10 @@ trait IpManager {
 	}
 
 	/**
-	 * Anonymize an IP address using WordPress core's privacy function.
+	 * Anonymize an IP via WordPress core's privacy function.
 	 *
-	 * IPv4: Zeros the last octet (e.g., 192.168.1.123 -> 192.168.1.0).
-	 * IPv6: Zeros the last 64 bits via inet_pton/inet_ntop.
-	 * Handles dual-stack (::ffff:0.0.1.x) and returns safe defaults for malformed IPs.
+	 * Zeros the last IPv4 octet or last 64 IPv6 bits, handles dual-stack, and
+	 * returns safe defaults for malformed IPs.
 	 *
 	 * @param string $ip The IP address to anonymize.
 	 * @since 0.0.1
@@ -64,6 +63,66 @@ trait IpManager {
 	 */
 	public static function anonymize_ip( string $ip ): string {
 		return wp_privacy_anonymize_ip( $ip );
+	}
+
+	/**
+	 * Infrastructure ranges trusted as reverse proxies by default.
+	 *
+	 * Loopback plus RFC 1918 / RFC 4193 / link-local: a REMOTE_ADDR in these came
+	 * from the site's own stack and an external attacker cannot spoof it. A method
+	 * not a constant because trait constants need PHP 8.2 and we support 7.4.
+	 *
+	 * @since 1.3.0
+	 * @return array<int, string>
+	 */
+	private static function local_proxy_ranges(): array {
+		return [
+			'127.0.0.0/8',
+			'10.0.0.0/8',
+			'172.16.0.0/12',
+			'192.168.0.0/16',
+			'169.254.0.0/16',
+			'::1/128',
+			'fc00::/7',
+			'fe80::/10',
+		];
+	}
+
+	/**
+	 * Cloudflare edge ranges, trusted as reverse proxies by default.
+	 *
+	 * Ships so "site behind Cloudflare" resolves real visitor IPs out of the box;
+	 * refresh from https://www.cloudflare.com/ips/ when it changes. Other CDNs:
+	 * add ranges via `surecookie_trusted_proxy_ips`.
+	 *
+	 * @since 1.3.0
+	 * @return array<int, string>
+	 */
+	private static function cloudflare_proxy_ranges(): array {
+		return [
+			'173.245.48.0/20',
+			'103.21.244.0/22',
+			'103.22.200.0/22',
+			'103.31.4.0/22',
+			'141.101.64.0/18',
+			'108.162.192.0/18',
+			'190.93.240.0/20',
+			'188.114.96.0/20',
+			'197.234.240.0/22',
+			'198.41.128.0/17',
+			'162.158.0.0/15',
+			'104.16.0.0/13',
+			'104.24.0.0/14',
+			'172.64.0.0/13',
+			'131.0.72.0/22',
+			'2400:cb00::/32',
+			'2606:4700::/32',
+			'2803:f800::/32',
+			'2405:b500::/32',
+			'2405:8100::/32',
+			'2a06:98c0::/29',
+			'2c0f:f248::/32',
+		];
 	}
 
 	/**
@@ -113,9 +172,8 @@ trait IpManager {
 			return $data;
 		}
 
-		// Use raw IP for geolocation accuracy (anonymized .0 addresses may not resolve correctly).
-		// This is SureCookie's own Agent API - the IP is used transiently for lookup, not stored.
-		// Privacy is enforced at the storage layer (consent-logs.php anonymizes before DB insert).
+		// Raw IP for geolocation accuracy (anonymized .0 may not resolve); sent
+		// transiently to SureCookie's own Agent API, never stored (storage layer anonymizes).
 		$api_url = Helper::get_agent_app_url() . 'api/geolocation/country';
 		$url     = add_query_arg( 'ip', $ip, $api_url );
 
@@ -212,8 +270,11 @@ trait IpManager {
 	/**
 	 * Get client's IP address.
 	 *
-	 * Uses REMOTE_ADDR by default (secure, cannot be spoofed).
-	 * Only trusts proxy headers when explicitly enabled via filter.
+	 * REMOTE_ADDR by default (cannot be spoofed). Forwarded headers are trusted
+	 * only when proxy trust is on AND the peer is in the trusted-proxy set, since
+	 * otherwise they are attacker-supplied. The `surecookie_trusted_client_ip_headers`
+	 * filter picks the header (default X-Forwarded-For, right-to-left walk);
+	 * resolution commits to the first present header, never falling through.
 	 *
 	 * @since 0.0.1
 	 * @return string Client IP address.
@@ -223,10 +284,20 @@ trait IpManager {
 			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
 			: '127.0.0.1';
 
+		// Normalize first: a dual-stack peer can arrive IPv4-mapped
+		// (::ffff:127.0.0.1) and must fold to 127.0.0.1 to match IPv4 proxy ranges,
+		// else a loopback proxy reads as untrusted and all visitors share one bucket.
+		$remote_addr = self::normalize_ip( $remote_addr );
+		if ( $remote_addr === '' ) {
+			$remote_addr = '127.0.0.1';
+		}
+
 		/**
 		 * Filter: Enable trusting proxy headers (X-Forwarded-For, CF-Connecting-IP, etc.).
 		 *
-		 * Only enable this if your site is behind a trusted reverse proxy or CDN.
+		 * Enable only behind a trusted reverse proxy or CDN. Not sufficient alone:
+		 * the request must also arrive from the trusted-proxy set (see
+		 * `surecookie_trusted_proxy_ips`, covering loopback, private ranges, Cloudflare).
 		 *
 		 * @param bool $trust Whether to trust proxy headers. Default false.
 		 * @since 0.0.1
@@ -234,35 +305,374 @@ trait IpManager {
 		$trust_proxy = (bool) apply_filters( 'surecookie_trust_proxy_headers', false );
 
 		if ( ! $trust_proxy ) {
-			return filter_var( $remote_addr, FILTER_VALIDATE_IP ) ? $remote_addr : '127.0.0.1';
+			return $remote_addr;
 		}
 
-		// When proxy trust is enabled, check proxy headers in priority order.
-		$proxy_keys = [
-			'HTTP_CF_CONNECTING_IP', // CloudFlare.
-			'HTTP_X_FORWARDED_FOR',  // Proxy.
-			'HTTP_X_REAL_IP',        // Nginx proxy.
-		];
+		$trusted_proxies = self::get_trusted_proxy_ranges();
 
-		foreach ( $proxy_keys as $key ) {
-			if ( ! empty( $_SERVER[ $key ] ) ) {
-				$ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+		// The peer must be a recognised proxy before its forwarded headers are
+		// believed; otherwise an attacker reaching the origin directly (leaked IP,
+		// unproxied hostname) could forge them to pick their rate-limit bucket and geo.
+		if ( ! self::ip_in_ranges( $remote_addr, $trusted_proxies ) ) {
+			/**
+			 * Fires when proxy trust is on but the request came from outside the
+			 * trusted-proxy set, so forwarded headers were ignored.
+			 *
+			 * Surfaces this misconfiguration (all visitors sharing one rate-limit
+			 * bucket) instead of leaving it to be diagnosed from dropped consent logs.
+			 *
+			 * @since 1.3.0
+			 * @param string $remote_addr The untrusted peer address that was used instead.
+			 */
+			do_action( 'surecookie_untrusted_proxy_peer', $remote_addr );
 
-				// Handle comma-separated IPs (from proxies) - take first (client IP).
-				if ( strpos( $ip, ',' ) !== false ) {
-					$ips = explode( ',', $ip );
-					$ip  = trim( $ips[0] );
+			return $remote_addr;
+		}
+
+		/**
+		 * Filter: forwarded headers to trust for the client IP, most-trusted first.
+		 *
+		 * Only consulted once proxy trust is on and the peer is trusted. Defaults to
+		 * X-Forwarded-For only (append-only right-to-left walk, see
+		 * client_ip_from_forwarded_for()); CF-Connecting-IP and X-Real-IP are
+		 * deliberately NOT trusted by default.
+		 *
+		 * Rules for operators:
+		 * - Resolution commits to the FIRST present header (no fall-through), so a
+		 *   spoofed value collapses to REMOTE_ADDR instead of being steered onto a
+		 *   weaker header. List exactly one unless you have reason for more.
+		 * - Only list a header your proxy OVERWRITES; a pass-through header re-opens
+		 *   IP spoofing and the per-IP rate-limit bypass this guard closes.
+		 * - nginx -> php-fpm (fastcgi_pass): `proxy_set_header` does NOT apply to
+		 *   FastCGI, so set `fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;`
+		 *   or use ngx_http_realip_module and leave proxy trust off.
+		 * - Only X-Forwarded-For is chain-walked; others are read as one bare IP. The
+		 *   RFC 7239 `Forwarded` header is not parsed, do not list it. Empty array
+		 *   trusts the peer gate only and returns REMOTE_ADDR.
+		 *
+		 * @since 1.3.0
+		 * @param array<int, string> $headers Ordered header names. Default [ 'X-Forwarded-For' ].
+		 */
+		$headers = apply_filters( 'surecookie_trusted_client_ip_headers', [ 'X-Forwarded-For' ] );
+		$headers = is_array( $headers ) ? $headers : [ 'X-Forwarded-For' ];
+
+		foreach ( $headers as $name ) {
+			if ( ! is_string( $name ) || trim( $name ) === '' ) {
+				continue;
+			}
+
+			$key = self::header_to_server_key( $name );
+
+			// Header absent: try the next declared header.
+			if ( empty( $_SERVER[ $key ] ) ) {
+				continue;
+			}
+
+			// Only X-Forwarded-For is an append-only chain; everything else is a
+			// single bare address the proxy set.
+			if ( $key === 'HTTP_X_FORWARDED_FOR' ) {
+				$candidate = self::client_ip_from_forwarded_for( $trusted_proxies );
+			} else {
+				$candidate = self::normalize_ip( sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) );
+
+				if ( ! self::is_usable_client_ip( $candidate ) ) {
+					$candidate = '';
 				}
+			}
 
-				// Validate IP and reject private/reserved ranges from proxy headers.
-				if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-					return $ip;
+			// Commit on the first header that is present - no fall-through to a
+			// later, weaker header.
+			return $candidate !== '' ? $candidate : $remote_addr;
+		}
+
+		return $remote_addr;
+	}
+
+	/**
+	 * Canonicalize a header name to its $_SERVER key.
+	 *
+	 * 'X-Forwarded-For' -> 'HTTP_X_FORWARDED_FOR'. The name comes from operator
+	 * config (surecookie_trusted_client_ip_headers), never request data, so any
+	 * value is safe: at worst it names a header that is never present.
+	 *
+	 * @since 1.3.0
+	 * @param string $name Header name, with or without the HTTP_ prefix.
+	 * @return string The corresponding $_SERVER key.
+	 */
+	private static function header_to_server_key( string $name ): string {
+		$key = strtoupper( str_replace( '-', '_', trim( $name ) ) );
+
+		if ( strpos( $key, 'HTTP_' ) !== 0 ) {
+			$key = 'HTTP_' . $key;
+		}
+
+		return $key;
+	}
+
+	/**
+	 * Resolve the client address from X-Forwarded-For.
+	 *
+	 * XFF is append-only: each hop adds the address it received from, so the left
+	 * end is client-supplied and the right end is what our infra appended. Hence
+	 * the client is found by walking from the right, not the left.
+	 *
+	 * @since 1.3.0
+	 * @param array<int, string> $trusted_proxies Trusted proxy addresses / CIDR ranges.
+	 * @return string Client IP, or an empty string when none could be trusted.
+	 */
+	private static function client_ip_from_forwarded_for( array $trusted_proxies ): string {
+		if ( empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			return '';
+		}
+
+		$chain = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+
+		/**
+		 * Filter: number of trusted proxy hops in front of this site.
+		 *
+		 * For stacks whose proxy addresses cannot be enumerated (rotating egress IPs,
+		 * a host-managed balancer). Set it to how many of our own proxies append to
+		 * the header: each one appends the address it received from, so N of them
+		 * leave the client at `count - N` and our own peer is REMOTE_ADDR, never a
+		 * chain entry. 1 therefore means the last entry is the client our single
+		 * proxy wrote - not the proxy itself.
+		 * Default 0 keeps the address-based walk, preferred when known.
+		 *
+		 * @since 1.3.0
+		 * @param int $hops Trusted hop count. Default 0 (disabled).
+		 */
+		$hops = (int) apply_filters( 'surecookie_trusted_proxy_hops', 0 );
+
+		if ( $hops > 0 ) {
+			$index     = count( $chain ) - $hops;
+			$candidate = isset( $chain[ $index ] ) ? self::normalize_ip( $chain[ $index ] ) : '';
+
+			return self::is_usable_client_ip( $candidate ) ? $candidate : '';
+		}
+
+		for ( $i = count( $chain ) - 1; $i >= 0; $i-- ) {
+			$candidate = self::normalize_ip( $chain[ $i ] );
+
+			// Unparseable entry at the trust boundary: stop rather than walk further
+			// left into client-supplied territory.
+			if ( $candidate === '' ) {
+				return '';
+			}
+
+			// Our own hop, keep walking left past it.
+			if ( self::ip_in_ranges( $candidate, $trusted_proxies ) ) {
+				continue;
+			}
+
+			// First address beyond our proxies: the furthest hop we can vouch for,
+			// so it is the answer whether or not it validates (all left of it is spoofable).
+			return self::is_usable_client_ip( $candidate ) ? $candidate : '';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Trusted reverse-proxy addresses and CIDR ranges.
+	 *
+	 * @since 1.3.0
+	 * @return array<int, string>
+	 */
+	private static function get_trusted_proxy_ranges(): array {
+		$ranges = array_merge( self::local_proxy_ranges(), self::cloudflare_proxy_ranges() );
+
+		/**
+		 * Filter: reverse proxies whose forwarded headers may be trusted.
+		 *
+		 * Accepts plain IPv4/IPv6 addresses and CIDR ranges. Defaults to loopback,
+		 * the private ranges, and Cloudflare's published edges. Replace the array
+		 * to restrict trust to just your own proxy, or append your CDN's ranges.
+		 *
+		 * @since 1.3.0
+		 * @param array<int, string> $ranges Trusted proxy addresses / CIDR ranges.
+		 */
+		$ranges = apply_filters( 'surecookie_trusted_proxy_ips', $ranges );
+
+		if ( ! is_array( $ranges ) ) {
+			return [];
+		}
+
+		return array_values(
+			array_filter(
+				array_map( 'strval', $ranges ),
+				static function ( $range ) {
+					return trim( $range ) !== '';
 				}
+			)
+		);
+	}
+
+	/**
+	 * Whether an address is usable as a stored client IP.
+	 *
+	 * Private and reserved ranges are rejected: they identify infrastructure
+	 * rather than a visitor, and would not geolocate.
+	 *
+	 * @since 1.3.0
+	 * @param string $ip Candidate address.
+	 * @return bool
+	 */
+	private static function is_usable_client_ip( string $ip ): bool {
+		return $ip !== '' && (bool) filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+	}
+
+	/**
+	 * Normalize a forwarded address into a bare, comparable IP.
+	 *
+	 * Strips surrounding whitespace, an optional port, IPv6 brackets, and folds
+	 * IPv4-mapped IPv6 (`::ffff:203.0.113.1`) down to its IPv4 form so it can be
+	 * matched against IPv4 ranges on dual-stack servers.
+	 *
+	 * @since 1.3.0
+	 * @param string $value Raw chain entry or header value.
+	 * @return string Normalized IP, or an empty string when not a valid address.
+	 */
+	private static function normalize_ip( string $value ): string {
+		$value = trim( $value );
+
+		if ( $value === '' ) {
+			return '';
+		}
+
+		if ( strpos( $value, '[' ) === 0 ) {
+			// Bracketed IPv6 literal, optionally with a port: [2001:db8::1]:443.
+			$close = strpos( $value, ']' );
+
+			if ( $close === false ) {
+				return '';
+			}
+
+			// Only an optional :port may follow the bracket; reject anything else
+			// as malformed rather than silently accepting the literal before it.
+			$rest = substr( $value, $close + 1 );
+			if ( $rest !== '' && strpos( $rest, ':' ) !== 0 ) {
+				return '';
+			}
+
+			$value = substr( $value, 1, $close - 1 );
+		} elseif ( substr_count( $value, ':' ) === 1 ) {
+			// Exactly one colon means IPv4 with a port; bare IPv6 always has more.
+			$value = substr( $value, 0, (int) strpos( $value, ':' ) );
+		}
+
+		if ( ! filter_var( $value, FILTER_VALIDATE_IP ) ) {
+			return '';
+		}
+
+		if ( stripos( $value, '::ffff:' ) === 0 ) {
+			$mapped = substr( $value, 7 );
+
+			if ( filter_var( $mapped, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+				return $mapped;
 			}
 		}
 
-		// Fallback to REMOTE_ADDR.
-		return filter_var( $remote_addr, FILTER_VALIDATE_IP ) ? $remote_addr : '127.0.0.1';
+		return $value;
+	}
+
+	/**
+	 * Whether an address falls inside any of the given addresses / CIDR ranges.
+	 *
+	 * @since 1.3.0
+	 * @param string             $ip     Address to test.
+	 * @param array<int, string> $ranges Addresses and CIDR ranges.
+	 * @return bool
+	 */
+	private static function ip_in_ranges( string $ip, array $ranges ): bool {
+		foreach ( $ranges as $range ) {
+			if ( self::ip_matches_range( $ip, $range ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Match an address against a single address or CIDR range.
+	 *
+	 * Compares packed bytes, so IPv4 and IPv6 are handled by the same code path;
+	 * a mismatch in address family simply fails to match.
+	 *
+	 * @since 1.3.0
+	 * @param string $ip    Address to test.
+	 * @param string $range Address or CIDR range.
+	 * @return bool
+	 */
+	private static function ip_matches_range( string $ip, string $range ): bool {
+		$range = trim( $range );
+
+		if ( $ip === '' || $range === '' ) {
+			return false;
+		}
+
+		if ( strpos( $range, '/' ) === false ) {
+			$packed_ip    = self::packed_ip( $ip );
+			$packed_range = self::packed_ip( $range );
+
+			return $packed_ip !== '' && $packed_ip === $packed_range;
+		}
+
+		[ $subnet, $prefix ] = explode( '/', $range, 2 );
+
+		if ( ! is_numeric( $prefix ) ) {
+			return false;
+		}
+
+		$packed_ip     = self::packed_ip( $ip );
+		$packed_subnet = self::packed_ip( $subnet );
+
+		// Empty means unparseable; differing lengths mean different address families.
+		if ( $packed_ip === '' || $packed_subnet === '' || strlen( $packed_ip ) !== strlen( $packed_subnet ) ) {
+			return false;
+		}
+
+		$prefix   = (int) $prefix;
+		$max_bits = strlen( $packed_ip ) * 8;
+
+		if ( $prefix < 0 || $prefix > $max_bits ) {
+			return false;
+		}
+
+		$whole_bytes = intdiv( $prefix, 8 );
+		$odd_bits    = $prefix % 8;
+
+		if ( $whole_bytes > 0 && strncmp( $packed_ip, $packed_subnet, $whole_bytes ) !== 0 ) {
+			return false;
+		}
+
+		if ( $odd_bits === 0 ) {
+			return true;
+		}
+
+		// $odd_bits > 0 implies $prefix < $max_bits, so this byte always exists.
+		$mask = chr( ( 0xFF << 8 - $odd_bits ) & 0xFF );
+
+		return ( $packed_ip[ $whole_bytes ] & $mask ) === ( $packed_subnet[ $whole_bytes ] & $mask );
+	}
+
+	/**
+	 * Pack an IP address into its binary representation.
+	 *
+	 * @since 1.3.0
+	 * @param string $ip Address to pack.
+	 * @return string Packed bytes, or an empty string when not a valid address.
+	 */
+	private static function packed_ip( string $ip ): string {
+		$ip = trim( $ip );
+
+		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return '';
+		}
+
+		$packed = inet_pton( $ip );
+
+		return is_string( $packed ) ? $packed : '';
 	}
 
 	/**
@@ -290,13 +700,11 @@ trait IpManager {
 		// Normalize: lowercase and strip IPv6 brackets so "[::1]" matches "::1".
 		$host = strtolower( trim( $host, '[]' ) );
 
-		// IP-literal hosts are local only when loopback (127.0.0.0/8, ::1) or in
-		// a private range. Anchored so public domains that merely contain "10."
-		// or "192.168." (e.g. "web10.example.com") are not misclassified.
+		// IP-literal hosts are local only when loopback (127.0.0.0/8, ::1) or private;
+		// anchored so "web10.example.com" and the like are not misclassified.
 		if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
-			// inet_pton() normalizes every IPv6 loopback form (::1 and the full
-			// 0:0:0:0:0:0:0:1) to the same packed bytes; 127.0.0.0/8 covers
-			// IPv4 loopback.
+			// inet_pton() folds every IPv6 loopback form (::1, 0:0:0:0:0:0:0:1) to
+			// the same packed bytes; 127.0.0.0/8 covers IPv4 loopback.
 			return inet_pton( $host ) === inet_pton( '::1' )
 				|| strpos( $host, '127.' ) === 0
 				|| self::is_private_ip( $host );

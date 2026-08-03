@@ -51,8 +51,10 @@ class Scan_Scripts {
 		add_filter( 'surecookie_known_scripts', [ $this, 'merge_scan_detected_resources' ], 20 );
 
 		// Skip blocking for scripts/iframes whose src matches an excluded domain.
-		add_filter( 'surecookie_skip_script', [ $this, 'should_skip_excluded_resource' ], 10, 2 );
-		add_filter( 'surecookie_skip_iframe', [ $this, 'should_skip_excluded_resource' ], 10, 2 );
+		// Kind-specific callbacks so a "script"-scoped exclusion never skips an
+		// iframe on the same host, and vice versa.
+		add_filter( 'surecookie_skip_script', [ $this, 'should_skip_excluded_script' ], 10, 2 );
+		add_filter( 'surecookie_skip_iframe', [ $this, 'should_skip_excluded_iframe' ], 10, 2 );
 	}
 
 	/**
@@ -99,31 +101,100 @@ class Scan_Scripts {
 	}
 
 	/**
-	 * Filter callback: skip blocking when the resource src matches an excluded domain.
+	 * `surecookie_skip_script` callback: skip a script whose src matches a
+	 * script-scoped (or legacy bare-domain) exclusion.
 	 *
-	 * Hooked into surecookie_skip_script and surecookie_skip_iframe so the
-	 * per-resource "Block" toggle in the admin UI works for both scan-detected
-	 * AND known-scripts entries.
+	 * @since 1.3.0
+	 * @param bool   $skip Whether the resource is already marked to skip.
+	 * @param string $src  The script src.
+	 * @return bool
+	 */
+	public function should_skip_excluded_script( bool $skip, string $src ): bool {
+		return $this->should_skip_excluded_resource( $skip, $src, 'script' );
+	}
+
+	/**
+	 * `surecookie_skip_iframe` callback: skip an iframe whose src matches an
+	 * iframe-scoped (or legacy bare-domain) exclusion.
+	 *
+	 * @since 1.3.0
+	 * @param bool   $skip Whether the resource is already marked to skip.
+	 * @param string $src  The iframe src.
+	 * @return bool
+	 */
+	public function should_skip_excluded_iframe( bool $skip, string $src ): bool {
+		return $this->should_skip_excluded_resource( $skip, $src, 'iframe' );
+	}
+
+	/**
+	 * Skip blocking when the resource src matches an excluded entry of the same
+	 * kind (or a legacy bare-domain entry, which applies to any kind).
+	 *
+	 * Exclusions are keyed per (kind, domain) so the per-resource "Do not block"
+	 * toggle on a script does not also unblock the iframe on the same host.
 	 *
 	 * @since 0.0.0-alpha.2
 	 * @param bool   $skip Whether the resource is already marked to skip.
 	 * @param string $src  The resource URL (script src or iframe src).
+	 * @param string $kind Resource kind ('script'|'iframe').
 	 * @return bool
 	 */
-	public function should_skip_excluded_resource( bool $skip, string $src ): bool {
+	public function should_skip_excluded_resource( bool $skip, string $src, string $kind = 'any' ): bool {
 		if ( $skip || empty( $src ) ) {
 			return $skip;
 		}
 
-		$excluded_domains = $this->get_excluded_domains_cached();
-
-		foreach ( $excluded_domains as $domain ) {
+		foreach ( $this->get_excluded_domains_cached() as $entry ) {
+			[ $entry_kind, $domain ] = $this->parse_scoped_key( (string) $entry );
+			if ( $domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
+				continue;
+			}
 			if ( strpos( $src, $domain ) !== false ) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether a scan-detected domain of a given kind is excluded from blocking.
+	 *
+	 * @param string             $domain   Scan-detected resource domain.
+	 * @param string             $kind     Resource kind ('script'|'iframe').
+	 * @param array<int, string> $excluded Excluded entries (scoped or legacy).
+	 * @since 1.3.0
+	 * @return bool
+	 */
+	private function is_domain_excluded( string $domain, string $kind, array $excluded ): bool {
+		foreach ( $excluded as $entry ) {
+			[ $entry_kind, $entry_domain ] = $this->parse_scoped_key( (string) $entry );
+			if ( $entry_domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
+				continue;
+			}
+			if ( $entry_domain === $domain ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Split a scoped exclusion entry into [ kind, domain ]. "script::host" /
+	 * "iframe::host" scope to a kind; a bare "host" is legacy and applies to
+	 * any kind. Mirrors Blocker::parse_scoped_key (shared key format).
+	 *
+	 * @param string $key Stored entry.
+	 * @since 1.3.0
+	 * @return array{0: string, 1: string} [ kind, domain ].
+	 */
+	private function parse_scoped_key( string $key ): array {
+		$key = trim( $key );
+		$pos = strpos( $key, '::' );
+		if ( $pos === false ) {
+			return [ 'any', $key ];
+		}
+		return [ substr( $key, 0, $pos ), substr( $key, $pos + 2 ) ];
 	}
 
 	/**
@@ -145,8 +216,10 @@ class Scan_Scripts {
 			return;
 		}
 
-		// Skip if excluded by admin.
-		if ( in_array( $domain, $excluded_domains, true ) ) {
+		// Skip if excluded by admin. Kind-scoped: a script exclusion does not
+		// stop the iframe on the same host from being blocked, and vice versa.
+		$kind = $type === 'iframes' ? 'iframe' : 'script';
+		if ( $this->is_domain_excluded( (string) $domain, $kind, $excluded_domains ) ) {
 			return;
 		}
 

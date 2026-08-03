@@ -8,6 +8,8 @@
 
 namespace SureCookie\Inc\Functions;
 
+use SureCookie\Inc\Utils\Options;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -47,6 +49,44 @@ class Sanitize {
 	}
 
 	/**
+	 * Sanitize a cookie domain.
+	 *
+	 * A cookie domain is a host (optionally with a leading dot), not a URL, so it
+	 * must not go through esc_url_raw() - that prepends "http://" and stores a
+	 * mangled value (e.g. ".youtube.com" becomes "http://.youtube.com"). This
+	 * strips any scheme/path that was pasted in, preserves a leading dot, and
+	 * keeps only host-safe characters so custom cookies match the format scanned
+	 * and declared cookies already use.
+	 *
+	 * @param mixed $value Raw domain input.
+	 * @since 1.2.5
+	 * @return string
+	 */
+	public static function cookie_domain( $value ): string {
+		$domain = trim( (string) $value );
+
+		if ( $domain === '' ) {
+			return '';
+		}
+
+		// If a full URL was pasted, keep only the host.
+		if ( strpos( $domain, '://' ) !== false ) {
+			$host   = wp_parse_url( $domain, PHP_URL_HOST );
+			$domain = is_string( $host ) && $host !== '' ? $host : $domain;
+		}
+
+		// A leading dot is valid in a cookie domain; preserve it across sanitizing.
+		$leading_dot = strncmp( $domain, '.', 1 ) === 0 ? '.' : '';
+		$domain      = ltrim( $domain, '.' );
+
+		// Keep only host-safe characters (letters, digits, dot, hyphen).
+		$domain = preg_replace( '/[^A-Za-z0-9.\-]/', '', $domain ); // phpcs:ignore Generic.PHP.ForbiddenFunctions.FoundWithAlternative -- Plain character-class strip; no /e modifier.
+		$domain = is_string( $domain ) ? $domain : '';
+
+		return $leading_dot . strtolower( $domain );
+	}
+
+	/**
 	 * Sanitize rich text content for banner/message fields.
 	 *
 	 * @param mixed $value Value to sanitize.
@@ -59,6 +99,51 @@ class Sanitize {
 		}
 
 		return wp_kses_post( $value );
+	}
+
+	/**
+	 * Re-sanitize rich text after an HTML-entity decode has re-armed it.
+	 *
+	 * Kses only inspects markup between a literal `<` and `>`, so
+	 * `&lt;img onerror=...&gt;` is stored verbatim and only goes live once
+	 * something decodes it - Helper::decode_html_entities_recursive() on the
+	 * settings routes, or WP_Scripts::localize() on every top-level scalar.
+	 * Decode to a fixed point (multiply-encoded payloads survive one pass)
+	 * before re-running kses. Stabilize loop as in self::stylesheet().
+	 *
+	 * @param mixed $value Value to sanitize.
+	 * @since 1.3.1
+	 * @return string
+	 */
+	public static function rich_text_after_decode( $value ) {
+		if ( ! is_string( $value ) || $value === '' ) {
+			return '';
+		}
+
+		// Terminates: html_entity_decode() never lengthens the string.
+		do {
+			$prev  = $value;
+			$value = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		} while ( $value !== $prev );
+
+		return wp_kses_post( $value );
+	}
+
+	/**
+	 * Apply self::rich_text_after_decode() to every rich-text key in a settings array.
+	 *
+	 * @param array<string, mixed> $settings Settings dataset.
+	 * @since 1.3.1
+	 * @return array<string, mixed>
+	 */
+	public static function rich_text_keys_after_decode( array $settings ): array {
+		foreach ( Options::get_rich_text_options() as $key ) {
+			if ( is_string( $settings[ $key ] ?? null ) ) {
+				$settings[ $key ] = self::rich_text_after_decode( $settings[ $key ] );
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

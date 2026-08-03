@@ -10,6 +10,7 @@
 
 namespace SureCookie\Inc\Modules\Auth;
 
+use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_Error;
@@ -56,7 +57,7 @@ class Controller {
 	 * Referer header, or access log.
 	 *
 	 * Each call mints a fresh 256-bit key and a fresh flow_id (UUID); the key
-	 * is stored server-side under a transient keyed by flow_id (NOT user_id —
+	 * is stored server-side under a transient keyed by flow_id (NOT user_id -
 	 * eliminates multi-tab key reuse).
 	 *
 	 * @since 0.0.1-beta.3
@@ -229,7 +230,9 @@ class Controller {
 		// pre-#466 clients - not validated, just not persisted.
 		unset( $decrypted_data_array['nonce'] );
 
-		update_option( self::SETTINGS_KEY, $decrypted_data_array );
+		// Non-autoloaded - the auth payload is only read by admin/REST paths, never
+		// on the front-end banner render, so it stays out of the alloptions cache.
+		Update::option( self::SETTINGS_KEY, $decrypted_data_array );
 
 		// Push account_ref to SaaS so it can populate Site::tier without
 		// seeing the user's email (issue #469). Fire-and-forget.
@@ -255,7 +258,7 @@ class Controller {
 	 * Attempt decryption using the key stored in the per-flow transient.
 	 *
 	 * The transient holds the hex-encoded key (transport-safe in JSON).
-	 * We hex2bin() it here so OpenSSL receives the full 32 raw bytes —
+	 * We hex2bin() it here so OpenSSL receives the full 32 raw bytes -
 	 * passing the 64-char hex string directly would silently truncate
 	 * inside openssl and reduce the AES-256 key to 128 effective bits.
 	 *

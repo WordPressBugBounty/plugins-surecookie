@@ -165,7 +165,10 @@ class Get {
 	 * @return string
 	 */
 	public static function unique_id( $prefix = '' ) {
-		return $prefix . time();
+		// Must be collision-free even when called many times within the same
+		// second (e.g. importing a whole service's cookies in one go); time()
+		// alone repeats and callers key arrays by this id, so entries clobbered.
+		return $prefix . wp_generate_uuid4();
 	}
 
 	/**
@@ -215,6 +218,9 @@ class Get {
 				'value'       => $_custom_cookie['value'] ?? '',
 				'path'        => $_custom_cookie['path'] ?? '/',
 				'expires'     => $_custom_cookie['expires'],
+				// Custom cookies are authored with an explicit lifetime in days;
+				// carry it through so consumers show the day count instead of re-deriving it from the absolute 'expires' timestamp.
+				'duration'    => $_custom_cookie['duration'] ?? '',
 				'secure'      => $_custom_cookie['secure'] ?? false,
 				'httpOnly'    => $_custom_cookie['httpOnly'] ?? false,
 				'provider'    => $_custom_cookie['provider'] ?? '',

@@ -98,11 +98,13 @@ class Settings extends Base {
 		$data        = apply_filters( 'surecookie_get_admin_settings_data', $data );
 		$decode_data = Helper::decode_html_entities_recursive( $data ) ?? $data;
 
-		// Re-sanitize custom_css after entity decoding to prevent blocklist bypass
-		// (e.g. &#64;import → @import surviving the original sanitization pass).
+		// Re-sanitize after entity decoding, else the decode undoes the sanitizer:
+		// &#64;import → @import for CSS, &lt;img onerror=…&gt; → live markup for rich text.
 		if ( isset( $decode_data['custom_css'] ) && is_string( $decode_data['custom_css'] ) ) {
 			$decode_data['custom_css'] = Sanitize::stylesheet( $decode_data['custom_css'] );
 		}
+
+		$decode_data = Sanitize::rich_text_keys_after_decode( $decode_data );
 
 		SendJson::success( [ 'data' => $decode_data ] );
 	}
@@ -183,6 +185,10 @@ class Settings extends Base {
 
 		$frontend_settings = apply_filters( 'surecookie_get_frontend_settings_data', $public_settings );
 		$decode_data       = Helper::decode_html_entities_recursive( $frontend_settings ) ?? $frontend_settings;
+
+		// Public route - the decode above must not hand an anonymous caller
+		// markup that kses had already neutralized.
+		$decode_data = Sanitize::rich_text_keys_after_decode( $decode_data );
 
 		SendJson::success( [ 'data' => $decode_data ] );
 	}

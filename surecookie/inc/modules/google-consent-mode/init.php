@@ -45,9 +45,6 @@ class Init {
 			return;
 		}
 
-		// Initialize Service_Detector (always needed for detection).
-		Service_Detector::get_instance();
-
 		// Initialize Consent_Handler (handles script output).
 		Consent_Handler::get_instance();
 

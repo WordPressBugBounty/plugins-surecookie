@@ -1406,7 +1406,7 @@
 	position: absolute;
 	inset: 0;
 }
-/* Audio variant — no aspect-ratio, fixed-ish height for the message + button card. */
+/* Audio variant - no aspect-ratio, fixed-ish height for the message + button card. */
 .surecookie-placeholder.surecookie-placeholder-audio {
 	min-height: 96px;
 }

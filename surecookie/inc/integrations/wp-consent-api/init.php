@@ -38,10 +38,16 @@ class Init {
 			return;
 		}
 
+		// Always on by design: installing the WP Consent API plugin IS the
+		// opt-in. A partial toggle shipped dead for several releases (issue
+		// #863, a compliance-audit "false off"), so the setting was removed
+		// entirely rather than wired - consent state must bridge seamlessly
+		// or not exist as an option at all.
+
 		// Register SureCookie as a Consent Management Platform.
 		$this->register_as_cmp();
 
-		// Initialize actions (settings dataset, cookie declarations).
+		// Initialize actions (cookie declarations, category map).
 		Actions::get_instance();
 
 		// Initialize consent handler (server-side consent state bridge).

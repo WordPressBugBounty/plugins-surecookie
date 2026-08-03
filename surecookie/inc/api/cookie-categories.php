@@ -130,13 +130,18 @@ class CookieCategories extends Base {
 				'callback'            => [ $this, 'delete_category' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
 				'args'                => [
-					'id'           => [
+					'id'              => [
 						'required' => true,
 						'type'     => 'string',
 					],
-					'keep_cookies' => [
+					'keep_cookies'    => [
 						'required' => false,
 						'type'     => 'boolean',
+					],
+					'target_category' => [
+						'required' => false,
+						'type'     => 'string',
+						'default'  => CookieCategoryService::DEFAULT_TARGET_CATEGORY,
 					],
 				],
 			]
@@ -211,11 +216,12 @@ class CookieCategories extends Base {
 	 */
 	public function delete_category( $request ): void {
 		try {
-			$category_id  = sanitize_text_field( $request->get_param( 'id' ) ?? '' );
-			$keep_cookies = (bool) $request->get_param( 'keep_cookies' );
+			$category_id     = sanitize_text_field( $request->get_param( 'id' ) ?? '' );
+			$keep_cookies    = (bool) $request->get_param( 'keep_cookies' );
+			$target_category = sanitize_text_field( (string) ( $request->get_param( 'target_category' ) ?? '' ) );
 
 			$service = new CookieCategoryService();
-			$result  = $service->delete_category( $category_id, $keep_cookies );
+			$result  = $service->delete_category( $category_id, $keep_cookies, $target_category );
 
 			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
 		} catch ( \Exception $e ) {

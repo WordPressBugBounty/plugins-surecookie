@@ -15,6 +15,7 @@
 namespace SureCookie\Inc\Modules\AutomaticScanning;
 
 use SureCookie\Inc\Functions\Update;
+use SureCookie\Inc\Services\CookieCategoryMemory;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -63,6 +64,12 @@ class History {
 		$domains  = isset( $context['domains'] ) && is_array( $context['domains'] ) ? $context['domains'] : [];
 		$snapshot = DiffEngine::build_snapshot( $cookies_by_category, $domains );
 		$diff     = DiffEngine::diff( $previous_snapshot, $snapshot );
+
+		// The snapshots hold the scanner's own classification, so a cookie whose
+		// category the admin has pinned can still show up as recategorized even
+		// though the store kept their choice. Reporting that would be untrue, so
+		// drop those entries.
+		$diff['recategorized'] = self::without_pinned_cookies( $diff['recategorized'] );
 
 		// Annotate newly-detected cookies with a rule-based suggested category
 		// and confidence (advisory in Free; consumed by Pro auto-apply).
@@ -139,5 +146,33 @@ class History {
 			'new_domains'         => isset( $changes['domains_added'] ) && is_array( $changes['domains_added'] ) ? $changes['domains_added'] : [],
 			'changes'             => $changes,
 		];
+	}
+
+	/**
+	 * Drop cookies whose category the admin has pinned.
+	 *
+	 * A pinned cookie is re-bucketed back to the admin's choice on every scan, so
+	 * the scanner changing its mind about it is not a change to the site - and Pro
+	 * auto-apply must not be handed a suggestion that would undo the choice.
+	 *
+	 * @param array<int, array<string, string>> $changes Recategorized entries from the diff.
+	 * @since 1.3.0
+	 * @return array<int, array<string, string>> The entries that are still real changes.
+	 */
+	private static function without_pinned_cookies( array $changes ): array {
+		if ( empty( $changes ) ) {
+			return $changes;
+		}
+
+		if ( empty( CookieCategoryMemory::all() ) ) {
+			return $changes;
+		}
+
+		return array_values(
+			array_filter(
+				$changes,
+				static fn( array $change ): bool => CookieCategoryMemory::remembered_category( $change ) === ''
+			)
+		);
 	}
 }

@@ -75,7 +75,7 @@ class Menu {
 				],
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/cookie-manager/scan',
-					'page_title' => __( 'Cookie Manager', 'surecookie' ),
+					'page_title' => __( 'Tracking Manager', 'surecookie' ),
 				],
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/analytics',

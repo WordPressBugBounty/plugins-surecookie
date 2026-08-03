@@ -52,9 +52,10 @@ class CookieCategories extends Base {
 					return $service->update_category( $category_id, $input );
 
 				case 'delete':
-					$category_id  = sanitize_text_field( $input['category_id'] ?? '' );
-					$keep_cookies = (bool) ( $input['keep_cookies'] ?? false );
-					return $service->delete_category( $category_id, $keep_cookies );
+					$category_id     = sanitize_text_field( $input['category_id'] ?? '' );
+					$keep_cookies    = (bool) ( $input['keep_cookies'] ?? false );
+					$target_category = sanitize_text_field( (string) ( $input['target_category'] ?? '' ) );
+					return $service->delete_category( $category_id, $keep_cookies, $target_category );
 
 				default:
 					return [
@@ -88,7 +89,7 @@ class CookieCategories extends Base {
 	 * {@inheritDoc}
 	 */
 	protected function get_description(): string {
-		return __( 'Manage cookie categories used to organize cookies by purpose (e.g., Necessary, Analytics, Marketing). Actions: "list" returns all categories with their ID, name, description, required status, and cookie count. "create" adds a new category (requires name). "update" modifies a category by category_id (name, description, required status). "delete" permanently removes a category by category_id — use "keep_cookies" to control whether associated cookies are moved to uncategorized (true) or deleted (false). Default/built-in categories (e.g., Necessary) cannot be deleted and their "required" status cannot be changed. Deleting a category that contains cookies without setting keep_cookies to true will also delete those cookie definitions.', 'surecookie' );
+		return __( 'Manage cookie categories used to organize cookies by purpose (e.g., Necessary, Analytics, Marketing). Actions: "list" returns all categories with their ID, name, description, required status, and cookie count. "create" adds a new category (requires name). "update" modifies a category by category_id (name, description, required status). "delete" permanently removes a category by category_id — use "keep_cookies" to control whether associated cookies are moved to another category (true) or deleted (false), and "target_category" to choose which category receives them (defaults to uncategorized). Default/built-in categories (e.g., Necessary) cannot be deleted and their "required" status cannot be changed. Deleting a category that contains cookies without setting keep_cookies to true will also delete those cookie definitions.', 'surecookie' );
 	}
 
 	/**
@@ -101,7 +102,7 @@ class CookieCategories extends Base {
 			'destructiveHint' => true,
 			'idempotentHint'  => false,
 			'openWorldHint'   => false,
-			'instructions'    => 'DESTRUCTIVE — the "delete" action permanently removes a cookie category and cannot be undone. When deleting, always set "keep_cookies" to true to preserve cookie definitions by moving them to uncategorized, unless the user explicitly wants to delete the cookies as well. Show the user the category name and its cookie count before confirming deletion. Default categories (e.g., Necessary) are protected and cannot be deleted. Always call "list" first to show existing categories before creating or deleting.',
+			'instructions'    => 'DESTRUCTIVE — the "delete" action permanently removes a cookie category and cannot be undone. When deleting, always set "keep_cookies" to true to preserve cookie definitions by moving them to another category, unless the user explicitly wants to delete the cookies as well. Pass "target_category" when the user names a destination; it defaults to uncategorized. Show the user the category name and its cookie count before confirming deletion. Default categories (e.g., Necessary) are protected and cannot be deleted. Always call "list" first to show existing categories before creating or deleting.',
 		];
 	}
 
@@ -112,30 +113,34 @@ class CookieCategories extends Base {
 		return [
 			'type'       => 'object',
 			'properties' => [
-				'action'       => [
+				'action'          => [
 					'type'        => 'string',
 					'enum'        => [ 'list', 'create', 'update', 'delete' ],
 					'description' => __( 'The category action to perform.', 'surecookie' ),
 				],
-				'category_id'  => [
+				'category_id'     => [
 					'type'        => 'string',
 					'description' => __( 'Category ID for update/delete operations.', 'surecookie' ),
 				],
-				'name'         => [
+				'name'            => [
 					'type'        => 'string',
 					'description' => __( 'Category name (required for create).', 'surecookie' ),
 				],
-				'description'  => [
+				'description'     => [
 					'type'        => 'string',
 					'description' => __( 'Category description.', 'surecookie' ),
 				],
-				'required'     => [
+				'required'        => [
 					'type'        => 'boolean',
 					'description' => __( 'Whether the category is required (users cannot opt out).', 'surecookie' ),
 				],
-				'keep_cookies' => [
+				'keep_cookies'    => [
 					'type'        => 'boolean',
-					'description' => __( 'For delete action: true to move cookies to "uncategorized", false to delete them.', 'surecookie' ),
+					'description' => __( 'For delete action: true to move cookies to another category, false to delete them.', 'surecookie' ),
+				],
+				'target_category' => [
+					'type'        => 'string',
+					'description' => __( 'For delete action with keep_cookies: ID of the category that receives the cookies. Defaults to "uncategorized".', 'surecookie' ),
 				],
 			],
 			'required'   => [ 'action' ],

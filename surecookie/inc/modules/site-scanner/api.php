@@ -170,7 +170,7 @@ class Api extends Base {
 		if ( ! $refresh ) {
 			$cached = $saas_client->get_cached_quota();
 			if ( ! empty( $cached ) ) {
-				// Strip the `_plan` sentinel before returning the quota payload —
+				// Strip the `_plan` sentinel before returning the quota payload -
 				// SaaS-reported plan goes back as a sibling, not nested in quota.
 				$cached_plan = $saas_client->get_cached_plan();
 				unset( $cached['_plan'] );

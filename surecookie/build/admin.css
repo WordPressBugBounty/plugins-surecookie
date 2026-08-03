@@ -600,6 +600,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   right: 0.75rem;
 }.surecookie-styles .right-4 {
   right: 1rem;
+}.surecookie-styles .right-8 {
+  right: 2rem;
 }.surecookie-styles .right-\[calc\(-50\%\+10px\)\] {
   right: calc(-50% + 10px);
 }.surecookie-styles .right-\[calc\(-50\%\+12px\)\] {
@@ -610,6 +612,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   inset-inline-start: 0px;
 }.surecookie-styles .top-0 {
   top: 0px;
+}.surecookie-styles .top-10 {
+  top: 2.5rem;
 }.surecookie-styles .top-2 {
   top: 0.5rem;
 }.surecookie-styles .top-2\.5 {
@@ -638,6 +642,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   z-index: 1;
 }.surecookie-styles .z-\[99999\] {
   z-index: 99999;
+}.surecookie-styles .z-\[9999\] {
+  z-index: 9999;
 }.surecookie-styles .order-1 {
   order: 1;
 }.surecookie-styles .order-10 {
@@ -741,6 +747,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .my-5 {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
+}.surecookie-styles .\!mb-4 {
+  margin-bottom: 1rem !important;
 }.surecookie-styles .\!mt-2 {
   margin-top: 0.5rem !important;
 }.surecookie-styles .-mb-4 {
@@ -831,6 +839,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   box-sizing: border-box;
 }.surecookie-styles .box-content {
   box-sizing: content-box;
+}.surecookie-styles .line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }.surecookie-styles .block {
   display: block;
 }.surecookie-styles .inline-block {
@@ -851,6 +864,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   display: contents;
 }.surecookie-styles .hidden {
   display: none;
+}.surecookie-styles .aspect-video {
+  aspect-ratio: 16 / 9;
 }.surecookie-styles .size-1\.5 {
   width: 0.375rem;
   height: 0.375rem;
@@ -942,6 +957,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   height: 39px;
 }.surecookie-styles .h-\[42px\] {
   height: 42px;
+}.surecookie-styles .h-\[760px\] {
+  height: 760px;
 }.surecookie-styles .h-\[calc\(100vh-64px\)\] {
   height: calc(100vh - 64px);
 }.surecookie-styles .h-auto {
@@ -962,6 +979,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   max-height: 13.5rem;
 }.surecookie-styles .max-h-\[400px\] {
   max-height: 400px;
+}.surecookie-styles .max-h-\[55vh\] {
+  max-height: 55vh;
+}.surecookie-styles .max-h-\[60vh\] {
+  max-height: 60vh;
 }.surecookie-styles .max-h-full {
   max-height: 100%;
 }.surecookie-styles .min-h-16 {
@@ -1026,6 +1047,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 3rem;
 }.surecookie-styles .w-120 {
   width: 30rem;
+}.surecookie-styles .w-14 {
+  width: 3.5rem;
 }.surecookie-styles .w-141\.5 {
   width: 35.375rem;
 }.surecookie-styles .w-16 {
@@ -1088,6 +1111,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 125px;
 }.surecookie-styles .w-\[130px\] {
   width: 130px;
+}.surecookie-styles .w-\[14\%\] {
+  width: 14%;
 }.surecookie-styles .w-\[140px\] {
   width: 140px;
 }.surecookie-styles .w-\[15\%\] {
@@ -1098,6 +1123,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 155px;
 }.surecookie-styles .w-\[170px\] {
   width: 170px;
+}.surecookie-styles .w-\[18\%\] {
+  width: 18%;
 }.surecookie-styles .w-\[18\.5rem\] {
   width: 18.5rem;
 }.surecookie-styles .w-\[22\.5rem\] {
@@ -1120,6 +1147,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 46px;
 }.surecookie-styles .w-\[512px\] {
   width: 512px;
+}.surecookie-styles .w-\[560px\] {
+  width: 560px;
 }.surecookie-styles .w-\[70px\] {
   width: 70px;
 }.surecookie-styles .w-\[80px\] {
@@ -1128,6 +1157,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 90px;
 }.surecookie-styles .w-\[95px\] {
   width: 95px;
+}.surecookie-styles .w-\[960px\] {
+  width: 960px;
 }.surecookie-styles .w-\[calc\(100\%\+0\.75rem\)\] {
   width: calc(100% + 0.75rem);
 }.surecookie-styles .w-\[calc\(100\%\+1rem\)\] {
@@ -1192,8 +1223,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   max-width: 42rem;
 }.surecookie-styles .max-w-\[768px\] {
   max-width: 768px;
+}.surecookie-styles .max-w-\[80\%\] {
+  max-width: 80%;
 }.surecookie-styles .max-w-\[80px\] {
   max-width: 80px;
+}.surecookie-styles .max-w-\[95vw\] {
+  max-width: 95vw;
 }.surecookie-styles .max-w-fit {
   max-width: fit-content;
 }.surecookie-styles .max-w-full {
@@ -1253,6 +1288,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .rotate-180 {
   --tw-rotate: 180deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}.surecookie-styles .rotate-\[180deg\] {
+  --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }.surecookie-styles .scale-95 {
   --tw-scale-x: .95;
   --tw-scale-y: .95;
@@ -1285,8 +1323,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   cursor: auto;
 }.surecookie-styles .cursor-default {
   cursor: default;
-}.surecookie-styles .cursor-help {
-  cursor: help;
 }.surecookie-styles .cursor-move {
   cursor: move;
 }.surecookie-styles .cursor-not-allowed {
@@ -1296,6 +1332,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .select-none {
   -webkit-user-select: none;
           user-select: none;
+}.surecookie-styles .select-all {
+  -webkit-user-select: all;
+          user-select: all;
 }.surecookie-styles .resize {
   resize: both;
 }.surecookie-styles .list-inside {
@@ -1454,10 +1493,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-space-x-reverse: 0;
   margin-right: calc(0.25rem * var(--tw-space-x-reverse));
   margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
-}.surecookie-styles .space-y-0 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0px * var(--tw-space-y-reverse));
 }.surecookie-styles .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));
@@ -1805,6 +1840,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .bg-badge-hover-yellow {
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
+}.surecookie-styles .bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
 }.surecookie-styles .bg-blue-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
@@ -1885,6 +1923,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .bg-icon-interactive {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+}.surecookie-styles .bg-misc-overlay {
+  background-color: #11182780;
 }.surecookie-styles .bg-misc-progress-background {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
@@ -1931,6 +1971,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .bg-yellow-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
+}.surecookie-styles .bg-opacity-50 {
+  --tw-bg-opacity: 0.5;
 }.surecookie-styles .fill-current {
   fill: currentColor;
 }.surecookie-styles .stroke-icon-primary {
@@ -1967,6 +2009,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   padding: 1.5rem;
 }.surecookie-styles .p-8 {
   padding: 2rem;
+}.surecookie-styles .px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
 }.surecookie-styles .px-0\.5 {
   padding-left: 0.125rem;
   padding-right: 0.125rem;
@@ -2012,6 +2057,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .py-1\.5 {
   padding-top: 0.375rem;
   padding-bottom: 0.375rem;
+}.surecookie-styles .py-10 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
 }.surecookie-styles .py-12 {
   padding-top: 3rem;
   padding-bottom: 3rem;
@@ -2145,8 +2193,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   font-weight: 400;
 }.surecookie-styles .font-semibold {
   font-weight: 600;
-}.surecookie-styles .uppercase {
-  text-transform: uppercase;
 }.surecookie-styles .capitalize {
   text-transform: capitalize;
 }.surecookie-styles .italic {
@@ -2178,8 +2224,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   line-height: 1;
 }.surecookie-styles .leading-relaxed {
   line-height: 1.625;
-}.surecookie-styles .leading-tight {
-  line-height: 1.25;
 }.surecookie-styles .tracking-2 {
   letter-spacing: 0.125em;
 }.surecookie-styles .\!text-link-primary {
@@ -2344,6 +2388,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .text-text-disabled {
   --tw-text-opacity: 1;
   color: rgb(189 193 199 / var(--tw-text-opacity, 1));
+}.surecookie-styles .text-text-error {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
 }.surecookie-styles .text-text-inverse {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
@@ -2597,7 +2644,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }.surecookie-styles input[type=search][name=keyword] {
   padding-left: 1.75rem;
-}#wpcontent:has(#surecookie-admin-root){padding-left:0}#wpbody-content:has(#surecookie-admin-root){padding-bottom:0}#wpbody-content:has(#surecookie-admin-root) .wrap{margin:0;padding:0}#wpfooter{display:none}#surecookie-admin-root *{box-sizing:border-box;font-family:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.surecookie-preview-banner{position:fixed;display:block;visibility:visible;opacity:1;pointer-events:auto}.surecookie-preview-banner-overlay{position:fixed;inset:0;background-color:rgba(0,0,0,.6);z-index:99998;pointer-events:none}.surecookie-preview-banner[data-preview=true]{box-sizing:border-box;border-top-right-radius:0}.surecookie-preview-banner.surecookie-banner-position-top{top:32px}.surecookie-preview-banner.surecookie-banner-position-top,.surecookie-preview-banner.surecookie-banner-position-bottom,.surecookie-preview-banner.surecookie-banner-position-box-base,.surecookie-preview-banner.surecookie-banner-position-bottom-center,.surecookie-preview-banner.surecookie-banner-position-middle{z-index:99999}.surecookie-preview-root-container .surecookie-accept-btn,.surecookie-preview-root-container .surecookie-accept-all-btn,.surecookie-preview-root-container .surecookie-decline-btn{background-color:var(--surecookie-banner-primary-color, #2563eb);color:#fff}.surecookie-preview-root-container .surecookie-accept-btn:hover,.surecookie-preview-root-container .surecookie-accept-all-btn:hover,.surecookie-preview-root-container .surecookie-decline-btn:hover,.surecookie-preview-root-container .surecookie-btn-primary:hover{background-color:var(--surecookie-banner-primary-hover-color, #1d4ed8);border-color:var(--surecookie-banner-primary-hover-color, #1d4ed8)}.surecookie-preview-root-container .surecookie-preferences-btn{background-color:rgba(0,0,0,0)}.surecookie-preview-root-container .surecookie-preferences-btn:hover{opacity:.8}.surecookie-styles .recharts-sector:focus,.surecookie-styles .recharts-layer:focus,.surecookie-styles .recharts-surface:focus,.surecookie-styles .recharts-wrapper svg:focus,.surecookie-styles .recharts-wrapper svg *:focus{outline:none}@keyframes surecookie-progress-stripes{from{background-position:1rem 0}to{background-position:0 0}}.surecookie-progress-striped{background-image:linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);background-size:1rem 1rem;animation:surecookie-progress-stripes 2s linear infinite}.surecookie-styles .file\:border-0::file-selector-button {
+}#wpcontent:has(#surecookie-admin-root){padding-left:0}#wpbody-content:has(#surecookie-admin-root){padding-bottom:0}#wpbody-content:has(#surecookie-admin-root) .wrap{margin:0;padding:0}#wpfooter{display:none}#surecookie-admin-root *{box-sizing:border-box;font-family:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.surecookie-preview-banner{position:fixed;display:block;visibility:visible;opacity:1;pointer-events:auto}.surecookie-preview-banner-overlay{position:fixed;inset:0;background-color:rgba(0,0,0,.6);z-index:99998;pointer-events:none}.surecookie-preview-banner[data-preview=true]{box-sizing:border-box;border-top-right-radius:0}.surecookie-preview-banner.surecookie-banner-position-top{top:32px}.surecookie-preview-banner.surecookie-banner-position-top,.surecookie-preview-banner.surecookie-banner-position-bottom,.surecookie-preview-banner.surecookie-banner-position-box-base,.surecookie-preview-banner.surecookie-banner-position-bottom-center,.surecookie-preview-banner.surecookie-banner-position-middle{z-index:99999}.surecookie-preview-root-container .surecookie-accept-btn,.surecookie-preview-root-container .surecookie-accept-all-btn,.surecookie-preview-root-container .surecookie-decline-btn{background-color:var(--surecookie-banner-primary-color, #2563eb);color:#fff}.surecookie-preview-root-container .surecookie-accept-btn:hover,.surecookie-preview-root-container .surecookie-accept-all-btn:hover,.surecookie-preview-root-container .surecookie-decline-btn:hover,.surecookie-preview-root-container .surecookie-btn-primary:hover{background-color:var(--surecookie-banner-primary-hover-color, #1d4ed8);border-color:var(--surecookie-banner-primary-hover-color, #1d4ed8)}.surecookie-preview-root-container .surecookie-preferences-btn{background-color:rgba(0,0,0,0)}.surecookie-preview-root-container .surecookie-preferences-btn:hover{opacity:.8}.surecookie-styles .recharts-sector:focus,.surecookie-styles .recharts-layer:focus,.surecookie-styles .recharts-surface:focus,.surecookie-styles .recharts-wrapper svg:focus,.surecookie-styles .recharts-wrapper svg *:focus{outline:none}@keyframes surecookie-progress-stripes{from{background-position:1rem 0}to{background-position:0 0}}.surecookie-progress-striped{background-image:linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);background-size:1rem 1rem;animation:surecookie-progress-stripes 2s linear infinite}.surecookie-styles .sc-child-w-full>*{width:100%}.surecookie-styles .file\:border-0::file-selector-button {
   border-width: 0px;
 }.surecookie-styles .file\:bg-transparent::file-selector-button {
   background-color: transparent;
@@ -3146,6 +3193,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .group\/switch:hover .group-hover\/switch\:bg-toggle-off-hover {
   --tw-bg-opacity: 1;
   background-color: rgb(189 193 199 / var(--tw-bg-opacity, 1));
+}.surecookie-styles .group:hover .group-hover\:bg-opacity-80 {
+  --tw-bg-opacity: 0.8;
 }.surecookie-styles .group\/quick-access-item:hover .group-hover\/quick-access-item\:text-link-primary-hover {
   --tw-text-opacity: 1;
   color: rgb(29 78 216 / var(--tw-text-opacity, 1));
@@ -3213,6 +3262,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
   .surecookie-styles .sm\:inline {
     display: inline;
+  }
+
+  .surecookie-styles .sm\:w-56 {
+    width: 14rem;
+  }
+
+  .surecookie-styles .sm\:flex-1 {
+    flex: 1 1 0%;
   }
 
   .surecookie-styles .sm\:shrink-0 {

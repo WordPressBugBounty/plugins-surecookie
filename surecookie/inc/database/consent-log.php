@@ -43,6 +43,16 @@ class ConsentLog extends Base {
 	protected $table_suffix = SURECOOKIE_CONSENT_LOG_DB;
 
 	/**
+	 * Whether the last upsert() wrote a row, or was swallowed as a duplicate.
+	 * Read via {@see self::last_upsert_stored()} so callers only count and
+	 * announce writes that actually landed.
+	 *
+	 * @since 1.3.0
+	 * @var bool
+	 */
+	private static $last_upsert_stored = false;
+
+	/**
 	 * Get the rolling activity window for active-site evaluation.
 	 *
 	 * @since 1.1.0
@@ -161,8 +171,8 @@ class ConsentLog extends Base {
 			// (session_id, timestamp) dedupes same-second duplicates via upsert()'s ON DUPLICATE KEY
 			// UPDATE, while later re-consents (new second) still create a fresh history row.
 			// This unique index also serves ordered session-history queries
-			// (WHERE session_id = ? ORDER BY timestamp DESC) — the engine scans it
-			// backward — so no separate composite index is needed. A separate index
+			// (WHERE session_id = ? ORDER BY timestamp DESC) - the engine scans it
+			// backward - so no separate composite index is needed. A separate index
 			// with a column-level `DESC` also broke SQLite's dbDelta translation, so
 			// it is intentionally omitted here.
 			'UNIQUE KEY session_unique (session_id, timestamp)',
@@ -707,6 +717,86 @@ class ConsentLog extends Base {
 	}
 
 	/**
+	 * Delete a session's forwarded rows except the one at a given timestamp.
+	 *
+	 * Lets Pro replace a partner's forwarded decision by writing first and pruning
+	 * after, so a failed replacement leaves the previous proof of consent standing
+	 * instead of erasing it and putting nothing back.
+	 *
+	 * @param string $session_id  Session UUID whose forwarded rows to prune.
+	 * @param string $origin_site Origin site canonical URL stored in the forwarded row.
+	 * @param string $timestamp   Timestamp of the row to keep.
+	 * @return bool True when at least one row was deleted.
+	 * @since 1.3.0
+	 */
+	public static function delete_forwarded_by_session_except( string $session_id, string $origin_site, string $timestamp ): bool {
+		if ( $session_id === '' || $origin_site === '' || $timestamp === '' ) {
+			return false;
+		}
+
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Targeted deletion on a custom table inside switch_to_blog; %i is the WP 6.2+ identifier placeholder and the cache is invalidated below.
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE session_id = %s AND is_forwarded = 1 AND origin_site = %s AND timestamp <> %s',
+				self::get_instance()->get_tablename(),
+				$session_id,
+				$origin_site,
+				$timestamp
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( $result ) {
+			self::invalidate_query_cache();
+		}
+
+		return (bool) $result;
+	}
+
+	/**
+	 * Delete the one forwarded row that mirrors a single origin consent event.
+	 *
+	 * The forwarded copy carries the origin row's `timestamp` verbatim, and the
+	 * origin's own unique key is `(session_id, timestamp)`, so this triple already
+	 * identifies one event without a mapping column. Erasing an origin row must
+	 * not reach past it: a session accumulates a history row per re-consent, and
+	 * the session-wide sweep would take the visitor's CURRENT decision with it.
+	 *
+	 * @param string $session_id  Session UUID of the row to delete.
+	 * @param string $origin_site Origin site canonical URL stored in the forwarded row.
+	 * @param string $timestamp   Origin row timestamp, copied onto the forwarded row.
+	 * @return bool True when at least one row was deleted.
+	 * @since 1.3.0
+	 */
+	public static function delete_forwarded_by_session_event( string $session_id, string $origin_site, string $timestamp ): bool {
+		if ( $session_id === '' || $origin_site === '' || $timestamp === '' ) {
+			return false;
+		}
+
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Targeted deletion on custom table inside switch_to_blog context; invalidated below.
+		$result = $wpdb->delete(
+			self::get_instance()->get_tablename(),
+			[
+				'session_id'   => $session_id,
+				'is_forwarded' => 1,
+				'origin_site'  => $origin_site,
+				'timestamp'    => $timestamp,
+			],
+			[ '%s', '%d', '%s', '%s' ]
+		);
+
+		if ( $result ) {
+			self::invalidate_query_cache();
+		}
+
+		return (bool) $result;
+	}
+
+	/**
 	 * Record the list of partner sites a consent was forwarded to.
 	 *
 	 * Called by the Pro Consent Forwarding module after a successful forward
@@ -740,6 +830,17 @@ class ConsentLog extends Base {
 	}
 
 	/**
+	 * Whether the most recent {@see self::upsert()} actually wrote a row, as
+	 * opposed to being swallowed as a same-second duplicate.
+	 *
+	 * @since 1.3.0
+	 * @return bool
+	 */
+	public static function last_upsert_stored(): bool {
+		return self::$last_upsert_stored;
+	}
+
+	/**
 	 * Insert or update the consent record for a session.
 	 *
 	 * Uses INSERT … ON DUPLICATE KEY UPDATE so that concurrent requests carrying
@@ -766,6 +867,16 @@ class ConsentLog extends Base {
 	public static function upsert( $ip_address, $user_id, $session_id, $preferences, $action, $country, $timestamp = null, $geo_preset_id = null, bool $is_forwarded = false, ?string $origin_site = null ) {
 		global $wpdb;
 
+		self::$last_upsert_stored = false;
+
+		/*
+		 * A caller that pins the timestamp is identifying an existing event, not
+		 * recording a new one - Pro's forwarding copies the origin row's timestamp
+		 * verbatim and matches on it - so only a timestamp we generated ourselves
+		 * may be nudged to dodge a collision below.
+		 */
+		$timestamp_is_ours = $timestamp === null;
+
 		if ( $timestamp === null ) {
 			$timestamp = current_time( 'mysql', true );
 		}
@@ -790,40 +901,71 @@ class ConsentLog extends Base {
 		$origin_binding = $origin === null ? [] : [ $origin ];
 		$forwarded_flag = $is_forwarded ? 1 : 0;
 
-		$values = array_merge(
-			[ $table_name, $ip_address, (int) $user_id, $session_id, $preferences, $action, $country, $timestamp ],
-			$preset_binding,
-			[ $forwarded_flag ],
-			$origin_binding
-		);
+		$log_id = false;
+		$stored = false;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $preset_sql / $origin_sql are hardcoded switches between 'NULL' (literal) and '%s' (placeholder); not user-controlled.
-		$query = $wpdb->prepare(
-			'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, timestamp, geo_preset_id, is_forwarded, origin_site)
-			 VALUES (%s, %d, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ')
-			 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)',
-			$values
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// Only a self-generated timestamp may be nudged, and never more than twice -
+		// the recorded second then trails the real event by at most 2s, which beats
+		// dropping the decision outright.
+		$attempts = $timestamp_is_ours ? 3 : 1;
 
-		if ( ! is_string( $query ) ) {
-			return false;
-		}
+		for ( $attempt = 0; $attempt < $attempts; $attempt++ ) {
+			$values = array_merge(
+				[ $table_name, $ip_address, (int) $user_id, $session_id, $preferences, $action, $country, $timestamp ],
+				$preset_binding,
+				[ $forwarded_flag ],
+				$origin_binding
+			);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared -- Prepared above; INSERT ON DUPLICATE KEY UPDATE requires a direct query for the atomic upsert guarantee.
-		$result = $wpdb->query( $query );
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $preset_sql / $origin_sql are hardcoded switches between 'NULL' (literal) and '%s' (placeholder); not user-controlled.
+			$query = $wpdb->prepare(
+				'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, timestamp, geo_preset_id, is_forwarded, origin_site)
+				 VALUES (%s, %d, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ')
+				 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)',
+				$values
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-		if ( $result === false ) {
-			return false;
+			if ( ! is_string( $query ) ) {
+				return false;
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared -- Prepared above; INSERT ON DUPLICATE KEY UPDATE requires a direct query for the atomic upsert guarantee.
+			$result = $wpdb->query( $query );
+
+			if ( $result === false ) {
+				return false;
+			}
+
+			// insert_id = new id on INSERT, or existing id via LAST_INSERT_ID(id) on collision
+			// (fires even on a no-op update in MySQL 5.7+/8.0).
+			$log_id = $wpdb->insert_id > 0 ? $wpdb->insert_id : false;
+
+			// A fresh INSERT affects one row; the no-op `id = LAST_INSERT_ID(id)`
+			// update affects none, which is the same-second collision.
+			if ( (int) $result !== 0 ) {
+				$stored = true;
+				break;
+			}
+
+			/*
+			 * Same session, same second. Resubmitting the same decision is exactly
+			 * the duplicate this unique key exists to swallow, so stop. A DIFFERENT
+			 * decision is a real event, and the row cannot be updated in place - the
+			 * id-only UPDATE clause above is what stops a forged session_id from
+			 * overwriting a stranger's consent - so retry a second later instead.
+			 */
+			if ( ! self::stored_row_differs( $log_id, (string) $preferences, (string) $action ) ) {
+				break;
+			}
+
+			$timestamp = gmdate( 'Y-m-d H:i:s', (int) strtotime( $timestamp . ' UTC' ) + 1 );
 		}
 
 		self::invalidate_query_cache();
+		self::$last_upsert_stored = $stored;
 
-		// insert_id = new id on INSERT, or existing id via LAST_INSERT_ID(id) on collision
-		// (fires even on a no-op update in MySQL 5.7+/8.0).
-		$log_id = $wpdb->insert_id > 0 ? $wpdb->insert_id : false;
-
-		if ( $log_id ) {
+		if ( $log_id && $stored ) {
 			/**
 			 * Fires after a consent log row has been successfully written.
 			 *
@@ -855,6 +997,34 @@ class ConsentLog extends Base {
 		}
 
 		return $log_id;
+	}
+
+	/**
+	 * Whether a stored row holds a different decision than the one just offered.
+	 *
+	 * @param int|false $log_id      Row id the collision resolved to.
+	 * @param string    $preferences Incoming JSON-encoded preferences.
+	 * @param string    $action      Incoming consent action.
+	 * @since 1.3.0
+	 * @return bool
+	 */
+	private static function stored_row_differs( $log_id, string $preferences, string $action ): bool {
+		if ( ! $log_id ) {
+			return false;
+		}
+
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Single-row read resolving a write collision, so a cached value would defeat the purpose; %i is the WP 6.2+ identifier placeholder.
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT preferences, action FROM %i WHERE id = %d', self::get_instance()->get_tablename(), (int) $log_id ), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( ! is_array( $row ) ) {
+			return false;
+		}
+
+		return (string) ( $row['preferences'] ?? '' ) !== $preferences
+			|| (string) ( $row['action'] ?? '' ) !== $action;
 	}
 
 	/**

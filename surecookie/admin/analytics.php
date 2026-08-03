@@ -10,7 +10,9 @@ namespace SureCookie\Admin;
 
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\AssistedScan\Telemetry as AssistedScanTelemetry;
 use SureCookie\Inc\Modules\Auth\Controller as AuthController;
+use SureCookie\Inc\Modules\SiteScanner\SaasClient;
 use SureCookie\Inc\Modules\SiteScanner\Utils as ScannerUtils;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -145,10 +147,9 @@ class Analytics {
 			]
 		);
 
-		// Detect version change vs `surecookie_saved_version` (owned by Maintenance).
-		// Runs before the daily throttle gate so an update is never missed between checks.
-		// Note: on frontend-first upgrades or BSF_Analytics_Events load failure, the
-		// `plugin_updated` event may be skipped - accepted tradeoff for key consolidation.
+		// Detect version change vs `surecookie_saved_version` (owned by Maintenance), before
+		// the daily throttle gate so an update is never missed. Note: a frontend-first upgrade
+		// or BSF_Analytics_Events load failure may skip `plugin_updated` - accepted tradeoff.
 		$saved_version             = get_option( 'surecookie_saved_version', '' );
 		$this->pre_upgrade_version = is_string( $saved_version ) ? $saved_version : '';
 		if ( ! empty( $saved_version ) && $saved_version !== SURECOOKIE_VERSION ) {
@@ -159,10 +160,9 @@ class Analytics {
 		// the throttle gate so it can bust the transient and re-queue this load).
 		$this->maybe_migrate_events_schema();
 
-		// State-based events - throttled to once per day. Deferred to `admin_init`
-		// (rather than run inline on `plugins_loaded`) so add-ons that register a
-		// `surecookie_detect_state_events` listener while loading on `init` are
-		// attached before detection fires its extension hook.
+		// State-based events, throttled once per day. Deferred to `admin_init` (not inline on
+		// `plugins_loaded`) so add-ons registering a `surecookie_detect_state_events` listener
+		// on `init` are attached before detection fires its extension hook.
 		add_action( 'admin_init', [ $this, 'maybe_detect_state_events' ] );
 	}
 
@@ -253,9 +253,8 @@ class Analytics {
 	private function maybe_migrate_events_schema(): void {
 		$stored = (int) get_option( 'surecookie_analytics_events_version', 0 );
 
-		// Collect events reshaped in every version newer than the stored one.
-		// Already-migrated versions are skipped, so an event never replays - there
-		// is nothing to prune from the map on a future bump.
+		// Collect events reshaped in every version newer than the stored one. Already-migrated
+		// versions are skipped, so an event never replays - nothing to prune on a future bump.
 		$to_flush = [];
 		foreach ( self::RESHAPED_EVENTS_BY_VERSION as $version => $event_names ) {
 			if ( $version > $stored ) {
@@ -313,9 +312,8 @@ class Analytics {
 			? sanitize_text_field( $bsf_referrers['surecookie'] )
 			: 'self';
 
-		// Emit a fixed flag as the event_value and carry the plugin version in
-		// properties['version']. Keeps the KPI value-breakdown a single row per
-		// event instead of accumulating one row per release (@since 1.2.4).
+		// Emit a fixed flag as the event_value, carry the version in properties['version'].
+		// Keeps the KPI breakdown one row per event, not one per release (@since 1.2.4).
 		$events->track(
 			'plugin_activated',
 			'activated',
@@ -326,9 +324,8 @@ class Analytics {
 		);
 
 		// ── 2. plugin_updated ────────────────────────────────────────────
-		// Use the version captured on `plugins_loaded` (before Maintenance::init
-		// updates `surecookie_saved_version` on `admin_init`), so the pre-upgrade
-		// version is preserved even though detection now runs on `admin_init`.
+		// Use the version captured on `plugins_loaded` (before Maintenance::init updates
+		// `surecookie_saved_version` on `admin_init`), preserving the pre-upgrade version.
 		$saved_version = $this->pre_upgrade_version;
 		if ( $saved_version !== SURECOOKIE_VERSION && ! empty( $saved_version ) ) {
 			$events->flush_pushed( [ 'plugin_updated' ] );
@@ -343,11 +340,10 @@ class Analytics {
 		}
 
 		// ── user_active_version (recurring version heartbeat) ────────────
-		// Reports the version each ACTIVE site is currently on. $force re-queues
-		// it every cycle so the latest version always wins and it survives the
-		// one-time dedup (same mechanism as plugin_updated). This is the one
-		// event whose value stays the version by design - the KPI breakdown then
-		// shows the active-install count per release (@since 1.2.4).
+		// Reports the version each ACTIVE site is on. $force re-queues it every cycle so the
+		// latest version wins and it survives the one-time dedup (like plugin_updated). The
+		// one event whose value stays the version by design - the KPI breakdown then shows
+		// active installs per release (@since 1.2.4).
 		$events->track( 'user_active_version', SURECOOKIE_VERSION, [], true );
 
 		// ── 3. onboarding_completed ──────────────────────────────────────
@@ -370,9 +366,8 @@ class Analytics {
 		}
 
 		// ── 5. banner_configured ─────────────────────────────────────────
-		// Fires when admin settings have been explicitly saved at least once.
-		// Carries the selected compliance law (always set; default GDPR) so the
-		// GDPR/CCPA/LGPD distribution is captured without a separate always-on event.
+		// Fires when admin settings have been saved at least once. Carries the compliance
+		// law (always set; default GDPR) to capture the GDPR/CCPA/LGPD distribution here.
 		if ( get_option( SURECOOKIE_SETTINGS_OPTION ) !== false ) {
 			$compliance_law = Settings::get( 'compliance_law' );
 			$law_name       = is_array( $compliance_law ) ? ( $compliance_law['name'] ?? '' ) : '';
@@ -388,9 +383,8 @@ class Analytics {
 		}
 
 		// ── 6. script_blocking_disabled ──────────────────────────────────
-		// `blocking_enabled` defaults to true, so an "enabled" event would fire for
-		// nearly every site. The meaningful signal is the rare cohort that turns
-		// script/iframe blocking OFF.
+		// `blocking_enabled` defaults to true, so an "enabled" event fires for nearly every
+		// site. The meaningful signal is the rare cohort that turns blocking OFF.
 		if ( ! (bool) Settings::get( 'blocking_enabled' ) ) {
 			$events->track( 'script_blocking_disabled', 'disabled' );
 		}
@@ -453,9 +447,8 @@ class Analytics {
 		}
 
 		// ── 12. upgrade_banner_dismissed ─────────────────────────────────
-		// Fires once the user has dismissed the pro upgrade nudge at least once.
-		// Key off the dismissal count: the nudge's `display` flag stays true until
-		// the 2nd dismissal, so it cannot detect a single dismissal.
+		// Fires once the user dismissed the pro upgrade nudge at least once. Key off the
+		// count: the nudge's `display` flag stays true until the 2nd dismissal.
 		$nudges = get_option( SURECOOKIE_NUDGES, [] );
 		if ( ! empty( $nudges['upgrade_banner']['count'] ) ) {
 			$events->track(
@@ -525,10 +518,9 @@ class Analytics {
 		}
 
 		// ── 20. cookie_policy_page_configured ────────────────────────────
-		// Emit a fixed 'configured' flag - never the page ID. The value only
-		// needs to signal that a policy page is assigned; sending the raw ID
-		// made every site a distinct event_value and flooded the KPI breakdown
-		// with one row per ID (@since 1.2.4).
+		// Emit a fixed 'configured' flag, never the page ID. The value only needs to signal
+		// a policy page is assigned; the raw ID made every site a distinct event_value,
+		// flooding the KPI breakdown with one row per ID (@since 1.2.4).
 		if ( (int) Settings::get( 'cookie_policy_page_id' ) > 0 ) {
 			$events->track( 'cookie_policy_page_configured', 'configured' );
 		}
@@ -564,6 +556,68 @@ class Analytics {
 				'banner_customized',
 				'customized',
 				[ 'signals' => implode( ',', $banner_signals ) ]
+			);
+		}
+
+		// ── 24. cloud_scan_blocked ───────────────────────────────────────
+		// The site's host served our scanner a challenge instead of the page. Across the
+		// installed base this measures how badly scanner reachability needs fixing - and
+		// it's why Assisted Scan exists, so it's tracked whether or not the fallback was used.
+		if ( get_option( SaasClient::BLOCKED_FLAG_OPTION, false ) ) {
+			$events->track(
+				'cloud_scan_blocked',
+				'blocked',
+				[
+					'version'            => SURECOOKIE_VERSION,
+					'days_since_install' => (string) $days_since_install,
+				]
+			);
+		}
+
+		// ── 25. assisted_scan_started ────────────────────────────────────
+		// Reached for the browser-collected fallback at least once.
+		if ( get_option( AssistedScanTelemetry::STARTED_FLAG, false ) ) {
+			$events->track(
+				'assisted_scan_started',
+				'started',
+				[
+					'version'            => SURECOOKIE_VERSION,
+					'days_since_install' => (string) $days_since_install,
+				]
+			);
+		}
+
+		// ── 26. assisted_scan_completed ──────────────────────────────────
+		// The recovery actually worked. `registered` separates the failure severities (an
+		// unregistered site could never scan; a registered one merely had a scan blocked).
+		// `adblock_suspected` flags known-incomplete results so they don't inflate success.
+		if ( get_option( AssistedScanTelemetry::COMPLETED_FLAG, false ) ) {
+			$stats = get_option( AssistedScanTelemetry::STATS_OPTION, [] );
+			$stats = is_array( $stats ) ? $stats : [];
+
+			$events->track(
+				'assisted_scan_completed',
+				'completed',
+				[
+					'version'            => SURECOOKIE_VERSION,
+					'days_since_install' => (string) $days_since_install,
+					'pages_walked'       => (string) (int) ( $stats['pages'] ?? 0 ),
+					'cookies_found'      => (string) (int) ( $stats['cookies'] ?? 0 ),
+					'services_found'     => (string) (int) ( $stats['services'] ?? 0 ),
+					'adblock_suspected'  => empty( $stats['adblock_suspected'] ) ? 'no' : 'yes',
+					'registered'         => empty( $stats['registered'] ) ? 'no' : 'yes',
+				]
+			);
+		}
+
+		// ── 27. assisted_scan_abandoned ──────────────────────────────────
+		// A walk that stopped reporting and had to be closed out by the rescue pass, not
+		// finished by the browser. The cohort to watch if the walk asks too much of people.
+		if ( get_option( AssistedScanTelemetry::ABANDONED_FLAG, false ) ) {
+			$events->track(
+				'assisted_scan_abandoned',
+				'abandoned',
+				[ 'version' => SURECOOKIE_VERSION ]
 			);
 		}
 

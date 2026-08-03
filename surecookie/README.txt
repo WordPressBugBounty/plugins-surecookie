@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, gdpr, ccpa, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -17,7 +17,9 @@ SureCookie is a WordPress cookie consent plugin that helps you scan cookies, dis
 
 It is built for site owners, E-commerce stores, agencies, bloggers, and WordPress professionals who want more than a basic cookie notice. SureCookie helps you understand what cookies and third-party services are running on your site, lets visitors manage their choices, and gives you a practical consent workflow without visitor-based pricing.
 
-<a href="https://app.zipwp.com/blueprint/surecookie-n9i" target="_blank" rel="noopener">Try the live demo of SureCookie.</a>
+👉 <a href="https://app.zipwp.com/blueprint/surecookie-n9i" target="_blank" rel="noopener">Try the live demo of SureCookie.</a>
+
+[youtube https://www.youtube.com/watch?v=IwU3Qa1VQYI]
 
 = Not Just a Cookie Banner =
 
@@ -503,6 +505,11 @@ For cookie scanning, selected page URLs and site verification details are sent t
 7. Cookie policy page.
 
 == Upgrade Notice ==
+= 1.3.1 =
+Cookies with the same name are no longer duplicated when scanned again. Scanned cookies now update existing entries instead of being added again.
+
+= 1.3.0 =
+Adds the Known Services library, browser-based scanning for sites where the scanner is blocked, the new Scripts and Embeds page, bulk cookie category changes, remembered manual categories, and duplicate cookie fixes.
 
 = 1.2.0 =
 Adds Re-request Consent, monthly automatic scanning foundation, scan history change detection, background overlay controls, consent log improvements, and better Google script handling.
@@ -514,6 +521,38 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.3.1 - 03-August-2026 =
+- Fix: Prevented duplicate cookies by ensuring scanned cookies with the same name are update existing entries instead of being added again.
+
+= 1.3.0 - 03-August-2026 =
+- New: Introducing "Known Services", a library of popular third-party services (Google Analytics, Meta Pixel, YouTube, Stripe, Hotjar and more) that you can add in one click. Adding a service declares its cookies in your cookie list and cookie policy, and blocks its scripts and embeds until consent, without waiting for a scan to find them. The free plan includes 5 services; SureCookie Pro unlocks the full automated library of 150+ services. ( https://surecookie.com/docs/using-known-services/ )
+- New: Introducing Assisted Scanner mechanism i.e. "Scan from Your Browser", a fallback scan for sites where the hosting firewall blocks SureCookie Scanner agent. ( https://surecookie.com/docs/scanning-your-site-from-your-browser/ )
+- New: "Resource Blocking" has been rebuilt as the "Scripts and Embeds" page, a single list of every script and embed found on your site plus any you add yourself.
+- New: You can now choose the consent state Google Consent Mode starts from before a visitor answers the banner. A "Worldwide" rule sets the baseline for Functional, Analytics and Marketing / Ads storage, and the regional rules below it override that baseline for the countries you list, so a region such as the EU can stay denied while other regions start from your own setting. Everything stays denied until you change it, so existing sites are unaffected.
+- New: Under Scripts and Embeds, you can now add your own scripts and embeds to block, even if they are not detected by a scan. This is useful for scripts that only run on certain pages or under certain conditions, such as tag managers, marketing pixels, or custom embeds.
+- New: You can now change the category of several cookies at once. Select them on the All Cookies page and move them together, with a reminder of what a category change means for visitor consent.
+- New: Deleting a cookie category now asks where its cookies should go, with a "Move Cookies To" picker instead of always sending them to Uncategorized.
+- Improvement: The built-in service catalog has grown to 150+ services with reviewed categories, so services such as Stripe, Cloudflare Turnstile, hCaptcha and Google Sign-In are treated as Essential or Functional instead of falling into Marketing. The catalog also refreshes on its daily schedule as intended.
+- Improvement: The admin has been reorganized. "Cookie Manager" is now "Tracking Manager" and holds Scanning, Known Services, Cookies (All Cookies and Cookie Policy), Scripts and Embeds, Geographic Rules and Consent Sharing in one place.
+- Improvement: Reduced the plugin's footprint on every page load. The scan log, active scan state, connection details and notice state are no longer loaded on requests that do not need them, and the scan log is capped at 500 lines so sites running automatic scans no longer grow it without limit.
+- Improvement: Hardened the security of the plugin.
+- Compatibility: If you use SureCookie Pro, update it to 1.1.0 or later alongside this release. Geographic Rules and Consent Sharing now live under Tracking Manager, and older Pro versions still register those pages at their previous location.
+- Fix: Consent log PDF exports breaks in right-to-left languages such as Arabic and Hebrew.
+- Fix: A cookie category you assign by hand is now remembered. Previously the next scan re-sorted that cookie using the scanner's own classification and your change was lost, including when a cookie stopped being detected and came back later.
+- Fix: Security cookies and scripts found by a scan, such as captcha, bot protection and CSRF tokens, were filed as Marketing or left Uncategorized. They are now treated as Essential, so a visitor who declines marketing no longer breaks logins, forms and captchas on your site. Run a scan to re-sort anything already detected.
+- Fix: Google Consent Mode sent no consent signals at all on sites that load Google Tag Manager from their own domain or through server-side tagging. SureCookie looked for Google's own script URLs to decide whether to act, and those setups have none, so neither the consent defaults nor the visitor's later choice ever reached Google. With Google Consent Mode turned on, the consent defaults are now always set at the top of every page before your tags run, no matter how those tags are loaded, and the visitor's choice is sent to Google as soon as they answer the banner.
+- Fix: The Provider and Duration columns showed "-" for every scanned cookie. Both now fill in, including on cookies already stored, so no rescan is needed.
+- Fix: Blocked embeds added to the page later, lazy loaded or loaded over AJAX, showed an empty box with no "Accept & Load" button.
+- Fix: The Google Consent Mode conflict warning for Site Kit never appeared in the WordPress admin.
+- Fix: Consent submissions returned an error when consent logging was turned off, even though the visitor's choice was saved correctly.
+- Fix: Screen readers announced every blocked embed on a page with the same "Accept & Load" label; each button now names the service it will load.
+- Fix: Removed the "Replace data on next scan" toggle. It had no effect, as every scan already replaces the detected resource list.
+- Fix: Deactivating or uninstalling the plugin now clears the scheduled tasks and cached service data added in this release.
+- Tweak: Scan results now tell you what actually happened. Separate notices cover a scan blocked by your host, a scan that reached the site but found nothing, a scan taking longer than usual, and a scan that finished only part of its pages. A retry adds to what was already found instead of replacing it, and the completion notice now points at both places results land, the Cookies page and the Scripts and Embeds page.
+- Tweak: The Consent Logs table header now wraps on narrow screens instead of overflowing.
+- Tweak: Scans could sit at "Queued..." forever on hosts where WordPress cron does not run, even though the scan had already finished. Opening the Scanning screen now refreshes the status directly.
+- Tweak: When a hosting firewall blocked our scanner, the Scanning screen simply reported 0 cookies with no explanation. It now says the host blocked the scan, links to the allowlisting guide, and lists anything it could still detect. An invalid, expired or self-signed SSL certificate is now reported as a certificate problem rather than a firewall problem.
+
 = 1.2.4 - 21-July-2026 =
 - Improvement: The banner button order setting now displays a notice, with a shortcut to your Geographic Targeting rules, explaining that visitors matched by a region-specific rule see that region's button order instead of the global one.
 - Improvement: The admin "What's New" panel no longer loads its font from Google's servers, removing an external request while keeping its appearance unchanged.

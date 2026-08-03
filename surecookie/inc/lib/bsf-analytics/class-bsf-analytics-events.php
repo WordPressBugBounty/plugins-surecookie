@@ -1,6 +1,6 @@
 <?php
 /**
- * BSF Analytics Events — reusable one-time milestone tracking.
+ * BSF Analytics Events - reusable one-time milestone tracking.
  *
  * Tracks events temporarily, sends them once via BSF Analytics,
  * then cleans up. Only a minimal dedup flag remains.
@@ -41,8 +41,8 @@ if ( ! class_exists( 'BSF_Analytics_Events' ) ) {
 		 *
 		 * @param string $slug            Plugin slug (e.g. 'sureforms', 'astra').
 		 * @param array  $option_resolver Optional. Custom callbacks for option storage.
-		 *                                 'get'    => callable( $key, $default ) — retrieve an option.
-		 *                                 'update' => callable( $key, $value )   — persist an option.
+		 *                                 'get'    => callable( $key, $default ) - retrieve an option.
+		 *                                 'update' => callable( $key, $value )   - persist an option.
 		 *                                 When omitted, uses get_option( '{slug}_{key}' ) / update_option( '{slug}_{key}' ).
 		 * @since 1.1.21
 		 */
@@ -59,27 +59,27 @@ if ( ! class_exists( 'BSF_Analytics_Events' ) ) {
 
 		/**
 		 * Track an event. By default, skips if already tracked or pending (one-time semantics).
-		 * When $force is true, the event is treated as retrackable — bypasses the post-send
+		 * When $force is true, the event is treated as retrackable - bypasses the post-send
 		 * dedup check and overwrites any pending entry with the same name. Useful for
 		 * recurring events like `plugin_updated` where the latest value should always win.
-		 * Only stores temporary data — cleaned up after analytics send.
+		 * Only stores temporary data - cleaned up after analytics send.
 		 *
 		 * @param string               $event_name  Event identifier.
 		 * @param string               $event_value Primary value (version, form ID, mode, etc.).
-		 * @param array<string, mixed> $properties  Additional context as key-value pairs. Values are stored as-is — sanitization is the caller's responsibility.
+		 * @param array<string, mixed> $properties  Additional context as key-value pairs. Values are stored as-is - sanitization is the caller's responsibility.
 		 * @param bool                 $force       When true, bypass pushed dedup and overwrite pending entry. Default false.
 		 * @since 1.1.21
 		 * @since 1.1.25 Added the $force parameter.
 		 * @return void
 		 */
 		public function track( $event_name, $event_value = '', $properties = array(), $force = false ) {
-			// Sanitize inputs once upfront — ensures dedup comparisons match stored values.
+			// Sanitize inputs once upfront - ensures dedup comparisons match stored values.
 			$event_name  = sanitize_text_field( $event_name );
 			$event_value = sanitize_text_field( (string) $event_value );
 			$properties  = is_array( $properties ) ? $properties : array();
 			$force       = (bool) $force;
 
-			// Check dedup flag — already sent in a previous cycle.
+			// Check dedup flag - already sent in a previous cycle.
 			// Force bypasses this check; pushed list will be refreshed on next flush_pending().
 			if ( ! $force ) {
 				$pushed = $this->get_option( 'usage_events_pushed', array() );
@@ -101,7 +101,7 @@ if ( ! class_exists( 'BSF_Analytics_Events' ) ) {
 			);
 
 			if ( ! $force ) {
-				// Default path: cheap membership check — no need to locate the key.
+				// Default path: cheap membership check - no need to locate the key.
 				if ( in_array( $event_name, array_column( $pending, 'event_name' ), true ) ) {
 					return;
 				}
@@ -150,7 +150,7 @@ if ( ! class_exists( 'BSF_Analytics_Events' ) ) {
 				return array();
 			}
 
-			// Add event names to dedup flag (minimal — just strings).
+			// Add event names to dedup flag (minimal - just strings).
 			$pushed = $this->get_option( 'usage_events_pushed', array() );
 			$pushed = is_array( $pushed ) ? $pushed : array();
 			$pushed = array_unique(

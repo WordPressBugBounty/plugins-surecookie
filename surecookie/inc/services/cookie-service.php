@@ -14,6 +14,7 @@
 namespace SureCookie\Inc\Services;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Functions\Validate;
@@ -32,6 +33,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.0.0-alpha.1
  */
 class CookieService {
+	/**
+	 * Maximum items accepted by one bulk category update. Mirrors the REST
+	 * `maxItems` arg schema as defense in depth for non-REST callers.
+	 *
+	 * @since 1.3.0
+	 */
+	public const MAX_BULK_ITEMS = 100;
 	/**
 	 * Get scanned cookies organized by category.
 	 *
@@ -111,8 +119,11 @@ class CookieService {
 		$duration    = sanitize_text_field( (string) ( $data['duration'] ?? '' ) );
 		$provider    = sanitize_text_field( $data['provider'] ?? '' );
 		$purpose     = sanitize_textarea_field( $data['purpose'] ?? '' );
-		$domain      = esc_url_raw( $data['domain'] ?? '' );
+		$domain      = Sanitize::cookie_domain( $data['domain'] ?? '' );
 		$type        = sanitize_text_field( $data['type'] ?? 'custom' );
+		// Provenance: set when this cookie is declared by adding a Known Service,
+		// so uninstalling that service can safely remove only its own rows.
+		$service_slug = sanitize_text_field( $data['service_slug'] ?? '' );
 
 		// Validate required fields.
 		if ( empty( $name ) || ! is_string( $name ) ) {
@@ -130,14 +141,19 @@ class CookieService {
 		}
 
 		// Get existing cookies.
-		$custom_cookies = Settings::get( 'custom_cookies' );
+		$custom_cookies = (array) Settings::get( 'custom_cookies' );
 
-		// Check for duplicate cookie name (O(1)).
-		if ( isset( $custom_cookies[ $name ] ) ) {
-			return [
-				'success' => false,
-				'message' => __( 'A cookie with this name already exists.', 'surecookie' ),
-			];
+		// Reject a duplicate by name. The store is keyed by a generated id (not
+		// the cookie name), so scan the values case-insensitively.
+		foreach ( $custom_cookies as $existing_cookie ) {
+			if ( is_array( $existing_cookie ) && isset( $existing_cookie['name'] )
+				&& strcasecmp( (string) $existing_cookie['name'], $name ) === 0 ) {
+				return [
+					'success' => false,
+					'code'    => 'duplicate_name',
+					'message' => __( 'A cookie with this name already exists.', 'surecookie' ),
+				];
+			}
 		}
 
 		$cookie_id = Get::unique_id( 'cookie_' );
@@ -161,6 +177,10 @@ class CookieService {
 			'type'        => $type,
 			'expires'     => $expires,
 		];
+
+		if ( $service_slug !== '' ) {
+			$new_cookie['service_slug'] = $service_slug;
+		}
 
 		// Set a new cookie.
 		$custom_cookies[ $cookie_id ] = $new_cookie;
@@ -223,7 +243,7 @@ class CookieService {
 		}
 
 		if ( Validate::not_empty( $data['domain'] ?? '' ) ) {
-			$cookie['domain'] = esc_url_raw( $data['domain'] );
+			$cookie['domain'] = Sanitize::cookie_domain( $data['domain'] );
 		}
 
 		// Duration & expires.
@@ -286,13 +306,15 @@ class CookieService {
 	 * @param string $cookie_name      The name of the cookie to move.
 	 * @param string $current_category  The source category ID.
 	 * @param string $new_category      The target category ID.
+	 * @param string $domain            Domain that set the cookie, to tell same-named cookies apart.
 	 * @return array{success: bool, message: string, cookie_name?: string, old_category?: string, new_category?: string}
 	 * @since 0.0.0-alpha.1
 	 */
-	public function update_scanned_cookie_category( string $cookie_name, string $current_category, string $new_category ): array {
+	public function update_scanned_cookie_category( string $cookie_name, string $current_category, string $new_category, string $domain = '' ): array {
 		$cookie_name      = sanitize_text_field( $cookie_name );
 		$current_category = sanitize_text_field( $current_category );
 		$new_category     = sanitize_text_field( $new_category );
+		$domain           = Sanitize::cookie_domain( $domain );
 
 		// Validate required fields.
 		if ( empty( $cookie_name ) ) {
@@ -342,38 +364,20 @@ class CookieService {
 			];
 		}
 
-		// Find the cookie in the current category.
-		$cookie_data  = null;
-		$cookie_index = null;
+		$moved = $this->move_scanned_cookie( $scanned_cookies, $cookie_name, $current_category, $new_category, $domain );
 
-		foreach ( $scanned_cookies[ $current_category ] as $index => $cookie ) {
-			if ( isset( $cookie['name'] ) && $cookie['name'] === $cookie_name ) {
-				$cookie_data  = $cookie;
-				$cookie_index = $index;
-				break;
-			}
-		}
-
-		if ( $cookie_data === null ) {
+		if ( $moved === null ) {
 			return [
 				'success' => false,
 				'message' => __( 'Cookie not found in the specified category.', 'surecookie' ),
 			];
 		}
 
-		// Remove cookie from current category.
-		array_splice( $scanned_cookies[ $current_category ], $cookie_index, 1 );
-
-		// Initialize new category array if it doesn't exist.
-		if ( ! isset( $scanned_cookies[ $new_category ] ) ) {
-			$scanned_cookies[ $new_category ] = [];
-		}
-
-		// Add cookie to new category.
-		$scanned_cookies[ $new_category ][] = $cookie_data;
-
 		// Save updated scanned cookies.
 		Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $scanned_cookies );
+
+		// Remember the choice so the next scan does not revert it.
+		CookieCategoryMemory::remember( [ $moved ], $new_category );
 
 		return [
 			'success'      => true,
@@ -382,5 +386,262 @@ class CookieService {
 			'old_category' => $current_category,
 			'new_category' => $new_category,
 		];
+	}
+
+	/**
+	 * Assign a batch of cookies (custom and/or scanned) to one category.
+	 *
+	 * The target category must be a registered cookie category - assigning to
+	 * an unknown ID would orphan cookies out of the admin list and the banner
+	 * disclosure. Items are validated, deduplicated, then applied with a single
+	 * option write per store (one for custom cookies, one for scanned). Items
+	 * that fail (e.g. a cookie deleted meanwhile) are counted, not fatal.
+	 *
+	 * @param array<int, array<string, string>> $items        Cookies to move. Each item:
+	 *                                                        type 'custom' needs `id`;
+	 *                                                        type 'scanned' needs `name` + `current_category`,
+	 *                                                        and may add `domain` to disambiguate.
+	 * @param string                            $new_category Target category ID.
+	 * @return array{success: bool, message: string, updated?: int, failed?: int}
+	 * @since 1.3.0
+	 */
+	public function bulk_update_cookie_category( array $items, string $new_category ): array {
+		$new_category = sanitize_text_field( $new_category );
+
+		if ( empty( $new_category ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'New category is required.', 'surecookie' ),
+			];
+		}
+
+		if ( empty( $items ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'No cookies selected.', 'surecookie' ),
+			];
+		}
+
+		if ( count( $items ) > self::MAX_BULK_ITEMS ) {
+			return [
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %d: maximum number of cookies per request. */
+					__( 'Too many cookies in one request. Please select up to %d.', 'surecookie' ),
+					self::MAX_BULK_ITEMS
+				),
+			];
+		}
+
+		$registered_ids = array_column( (array) Settings::get( 'cookie_categories' ), 'id' );
+		if ( ! in_array( $new_category, $registered_ids, true ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'The selected category no longer exists. Please reload and try again.', 'surecookie' ),
+			];
+		}
+
+		// Validate and deduplicate items, partitioned per store so each store
+		// is read and written exactly once below.
+		$custom_ids    = [];
+		$scanned_moves = [];
+		$failed        = 0;
+
+		foreach ( $items as $item ) {
+			if ( ! is_array( $item ) ) {
+				$failed++;
+				continue;
+			}
+
+			$type = is_string( $item['type'] ?? null ) ? $item['type'] : '';
+
+			if ( $type === 'custom' && is_string( $item['id'] ?? null ) && $item['id'] !== '' ) {
+				$custom_ids[ sanitize_text_field( $item['id'] ) ] = true;
+				continue;
+			}
+
+			if (
+				$type === 'scanned' &&
+				is_string( $item['name'] ?? null ) && $item['name'] !== '' &&
+				is_string( $item['current_category'] ?? null ) && $item['current_category'] !== ''
+			) {
+				$name    = sanitize_text_field( $item['name'] );
+				$current = sanitize_text_field( $item['current_category'] );
+				// Domain keeps same-named cookies from different domains as
+				// separate moves instead of collapsing them into one.
+				$domain   = Sanitize::cookie_domain( is_string( $item['domain'] ?? null ) ? $item['domain'] : '' );
+				$move_key = $name . '|' . $domain . '|' . $current;
+
+				$scanned_moves[ $move_key ] = [
+					'name'    => $name,
+					'current' => $current,
+					'domain'  => $domain,
+				];
+				continue;
+			}
+
+			$failed++;
+		}
+
+		$updated = 0;
+
+		// Custom cookies: patch categories in one read-modify-write.
+		if ( $custom_ids ) {
+			$custom_cookies = (array) Settings::get( 'custom_cookies' );
+			$dirty          = false;
+
+			foreach ( array_keys( $custom_ids ) as $cookie_id ) {
+				if ( ! isset( $custom_cookies[ $cookie_id ] ) ) {
+					$failed++;
+					continue;
+				}
+
+				if ( ( $custom_cookies[ $cookie_id ]['category'] ?? '' ) !== $new_category ) {
+					$custom_cookies[ $cookie_id ]['category'] = $new_category;
+					$dirty                                    = true;
+				}
+				$updated++;
+			}
+
+			if ( $dirty ) {
+				Settings::update( 'custom_cookies', $custom_cookies );
+			}
+		}
+
+		// Scanned cookies: apply all moves in memory, then one option write.
+		if ( $scanned_moves ) {
+			$scanned_cookies = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+			$scanned_cookies = is_array( $scanned_cookies ) ? $scanned_cookies : [];
+			$moved_cookies   = [];
+
+			foreach ( $scanned_moves as $move ) {
+				// Already in the target category: success no-op, no write needed.
+				if ( $move['current'] === $new_category ) {
+					$updated++;
+					continue;
+				}
+
+				$moved = $this->move_scanned_cookie( $scanned_cookies, $move['name'], $move['current'], $new_category, $move['domain'] );
+
+				if ( $moved !== null ) {
+					$updated++;
+					$moved_cookies[] = $moved;
+				} else {
+					$failed++;
+				}
+			}
+
+			if ( $moved_cookies ) {
+				Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $scanned_cookies );
+
+				// Remember the choices so the next scan does not revert them.
+				CookieCategoryMemory::remember( $moved_cookies, $new_category );
+			}
+		}
+
+		return [
+			'success' => $updated > 0,
+			'message' => $updated > 0
+				? sprintf(
+					/* translators: %d: number of cookies updated. */
+					_n(
+						'%d cookie moved to the selected category.',
+						'%d cookies moved to the selected category.',
+						$updated,
+						'surecookie'
+					),
+					$updated
+				)
+				: __( 'No cookies could be updated.', 'surecookie' ),
+			'updated' => $updated,
+			'failed'  => $failed,
+		];
+	}
+
+	/**
+	 * Move one scanned cookie between category groups, in memory.
+	 *
+	 * Shared by the single-item update and the bulk update so the splice/append
+	 * logic exists once. Does not persist - callers save the option themselves,
+	 * which lets the bulk path apply many moves with a single write. The moved
+	 * row is returned so callers can record the assignment against the cookie's
+	 * full identity (name + domain + provider).
+	 *
+	 * A name can appear more than once in one category - two cookies called `id`
+	 * set by different domains are separate cookies that the scanner keeps apart
+	 * by signature, and both may be classified the same way. So the domain the
+	 * request came with is matched first, and a name-only match is the fallback
+	 * for a caller that did not send one.
+	 *
+	 * @param array<string, array<int, array<string, mixed>>> $scanned_cookies  Scanned cookies, grouped by category (by reference).
+	 * @param string                                          $cookie_name      Cookie to move.
+	 * @param string                                          $current_category Source category ID.
+	 * @param string                                          $new_category     Target category ID.
+	 * @param string                                          $domain           Domain that set the cookie, when known.
+	 * @return array<string, mixed>|null The moved cookie, or null when it was not found.
+	 * @since 1.3.0
+	 */
+	private function move_scanned_cookie( array &$scanned_cookies, string $cookie_name, string $current_category, string $new_category, string $domain = '' ): ?array {
+		if ( ! isset( $scanned_cookies[ $current_category ] ) || ! is_array( $scanned_cookies[ $current_category ] ) ) {
+			return null;
+		}
+
+		$index = $this->find_scanned_cookie( $scanned_cookies[ $current_category ], $cookie_name, $domain );
+
+		if ( $index === null ) {
+			return null;
+		}
+
+		$cookie = $scanned_cookies[ $current_category ][ $index ];
+
+		array_splice( $scanned_cookies[ $current_category ], $index, 1 );
+
+		if ( ! isset( $scanned_cookies[ $new_category ] ) ) {
+			$scanned_cookies[ $new_category ] = [];
+		}
+
+		// Keep the row's own category field in step with its bucket, so a
+		// stored cookie never reports a category it no longer sits in.
+		$cookie['category'] = $new_category;
+
+		$scanned_cookies[ $new_category ][] = $cookie;
+
+		return $cookie;
+	}
+
+	/**
+	 * Locate a cookie within one category group.
+	 *
+	 * Prefers an exact name+domain match so same-named cookies from different
+	 * domains are never confused, and falls back to the first name match when no
+	 * domain was supplied or none matched (a stored domain can differ from what
+	 * the admin's page was rendered with).
+	 *
+	 * @param array<int, array<string, mixed>> $cookies Cookies in one category.
+	 * @param string                           $name    Cookie name.
+	 * @param string                           $domain  Domain to prefer, or an empty string.
+	 * @return int|null Index of the match, or null when there is none.
+	 * @since 1.3.0
+	 */
+	private function find_scanned_cookie( array $cookies, string $name, string $domain ): ?int {
+		$normalize     = static fn( string $value ): string => strtolower( ltrim( trim( $value ), '.' ) );
+		$wanted        = $normalize( $domain );
+		$name_fallback = null;
+
+		foreach ( $cookies as $index => $cookie ) {
+			if ( ! is_array( $cookie ) || ( $cookie['name'] ?? null ) !== $name ) {
+				continue;
+			}
+
+			if ( $wanted !== '' && $normalize( (string) ( $cookie['domain'] ?? '' ) ) === $wanted ) {
+				return (int) $index;
+			}
+
+			if ( $name_fallback === null ) {
+				$name_fallback = (int) $index;
+			}
+		}
+
+		return $name_fallback;
 	}
 }

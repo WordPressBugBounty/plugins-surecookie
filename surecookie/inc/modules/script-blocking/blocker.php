@@ -10,7 +10,7 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
-use SureCookie\Inc\Modules\SiteScanner\SaasClient;
+use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,19 +43,28 @@ class Blocker {
 	private const QUARANTINE_CATEGORY = 'quarantine';
 
 	/**
-	 * Known scripts instance.
-	 *
-	 * @var Known_Scripts
+	 * Marker comment printed at the very start of `wp_footer`, giving the
+	 * buffer processor a precise footer boundary for region-constrained rules.
+	 * Always stripped from the final output.
 	 */
-	private Known_Scripts $known_scripts;
+	private const FOOTER_MARKER = '<!--surecookie:footer-->';
 
 	/**
 	 * Per-request cache of iframe-pattern lookup map (shared across
 	 * block_iframes / block_embeds / block_objects).
 	 *
-	 * @var array<string, array{name: string, category: string, label: string}>|null
+	 * @var array<string, array{name: string, category: string, label: string, path?: string, location?: string}>|null
 	 */
 	private ?array $iframe_patterns_cache = null;
+
+	/**
+	 * Per-request cache of admin category overrides ({ domain => category }),
+	 * from the `resource_category_overrides` setting. Lets an admin recategorize
+	 * a detected resource so consent gating follows the chosen category.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private ?array $category_overrides = null;
 
 	/**
 	 * Constructor.
@@ -63,7 +72,6 @@ class Blocker {
 	 * @since 0.0.1
 	 */
 	private function __construct() {
-		$this->known_scripts = Known_Scripts::get_instance();
 		$this->register_hooks();
 	}
 
@@ -133,7 +141,20 @@ class Blocker {
 			$buffer = $this->block_objects( $buffer );
 		}
 
-		return $buffer;
+		// The footer-boundary marker is internal - never ship it.
+		return str_replace( self::FOOTER_MARKER, '', $buffer );
+	}
+
+	/**
+	 * Print the footer-boundary marker consumed by split_html_regions().
+	 *
+	 * @since 1.3.0
+	 * @return void
+	 */
+	public function mark_footer_start(): void {
+		if ( Utils::is_blocking_enabled() ) {
+			echo self::FOOTER_MARKER; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static HTML comment constant.
+		}
 	}
 
 	/**
@@ -144,6 +165,10 @@ class Blocker {
 	 */
 	private function register_hooks(): void {
 		add_filter( 'template_include', [ $this, 'intercept_template' ], PHP_INT_MAX );
+
+		// Before every other wp_footer callback, so all footer scripts land
+		// after the marker. Stripped again in process_buffer().
+		add_action( 'wp_footer', [ $this, 'mark_footer_start' ], -PHP_INT_MAX );
 	}
 
 	/**
@@ -200,6 +225,10 @@ class Blocker {
 
 		// Allow the SaaS scanner to bypass blocking so it sees the full unblocked page.
 		if ( $this->is_scan_bypass_request() ) {
+			// Record that the scanner's request actually reached WordPress. If a
+			// scan finishes with zero findings and zero reach, the host firewall
+			// blocked the crawl at the edge (see SaasClient::classify_scan_outcome).
+			do_action( 'surecookie_scanner_request_detected' );
 			return false;
 		}
 
@@ -258,7 +287,7 @@ class Blocker {
 	 * @return string Modified HTML.
 	 */
 	private function block_scripts( string $html ): string {
-		$all_scripts = $this->known_scripts->get_all_scripts();
+		$all_scripts = apply_filters( 'surecookie_known_scripts', [] );
 
 		if ( empty( $all_scripts ) ) {
 			return $html;
@@ -271,7 +300,47 @@ class Blocker {
 			return $html;
 		}
 
-		// Use regex to find and modify script tags.
+		// Region-constrained rules (head|body|footer) need per-segment passes;
+		// the common case (no constraints) keeps the single whole-page pass.
+		$has_constraint = false;
+		foreach ( $patterns as $info ) {
+			if ( $info['location'] !== 'any' ) {
+				$has_constraint = true;
+				break;
+			}
+		}
+
+		if ( ! $has_constraint ) {
+			return $this->rewrite_script_tags( $html, $patterns );
+		}
+
+		$out = '';
+		foreach ( $this->split_html_regions( $html ) as $segment ) {
+			$region_patterns = array_filter(
+				$patterns,
+				static function ( $info ) use ( $segment ) {
+					$location = $info['location'];
+					return $location === 'any' || in_array( $location, $segment['accepts'], true );
+				}
+			);
+
+			$out .= empty( $region_patterns )
+				? $segment['html']
+				: $this->rewrite_script_tags( $segment['html'], $region_patterns );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Run the script-tag rewrite pass over one HTML chunk.
+	 *
+	 * @param string               $html     HTML content.
+	 * @param array<string, mixed> $patterns Pattern lookup map.
+	 * @since 1.3.0
+	 * @return string Modified HTML.
+	 */
+	private function rewrite_script_tags( string $html, array $patterns ): string {
 		$result = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
 			function ( $matches ) use ( $patterns ) {
@@ -284,6 +353,54 @@ class Blocker {
 	}
 
 	/**
+	 * Split the page into head / body / footer segments for region-constrained
+	 * matching. Head ends at `</head>`; footer starts at the marker printed by
+	 * `mark_footer_start()`. When a boundary is missing, its region folds into
+	 * the surrounding segment (which then accepts that region's rules too), so
+	 * a constrained rule can never silently stop blocking.
+	 *
+	 * @param string $html HTML content.
+	 * @since 1.3.0
+	 * @return array<int, array{html: string, accepts: array<int, string>}>
+	 */
+	private function split_html_regions( string $html ): array {
+		$head_end     = stripos( $html, '</head>' );
+		$footer_start = strpos( $html, self::FOOTER_MARKER );
+
+		$segments = [];
+
+		if ( $head_end !== false ) {
+			$segments[]  = [
+				'html'    => substr( $html, 0, $head_end ),
+				'accepts' => [ 'head' ],
+			];
+			$rest_offset = $head_end;
+		} else {
+			$rest_offset = 0;
+		}
+
+		$body_accepts = $head_end === false ? [ 'head', 'body' ] : [ 'body' ];
+
+		if ( $footer_start !== false && $footer_start >= $rest_offset ) {
+			$segments[] = [
+				'html'    => substr( $html, $rest_offset, $footer_start - $rest_offset ),
+				'accepts' => $body_accepts,
+			];
+			$segments[] = [
+				'html'    => substr( $html, $footer_start ),
+				'accepts' => [ 'footer' ],
+			];
+		} else {
+			$segments[] = [
+				'html'    => substr( $html, $rest_offset ),
+				'accepts' => array_merge( $body_accepts, [ 'footer' ] ),
+			];
+		}
+
+		return $segments;
+	}
+
+	/**
 	 * Get the iframe-pattern lookup map, computed once per request.
 	 *
 	 * Shared by block_iframes / block_embeds / block_objects so the known-scripts
@@ -291,14 +408,14 @@ class Blocker {
 	 * Blocker singleton, which is instantiated fresh per PHP request.
 	 *
 	 * @since 0.0.1-beta.2
-	 * @return array<string, array{name: string, category: string, label: string}>
+	 * @return array<string, array{name: string, category: string, label: string, path?: string, location?: string}>
 	 */
 	private function get_iframe_patterns(): array {
 		if ( $this->iframe_patterns_cache !== null ) {
 			return $this->iframe_patterns_cache;
 		}
 
-		$all_scripts = $this->known_scripts->get_all_scripts();
+		$all_scripts = apply_filters( 'surecookie_known_scripts', [] );
 
 		if ( empty( $all_scripts ) ) {
 			$this->iframe_patterns_cache = [];
@@ -401,7 +518,7 @@ class Blocker {
 	 *
 	 * @param array<string, array<string, mixed>> $all_scripts Known scripts by category.
 	 * @since 0.0.1
-	 * @return array<string, array{name: string, category: string, label: string}>
+	 * @return array<string, array{name: string, category: string, label: string, location: string, path: string}>
 	 */
 	private function build_script_patterns( array $all_scripts ): array {
 		$patterns = [];
@@ -421,6 +538,11 @@ class Blocker {
 						'name'     => $service_key,
 						'category' => $category,
 						'label'    => $service['label'] ?? $service_key,
+						// Optional page-region constraint (head|body|footer).
+						'location' => $service['location'] ?? 'any',
+						// Optional narrowing constraint: the resource must
+						// also contain this path/pattern.
+						'path'     => (string) ( $service['path'] ?? '' ),
 					];
 				}
 			}
@@ -434,7 +556,7 @@ class Blocker {
 	 *
 	 * @param array<string, array<string, mixed>> $all_scripts Known scripts by category.
 	 * @since 0.0.1
-	 * @return array<string, array{name: string, category: string, label: string}>
+	 * @return array<string, array{name: string, category: string, label: string, path?: string, location?: string}>
 	 */
 	private function build_iframe_patterns( array $all_scripts ): array {
 		$patterns = [];
@@ -454,6 +576,8 @@ class Blocker {
 						'name'     => $service_key,
 						'category' => $category,
 						'label'    => $service['label'] ?? $service_key,
+						// Optional narrowing constraint (see build_script_patterns).
+						'path'     => (string) ( $service['path'] ?? '' ),
 					];
 				}
 			}
@@ -465,8 +589,8 @@ class Blocker {
 	/**
 	 * Process a single script tag.
 	 *
-	 * @param array<int, string>                                                  $matches  Regex matches.
-	 * @param array<string, array{name: string, category: string, label: string}> $patterns Pattern mappings.
+	 * @param array<int, string>                                                                                    $matches  Regex matches.
+	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1
 	 * @return string Modified script tag.
 	 */
@@ -477,6 +601,18 @@ class Blocker {
 
 		// Skip if already blocked.
 		if ( strpos( $attributes, 'data-surecookie-category' ) !== false ) {
+			return $full_tag;
+		}
+
+		// Never block SureCookie's own inline scripts. WordPress emits our
+		// localized data as id="{handle}-js-{extra,before,after}" (e.g.
+		// surecookie-public-js-extra, which defines window.surecookiePublicSettings).
+		// That payload embeds tracker-domain strings - cookie domains and the
+		// blocking patterns themselves - for client-side use, so matching inline
+		// CONTENT would self-match a blocking pattern and neutralize the consent
+		// runtime's own bootstrap. Our handles are always "surecookie"-prefixed;
+		// no third-party script carries that id.
+		if ( preg_match( '/\bid\s*=\s*["\']surecookie[-_]/i', $attributes ) ) {
 			return $full_tag;
 		}
 
@@ -500,6 +636,9 @@ class Blocker {
 		if ( $match_result === null ) {
 			return $full_tag;
 		}
+
+		// Honor an admin category override for this resource.
+		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'script' );
 
 		// Check if this script should be skipped.
 		$skip = apply_filters(
@@ -532,8 +671,8 @@ class Blocker {
 	/**
 	 * Process a single iframe tag.
 	 *
-	 * @param array<int, string>                                                  $matches  Regex matches.
-	 * @param array<string, array{name: string, category: string, label: string}> $patterns Pattern mappings.
+	 * @param array<int, string>                                                                                    $matches  Regex matches.
+	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1
 	 * @return string Modified iframe tag with placeholder.
 	 */
@@ -562,6 +701,9 @@ class Blocker {
 		if ( $match_result === null ) {
 			return $full_tag;
 		}
+
+		// Honor an admin category override for this resource.
+		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'iframe' );
 
 		// Check if this iframe should be skipped.
 		$skip = apply_filters(
@@ -595,8 +737,8 @@ class Blocker {
 	/**
 	 * Process a single <embed> tag.
 	 *
-	 * @param array<int, string>                                                  $matches  Regex matches.
-	 * @param array<string, array{name: string, category: string, label: string}> $patterns Pattern mappings.
+	 * @param array<int, string>                                                                                    $matches  Regex matches.
+	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1-beta.2
 	 * @return string Modified embed tag with placeholder, or original tag if not blocked.
 	 */
@@ -629,6 +771,9 @@ class Blocker {
 		if ( $match_result === null ) {
 			return $full_tag;
 		}
+
+		// Honor an admin category override for this resource.
+		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'iframe' );
 
 		/**
 		 * Filter: Allow bypassing <embed> blocking for a specific URL/service.
@@ -668,8 +813,8 @@ class Blocker {
 	/**
 	 * Process a single <object> tag.
 	 *
-	 * @param array<int, string>                                                  $matches  Regex matches.
-	 * @param array<string, array{name: string, category: string, label: string}> $patterns Pattern mappings.
+	 * @param array<int, string>                                                                                    $matches  Regex matches.
+	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1-beta.2
 	 * @return string Modified object tag with placeholder, or original tag if not blocked.
 	 */
@@ -712,6 +857,9 @@ class Blocker {
 		if ( $match_result === null ) {
 			return $full_tag;
 		}
+
+		// Honor an admin category override for this resource.
+		$match_result['category'] = $this->resolve_category( $data, $match_result['category'], 'iframe' );
 
 		/**
 		 * Filter: Allow bypassing <object> blocking for a specific URL/service.
@@ -848,25 +996,119 @@ class Blocker {
 	}
 
 	/**
+	 * Admin per-domain category overrides ({ domain => category }), read once
+	 * per request. Invalid rows are skipped.
+	 *
+	 * @since 1.3.0
+	 * @return array<string, string>
+	 */
+	private function get_category_overrides(): array {
+		if ( $this->category_overrides !== null ) {
+			return $this->category_overrides;
+		}
+
+		$this->category_overrides = [];
+		$stored                   = Settings::get( 'resource_category_overrides' );
+		if ( is_array( $stored ) ) {
+			foreach ( $stored as $domain => $category ) {
+				$domain   = trim( (string) $domain );
+				$category = trim( (string) $category );
+				if ( $domain !== '' && $category !== '' ) {
+					$this->category_overrides[ $domain ] = $category;
+				}
+			}
+		}
+
+		return $this->category_overrides;
+	}
+
+	/**
+	 * Apply an admin category override to a matched resource when its src
+	 * contains an overridden domain, so consent gating follows the admin choice.
+	 *
+	 * Overrides are keyed per (kind, domain) so a script and an iframe on the
+	 * same host stay independent. An exact-kind override wins; a legacy
+	 * bare-domain override applies to any kind. `$kind` is 'script' for scripts
+	 * and 'iframe' for iframe/embed/object resources.
+	 *
+	 * @param string $src      Resource URL.
+	 * @param string $category Category resolved from the pattern match.
+	 * @param string $kind     Resource kind ('script'|'iframe').
+	 * @since 1.3.0
+	 * @return string Overridden category, or the original when no override matches.
+	 */
+	private function resolve_category( string $src, string $category, string $kind = 'any' ): string {
+		if ( $src === '' ) {
+			return $category;
+		}
+		$legacy = null;
+		foreach ( $this->get_category_overrides() as $key => $target ) {
+			[ $entry_kind, $domain ] = $this->parse_scoped_key( (string) $key );
+			if ( $domain === '' || strpos( $src, $domain ) === false ) {
+				continue;
+			}
+			if ( $entry_kind === $kind ) {
+				return $target; // Exact-kind override wins.
+			}
+			if ( $entry_kind === 'any' && $legacy === null ) {
+				$legacy = $target; // Legacy bare-domain key applies to any kind.
+			}
+		}
+		return $legacy ?? $category;
+	}
+
+	/**
+	 * Split a scoped override key into [ kind, domain ].
+	 *
+	 * Keys are stored as "script::host" or "iframe::host" so a script and an
+	 * iframe on the same host can be gated independently; a bare "host" (no
+	 * "::") is a legacy key that applies to any kind.
+	 *
+	 * @param string $key Stored key.
+	 * @since 1.3.0
+	 * @return array{0: string, 1: string} [ kind ('script'|'iframe'|'any'), domain ].
+	 */
+	private function parse_scoped_key( string $key ): array {
+		$key = trim( $key );
+		$pos = strpos( $key, '::' );
+		if ( $pos === false ) {
+			return [ 'any', $key ];
+		}
+		return [ substr( $key, 0, $pos ), substr( $key, $pos + 2 ) ];
+	}
+
+	/**
 	 * Match a URL against known patterns.
 	 *
-	 * @param string                                                              $src      URL to match.
-	 * @param string                                                              $content  Content to match.
-	 * @param array<string, array{name: string, category: string, label: string}> $patterns Pattern mappings.
+	 * @param string                                                                                                $src      URL to match.
+	 * @param string                                                                                                $content  Content to match.
+	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1
-	 * @return array{name: string, category: string, label: string}|null Match result or null.
+	 * @return array{name: string, category: string, label: string, path?: string, location?: string}|null Match result or null.
 	 */
 	private function match_pattern( string $src, string $content, array $patterns ): ?array {
 		foreach ( $patterns as $pattern => $info ) {
-			// Match in src.
-			if ( ! empty( $src ) && strpos( $src, $pattern ) !== false ) {
-				return $info;
+			$matched =
+				( ! empty( $src ) && strpos( $src, $pattern ) !== false ) ||
+				( ! empty( $content ) && strpos( $content, $pattern ) !== false );
+
+			if ( ! $matched ) {
+				continue;
 			}
 
-			// Match in inline content.
-			if ( ! empty( $content ) && strpos( $content, $pattern ) !== false ) {
-				return $info;
+			// Optional narrowing constraint: the resource must ALSO contain
+			// the rule's path/pattern (e.g. host + `/fbevents.js`).
+			$path = (string) ( $info['path'] ?? '' );
+			if ( $path !== '' ) {
+				$path_matched =
+					( ! empty( $src ) && stripos( $src, $path ) !== false ) ||
+					( ! empty( $content ) && stripos( $content, $path ) !== false );
+				if ( ! $path_matched ) {
+					continue;
+				}
 			}
+
+			return $info;
 		}
 
 		return null;
@@ -1044,7 +1286,15 @@ class Blocker {
 		}
 		$placeholder .= '</p>';
 		if ( ! $is_quarantined ) {
-			$placeholder .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $mapped_category ) . '">';
+			// aria-label carries the service name so multiple blocked embeds on
+			// one page don't all expose the identical accessible name "Accept &
+			// Load" to screen readers.
+			$button_aria = sprintf(
+				/* translators: %s: Service name (e.g., YouTube, Google Maps) */
+				__( 'Accept and load %s content', 'surecookie' ),
+				$label
+			);
+			$placeholder .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $mapped_category ) . '" aria-label="' . esc_attr( $button_aria ) . '">';
 			$placeholder .= esc_html__( 'Accept & Load', 'surecookie' );
 			$placeholder .= '</button>';
 		}
@@ -1091,23 +1341,10 @@ class Blocker {
 	 *
 	 * @since 0.0.0-alpha.2
 	 * @since 0.0.1-beta.2 Strict 64-char hex validation; replaces sanitize_text_field().
+	 * @since 1.3.0 Delegates to Utils so integrations that gate outside the output buffer share it.
 	 * @return bool
 	 */
 	private function is_scan_bypass_request(): bool {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Strict regex below rejects anything but [0-9a-f]{64}.
-		$header_value = $_SERVER['HTTP_X_SURECOOKIE_SCAN'] ?? '';
-
-		if ( ! is_string( $header_value ) || ! preg_match( '/^[0-9a-f]{64}$/i', $header_value ) ) {
-			return false;
-		}
-
-		$stored_token = get_transient( SaasClient::SCAN_BYPASS_TRANSIENT_KEY );
-
-		// Fail closed if transient is corrupted or returns a non-string (object cache edge cases).
-		if ( ! is_string( $stored_token ) || ! preg_match( '/^[0-9a-f]{64}$/i', $stored_token ) ) {
-			return false;
-		}
-
-		return hash_equals( $stored_token, $header_value );
+		return Utils::is_scan_bypass_request();
 	}
 }

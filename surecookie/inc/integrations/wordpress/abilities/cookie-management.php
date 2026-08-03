@@ -62,7 +62,8 @@ class CookieManagement extends Base {
 					$cookie_name      = sanitize_text_field( $input['cookie_name'] ?? '' );
 					$current_category = sanitize_text_field( $input['current_category'] ?? '' );
 					$new_category     = sanitize_text_field( $input['new_category'] ?? '' );
-					return $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category );
+					$domain           = sanitize_text_field( $input['domain'] ?? '' );
+					return $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category, $domain );
 
 				default:
 					return [
@@ -162,7 +163,7 @@ class CookieManagement extends Base {
 				],
 				'domain'           => [
 					'type'        => 'string',
-					'description' => __( 'Cookie domain.', 'surecookie' ),
+					'description' => __( 'Cookie domain. For recategorize_scanned, supply it when two scanned cookies share a name so the right one is moved.', 'surecookie' ),
 				],
 				'cookie_name'      => [
 					'type'        => 'string',

@@ -399,11 +399,48 @@ class Shortcode {
 			return (string) $cookie['duration'];
 		}
 
+		// Scanned cookies carry an absolute expiry timestamp rather than a day count. Returning it verbatim printed a raw ISO-8601 string into the
+		// public policy table, so derive the remaining days to match the day count that custom cookies store in 'duration'.
 		if ( ! empty( $cookie['expires'] ) ) {
-			return (string) $cookie['expires'];
+			return self::expires_to_days( $cookie['expires'] );
 		}
 
 		return '';
+	}
+
+	/**
+	 * Convert an absolute cookie expiry into a whole number of days from now.
+	 *
+	 * Accepts the ISO-8601 timestamps relayed from the scan API, the
+	 * 'Y-m-d H:i:s' UTC strings written for custom and declared cookies, and
+	 * bare Unix timestamps from older records.
+	 *
+	 * @param mixed $expires Raw expiry value.
+	 * @since 1.3.0
+	 * @return string Day count, or an empty string when the value is unusable.
+	 */
+	private static function expires_to_days( $expires ): string {
+		if ( is_numeric( $expires ) ) {
+			$timestamp = (int) $expires;
+		} elseif ( is_string( $expires ) ) {
+			// 'Y-m-d H:i:s' carries no timezone but is stored as UTC, so pin it
+			// to UTC instead of letting strtotime() assume server-local time.
+			$normalized = preg_match( '/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/', trim( $expires ) )
+				? str_replace( ' ', 'T', trim( $expires ) ) . '+00:00'
+				: trim( $expires );
+
+			$timestamp = strtotime( $normalized );
+		} else {
+			return '';
+		}
+
+		if ( empty( $timestamp ) ) {
+			return '';
+		}
+
+		$diff = $timestamp - time();
+
+		return $diff <= 0 ? '0' : (string) (int) ceil( $diff / DAY_IN_SECONDS );
 	}
 
 	/**

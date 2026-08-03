@@ -31,199 +31,203 @@ class Options {
 		return apply_filters(
 			'surecookie_plugin_settings_dataset',
 			[
-				'banner_enabled'                 => [
+				'banner_enabled'                => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'preview_enabled'                => [
+				'preview_enabled'               => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'message_heading'                => [
+				'message_heading'               => [
 					'type'    => 'string',
 					'default' => '',
 				],
-				'message_description'            => [
+				'message_description'           => [
 					'type'    => 'rich_text',
 					'default' => __( 'We use cookies to improve your experience and understand how you use our site. You can review your choices at any time.', 'surecookie' ),
 				],
 
-				'banner_position'                => [
+				'banner_position'               => [
 					'type'    => 'string',
 					'default' => 'bottom',
 				],
 
-				'banner_logo'                    => [
+				'banner_logo'                   => [
 					'type'    => 'string',
 					'default' => '',
 				],
-				'accept_btn_text'                => [
+				'accept_btn_text'               => [
 					'type'    => 'string',
 					'default' => __( 'Only Essential', 'surecookie' ),
 				],
-				'accept_all_enabled'             => [
+				'accept_all_enabled'            => [
 					'type'    => 'bool',
 					'default' => true,
 				],
 
-				'accept_all_btn_text'            => [
+				'accept_all_btn_text'           => [
 					'type'    => 'string',
 					'default' => __( 'Accept All', 'surecookie' ),
 				],
-				'decline_btn_text'               => [
+				'decline_btn_text'              => [
 					'type'    => 'string',
 					'default' => __( 'Decline', 'surecookie' ),
 				],
-				'settings_btn_text'              => [
+				'settings_btn_text'             => [
 					'type'    => 'string',
 					'default' => __( 'Cookie Settings', 'surecookie' ),
 				],
 
-				'button_order'                   => [
+				'button_order'                  => [
 					'type'    => 'string',
 					'default' => 'accept_all,accept,preferences,decline',
 				],
-				'compliance_law'                 => [
+				'compliance_law'                => [
 					'type'    => 'array',
 					'default' => [
 						'id'   => '1',
 						'name' => 'GDPR',
 					],
 				],
-				'notice_type'                    => [
+				'notice_type'                   => [
 					'type'    => 'string',
 					'default' => 'banner',
 				],
-				'notice_position'                => [
+				'notice_position'               => [
 					'type'    => 'string',
 					'default' => 'bottom',
 				],
 
-				'show_preview'                   => [
+				'show_preview'                  => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'cookie_categories'              => [
+				'cookie_categories'             => [
 					'type'    => 'array',
 					'default' => Get::default_cookie_categories(),
 				],
-				'custom_cookies'                 => [
+				'custom_cookies'                => [
 					'type'    => 'array',
 					'default' => [],
 				],
-				'consent_logging_enabled'        => [
+				'consent_logging_enabled'       => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'consent_log_retention'          => [
+				'consent_log_retention'         => [
 					'type'    => 'string',
 					'default' => '365_days',
 				],
-				'consent_duration_days'          => [
+				'consent_duration_days'         => [
 					'type'    => 'int',
 					'default' => 365,
 				],
 				// Unix timestamp of the last admin "Renew consent" action. Consents
 				// recorded before this are treated as stale so the banner reappears.
-				'consent_renewed_at'             => [
+				'consent_renewed_at'            => [
 					'type'    => 'int',
 					'default' => 0,
 				],
-				'color_palette'                  => [
+				'color_palette'                 => [
 					'type'    => 'string',
 					'default' => 'green-lime',
 				],
-				'banner_width'                   => [
+				'banner_width'                  => [
 					'type'    => 'int',
 					'default' => 650,
 				],
-				'preferences_btn_text'           => [
+				'preferences_btn_text'          => [
 					'type'    => 'string',
 					'default' => __( 'Preferences', 'surecookie' ),
 				],
-				'preferences_modal_heading'      => [
+				'preferences_modal_heading'     => [
 					'type'    => 'string',
 					'default' => __( 'Privacy Preference', 'surecookie' ),
 				],
-				'preferences_modal_description'  => [
+				'preferences_modal_description' => [
 					'type'    => 'rich_text',
 					'default' => __( 'We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience.', 'surecookie' ),
 				],
-				'scan_pages'                     => [
+				'scan_pages'                    => [
 					'type'    => 'array',
 					'default' => [],
 				],
-				'blocking_enabled'               => [
+				'blocking_enabled'              => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'top_level_menu_enabled'         => [
+				'top_level_menu_enabled'        => [
 					'type'    => 'bool',
 					'default' => true,
 				],
-				'banner_animation'               => [
+				'banner_animation'              => [
 					'type'    => 'string',
 					'default' => 'fade',
 				],
-				'banner_overlay_enabled'         => [
+				'banner_overlay_enabled'        => [
 					'type'    => 'bool',
 					'default' => false,
 				],
-				'reconsent_button_label'         => [
+				'reconsent_button_label'        => [
 					'type'    => 'string',
 					'default' => __( 'Cookie Preferences', 'surecookie' ),
 				],
-				'reconsent_menu_id'              => [
+				'reconsent_menu_id'             => [
 					'type'    => 'string',
 					'default' => '',
 				],
-				'cookie_policy_page_id'          => [
+				'cookie_policy_page_id'         => [
 					'type'    => 'int',
 					'default' => 0,
 				],
-				'custom_css'                     => [
+				'custom_css'                    => [
 					'type'    => 'stylesheet',
 					'default' => '',
 				],
-				'delete_data_on_uninstall'       => [
+				'delete_data_on_uninstall'      => [
 					'type'    => 'bool',
 					'default' => false,
 				],
-				'enable_mcp'                     => [
+				'enable_mcp'                    => [
 					'type'    => 'bool',
 					'default' => false,
 				],
-				'excluded_scan_resources'        => [
+				'excluded_scan_resources'       => [
 					'type'    => 'array',
 					'default' => [],
 				],
-				'replace_scan_resources_on_scan' => [
-					'type'    => 'bool',
-					'default' => true,
+				'resource_category_overrides'   => [
+					'type'    => 'array',
+					'default' => [],
 				],
-				'consent_model'                  => [
+				'custom_blocked_scripts'        => [
+					'type'    => 'array',
+					'default' => [],
+				],
+				'consent_model'                 => [
 					'type'    => 'string',
 					'default' => 'opt-in',
 				],
-				'total_logs'                     => [
+				'total_logs'                    => [
 					'type'    => 'int',
 					'default' => 0,
 				],
 
 				// Automatic Scanning (Free base). Pro adds the Weekly frequency + email/apply/guard keys.
-				'auto_scan_enabled'              => [
+				'auto_scan_enabled'             => [
 					'type'    => 'bool',
 					'default' => false,
 				],
-				'auto_scan_frequency'            => [
+				'auto_scan_frequency'           => [
 					'type'    => 'string',
 					'default' => 'monthly',
 				],
-				'auto_scan_scope'                => [
+				'auto_scan_scope'               => [
 					'type'    => 'string',
 					'default' => 'same_as_manual',
 				],
-				'auto_scan_pages'                => [
+				'auto_scan_pages'               => [
 					'type'    => 'array',
 					'default' => [],
 				],
@@ -280,5 +284,21 @@ class Options {
 	public static function get_option_type( $option ) {
 		$settings = self::get_all_configurations();
 		return isset( $settings[ $option ]['type'] ) && Validate::not_empty( $settings[ $option ]['type'] ) ? $settings[ $option ]['type'] : 'string';
+	}
+
+	/**
+	 * Get the keys of every option storing rich text (HTML). Derived, not
+	 * hardcoded, so a new rich_text field is covered automatically.
+	 *
+	 * @return array<string>
+	 * @since 1.3.1
+	 */
+	public static function get_rich_text_options() {
+		$configs = array_filter(
+			self::get_all_configurations(),
+			static fn( $config ) => ( $config['type'] ?? '' ) === 'rich_text'
+		);
+
+		return array_map( 'strval', array_keys( $configs ) );
 	}
 }

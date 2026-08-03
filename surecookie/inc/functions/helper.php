@@ -170,7 +170,7 @@ class Helper {
 	 * Lets the UI distinguish "install and activate" from "buy a license" when
 	 * nudging users toward premium scan limits.
 	 *
-	 * @since x.x.x
+	 * @since 1.3.0
 	 * @return bool True if the Pro plugin files are present.
 	 */
 	public static function is_pro_installed(): bool {
@@ -225,17 +225,17 @@ class Helper {
 	}
 
 	/**
-	 * Build a UTM-tagged marketing link with fixed defaults for outbound CTAs.
+	 * Build a UTM-tagged marketing link with per-site attribution for outbound CTAs.
 	 *
-	 * Enforces the plugin-wide attribution convention across all outbound
-	 * surecookie.com links: `utm_source=surecookie_plugin`,
+	 * Attribution convention across all outbound surecookie.com links:
+	 * `utm_source` is the SITE DOMAIN (so every installation is identifiable
+	 * in analytics - which sites drive powered-by clicks, which convert),
 	 * `utm_medium=wordpress_plugin`, `utm_campaign=core_plugin`. Callers only
 	 * supply the path and an edge identifier for `utm_content`.
 	 *
 	 * Unlike {@see Helper::get_website_url()}, this does NOT route through
 	 * BSF_UTM_Analytics - we need a deterministic `utm_source` even when the
-	 * install referer is recorded, since marketing reports key off
-	 * `utm_source=surecookie_plugin`.
+	 * install referer is recorded.
 	 *
 	 * Uses `esc_url_raw()` instead of `esc_url()`: values returned here are exposed
 	 * to JS via wp_localize_script and set as `href` attributes by React - which
@@ -243,6 +243,7 @@ class Helper {
 	 * strings carrying multiple utm params.
 	 *
 	 * @since 0.0.1-beta.2
+	 * @since 1.3.0 `utm_source` is the site domain instead of the static `surecookie_plugin`.
 	 *
 	 * @param string                $path        Path appended to SURECOOKIE_WEBSITE (e.g. 'docs/', 'contact/'). Empty for the homepage.
 	 * @param string                $utm_content Edge identifier, e.g. 'help_center', 'banner_branding'.
@@ -258,7 +259,7 @@ class Helper {
 
 		$utm_args = array_merge(
 			[
-				'utm_source'   => 'surecookie_plugin',
+				'utm_source'   => self::get_utm_source(),
 				'utm_medium'   => 'wordpress_plugin',
 				'utm_campaign' => 'core_plugin',
 				'utm_content'  => $utm_content,
@@ -267,5 +268,24 @@ class Helper {
 		);
 
 		return esc_url_raw( add_query_arg( $utm_args, $base ) );
+	}
+
+	/**
+	 * The per-site `utm_source`: this installation's domain (host of home_url,
+	 * multisite-aware), so analytics can attribute clicks and conversions to
+	 * the exact site. Falls back to the legacy static value when the host
+	 * cannot be resolved.
+	 *
+	 * @since 1.3.0
+	 * @return string
+	 */
+	public static function get_utm_source(): string {
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+
+		if ( ! is_string( $host ) || $host === '' ) {
+			return 'surecookie_plugin';
+		}
+
+		return strtolower( sanitize_text_field( $host ) );
 	}
 }

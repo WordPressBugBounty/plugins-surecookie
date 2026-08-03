@@ -1,6 +1,6 @@
 <?php
 /**
- * ConsentState — Server-side reader for the SureCookie consent cookie.
+ * ConsentState - Server-side reader for the SureCookie consent cookie.
  *
  * Single source of truth for parsing `surecookie_user_consent` at PHP render
  * time. Consumed by Google Consent Mode, WP Consent API integration, and the
@@ -52,7 +52,7 @@ final class ConsentState {
 	 * Preferences map as `[ category => bool ]`. Null when no/invalid cookie.
 	 *
 	 * Uses strict `=== true` rather than `boolval()` because PHP coerces every
-	 * non-empty non-"0" string to true — a tampered cookie with `"marketing":"false"`
+	 * non-empty non-"0" string to true - a tampered cookie with `"marketing":"false"`
 	 * would otherwise grant marketing. Anything that isn't literally `true` in
 	 * the JSON resolves to false (fail-closed). Matches the old strict
 	 * `is_bool()` validation the GCM handler used before extraction.
@@ -89,7 +89,7 @@ final class ConsentState {
 
 	/**
 	 * Whether the visitor has ever interacted with the banner. Distinct from
-	 * `has_category` — a "decline all" choice still counts as having a cookie.
+	 * `has_category` - a "decline all" choice still counts as having a cookie.
 	 *
 	 * @since 1.2.4
 	 * @return bool
@@ -112,7 +112,7 @@ final class ConsentState {
 	/**
 	 * Full parsed cookie payload, or null when the cookie is missing/invalid.
 	 *
-	 * Internal helper for preferences() / has_recorded_choice() — kept private
+	 * Internal helper for preferences() / has_recorded_choice() - kept private
 	 * because every consumer pattern is better served by one of the typed
 	 * accessors below. Promote to public when a real external need appears.
 	 *
@@ -130,7 +130,7 @@ final class ConsentState {
 	/**
 	 * Read + validate the cookie.
 	 *
-	 * Skips `sanitize_text_field` deliberately — it corrupts URL-encoded JSON.
+	 * Skips `sanitize_text_field` deliberately - it corrupts URL-encoded JSON.
 	 * Safety comes from structural validation + boolean coercion of values.
 	 *
 	 * @since 1.2.4

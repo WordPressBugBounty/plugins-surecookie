@@ -1,6 +1,6 @@
 <?php
 /**
- * Presto Player — Block Handler
+ * Presto Player - Block Handler
  *
  * Wraps every server-rendered Presto Player block (YouTube, Vimeo, Bunny.net,
  * self-hosted video, audio) in a SureCookie placeholder. The original Presto
@@ -12,8 +12,8 @@
  * is always wrapped regardless of the request's consent cookie, so a full-page
  * cache can't serve an un-gated player warmed by a consented visitor.
  * consentManager.js restores the block for visitors who have already consented,
- * cloning the template's content back into the DOM. Presto's runtime — already
- * loaded because its render_callback ran — then auto-upgrades the new
+ * cloning the template's content back into the DOM. Presto's runtime - already
+ * loaded because its render_callback ran - then auto-upgrades the new
  * `<presto-player>` element. Same UX as raw YouTube/Vimeo embeds: in-place
  * restore, no reload. This mirrors the core script blocker's model.
  *
@@ -40,7 +40,7 @@ class Block_Handler {
 
 	/**
 	 * Container blocks that render through `render_block` but build the player
-	 * indirectly (Media Hub / reusable video, playlist, popup media) — so the
+	 * indirectly (Media Hub / reusable video, playlist, popup media) - so the
 	 * inner provider block never reaches this filter. Handled by resolving the
 	 * referenced video's provider from its post.
 	 */
@@ -85,7 +85,7 @@ class Block_Handler {
 	/**
 	 * True while rendering a block nested inside a Presto popup. Popups render
 	 * their player through the WP Interactivity API in a `wp_footer` template,
-	 * which the placeholder/restore mechanism can't safely wrap — so we leave
+	 * which the placeholder/restore mechanism can't safely wrap - so we leave
 	 * popup videos to Presto (they stay inert in that template until opened).
 	 *
 	 * @var bool
@@ -134,7 +134,7 @@ class Block_Handler {
 	 * @return string
 	 */
 	public function wrap_block( $block_content, $block ): string {
-		// Cast once — render_block can pass non-string $block_content for some
+		// Cast once - render_block can pass non-string $block_content for some
 		// dynamic blocks; the method return type requires string.
 		$block_content = (string) $block_content;
 		$block_name    = is_array( $block ) ? (string) ( $block['blockName'] ?? '' ) : '';
@@ -150,13 +150,23 @@ class Block_Handler {
 			return $block_content;
 		}
 
-		// Skip the editor preview (REST), admin pages, AJAX — admins need to
+		// Skip the editor preview (REST), admin pages, AJAX - admins need to
 		// see the actual player while configuring blocks.
 		if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			return $block_content;
 		}
 
 		if ( ! Utils::is_blocking_enabled() || ! Utils::should_process_based_on_geo() ) {
+			return $block_content;
+		}
+
+		// Let the scanner see the real player. Unlike a blocked <script>/<iframe>,
+		// the placeholder below keeps only the service name and category - the
+		// provider URL is gone - so a gated Presto block is undetectable by any
+		// scan, and its host (e.g. a Bunny Stream delivery zone) never reaches the
+		// cookie catalog. The Blocker short-circuits on the same token, but that
+		// only covers the output buffer, and `render_block` runs before it.
+		if ( Utils::is_scan_bypass_request() ) {
 			return $block_content;
 		}
 
@@ -185,7 +195,7 @@ class Block_Handler {
 		// Always wrap server-side (cache-safe): the rendered HTML must not vary on
 		// the visitor's consent cookie, or a full-page cache warmed by a consented
 		// visitor would serve un-gated players to everyone. consentManager.js
-		// restores the block in place for visitors who have already consented — the
+		// restores the block in place for visitors who have already consented - the
 		// same model the core script blocker uses for iframes/scripts.
 		return $this->build_placeholder( $provider, $attributes, $block_content );
 	}
@@ -219,12 +229,19 @@ class Block_Handler {
 		$out .= '<p class="surecookie-placeholder-text">';
 		$out .= esc_html( $this->placeholder_message( $provider['label'] ) );
 		$out .= '</p>';
-		$out .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $category ) . '">';
+		// aria-label carries the provider name so multiple blocked embeds don't
+		// all expose the identical accessible name "Accept & Load".
+		$button_aria = sprintf(
+			/* translators: %s: Provider name (e.g., YouTube, Vimeo) */
+			__( 'Accept and load %s content', 'surecookie' ),
+			$provider['label']
+		);
+		$out .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $category ) . '" aria-label="' . esc_attr( $button_aria ) . '">';
 		$out .= esc_html__( 'Accept & Load', 'surecookie' );
 		$out .= '</button>';
 		$out .= '</div>';
 
-		// Inert template — custom elements inside don't upgrade until cloned.
+		// Inert template - custom elements inside don't upgrade until cloned.
 		// consentManager.js clones the content into the placeholder's position
 		// on accept; Presto's runtime then upgrades the new <presto-player>.
 		$out .= '<template class="surecookie-presto-restore">' . $block_content . '</template>';
@@ -338,7 +355,7 @@ class Block_Handler {
 
 		// Popup trigger: gating the trigger button/thumbnail blocks the whole
 		// popup (it can't open). The video lives in a sibling block, so the
-		// provider isn't knowable here — gate under marketing (popups are
+		// provider isn't knowable here - gate under marketing (popups are
 		// typically third-party video) with a generic label.
 		if ( $block_name === 'presto-player/popup-trigger' ) {
 			return [
@@ -350,7 +367,7 @@ class Block_Handler {
 
 		// reusable-display / media-hub: gate by the referenced video's provider.
 		// Fail closed when the provider can't be resolved (deleted video, unmapped
-		// provider, or a renamed Presto model class — init.php intentionally gates
+		// provider, or a renamed Presto model class - init.php intentionally gates
 		// only on PRESTO_PLAYER_PLUGIN_FILE, not on \ReusableVideo existing). Mirror
 		// the playlist / popup-trigger defaults so a container is never left ungated.
 		$inner_name = $this->reusable_inner_block_name( isset( $attributes['id'] ) ? absint( $attributes['id'] ) : 0 );
@@ -384,7 +401,7 @@ class Block_Handler {
 	 * Resolve provider info for a playlist. Playlists render their items as JSON
 	 * for a JS component (no per-item render_block), so the whole playlist is
 	 * gated. Category is the strictest across items (marketing wins). Any item
-	 * that resolves to marketing — or any item that cannot be resolved at all —
+	 * that resolves to marketing - or any item that cannot be resolved at all -
 	 * forces the whole playlist to marketing, so it is never left ungated or
 	 * silently downgraded to functional.
 	 *
@@ -395,7 +412,7 @@ class Block_Handler {
 	private function resolve_playlist_provider( array $block ): array {
 		$inner_blocks = is_array( $block['innerBlocks'] ?? null ) ? $block['innerBlocks'] : [];
 		$category     = 'functional';
-		// Raw label — placeholder_message() keys on it, then translates the full
+		// Raw label - placeholder_message() keys on it, then translates the full
 		// sentence, so keep it untranslated here.
 		$label = 'Video';
 		$found = false;

@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\AssistedScan\Session as AssistedSession;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Utils\Logger;
 
@@ -131,14 +132,41 @@ class Cron {
 	 * @return array<string, mixed> Scan status data.
 	 */
 	public function get_scan_status(): array {
+		// An assisted walk is answered first, without touching the SaaS: the sites that
+		// need one are the sites our scanner can't reach, so polling during the walk would
+		// add a doomed request to every poll. Reported in the cloud scan's shape so the
+		// progress UI needs no changes.
+		$assisted = AssistedSession::get_instance();
+		if ( $assisted->is_active() ) {
+			return $assisted->status_payload();
+		}
+
+		// A walk that just ended keeps reporting a terminal state briefly, so the
+		// screen can run its completion path before the status settles to idle.
+		$just_finished = $assisted->peek_just_finished();
+		if ( $just_finished !== null ) {
+			return $just_finished;
+		}
+
 		$saas_client = SaasClient::get_instance();
+
+		// Pull the latest status from the SaaS on read so an in-flight scan resolves even
+		// when WP-Cron isn't firing the poll hook (DISABLE_WP_CRON with no server cron, or
+		// full-page caching). Throttled internally; a no-op when idle/terminal.
+		$saas_client->sync_active_scan_status();
+
 		$active_scan = $saas_client->get_active_scan();
 
 		if ( empty( $active_scan ) ) {
+			$last_outcome = get_transient( SaasClient::LAST_OUTCOME_TRANSIENT );
+
 			return [
-				'in_progress' => false,
-				'status'      => 'idle',
-				'message'     => __( 'No active scan.', 'surecookie' ),
+				'in_progress'  => false,
+				'status'       => 'idle',
+				'message'      => __( 'No active scan.', 'surecookie' ),
+				// Lets the UI show honest guidance after a blocked/empty scan
+				// instead of a bare "0 cookies found".
+				'last_outcome' => is_array( $last_outcome ) ? $last_outcome : null,
 			];
 		}
 
@@ -160,12 +188,30 @@ class Cron {
 	}
 
 	/**
-	 * Cancel the current scan.
+	 * Cancel the current scan, whichever kind is running.
+	 *
+	 * Handles both modes so the existing Cancel control and its React hook keep
+	 * working without needing to know which scanner produced the run.
 	 *
 	 * @since 0.0.1
+	 * @since 1.3.0 Also cancels an assisted walk.
 	 * @return bool True if cancelled, false if no scan was active.
 	 */
 	public function cancel_scan(): bool {
+		$assisted = AssistedSession::get_instance();
+
+		// Cleared unconditionally when any session state exists, so a stale walk the
+		// administrator can no longer reach from its scan window is still clearable.
+		if ( ! empty( $assisted->get() ) ) {
+			$assisted->clear();
+			// A cancelled walk must not inherit an earlier walk's terminal state and
+			// report itself as completed.
+			$assisted->clear_just_finished();
+			Logger::get_instance()->log( __( 'Assisted scan cancelled by user.', 'surecookie' ) );
+
+			return true;
+		}
+
 		$saas_client = SaasClient::get_instance();
 
 		if ( ! $saas_client->is_scan_in_progress() ) {

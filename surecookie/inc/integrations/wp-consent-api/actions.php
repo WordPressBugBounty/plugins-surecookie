@@ -79,17 +79,6 @@ class Actions {
 	}
 
 	/**
-	 * Add WP Consent API availability flag to frontend localized data.
-	 *
-	 * @param array<string> $frontend_keys The current frontend setting keys.
-	 * @return array<string>
-	 * @since 0.0.1-beta.1
-	 */
-	public function add_frontend_options( array $frontend_keys ): array {
-		return array_merge( $frontend_keys, [ 'wp_consent_api_enabled' ] );
-	}
-
-	/**
 	 * Add the WP Consent API category map to frontend localized data.
 	 *
 	 * Makes PHP the single source of truth for the SureCookie → WP Consent API
@@ -105,36 +94,14 @@ class Actions {
 	}
 
 	/**
-	 * Add WP Consent API settings to the plugin settings dataset.
-	 *
-	 * @param array<string, mixed> $settings The current settings dataset.
-	 * @return array<string, mixed>
-	 * @since 0.0.1-beta.1
-	 */
-	public function add_settings_to_dataset( array $settings ): array {
-		$settings['wp_consent_api_enabled'] = [
-			'type'    => 'bool',
-			'default' => true,
-		];
-
-		return $settings;
-	}
-
-	/**
 	 * Initialize hooks.
 	 *
 	 * @return void
 	 * @since 0.0.1-beta.1
 	 */
 	private function init_hooks(): void {
-		// Register SureCookie's cookies with WP Consent API.
-		add_action( 'init', [ $this, 'register_cookies' ], 20 );
-
-		// Add settings to plugin dataset.
-		add_filter( 'surecookie_plugin_settings_dataset', [ $this, 'add_settings_to_dataset' ] );
-
-		// Add to frontend localized data so JS knows the API is available.
-		add_filter( 'surecookie_frontend_setting_keys', [ $this, 'add_frontend_options' ] );
+		// Register SureCookie's cookies with WP Consent API. Hooked to wp_loaded, NOT init.
+		add_action( 'wp_loaded', [ $this, 'register_cookies' ] );
 
 		// Pass the category map to the frontend so JS uses PHP as single source of truth.
 		add_filter( 'surecookie_frontend_localize_data', [ $this, 'add_category_map_to_frontend' ] );

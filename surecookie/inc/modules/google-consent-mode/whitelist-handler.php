@@ -13,8 +13,8 @@
 namespace SureCookie\Inc\Modules\GoogleConsentMode;
 
 use SureCookie\Inc\Functions\Settings;
-use SureCookie\Inc\Modules\ScriptBlocking\Known_Scripts;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as ScriptBlockingUtils;
+use SureCookie\Inc\Modules\Services\Known_Scripts;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -289,6 +289,54 @@ class Whitelist_Handler {
 	}
 
 	/**
+	 * Resolved GCM auto-whitelist: the services + URL patterns that are exempt
+	 * from blocking while Google Consent Mode is active. Returns empty lists when
+	 * whitelisting is not currently in effect (GCM or blocking off), matching the
+	 * same gate as runtime blocking. Read-only, for surfacing in the UI.
+	 *
+	 * @since 1.3.0
+	 * @return array{services: array<string>, patterns: array<string>}
+	 */
+	public function get_whitelisted_scripts(): array {
+		$empty = [
+			'services' => [],
+			'patterns' => [],
+		];
+
+		if ( ! $this->should_whitelist() ) {
+			$data = $empty;
+		} else {
+			if ( $this->whitelist_cache === null ) {
+				$this->build_whitelist_cache();
+			}
+			$data = $this->whitelist_cache ?? $empty;
+		}
+
+		/**
+		 * Filter the resolved GCM auto-whitelist list.
+		 *
+		 * @since 1.3.0
+		 * @param array{services: array<string>, patterns: array<string>} $data Services + URL patterns exempt from blocking.
+		 */
+		return apply_filters( 'surecookie_gcm_whitelisted_scripts', $data );
+	}
+
+	/**
+	 * Add the GCM auto-whitelist to the admin localize payload.
+	 *
+	 * @param mixed $data Existing admin localize data.
+	 * @since 1.3.0
+	 * @return mixed
+	 */
+	public function add_whitelist_to_admin_data( $data ) {
+		if ( is_array( $data ) ) {
+			$data['gcmWhitelistedScripts'] = $this->get_whitelisted_scripts();
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Register WordPress hooks.
 	 *
 	 * @return void
@@ -306,6 +354,10 @@ class Whitelist_Handler {
 
 		// Let other modules (e.g. the Pro auto-scan guard) ask whether GCM manages a resource, without hard-depending on this class.
 		add_filter( 'surecookie_is_gcm_managed', [ $this, 'filter_is_gcm_managed' ], 10, 2 );
+
+		// Expose the resolved GCM auto-whitelist to the admin app so Pro's
+		// Always Allowed manager can list it read-only.
+		add_filter( 'surecookie_admin_localize_data', [ $this, 'add_whitelist_to_admin_data' ] );
 	}
 
 	/**
@@ -399,7 +451,7 @@ class Whitelist_Handler {
 		];
 
 		// Check if Known_Scripts class exists (Script Blocking module might not be loaded).
-		if ( ! class_exists( 'SureCookie\Inc\Modules\ScriptBlocking\Known_Scripts' ) ) {
+		if ( ! class_exists( 'SureCookie\Inc\Modules\Services\Known_Scripts' ) ) {
 			return;
 		}
 

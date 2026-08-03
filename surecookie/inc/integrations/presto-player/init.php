@@ -1,20 +1,20 @@
 <?php
 /**
- * Presto Player — Integration Initialization
+ * Presto Player - Integration Initialization
  *
  * Blocks Presto Player video/audio embeds (YouTube, Vimeo, self-hosted, Bunny.net)
  * until the visitor grants consent for the relevant category.
  *
- * Hooks the `render_block` filter — Presto renders normally (its runtime
+ * Hooks the `render_block` filter - Presto renders normally (its runtime
  * script enqueues, its markup is generated), but we wrap the output in a
  * consent placeholder and stash the rendered HTML inside an inert
  * `<template>` element. Custom elements inside `<template>` are never
  * upgraded by the browser, so no `<presto-player>` exists in the live DOM
- * pre-consent — no iframe loads, no cookies set.
+ * pre-consent - no iframe loads, no cookies set.
  *
  * On accept, consentManager.js clones the template content back into the
  * DOM. The browser auto-upgrades the new `<presto-player>` and Presto's
- * already-loaded runtime starts the player — in-place, no reload.
+ * already-loaded runtime starts the player - in-place, no reload.
  *
  * @package SureCookie\Inc\Integrations\PrestoPlayer
  * @since 1.2.4
@@ -37,7 +37,7 @@ class Init {
 	use GetInstance;
 
 	/**
-	 * Constructor — gates on Presto Player being active.
+	 * Constructor - gates on Presto Player being active.
 	 *
 	 * @since 1.2.4
 	 */

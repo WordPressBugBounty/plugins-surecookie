@@ -31,5 +31,14 @@ class Init {
 		// The blocker's should_process() handles all conditions including settings check.
 		Blocker::get_instance();
 		Scan_Scripts::get_instance();
+
+		// The catalog domain (Services_Source, Known_Scripts blocking view, the
+		// refresh Cron, declared cookies) now lives in the Services module and is
+		// consumed here purely through the `surecookie_known_scripts` filter.
+
+		// Custom block rules (custom_blocked_scripts) contribute their own
+		// entries to that same filter at priority 25 (after the catalog view and
+		// scan-detected merge), so this stays a pure consumer of the shared view.
+		Custom_Scripts::get_instance();
 	}
 }

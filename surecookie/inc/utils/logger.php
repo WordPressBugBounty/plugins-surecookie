@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 
 /**
@@ -22,6 +23,17 @@ use SureCookie\Inc\Traits\GetInstance;
  */
 class Logger {
 	use GetInstance;
+
+	/**
+	 * Maximum number of lines kept in the scan log option.
+	 *
+	 * The log is appended to on every progress step of every scan but is only
+	 * cleared when a manual scan starts, so a site running automatic scans would
+	 * otherwise grow this option without bound. Oldest lines are dropped first.
+	 *
+	 * @since 1.3.0
+	 */
+	public const MAX_LOG_ENTRIES = 500;
 
 	/**
 	 * Log an error message to the WordPress debug log.
@@ -57,9 +69,19 @@ class Logger {
 	 */
 	public function save_log( $message ) {
 		$logs = get_option( SURECOOKIE_SCANNED_LOGS_OPTION, [] );
+		if ( ! is_array( $logs ) ) {
+			$logs = [];
+		}
 
 		$logs[] = $message;
-		update_option( SURECOOKIE_SCANNED_LOGS_OPTION, $logs );
+
+		if ( count( $logs ) > self::MAX_LOG_ENTRIES ) {
+			$logs = array_slice( $logs, -self::MAX_LOG_ENTRIES );
+		}
+
+		// Non-autoloaded - the log is only ever read by the scanner UI, so it must
+		// not ride along in the alloptions cache on every front-end request.
+		Update::option( SURECOOKIE_SCANNED_LOGS_OPTION, $logs );
 	}
 
 	/**

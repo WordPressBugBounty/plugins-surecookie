@@ -13,8 +13,10 @@ use SureCookie\Admin\Product_Promotion;
 use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\WpConsentApi\Consent_Handler;
+use SureCookie\Inc\Modules\AssistedScan\Utils as AssistedScanUtils;
 use SureCookie\Inc\Modules\Nudges\Utils;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
 use SureCookie\Inc\Modules\SiteScanner\Utils as SiteScannerUtils;
@@ -30,11 +32,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class LocalizeData {
 	/**
-	 * Maximum age, in hourly buckets, for which an expired token may be
-	 * exchanged for a fresh one (~30 days). Covers long page-cache TTLs
-	 * (WP Rocket's 10-day default lifespan, long CDN edge caches) while
-	 * still requiring the caller to hold a token genuinely issued by this
-	 * site - a forged token matches no bucket at any age.
+	 * Maximum age, in hourly buckets, for which an expired token may be exchanged for
+	 * a fresh one (~30 days). Covers long page-cache TTLs (WP Rocket's 10-day default,
+	 * long CDN edge caches) while still requiring a token genuinely issued by this site -
+	 * a forged token matches no bucket at any age.
 	 *
 	 * @since 1.2.1
 	 */
@@ -42,15 +43,11 @@ class LocalizeData {
 	/**
 	 * Get keyed map of UTM-tagged outbound marketing links.
 	 *
-	 * Each entry is `[ path, utm_content ]` and is expanded via
-	 * {@see Helper::get_marketing_link()} into a full URL with the standard
-	 * source / medium / campaign defaults. Keys are consumed by the React
-	 * helper `getSureCookieLink()` on the JS side.
-	 *
-	 * Includes both informational links (docs, support, branding) and Pro
-	 * upgrade pricing CTAs (keys prefixed `pricing_`). Callers on the JS side
-	 * resolve a single unified map, and marketing reports attribute by
-	 * `utm_content`.
+	 * Each entry is `[ path, utm_content ]`, expanded via {@see Helper::get_marketing_link()}
+	 * into a full URL with the standard source/medium/campaign defaults. Keys are consumed
+	 * by the React helper `getSureCookieLink()`. Includes informational links (docs, support,
+	 * branding) and Pro pricing CTAs (keys prefixed `pricing_`); marketing reports attribute
+	 * by `utm_content`.
 	 *
 	 * @return array<string, string> Map of edge identifier => URL.
 	 * @since 0.0.1-beta.2
@@ -78,6 +75,7 @@ class LocalizeData {
 			'pricing_submenu_link_upgrade'   => [ 'pricing/', 'pricing_submenu_link_upgrade' ],
 			'pricing_admin_toolbar_upgrade'  => [ 'pricing/', 'pricing_admin_toolbar_upgrade' ],
 			'pricing_scan_cookies_banner'    => [ 'pricing/', 'pricing_scan_cookies_banner' ],
+			'pricing_known_services'         => [ 'pricing/', 'pricing_known_services' ],
 			'pricing_hide_branding_settings' => [ 'pricing/', 'pricing_hide_branding_settings' ],
 			'pricing_reconsent_banner'       => [ 'pricing/', 'pricing_reconsent_banner' ],
 			'pricing_onboarding_scan'        => [ 'pricing/', 'pricing_onboarding_scan' ],
@@ -176,6 +174,12 @@ class LocalizeData {
 				'whatsNewLink'               => Helper::get_marketing_link( 'whats-new/', 'whats_new' ),
 				'termsConditionsURL'         => Helper::get_marketing_link( 'terms-and-conditions/', 'admin_terms_conditions' ),
 				'maxScanPages'               => SiteScannerUtils::get_max_scan_pages(),
+
+				// Assisted Scan: a browser-collected fallback for sites our scanner cannot reach.
+				'assistedScanEnabled'        => AssistedScanUtils::is_enabled(),
+				'assistedMaxScanPages'       => AssistedScanUtils::get_max_pages(),
+
+				// Cron related data.
 				'isCronAvailable'            => (bool) $cron_status,
 				'cronType'                   => $cron_status ? $cron_status : 'unavailable',
 				'is_local_site'              => SaasClient::is_local_site(),
@@ -220,13 +224,15 @@ class LocalizeData {
 			]
 		);
 
-		// Override consent_model with the geo-resolved value so the frontend JS receives the correct model for the current visitor's location.
-		// Only runs when the WP Consent API module was actually initialized.
+		// Override consent_model with the geo-resolved value so the frontend JS gets the
+		// right model for this visitor's location. Only when the WP Consent API initialized.
 		if ( did_action( 'surecookie_wp_consent_api_initialized' ) ) {
 			$data['consent_model'] = Consent_Handler::get_active_consent_model();
 		}
 
-		return $data;
+		// wp_localize_script() html_entity_decode()s every top-level scalar, so
+		// pre-empt it here - this payload reaches every anonymous visitor.
+		return Sanitize::rich_text_keys_after_decode( $data );
 	}
 
 	/**
@@ -267,22 +273,20 @@ class LocalizeData {
 	}
 
 	/**
-	 * Whether a token was genuinely issued by this site within the last
-	 * ~30 days - including tokens that are still valid.
+	 * Whether a token was genuinely issued by this site within the last ~30 days,
+	 * including still-valid tokens.
 	 *
-	 * Used by the fresh-token exchange endpoint: HTML served from a
-	 * long-lived page cache carries an expired token, which would silently
-	 * drop the consent-log audit trail. Exchanging it preserves the
-	 * "came from a real page load" property without shortening cacheability.
+	 * Used by the fresh-token exchange endpoint: HTML from a long-lived page cache carries
+	 * an expired token that would silently drop the consent-log audit trail. Exchanging it
+	 * preserves the "came from a real page load" property without shortening cacheability.
 	 *
 	 * @since 1.2.1
 	 * @param string $token Token from the inbound request.
 	 * @return bool
 	 */
 	public static function is_recently_issued_consent_log_token( string $token ): bool {
-		// Tokens are 64-char lowercase-hex HMACs. Reject anything else (empty,
-		// wrong length, non-hex) before the ~720-iteration comparison loop so
-		// malformed input costs O(1) instead of a full bucket sweep.
+		// Tokens are 64-char lowercase-hex HMACs. Reject anything else before the ~720-iteration
+		// loop so malformed input costs O(1) instead of a full bucket sweep.
 		if ( strlen( $token ) !== 64 || ! ctype_xdigit( $token ) ) {
 			return false;
 		}

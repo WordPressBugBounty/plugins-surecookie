@@ -44,6 +44,12 @@ class Consent_Handler {
 		// Use output buffering to inject consent script at start of <head>.
 		// This guarantees execution before any tracking scripts (Critical Fix #4).
 		add_action( 'template_redirect', [ $this, 'start_output_buffer' ], 1 );
+
+		// Warn admins when Google Site Kit's own Consent Mode is active (it
+		// conflicts with ours). Wired on admin_notices directly: the frontend
+		// output-buffering path never runs on wp-admin, so the conflict notice
+		// would otherwise never render.
+		add_action( 'admin_notices', [ $this, 'maybe_render_site_kit_conflict_notice' ] );
 	}
 
 	/**
@@ -88,10 +94,8 @@ class Consent_Handler {
 			return $buffer;
 		}
 
-		// Detect Google services from enqueued scripts or raw HTML in the buffer.
-		if ( ! $this->has_google_services( $buffer ) ) {
-			return $buffer;
-		}
+		// No URL/signature gate: detection can never see server-side or first-party
+		// tag setups (#864), and defaults must precede any tag - GCM on means inject.
 
 		// Inject pre-generated script immediately after <head> tag.
 		$script = $this->consent_script;
@@ -134,6 +138,24 @@ class Consent_Handler {
 	}
 
 	/**
+	 * Admin_notices callback: warn when Google Site Kit's Consent Mode conflicts
+	 * with SureCookie's, but only while our GCM is enabled. Runs on wp-admin,
+	 * where the frontend buffering path that detects the conflict never executes.
+	 *
+	 * @return void
+	 * @since 0.0.0-alpha.1
+	 */
+	public function maybe_render_site_kit_conflict_notice(): void {
+		if ( ! Settings::get( 'gcm_enabled' ) ) {
+			return;
+		}
+		if ( ! $this->has_consent_mode_conflict() ) {
+			return;
+		}
+		$this->show_site_kit_conflict_notice();
+	}
+
+	/**
 	 * Generate consent script HTML.
 	 *
 	 * @return string Consent script HTML.
@@ -163,7 +185,7 @@ class Consent_Handler {
 		} elseif ( $cookie_preferences !== null ) {
 			$preferences = $cookie_preferences;
 		} else {
-			$preferences = $default_denied;
+			$preferences = $this->global_default_preferences( $default_denied );
 		}
 
 		// Map to Google consent parameters.
@@ -317,6 +339,34 @@ class Consent_Handler {
 	}
 
 	/**
+	 * Resolve the GLOBAL consent default for a visitor with no recorded choice.
+	 *
+	 * `gcm_default_consent` carries the admin's per-category granted/denied
+	 * choice (all denied by default). Region rules emitted after the global
+	 * default always override it for their regions (gtag resolves the most
+	 * specific match client-side), and a recorded choice or GPC wins over
+	 * everything.
+	 *
+	 * @param array<string, bool> $default_denied The all-denied baseline.
+	 * @since 1.3.1
+	 * @return array<string, bool>
+	 */
+	private function global_default_preferences( array $default_denied ): array {
+		$defaults = Settings::get( 'gcm_default_consent' );
+
+		if ( ! is_array( $defaults ) ) {
+			return $default_denied;
+		}
+
+		return [
+			'essential'  => true,
+			'functional' => $this->resolve_preset_bool( $defaults['functional'] ?? null ),
+			'analytics'  => $this->resolve_preset_bool( $defaults['analytics'] ?? null ),
+			'marketing'  => $this->resolve_preset_bool( $defaults['marketing'] ?? null ),
+		];
+	}
+
+	/**
 	 * Check if Global Privacy Control (GPC) is enabled.
 	 *
 	 * Critical Fix #3: GPC support for CCPA compliance.
@@ -374,42 +424,6 @@ class Consent_Handler {
 	}
 
 	/**
-	 * Detect Google services from enqueued scripts or raw HTML buffer.
-	 *
-	 * First checks the Service_Detector (enqueued scripts with transient cache),
-	 * then falls back to scanning the HTML buffer for Google service URLs.
-	 * This catches scripts added via WPCode, theme header, or other non-enqueued methods.
-	 *
-	 * @param string $buffer HTML buffer to scan as fallback.
-	 * @return bool True if any Google service detected.
-	 * @since 0.0.0-alpha.1
-	 */
-	private function has_google_services( $buffer ): bool {
-		// Fast path: check cached enqueued script detection first.
-		$service_detector = Service_Detector::get_instance();
-		if ( $service_detector->has_google_services() ) {
-			return true;
-		}
-
-		// Fallback: scan HTML buffer for raw Google script tags.
-		$google_domains = [
-			'googletagmanager.com/gtag/js',
-			'googletagmanager.com/gtm.js',
-			'google-analytics.com/analytics.js',
-			'googleadservices.com',
-			'googlesyndication.com',
-		];
-
-		foreach ( $google_domains as $domain ) {
-			if ( strpos( $buffer, $domain ) !== false ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Check for Google Consent Mode conflicts with other plugins.
 	 *
 	 * Critical Fix #10: Google Site Kit conflict detection.
@@ -418,15 +432,14 @@ class Consent_Handler {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function has_consent_mode_conflict(): bool {
-		// Check for Google Site Kit.
+		// Pure detection (no side effects): Site Kit present AND its Consent Mode
+		// enabled. Callers act on the result - the frontend skips injecting our
+		// script; the admin conflict notice is wired separately in the constructor
+		// (previously an add_action here, which never fired since this only runs
+		// during frontend output buffering).
 		if ( class_exists( 'Google\Site_Kit\Core\Consent_Mode\Consent_Mode' ) ) {
 			$sitekit_options = get_option( 'googlesitekit_consent_mode', [] );
-
-			if ( ! empty( $sitekit_options['enabled'] ) ) {
-				// Show admin notice about conflict.
-				add_action( 'admin_notices', [ $this, 'show_site_kit_conflict_notice' ] );
-				return true;
-			}
+			return ! empty( $sitekit_options['enabled'] );
 		}
 
 		return false;

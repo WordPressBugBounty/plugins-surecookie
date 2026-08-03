@@ -99,29 +99,29 @@ class Product_Promotion {
 	 */
 	private function get_base_promotions(): array {
 		return [
-			'surerank/surerank.php'   => [
+			'surerank/surerank.php'             => [
 				'name'        => 'SureRank SEO',
 				'description' => __( 'Grow traffic of your website with SureRank - a lightweight SEO toolkit plugin for WordPress users who want better rankings without the complexity.', 'surecookie' ),
 				'priority'    => 1,
 				'bannerImage' => 'https://ps.w.org/surerank/assets/banner-1544x500.jpg',
 			],
-			'sureforms/sureforms.php' => [
+			'sureforms/sureforms.php'           => [
 				'name'        => 'SureForms',
 				'description' => __( 'A simple yet powerful way to create modern forms for your website.', 'surecookie' ),
 				'priority'    => 2,
 				'bannerImage' => 'https://ps.w.org/sureforms/assets/banner-1544x500.png',
 			],
-			'suremails/suremails.php' => [
+			'suremails/suremails.php'           => [
 				'name'        => 'SureMail',
-				'description' => __( 'WordPress emails often go missing or land in spam because web hosts aren’t built for reliable delivery. SureMail fixes this by connecting to trusted SMTP services, so your emails reach inboxes, no more lost messages or frustrated customers.', 'surecookie' ),
+				'description' => __( 'WordPress emails often go missing or land in spam because web hosts aren\'t built for reliable delivery. SureMail fixes this by connecting to trusted SMTP services, so your emails reach inboxes, no more lost messages or frustrated customers.', 'surecookie' ),
 				'priority'    => 3,
 				'bannerImage' => 'https://ps.w.org/suremails/assets/banner-1544x500.jpg',
 			],
-			'ultimate-addons-for-gutenberg/ultimate-addons-for-gutenberg.php' => [
-				'name'        => 'Spectra',
-				'description' => __( 'The Spectra extends the Gutenberg functionality with several unique and feature-rich blocks that help build websites faster.', 'surecookie' ),
+			'spectra-blocks/spectra-blocks.php' => [
+				'name'        => 'Spectra Blocks',
+				'description' => __( 'Spectra Blocks is a complete rebuild of Spectra on WordPress\'s modern core-block APIs - an AI website builder built directly into the Block Editor.', 'surecookie' ),
 				'priority'    => 4,
-				'bannerImage' => 'https://ps.w.org/ultimate-addons-for-gutenberg/assets/banner-1544x500.jpg',
+				'bannerImage' => 'https://ps.w.org/spectra-blocks/assets/banner-1544x500.jpg',
 			],
 		];
 	}

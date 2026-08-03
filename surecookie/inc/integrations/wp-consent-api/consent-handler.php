@@ -92,7 +92,18 @@ class Consent_Handler {
 			return;
 		}
 
+		// The map is many-to-one and wp_set_consent() is one cookie per WP type,
+		// so first mapped category wins - as updateWpConsentApi() already does
+		// in consentManager.js. Otherwise built-in `uncategorized` (which falls
+		// back to `marketing`) re-allows marketing for a visitor who declined it.
+		$assigned = [];
+
 		foreach ( $category_map as $surecookie_cat => $wp_type ) {
+			if ( isset( $assigned[ $wp_type ] ) ) {
+				continue;
+			}
+			$assigned[ $wp_type ] = true;
+
 			// Essential is always allowed - ignore tampered cookie values.
 			$value = $surecookie_cat === 'essential'
 				? 'allow'

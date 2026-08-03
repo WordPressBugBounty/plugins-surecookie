@@ -36,9 +36,8 @@ function surecookie_should_delete_data() {
 }
 
 /*
- * Note: The deletion check is performed per-site (not globally) so that
- * in multisite each sub-site's own preference is respected.
- * See surecookie_should_delete_data() usage below.
+ * Deletion is checked per-site (not globally) so each multisite sub-site's own
+ * preference is respected. See surecookie_should_delete_data() usage below.
  */
 
 /**
@@ -58,6 +57,7 @@ function surecookie_get_option_keys() {
 		'surecookie_scanned_cookies',
 		'surecookie_scanned_logs',
 		'surecookie_scanned_resources',
+		'surecookie_cookie_category_memory',
 		'surecookie_nudges',
 		// Runtime options (not constants).
 		'surecookie_do_activation_redirect',
@@ -72,6 +72,15 @@ function surecookie_get_option_keys() {
 		'surecookie_first_scan_pages_count',
 		'surecookie_first_scan_completed_flag',
 		'surecookie_first_scan_pages_scanned',
+		// Assisted Scan analytics flags (Modules\AssistedScan\Telemetry) + blocked-scanner
+		// flag (SaasClient::BLOCKED_FLAG_OPTION). No autoloader - keep literals in sync.
+		'surecookie_assisted_scan_started_flag',
+		'surecookie_assisted_scan_completed_flag',
+		'surecookie_assisted_scan_abandoned_flag',
+		'surecookie_assisted_scan_stats',
+		'surecookie_cloud_scan_blocked_flag',
+		// Assisted Scan in-flight session state (Modules\AssistedScan\Session).
+		'surecookie_assisted_scan',
 		// Issue #473 - scanner SaaS credentials.
 		'surecookie_site_credentials',
 		'surecookie_last_known_quota',
@@ -80,13 +89,26 @@ function surecookie_get_option_keys() {
 		'surecookie_onboarding_lead',
 		'surecookie_first_successful_scan',
 		'surecookie_db_version',
+		// Migration completion ledger (Core\Maintenance::LEDGER_OPTION). A single
+		// row covering every migration, so adding a migration never adds a key here.
+		'surecookie_migrations',
+		// Pre-ledger per-migration flags (Maintenance::LEGACY_FLAGS). Deleted during ledger
+		// adoption on the first upgraded run; listed here for a site that uninstalls before
+		// ever upgrading. Safe to drop ~two releases after the ledger ships.
 		'surecookie_consent_log_unique_key_migrated',
+		'surecookie_services_backfill_v1',
+		'surecookie_cookie_provider_backfill_v1',
+		'surecookie_cookie_category_memory_backfill_v1',
+		// Known Services installed registry (Modules\Services\Installed_Services).
+		'surecookie_installed_services',
 		// BSF Analytics event queue + schema version.
 		'surecookie_analytics_events_version',
 		'surecookie_usage_events_pending',
 		'surecookie_usage_events_pushed',
 		'surecookie_first_auto_scan_frequency',
 		'surecookie_first_auto_scan_started_flag',
+		// Pro activation redirect.
+		'surecookie_pro_redirect_on_activation',
 	];
 }
 
@@ -101,9 +123,8 @@ function surecookie_delete_options(): void {
 	}
 
 	// Per-user "last viewed consent log" pointers are stored as
-	// surecookie_last_viewed_consent_log_<user_id>, so the user-id suffix
-	// makes them unknowable in advance - delete by prefix. The prefix is
-	// specific enough to never match keys owned by the Pro plugin.
+	// surecookie_last_viewed_consent_log_<user_id>; the user-id suffix is unknowable in
+	// advance, so delete by prefix (specific enough to never match Pro's keys).
 	global $wpdb;
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 	$wpdb->query(
@@ -120,6 +141,9 @@ function surecookie_delete_options(): void {
  * @return void
  */
 function surecookie_delete_transients(): void {
+	delete_transient( 'surecookie_services' );
+	// Legacy key from the pre-refactor known-scripts cache; kept so an uninstall
+	// after upgrading from an older version still clears any lingering row.
 	delete_transient( 'surecookie_known_scripts' );
 	delete_transient( 'surecookie_geo_cache' );
 	delete_transient( 'surecookie_state_events_checked' );
@@ -134,6 +158,13 @@ function surecookie_delete_transients(): void {
 	delete_transient( 'surecookie_auto_scan_lock' );
 	// Google Consent Mode service detection cache (ServiceDetector::TRANSIENT_KEY).
 	delete_transient( 'surecookie_gcm_services_detected' );
+	// Migration runner lock + schema-upgrade backoff (Core\Maintenance).
+	delete_transient( 'surecookie_migrations_lock' );
+	delete_transient( 'surecookie_db_upgrade_backoff' );
+	// The schema backoff is network-scoped on multisite (Maintenance::maybe_upgrade_db).
+	if ( is_multisite() ) {
+		delete_site_transient( 'surecookie_db_upgrade_backoff' );
+	}
 }
 
 /**
@@ -147,6 +178,10 @@ function surecookie_unschedule_crons(): void {
 	// Automatic-scanning events (Scheduler::RUN_HOOK / Runner::RETRY_HOOK).
 	wp_clear_scheduled_hook( 'surecookie_auto_scan_run' );
 	wp_clear_scheduled_hook( 'surecookie_auto_scan_retry' );
+	// Services-dataset daily refresh (Services\Cron::REFRESH_HOOK).
+	wp_clear_scheduled_hook( 'surecookie_refresh_datasets' );
+	// First-party loopback service detection (SaaSClient::FIRST_PARTY_DETECT_HOOK).
+	wp_clear_scheduled_hook( 'surecookie_first_party_detect' );
 }
 
 /**
@@ -216,12 +251,27 @@ if ( is_multisite() ) {
 	);
 
 	if ( is_array( $blog_ids ) ) {
+		// An empty list means nothing was cleaned, so the network row must stay.
+		$all_sites_cleaned = ! empty( $blog_ids );
+
 		foreach ( $blog_ids as $site_id ) {
 			switch_to_blog( (int) $site_id );
 			if ( surecookie_should_delete_data() ) {
 				surecookie_uninstall_site();
+			} else {
+				$all_sites_cleaned = false;
 			}
 			restore_current_blog();
+		}
+
+		/*
+		 * surecookie_db_version is stored with update_network_option() on multisite (see
+		 * Maintenance::store_db_version), so the per-blog delete_option() above never removes
+		 * it. Only drop the network row once every site is cleaned - else a site that opted
+		 * out loses its schema-version tracking.
+		 */
+		if ( $all_sites_cleaned ) {
+			delete_network_option( null, 'surecookie_db_version' );
 		}
 	}
 } elseif ( surecookie_should_delete_data() ) {
