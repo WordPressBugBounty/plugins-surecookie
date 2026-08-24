@@ -93,7 +93,7 @@ class Shortcode {
 	 */
 	private static function build_category_data(): array {
 		$categories     = Settings::get( 'cookie_categories' );
-		$scanned_raw    = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+		$scanned_raw    = Get::scanned_cookies_for_display();
 		$custom_grouped = Get::formatted_custom_cookies();
 
 		if ( ! is_array( $categories ) || empty( $categories ) ) {

@@ -65,6 +65,12 @@ class CookieManagement extends Base {
 					$domain           = sanitize_text_field( $input['domain'] ?? '' );
 					return $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category, $domain );
 
+				case 'bulk_recategorize':
+					return $service->bulk_update_cookie_category(
+						is_array( $input['items'] ?? null ) ? $input['items'] : [],
+						sanitize_text_field( $input['new_category'] ?? '' )
+					);
+
 				default:
 					return [
 						'success' => false,
@@ -97,7 +103,7 @@ class CookieManagement extends Base {
 	 * {@inheritDoc}
 	 */
 	protected function get_description(): string {
-		return __( 'Manage cookies detected and defined by SureCookie. Actions: "list_scanned" returns all cookies found by the site scanner with their name, category, provider, and description. "list_custom" returns manually defined cookies. "create_custom" adds a new custom cookie definition (requires name and category). "update_custom" modifies an existing custom cookie by cookie_id. "delete_custom" permanently removes a custom cookie definition by cookie_id — this cannot be undone. "recategorize_scanned" moves a scanned cookie from one category to another. Use surecookie/cookie-categories with action "list" to discover valid category IDs before creating or recategorizing cookies.', 'surecookie' );
+		return __( 'Manage cookies detected and defined by SureCookie. Actions: "list_scanned" returns all cookies found by the site scanner with their name, category, provider, and description. "list_custom" returns manually defined cookies. "create_custom" adds a new custom cookie definition (requires name and category). "update_custom" modifies an existing custom cookie by cookie_id. "delete_custom" permanently removes a custom cookie definition by cookie_id — this cannot be undone. "recategorize_scanned" moves a scanned cookie from one category to another. "bulk_recategorize" moves up to 100 cookies, custom and scanned together, into one category in a single write — prefer it over repeated "recategorize_scanned" calls when triaging scan results, since each single move rewrites the whole cookie store. Use surecookie/cookie-categories with action "list" to discover valid category IDs before creating or recategorizing cookies.', 'surecookie' );
 	}
 
 	/**
@@ -130,8 +136,40 @@ class CookieManagement extends Base {
 						'update_custom',
 						'delete_custom',
 						'recategorize_scanned',
+						'bulk_recategorize',
 					],
 					'description' => __( 'The cookie management action to perform.', 'surecookie' ),
+				],
+				'items'            => [
+					'type'        => 'array',
+					'maxItems'    => 100,
+					'description' => __( 'For "bulk_recategorize", the cookies to move (up to 100). Use "list_scanned" and "list_custom" first to discover them.', 'surecookie' ),
+					'items'       => [
+						'type'       => 'object',
+						'properties' => [
+							'type'             => [
+								'type'        => 'string',
+								'enum'        => [ 'custom', 'scanned' ],
+								'description' => __( 'Which store the cookie lives in.', 'surecookie' ),
+							],
+							'id'               => [
+								'type'        => 'string',
+								'description' => __( 'Cookie ID. Required when type is "custom".', 'surecookie' ),
+							],
+							'name'             => [
+								'type'        => 'string',
+								'description' => __( 'Cookie name. Required when type is "scanned".', 'surecookie' ),
+							],
+							'current_category' => [
+								'type'        => 'string',
+								'description' => __( 'Current category ID. Required when type is "scanned".', 'surecookie' ),
+							],
+							'domain'           => [
+								'type'        => 'string',
+								'description' => __( 'Optional. Disambiguates two scanned cookies sharing a name.', 'surecookie' ),
+							],
+						],
+					],
 				],
 				'cookie_id'        => [
 					'type'        => 'string',

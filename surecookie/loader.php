@@ -20,8 +20,10 @@ use SureCookie\Inc\Database\Init as DB_Initializer;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Integrations\Init as Integrations_Initializer;
 use SureCookie\Inc\Integrations\Wordpress\Init as Wordpress_Abilities_Initializer;
+use SureCookie\Inc\Modules\GoogleConsentMode\Actions as Gcm_Actions;
 use SureCookie\Inc\Modules\Init as Modules_Initiator;
 use SureCookie\Inc\Modules\Mcp\Init as Mcp_Initializer;
+use SureCookie\Inc\Utils\Settings_Metadata;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -55,6 +57,7 @@ class SureCookie_Loader {
 		// Register autoloader.
 		spl_autoload_register( [ $this, 'autoload' ] );
 
+		add_action( 'plugins_loaded', [ $this, 'register_settings_dataset' ], 1 );
 		add_action( 'plugins_loaded', [ $this, 'load_routes' ] );
 
 		// Initialize plugin hooks.
@@ -184,6 +187,27 @@ class SureCookie_Loader {
 				require_once $file;
 			}
 		}
+	}
+
+	/**
+	 * Register settings-dataset contributions that must exist before init:20.
+	 *
+	 * The MCP adapter builds the abilities registry at init:20, which freezes
+	 * manage-settings' input schema and primes the static cache in
+	 * Settings::get_settings_defaults(). Modules boot at init:999, so a module
+	 * that contributes setting keys registers that one filter here instead;
+	 * registering it in the module would leave those keys unwritable over MCP
+	 * and absent from the defaults for the rest of the request.
+	 *
+	 * @since 1.4.0
+	 * @return void
+	 */
+	public function register_settings_dataset(): void {
+		add_filter( 'surecookie_plugin_settings_dataset', [ Gcm_Actions::class, 'add_gcm_settings_to_dataset' ] );
+
+		// Priority 20 so every contributor has added its keys first; the
+		// annotator only touches keys that already exist.
+		add_filter( 'surecookie_plugin_settings_dataset', [ Settings_Metadata::class, 'merge' ], 20 );
 	}
 
 	/**

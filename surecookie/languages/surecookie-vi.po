@@ -37,34 +37,28 @@ msgstr "Sự đồng ý cookie thực sự cho WordPress. Quét dựa trên trì
 msgid "https://surecookie.com/"
 msgstr "https://surecookie.com/"
 
-#: admin/menu.php:74
+#: admin/menu.php:89
 #: build/admin.js:2
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
-#: admin/menu.php:87
-#: admin/menu.php:274
+#: admin/menu.php:107
+#: admin/menu.php:309
 #: build/admin.js:2
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: admin/menu.php:82
-#: admin/menu.php:400
-#: build/admin.js:2
-msgid "Logs"
-msgstr "Nhật ký"
-
-#: admin/menu.php:91
+#: admin/menu.php:111
 #: build/admin.js:2
 msgid "Learn"
 msgstr "Tìm hiểu"
 
-#: admin/menu.php:130
+#: admin/menu.php:150
 msgid "You don't have access to this page."
 msgstr "Bạn không có quyền truy cập trang này."
 
-#: admin/menu.php:300
-#: admin/menu.php:301
+#: admin/menu.php:335
+#: admin/menu.php:336
 msgid "Upgrade"
 msgstr "Nâng cấp"
 
@@ -81,19 +75,19 @@ msgstr "Bạn không có đủ quyền để truy cập trang này."
 msgid "A simple yet powerful way to create modern forms for your website."
 msgstr "Một cách đơn giản nhưng mạnh mẽ để tạo các biểu mẫu hiện đại cho trang web của bạn."
 
-#: admin/rating-notice.php:234
+#: admin/rating-notice.php:306
 msgid "If SureCookie has been helpful, would you mind taking a moment to leave a 5-star review on WordPress.org?"
 msgstr "Nếu SureCookie hữu ích, bạn có thể dành chút thời gian để đánh giá 5 sao trên WordPress.org không?"
 
-#: admin/rating-notice.php:243
+#: admin/rating-notice.php:315
 msgid "Rate SureCookie"
 msgstr "Đánh giá SureCookie"
 
-#: admin/rating-notice.php:251
+#: admin/rating-notice.php:323
 msgid "Maybe later"
 msgstr "Có thể sau"
 
-#: admin/rating-notice.php:255
+#: admin/rating-notice.php:327
 msgid "I already did"
 msgstr "Tôi đã làm rồi"
 
@@ -109,99 +103,99 @@ msgstr "Kiểm tra bảo mật thất bại. Vui lòng làm mới trang và th�
 msgid "Your session expired. Please refresh the page and try again."
 msgstr "Phiên làm việc của bạn đã hết hạn. Vui lòng làm mới trang và thử lại."
 
-#: inc/api/consent-logs.php:146
+#: inc/api/consent-logs.php:151
 msgid "Search by IP address or Session ID"
 msgstr "Tìm kiếm theo địa chỉ IP hoặc ID Phiên làm việc"
 
-#: inc/api/consent-logs.php:318
-#: inc/api/consent-logs.php:345
+#: inc/api/consent-logs.php:339
+#: inc/api/consent-logs.php:366
 msgid "Request origin could not be verified."
 msgstr "Không thể xác minh nguồn yêu cầu."
 
-#: inc/api/consent-logs.php:892
+#: inc/api/consent-logs.php:951
 msgid "Request origin is not allowed."
 msgstr "Nguồn yêu cầu không được phép."
 
-#: inc/api/consent-logs.php:448
+#: inc/api/consent-logs.php:503
 msgid "Consent logs retrieved successfully."
 msgstr "Lấy nhật ký đồng ý thành công."
 
-#: inc/api/consent-logs.php:490
+#: inc/api/consent-logs.php:545
 msgid "Consent processed successfully (logging disabled)"
 msgstr "Xử lý đồng ý thành công (đã tắt ghi nhật ký)"
 
-#: inc/api/consent-logs.php:376
-#: inc/api/consent-logs.php:515
+#: inc/api/consent-logs.php:397
+#: inc/api/consent-logs.php:570
 msgid "Too many requests. Please try again later."
 msgstr "Quá nhiều yêu cầu. Vui lòng thử lại sau."
 
-#: inc/api/consent-logs.php:535
+#: inc/api/consent-logs.php:590
 msgid "Preferences should not be empty."
 msgstr "Tùy chọn không được để trống."
 
-#: inc/api/consent-logs.php:544
+#: inc/api/consent-logs.php:599
 msgid "Preferences data is too large."
 msgstr "Dữ liệu tùy chọn quá lớn."
 
-#: inc/api/consent-logs.php:555
-#: inc/api/consent-logs.php:566
+#: inc/api/consent-logs.php:610
+#: inc/api/consent-logs.php:621
 msgid "Invalid preferences format."
 msgstr "Định dạng tùy chọn không hợp lệ."
 
-#: inc/api/consent-logs.php:575
+#: inc/api/consent-logs.php:630
 msgid "Session ID is required."
 msgstr "Yêu cầu ID Phiên làm việc."
 
-#: inc/api/consent-logs.php:614
+#: inc/api/consent-logs.php:669
 msgid "Accept All is not enabled for this site."
 msgstr "Chức năng Chấp nhận Tất cả không được bật cho trang này."
 
-#: inc/api/consent-logs.php:641
+#: inc/api/consent-logs.php:700
 msgid "Consent saved successfully."
 msgstr "Lưu đồng ý thành công."
 
-#: inc/api/consent-logs.php:651
+#: inc/api/consent-logs.php:710
 msgid "Failed to save consent."
 msgstr "Lưu đồng ý thất bại."
 
-#: inc/api/consent-logs.php:669
-#: inc/api/consent-logs.php:801
+#: inc/api/consent-logs.php:728
+#: inc/api/consent-logs.php:860
 msgid "Invalid log ID"
 msgstr "ID nhật ký không hợp lệ"
 
-#: inc/api/consent-logs.php:681
+#: inc/api/consent-logs.php:740
 msgid "Log not found."
 msgstr "Không tìm thấy nhật ký."
 
-#: inc/api/consent-logs.php:717
-#: inc/api/consent-logs.php:744
+#: inc/api/consent-logs.php:776
+#: inc/api/consent-logs.php:803
 msgid "Log details retrieved successfully."
 msgstr "Chi tiết nhật ký đã được truy xuất thành công."
 
-#: inc/api/consent-logs.php:766
+#: inc/api/consent-logs.php:825
 msgid "Invalid log IDs"
 msgstr "ID nhật ký không hợp lệ"
 
-#: inc/api/consent-logs.php:777
-#: inc/api/consent-logs.php:872
+#: inc/api/consent-logs.php:836
+#: inc/api/consent-logs.php:931
 msgid "Failed to delete logs."
 msgstr "Xóa nhật ký thất bại."
 
 #. translators: %d: number of logs deleted
-#: inc/api/consent-logs.php:787
+#: inc/api/consent-logs.php:846
 #, php-format
 msgid "%d log(s) deleted successfully."
 msgstr "%d nhật ký đã được xóa thành công."
 
-#: inc/api/consent-logs.php:812
+#: inc/api/consent-logs.php:871
 msgid "Log deleted successfully."
 msgstr "Xóa nhật ký thành công."
 
-#: inc/api/consent-logs.php:821
+#: inc/api/consent-logs.php:880
 msgid "Failed to delete log."
 msgstr "Xóa nhật ký thất bại."
 
-#: inc/api/consent-logs.php:863
+#: inc/api/consent-logs.php:922
 msgid "All logs deleted successfully."
 msgstr "Tất cả nhật ký đã được xóa thành công."
 
@@ -276,11 +270,11 @@ msgstr "Plugin đã không hoạt động."
 msgid "Plugin deactivated successfully."
 msgstr "Hủy kích hoạt plugin thành công."
 
-#: inc/api/plugin.php:290
+#: inc/api/plugin.php:240
 msgid "Conflicting plugins retrieved."
 msgstr "Các plugin xung đột đã được truy xuất."
 
-#: inc/api/posts.php:199
+#: inc/api/posts.php:151
 msgid "Post not found."
 msgstr "Không tìm thấy bài đăng."
 
@@ -288,55 +282,55 @@ msgstr "Không tìm thấy bài đăng."
 msgid "Scanned history retrieved successfully."
 msgstr "Lịch sử quét đã được truy xuất thành công."
 
-#: inc/api/scanned-resources.php:78
+#: inc/api/scanned-resources.php:79
 msgid "Scanned resources retrieved successfully."
 msgstr "Tài nguyên quét đã được truy xuất thành công."
 
-#: inc/api/settings.php:120
+#: inc/api/settings.php:201
 msgid "No data found"
 msgstr "Không tìm thấy dữ liệu"
 
-#: inc/api/settings.php:144
+#: inc/api/settings.php:208
 msgid "Settings updated"
 msgstr "Cài đặt đã được cập nhật"
 
-#: inc/functions/get.php:118
+#: inc/functions/get.php:128
 msgid "Essential Cookies"
 msgstr "Cookie thiết yếu"
 
-#: inc/functions/get.php:119
+#: inc/functions/get.php:129
 msgid "Required for basic website functionality."
 msgstr "Cần thiết cho chức năng cơ bản của trang web."
 
-#: inc/functions/get.php:124
+#: inc/functions/get.php:134
 msgid "Functional Cookies"
 msgstr "Cookie chức năng"
 
-#: inc/functions/get.php:125
+#: inc/functions/get.php:135
 msgid "Enable features like saved preferences and personalized content."
 msgstr "Kích hoạt các tính năng như lưu tùy chọn và nội dung cá nhân hóa."
 
-#: inc/functions/get.php:130
+#: inc/functions/get.php:140
 msgid "Analytics Cookies"
 msgstr "Cookie phân tích"
 
-#: inc/functions/get.php:131
+#: inc/functions/get.php:141
 msgid "Help us understand how visitors use our site so we can improve it."
 msgstr "Giúp chúng tôi hiểu cách khách truy cập sử dụng trang web để cải thiện nó."
 
-#: inc/functions/get.php:136
+#: inc/functions/get.php:146
 msgid "Marketing Cookies"
 msgstr "Cookie tiếp thị"
 
-#: inc/functions/get.php:137
+#: inc/functions/get.php:147
 msgid "Used to show you relevant ads based on your interests."
 msgstr "Được sử dụng để hiển thị quảng cáo phù hợp dựa trên sở thích của bạn."
 
-#: inc/functions/get.php:142
+#: inc/functions/get.php:152
 msgid "Uncategorized Cookies"
 msgstr "Cookie chưa phân loại"
 
-#: inc/functions/get.php:143
+#: inc/functions/get.php:153
 msgid "Cookies that haven't been categorized yet."
 msgstr "Cookie chưa được phân loại."
 
@@ -539,11 +533,11 @@ msgstr "Cập nhật lần cuối: %s"
 msgid "This website"
 msgstr "Trang web này"
 
-#: inc/modules/google-consent-mode/consent-handler.php:130
+#: inc/modules/google-consent-mode/consent-handler.php:129
 msgid "SureCookie:"
 msgstr "SureCookie:"
 
-#: inc/modules/google-consent-mode/consent-handler.php:132
+#: inc/modules/google-consent-mode/consent-handler.php:131
 msgid "Google Site Kit's Consent Mode is active. Please disable it in Site Kit settings to use SureCookie's implementation."
 msgstr "Chế độ Đồng ý của Google Site Kit đang hoạt động. Vui lòng tắt nó trong cài đặt Site Kit để sử dụng triển khai của SureCookie."
 
@@ -563,14 +557,14 @@ msgstr "\"%s\" đã bị vô hiệu hóa."
 
 #. translators: %s: Service name (e.g., YouTube, Vimeo, Bunny.net).
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:302
-#: inc/modules/script-blocking/blocker.php:1283
+#: inc/integrations/presto-player/block-handler.php:399
+#: inc/traits/placeholder-content.php:150
 #, php-format
 msgid "This content is blocked because it requires %s cookies."
 msgstr "Nội dung này bị chặn vì nó yêu cầu cookie %s."
 
-#: inc/integrations/presto-player/block-handler.php:240
-#: inc/modules/script-blocking/blocker.php:1298
+#: inc/traits/placeholder-content.php:249
+#: inc/utils/options.php:260
 msgid "Accept & Load"
 msgstr "Chấp nhận & Tải"
 
@@ -789,41 +783,41 @@ msgstr "Không thể mã hóa hoàn tất xác minh."
 msgid "Failed to fetch results."
 msgstr "Không thể lấy kết quả."
 
-#: inc/services/cookie-category-service.php:54
+#: inc/services/cookie-category-service.php:60
 msgid "Cookie categories retrieved successfully."
 msgstr "Danh mục cookie đã được lấy thành công."
 
-#: inc/services/cookie-category-service.php:75
+#: inc/services/cookie-category-service.php:83
 msgid "Category name is required."
 msgstr "Tên danh mục là bắt buộc."
 
-#: inc/services/cookie-category-service.php:86
+#: inc/services/cookie-category-service.php:94
 msgid "A category with this name already exists."
 msgstr "Đã tồn tại danh mục với tên này."
 
-#: inc/services/cookie-category-service.php:103
+#: inc/services/cookie-category-service.php:111
 msgid "Category created successfully."
 msgstr "Danh mục đã được tạo thành công."
 
-#: inc/services/cookie-category-service.php:124
-#: inc/services/cookie-category-service.php:196
+#: inc/services/cookie-category-service.php:132
+#: inc/services/cookie-category-service.php:204
 msgid "Category ID is required."
 msgstr "ID danh mục là bắt buộc."
 
-#: inc/services/cookie-category-service.php:134
-#: inc/services/cookie-category-service.php:215
+#: inc/services/cookie-category-service.php:142
+#: inc/services/cookie-category-service.php:223
 msgid "Category not found."
 msgstr "Không tìm thấy danh mục."
 
-#: inc/services/cookie-category-service.php:166
+#: inc/services/cookie-category-service.php:174
 msgid "Category updated successfully."
 msgstr "Danh mục đã được cập nhật thành công."
 
-#: inc/services/cookie-category-service.php:205
+#: inc/services/cookie-category-service.php:213
 msgid "Default categories cannot be deleted."
 msgstr "Danh mục mặc định không thể bị xóa."
 
-#: inc/services/cookie-category-service.php:307
+#: inc/services/cookie-category-service.php:315
 msgid "Category deleted successfully."
 msgstr "Danh mục đã được xóa thành công."
 
@@ -900,51 +894,51 @@ msgstr "Không tìm thấy cookie trong danh mục được chỉ định."
 msgid "Cookie category updated successfully."
 msgstr "Cập nhật danh mục cookie thành công."
 
-#: inc/utils/options.php:48
+#: inc/utils/options.php:56
 msgid "We use cookies to improve your experience and understand how you use our site. You can review your choices at any time."
 msgstr "Chúng tôi sử dụng cookie để cải thiện trải nghiệm của bạn và hiểu cách bạn sử dụng trang web của chúng tôi. Bạn có thể xem lại lựa chọn của mình bất cứ lúc nào."
 
-#: inc/utils/options.php:62
+#: inc/utils/options.php:73
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Only Essential"
 msgstr "Chỉ thiết yếu"
 
-#: inc/utils/options.php:71
+#: inc/utils/options.php:84
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Accept All"
 msgstr "Chấp nhận tất cả"
 
-#: inc/utils/options.php:75
+#: inc/utils/options.php:89
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Decline"
 msgstr "Từ chối"
 
-#: inc/utils/options.php:79
+#: inc/utils/options.php:94
 msgid "Cookie Settings"
 msgstr "Cài đặt cookie"
 
-#: inc/utils/options.php:142
+#: inc/utils/options.php:174
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Preferences"
 msgstr "Sở thích"
 
-#: inc/utils/options.php:146
+#: inc/utils/options.php:179
 msgid "Privacy Preference"
 msgstr "Sở thích quyền riêng tư"
 
-#: inc/utils/options.php:150
+#: inc/utils/options.php:184
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr "Chúng tôi sử dụng cookie và các công nghệ tương tự để giúp cá nhân hóa nội dung, điều chỉnh và đo lường quảng cáo, và cung cấp trải nghiệm tốt hơn."
 
-#: inc/utils/options.php:174
+#: inc/utils/options.php:213
 #: build/admin.js:4
 #: build/admin.js:75
 msgid "Cookie Preferences"
@@ -995,6 +989,7 @@ msgstr "Không hủy được việc quét."
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "Failed to load settings"
 msgstr "Không tải được cài đặt"
@@ -1044,6 +1039,7 @@ msgstr "Trình quét cookie"
 msgid "All Cookies"
 msgstr "Tất cả cookie"
 
+#: inc/api/settings.php:620
 #: build/admin.js:2
 msgid "Banner"
 msgstr "Biểu ngữ"
@@ -1071,6 +1067,7 @@ msgstr "Đồng ý lại"
 msgid "Custom CSS"
 msgstr "CSS tùy chỉnh"
 
+#: inc/api/settings.php:672
 #: build/admin.js:2
 msgid "Google Consent Mode"
 msgstr "Chế độ đồng ý của Google"
@@ -1079,6 +1076,8 @@ msgstr "Chế độ đồng ý của Google"
 msgid "Additional Consent"
 msgstr "Đồng ý bổ sung"
 
+#: admin/menu.php:97
+#: admin/menu.php:482
 #: build/admin.js:2
 #: build/admin.js:21
 msgid "Consent Logs"
@@ -1104,7 +1103,7 @@ msgstr "Đã xảy ra lỗi trong quá trình xác thực"
 msgid "Authentication cancelled. Please try again."
 msgstr "Xác thực bị hủy. Vui lòng thử lại."
 
-#: inc/modules/assisted-scan/collector.php:329
+#: inc/modules/assisted-scan/collector.php:332
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:28
@@ -1270,6 +1269,7 @@ msgstr "Cấu hình nội dung văn bản xuất hiện trong biểu ngữ đồ
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr "Đã xảy ra lỗi khi tải cài đặt. Vui lòng làm mới trang để thử lại."
@@ -1748,6 +1748,7 @@ msgstr "Giúp định hình tương lai của SureCookie. Chia sẻ cách bạn 
 
 #: build/admin.js:53
 #: build/admin.js:84
+#: build/admin.js:89
 msgid "Learn More"
 msgstr "Tìm hiểu thêm"
 
@@ -2340,7 +2341,7 @@ msgstr "Xác nhận lựa chọn của tôi"
 msgid "Powered by SureCookie (opens in new tab)"
 msgstr "Được cung cấp bởi SureCookie (mở trong tab mới)"
 
-#: inc/utils/localize-data.php:222
+#: inc/utils/localize-data.php:225
 #: build/admin.js:4
 #: build/admin.js:53
 #: build/public.js:4
@@ -2350,10 +2351,6 @@ msgstr "Được cung cấp bởi"
 #: build/admin.js:53
 msgid "Buttons are for reference only in preview."
 msgstr "Các nút chỉ để tham khảo trong bản xem trước."
-
-#: build/admin.js:53
-msgid "This is a preview"
-msgstr "Đây là bản xem trước"
 
 #: build/admin.js:53
 msgid "Close preview"
@@ -3133,35 +3130,35 @@ msgstr "Chỉ hiển thị biểu ngữ ở các vùng đã chọn, tạo quy t�
 msgid "Location detection uses GeoLite2 data by MaxMind, available from <link>https://www.maxmind.com</link>."
 msgstr "Phát hiện vị trí sử dụng dữ liệu GeoLite2 của MaxMind, có sẵn từ <link>https://www.maxmind.com</link>."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "IAB Transparency & Consent Framework"
 msgstr "Khung Minh bạch & Đồng ý IAB"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr "Làm cho biểu ngữ đồng ý của bạn tuân thủ IAB TCF 2.3 và tích hợp với Danh sách Nhà cung cấp Toàn cầu."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr "Mở khóa Tuân thủ IAB TCF 2.3 - Sắp ra mắt"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr "Bật chế độ TCF đầy đủ, tạo chuỗi TC và hiển thị danh sách nhà cung cấp IAB cho khách truy cập của bạn."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Google Additional Consent (AC)"
 msgstr "Đồng ý Bổ sung của Google (AC)"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr "Thêm Đồng ý Bổ sung của Google cùng với IAB TCF để xử lý các nhà cung cấp công nghệ quảng cáo không có trong Danh sách Nhà cung cấp Toàn cầu của IAB."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr "Mở khóa Google Đồng ý Bổ sung - Sắp ra mắt"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr "Tạo chuỗi AC, sao chép cookie addtl_consent và hiển thị danh sách nhà cung cấp Đồng ý Bổ sung của Google cho khách truy cập của bạn - yêu cầu để kiếm tiền đầy đủ với Google Ads / GAM."
 
@@ -3389,6 +3386,7 @@ msgstr "Nhận từ"
 
 #: build/admin.js:3
 #: build/admin.js:4
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Received"
 msgstr "Đã nhận"
@@ -3437,6 +3435,7 @@ msgstr "Nâng cấp xuất nhật ký sự đồng ý"
 msgid "Preference sections"
 msgstr "Phần tùy chọn"
 
+#: inc/api/settings.php:653
 #: build/admin.js:2
 #: build/admin.js:50
 #: build/public.js:1
@@ -3482,6 +3481,7 @@ msgstr "Máy chủ SureCookie MCP cho cài đặt đồng ý cookie, nhật ký 
 msgid "%s submenu"
 msgstr "%s menu phụ"
 
+#: inc/api/settings.php:625
 #: build/admin.js:2
 msgid "General"
 msgstr "Chung"
@@ -3490,6 +3490,7 @@ msgstr "Chung"
 msgid "Consent & Data"
 msgstr "Đồng ý & Dữ liệu"
 
+#: inc/api/settings.php:630
 #: build/admin.js:2
 msgid "Consent Frameworks"
 msgstr "Khung đồng ý"
@@ -3577,18 +3578,6 @@ msgid "VS Code"
 msgstr "VS Code"
 
 #: build/admin.js:84
-msgid "ChatGPT"
-msgstr "ChatGPT"
-
-#: build/admin.js:84
-msgid "go to Settings → Connectors → Add Connector, paste the endpoint URL, and use your WordPress username + Application Password."
-msgstr "đi tới Cài đặt → Bộ kết nối → Thêm Bộ kết nối, dán URL điểm cuối và sử dụng tên người dùng WordPress + Mật khẩu Ứng dụng của bạn."
-
-#: build/admin.js:84
-msgid "Learn more about ChatGPT connectors"
-msgstr "Tìm hiểu thêm về các bộ kết nối ChatGPT"
-
-#: build/admin.js:84
 msgid "SureCookie Only"
 msgstr "Chỉ SureCookie"
 
@@ -3648,10 +3637,6 @@ msgid "Enable MCP"
 msgstr "Bật MCP"
 
 #: build/admin.js:87
-msgid "Allow AI clients like Claude, ChatGPT, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
-msgstr "Cho phép các khách hàng AI như Claude, ChatGPT và Cursor quản lý biểu ngữ cookie, trình quét và cài đặt đồng ý của bạn qua SureCookie. Khi tắt, không có quyền nào được đăng ký và khách hàng AI không thể kết nối."
-
-#: build/admin.js:87
 msgid "WordPress Abilities API not available"
 msgstr "API Khả năng WordPress không khả dụng"
 
@@ -3667,11 +3652,11 @@ msgstr "Các thay đổi chưa được lưu"
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr "Điểm cuối MCP chỉ hoạt động sau khi bạn lưu cài đặt của mình."
 
-#: inc/api/consent-logs.php:404
+#: inc/api/consent-logs.php:425
 msgid "Unable to determine the current user."
 msgstr "Không thể xác định người dùng hiện tại."
 
-#: inc/api/consent-logs.php:415
+#: inc/api/consent-logs.php:436
 msgid "Consent logs marked as viewed."
 msgstr "Nhật ký đồng ý đã được đánh dấu là đã xem."
 
@@ -3719,7 +3704,8 @@ msgstr "Một lần mỗi tháng (SureCookie)"
 msgid "Once Weekly (SureCookie)"
 msgstr "Một lần mỗi tuần (SureCookie)"
 
-#: inc/modules/script-blocking/blocker.php:1279
+#: inc/traits/placeholder-content.php:215
+#: inc/utils/localize-data.php:265
 msgid "This content is currently blocked."
 msgstr "Nội dung này hiện đang bị chặn."
 
@@ -4023,10 +4009,6 @@ msgstr "Luôn cập nhật và giúp định hình SureCookie! Nhận các cập
 msgid "Grow traffic of your website with SureRank - a lightweight SEO toolkit plugin for WordPress users who want better rankings without the complexity."
 msgstr "Tăng lưu lượng truy cập cho trang web của bạn với SureRank - một plugin bộ công cụ SEO gọn nhẹ dành cho người dùng WordPress muốn có thứ hạng tốt hơn mà không cần sự phức tạp."
 
-#: admin/rating-notice.php:232
-msgid "Amazing! SureCookie discovered cookies on your site - let's keep growing together!"
-msgstr "Tuyệt vời! SureCookie đã phát hiện cookie trên trang web của bạn - hãy cùng nhau tiếp tục phát triển!"
-
 #. translators: 1: page URL, 2: error message
 #: inc/modules/site-scanner/saas-client.php:989
 #, php-format
@@ -4092,15 +4074,15 @@ msgstr "Khởi động lại khách hàng AI của bạn và dán lại lời nh
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr "Tận hưởng khách hàng AI của bạn đã được kết nối với trang WordPress của bạn!"
 
-#: admin/rating-notice.php:156
+#: admin/rating-notice.php:179
 msgid "Invalid nonce."
 msgstr "Nonce không hợp lệ."
 
-#: admin/rating-notice.php:158
+#: admin/rating-notice.php:181
 msgid "Unauthorized user."
 msgstr "Người dùng không được phép."
 
-#: admin/rating-notice.php:171
+#: admin/rating-notice.php:194
 msgid "Invalid parameters."
 msgstr "Tham số không hợp lệ."
 
@@ -4108,11 +4090,11 @@ msgstr "Tham số không hợp lệ."
 msgid "More scan limits, geographic targeting, re-consent widget, and more."
 msgstr "Giới hạn quét nhiều hơn, nhắm mục tiêu địa lý, widget đồng ý lại, và nhiều hơn nữa."
 
-#: inc/integrations/presto-player/block-handler.php:293
+#: inc/integrations/presto-player/block-handler.php:390
 msgid "This audio is blocked until you accept cookies to load it."
 msgstr "Âm thanh này bị chặn cho đến khi bạn chấp nhận cookie để tải nó."
 
-#: inc/integrations/presto-player/block-handler.php:297
+#: inc/integrations/presto-player/block-handler.php:394
 msgid "This video is blocked until you accept cookies to load it."
 msgstr "Video này bị chặn cho đến khi bạn chấp nhận cookie để tải nó."
 
@@ -4384,7 +4366,7 @@ msgstr "Hãy để chúng tôi giúp bạn phát hiện cookie, cấu hình lự
 msgid "Keep consent records locally on the site and export individual records when needed"
 msgstr "Lưu giữ hồ sơ đồng ý tại chỗ trên trang web và xuất các hồ sơ riêng lẻ khi cần thiết"
 
-#: admin/menu.php:78
+#: admin/menu.php:93
 #: build/admin.js:2
 msgid "Tracking Manager"
 msgstr "Trình quản lý theo dõi"
@@ -4401,10 +4383,9 @@ msgstr "Spectra Blocks là sự xây dựng lại hoàn chỉnh của Spectra tr
 msgid "Failed to update cookie categories: "
 msgstr "Không thể cập nhật các loại cookie:"
 
-#. translators: %s: Provider name (e.g., YouTube, Vimeo)
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:236
-#: inc/modules/script-blocking/blocker.php:1294
+#: inc/traits/placeholder-content.php:227
+#: inc/utils/localize-data.php:267
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Chấp nhận và tải nội dung %s"
@@ -4447,34 +4428,34 @@ msgid "Assisted scan cancelled."
 msgstr "Quét hỗ trợ đã bị hủy."
 
 #. translators: 1: current page number, 2: total pages.
-#: inc/modules/assisted-scan/collector.php:322
+#: inc/modules/assisted-scan/collector.php:325
 #, php-format
 msgid "SureCookie is scanning page %1$d of %2$d"
 msgstr "SureCookie đang quét trang %1$d trong tổng số %2$d"
 
-#: inc/modules/assisted-scan/collector.php:323
+#: inc/modules/assisted-scan/collector.php:326
 msgid "Keep this tab in front so the scan can continue."
 msgstr "Giữ tab này ở phía trước để quét có thể tiếp tục."
 
-#: inc/modules/assisted-scan/collector.php:324
+#: inc/modules/assisted-scan/collector.php:327
 msgid "Paused. Bring this tab to the front to continue."
 msgstr "Tạm dừng. Đưa tab này lên trước để tiếp tục."
 
-#: inc/modules/assisted-scan/collector.php:325
+#: inc/modules/assisted-scan/collector.php:328
 msgid "Preparing a clean visit…"
 msgstr "Chuẩn bị một lượt truy cập sạch sẽ…"
 
 #. translators: 1: number of cookies, 2: number of services.
-#: inc/modules/assisted-scan/collector.php:327
+#: inc/modules/assisted-scan/collector.php:330
 #, php-format
 msgid "Scan complete: %1$d cookies, %2$d services found"
 msgstr "Quét hoàn tất: tìm thấy %1$d cookie, %2$d dịch vụ"
 
-#: inc/modules/assisted-scan/collector.php:328
+#: inc/modules/assisted-scan/collector.php:331
 msgid "The scan could not be completed. Return to SureCookie to try again."
 msgstr "Không thể hoàn thành quét. Quay lại SureCookie để thử lại."
 
-#: inc/modules/assisted-scan/collector.php:330
+#: inc/modules/assisted-scan/collector.php:333
 msgid "SureCookie assisted scan progress"
 msgstr "Tiến trình quét hỗ trợ SureCookie"
 
@@ -4510,11 +4491,12 @@ msgstr "Quét hỗ trợ đang tiến hành..."
 msgid "Assisted scan finished."
 msgstr "Quét hỗ trợ đã hoàn tất."
 
-#: inc/modules/services/api.php:142
+#: inc/services/known-services-service.php:71
+#: inc/services/known-services-service.php:202
 msgid "Unknown service."
 msgstr "Dịch vụ không xác định."
 
-#: inc/modules/services/api.php:153
+#: inc/services/known-services-service.php:78
 msgid "This is a Pro service. Upgrade to add it."
 msgstr "Đây là dịch vụ Pro. Nâng cấp để thêm nó."
 
@@ -4534,11 +4516,11 @@ msgstr "Chúng tôi không thể xác minh tên miền của bạn vì máy ch�
 msgid "We could not reach your site's REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry."
 msgstr "Chúng tôi không thể truy cập REST API của trang web bạn tại /wp-json/. Hãy bật liên kết tĩnh đẹp và đảm bảo không có plugin bảo mật nào vô hiệu hóa REST API, sau đó thử lại."
 
-#: inc/services/cookie-category-service.php:247
+#: inc/services/cookie-category-service.php:255
 msgid "Cookies cannot be moved to the category being deleted."
 msgstr "Không thể di chuyển cookie vào danh mục đang bị xóa."
 
-#: inc/services/cookie-category-service.php:254
+#: inc/services/cookie-category-service.php:262
 #: inc/services/cookie-service.php:440
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "Danh mục đã chọn không còn tồn tại. Vui lòng tải lại và thử lại."
@@ -4578,6 +4560,7 @@ msgstr "Dịch vụ đã biết"
 msgid "Scripts and Embeds"
 msgstr "Kịch bản và Nhúng"
 
+#: inc/api/settings.php:615
 #: build/admin.js:2
 #: build/admin.js:84
 msgid "Geographic Rules"
@@ -4636,6 +4619,7 @@ msgstr "Di chuyển đến danh mục…"
 msgid "Applying…"
 msgstr "Đang áp dụng…"
 
+#: build/admin.js:4
 #: build/admin.js:25
 msgid "Apply"
 msgstr "Áp dụng"
@@ -5502,3 +5486,881 @@ msgstr "Được phép tải khi Chế độ Đồng ý của Google đang hoạ
 #: build/admin.js:77
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. They cannot be removed here."
 msgstr "Các dịch vụ Google này được phép tải khi Chế độ Đồng ý của Google đang hoạt động, thay vì bị chặn trước khi có sự đồng ý. Đối với các sản phẩm thẻ Google, Chế độ Đồng ý sẽ kiểm soát những gì chúng có thể lưu trữ và các định danh mà chúng có thể sử dụng. Nó không ngăn chúng liên hệ với Google. Chúng không thể bị loại bỏ ở đây."
+
+#: admin/menu.php:102
+#: admin/menu.php:455
+#: build/admin.js:2
+msgid "Data Requests"
+msgstr "Yêu cầu dữ liệu"
+
+#: admin/menu.php:461
+msgid "NEW"
+msgstr "MỚI"
+
+#. translators: %s: number of visitor consents recorded so far, e.g. "1,204".
+#: admin/rating-notice.php:284
+#, php-format
+msgid "Amazing! SureCookie has recorded %s visitor consent on your site - let's keep growing together!"
+msgid_plural "Amazing! SureCookie has recorded %s visitor consents on your site - let's keep growing together!"
+msgstr[0] "Tuyệt vời! SureCookie đã ghi nhận %s lượt đồng ý của khách truy cập trên trang của bạn - hãy cùng phát triển nhé!"
+
+#: inc/api/consent-logs.php:169
+msgid "Inclusive start of the log date range (Y-m-d)."
+msgstr "Bắt đầu bao gồm của phạm vi ngày ghi nhật ký (Y-m-d)."
+
+#: inc/api/consent-logs.php:177
+msgid "Inclusive end of the log date range (Y-m-d)."
+msgstr "Kết thúc bao gồm của phạm vi ngày ghi nhật ký (Y-m-d)."
+
+#: inc/api/consent-logs.php:482
+msgid "The start date cannot be later than the end date."
+msgstr "Ngày bắt đầu không được muộn hơn ngày kết thúc."
+
+#: inc/api/settings.php:288
+msgid "Please upload a SureCookie export file to import."
+msgstr "Vui lòng tải lên tệp xuất SureCookie để nhập."
+
+#: inc/api/settings.php:297
+msgid "The selected file is too large to import."
+msgstr "Tệp đã chọn quá lớn để nhập."
+
+#: inc/api/settings.php:308
+msgid "The uploaded file is not valid JSON."
+msgstr "Tệp tải lên không phải là JSON hợp lệ."
+
+#: inc/api/settings.php:317
+msgid "The uploaded file is not a valid SureCookie settings export."
+msgstr "Tệp tải lên không phải là tệp xuất cài đặt SureCookie hợp lệ."
+
+#: inc/api/settings.php:326
+msgid "This settings export uses an unsupported schema version."
+msgstr "Tệp xuất cài đặt này sử dụng phiên bản sơ đồ không được hỗ trợ."
+
+#: inc/api/settings.php:337
+msgid "The uploaded file does not contain a valid settings payload."
+msgstr "Tệp tải lên không chứa dữ liệu cài đặt hợp lệ."
+
+#: inc/api/settings.php:363
+msgid "No settings were imported. This export contains Pro features that are not available on this site."
+msgstr "Không có cài đặt nào được nhập. Tệp xuất này chứa các tính năng Pro không có trên trang này."
+
+#: inc/api/settings.php:376
+msgid "The uploaded file does not contain any importable SureCookie settings for this site."
+msgstr "Tệp tải lên không chứa bất kỳ cài đặt SureCookie có thể nhập nào cho trang này."
+
+#: inc/api/settings.php:407
+#: build/admin.js:89
+msgid "Settings imported successfully."
+msgstr "Nhập cài đặt thành công."
+
+#: inc/api/settings.php:610
+msgid "Cookies & Scripts"
+msgstr "Cookie & Kịch bản"
+
+#: inc/api/settings.php:611
+msgid "Cookie categories, custom cookies, known services, script blocking and scanning."
+msgstr "Danh mục cookie, cookie tùy chỉnh, dịch vụ đã biết, chặn và quét kịch bản."
+
+#: inc/api/settings.php:616
+msgid "Region-based banner rules."
+msgstr "Quy tắc biểu ngữ theo vùng."
+
+#: inc/api/settings.php:621
+msgid "Banner content, layout, colors, buttons and display."
+msgstr "Nội dung biểu ngữ, bố cục, màu sắc, nút và hiển thị."
+
+#: inc/api/settings.php:626
+msgid "Consent model, logging, preferences, custom CSS and other plugin settings."
+msgstr "Mô hình đồng ý, ghi nhật ký, tùy chọn, CSS tùy chỉnh và các cài đặt plugin khác."
+
+#: inc/api/settings.php:631
+msgid "Google Consent Mode and other consent integrations."
+msgstr "Chế độ đồng ý Google và các tích hợp đồng ý khác."
+
+#: inc/api/settings.php:635
+msgid "Buttons & labels"
+msgstr "Nút & nhãn"
+
+#: inc/api/settings.php:636
+msgid "Button visibility, order and label text."
+msgstr "Hiển thị nút, thứ tự và văn bản nhãn."
+
+#: inc/api/settings.php:641
+msgid "Consent & compliance"
+msgstr "Đồng ý & tuân thủ"
+
+#: inc/api/settings.php:642
+msgid "Compliance law, consent model, logging and duration."
+msgstr "Luật tuân thủ, mô hình đồng ý, ghi nhật ký và thời gian."
+
+#: inc/api/settings.php:647
+msgid "Cookie categories"
+msgstr "Danh mục cookie"
+
+#: inc/api/settings.php:648
+msgid "Your consent categories."
+msgstr "Danh mục đồng ý của bạn."
+
+#: inc/api/settings.php:654
+msgid "Custom cookie definitions."
+msgstr "Định nghĩa cookie tùy chỉnh."
+
+#: inc/api/settings.php:660
+msgid "Script blocking"
+msgstr "Chặn kịch bản"
+
+#: inc/api/settings.php:661
+msgid "Blocking rules and scan resource overrides."
+msgstr "Quy tắc chặn và ghi đè tài nguyên quét."
+
+#: inc/api/settings.php:666
+msgid "Known services"
+msgstr "Dịch vụ đã biết"
+
+#: inc/api/settings.php:667
+msgid "Services you added or removed for cookie declarations and blocking."
+msgstr "Dịch vụ bạn đã thêm hoặc xóa cho khai báo cookie và chặn."
+
+#: inc/api/settings.php:673
+msgid "GCM toggle and region defaults."
+msgstr "Chuyển đổi GCM và mặc định vùng."
+
+#: inc/api/settings.php:678
+msgid "Automatic scanning"
+msgstr "Quét tự động"
+
+#: inc/api/settings.php:679
+msgid "Scan frequency and scope."
+msgstr "Tần suất và phạm vi quét."
+
+#: inc/api/settings.php:684
+#: build/admin.js:2
+msgid "Advanced"
+msgstr "Nâng cao"
+
+#: inc/api/settings.php:685
+msgid "Custom CSS, integrations and tool settings."
+msgstr "CSS tùy chỉnh, tích hợp và cài đặt công cụ."
+
+#: inc/integrations/astra/init.php:123
+#: inc/integrations/theme-palette/init.php:81
+msgid "Astra Global Palette"
+msgstr "Bảng màu toàn cầu Astra"
+
+#: inc/integrations/theme-palette/init.php:92
+msgid "Kadence Color Palette"
+msgstr "Bảng màu Kadence"
+
+#: inc/integrations/theme-palette/init.php:104
+msgid "Theme Colors"
+msgstr "Màu chủ đề"
+
+#: inc/services/known-services-service.php:162
+msgid "The service could not be installed."
+msgstr "Không thể cài đặt dịch vụ."
+
+#: inc/services/known-services-service.php:177
+msgid "Service installed. Every cookie it declares was already present, so no new cookie definitions were created."
+msgstr "Dịch vụ đã được cài đặt. Mọi cookie được khai báo đều đã có, nên không tạo định nghĩa cookie mới nào."
+
+#: inc/services/known-services-service.php:178
+msgid "Service installed and its cookies declared."
+msgstr "Dịch vụ đã được cài đặt và các cookie của nó đã được khai báo."
+
+#: inc/services/known-services-service.php:213
+msgid "Service removed and its declared cookies deleted."
+msgstr "Dịch vụ đã bị xóa và các cookie đã khai báo của nó đã bị xóa."
+
+#: inc/services/known-services-service.php:214
+msgid "That service was not installed, so nothing was removed."
+msgstr "Dịch vụ đó chưa được cài đặt, nên không có gì bị xóa."
+
+#: inc/services/known-services-service.php:244
+msgid "Catalog refreshed."
+msgstr "Danh mục đã được làm mới."
+
+#: inc/services/script-blocking-service.php:161
+msgid "A resource domain and a target category are both required."
+msgstr "Cần có cả tên miền tài nguyên và danh mục mục tiêu."
+
+#: inc/services/script-blocking-service.php:174
+#: inc/services/script-blocking-service.php:433
+msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Danh mục đó không tồn tại. Sử dụng surecookie/cookie-categories với hành động \"list\" để xem các ID hợp lệ."
+
+#: inc/services/script-blocking-service.php:191
+msgid "Resource category updated."
+msgstr "Danh mục tài nguyên đã được cập nhật."
+
+#: inc/services/script-blocking-service.php:230
+msgid "That resource was already excluded from blocking."
+msgstr "Tài nguyên đó đã bị loại trừ khỏi việc chặn."
+
+#: inc/services/script-blocking-service.php:231
+msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
+msgstr "Tài nguyên đã được loại trừ khỏi việc chặn. Lưu ý điều này chỉ áp dụng cho script và iframe, không áp dụng cho thẻ embed hoặc object."
+
+#: inc/services/script-blocking-service.php:253
+msgid "A resource domain is required."
+msgstr "Cần có một tên miền tài nguyên."
+
+#: inc/services/script-blocking-service.php:280
+msgid "Resource will be blocked again until consent."
+msgstr "Tài nguyên sẽ bị chặn lại cho đến khi có sự đồng ý."
+
+#: inc/services/script-blocking-service.php:281
+msgid "That resource was not excluded, so nothing changed."
+msgstr "Tài nguyên đó không bị loại trừ, vì vậy không có gì thay đổi."
+
+#: inc/services/script-blocking-service.php:361
+msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Cần có một danh mục hợp lệ. Sử dụng surecookie/cookie-categories với hành động \"list\" để xem các ID hợp lệ."
+
+#: inc/services/script-blocking-service.php:368
+msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
+msgstr "Một quy tắc cho mẫu đó đã tồn tại. Hãy sử dụng \"update_rule\" thay thế."
+
+#: inc/services/script-blocking-service.php:377
+msgid "Blocking rule created."
+msgstr "Quy tắc chặn đã được tạo."
+
+#: inc/services/script-blocking-service.php:399
+#: inc/services/script-blocking-service.php:465
+msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
+msgstr "Không có quy tắc chặn nào phù hợp với mẫu đó. Sử dụng \"list_rules\" để xem các quy tắc hiện tại."
+
+#: inc/services/script-blocking-service.php:417
+msgid "Another rule already uses that pattern."
+msgstr "Một quy tắc khác đã sử dụng mẫu đó."
+
+#: inc/services/script-blocking-service.php:429
+msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Danh mục đó không phải là một ID hợp lệ. Sử dụng surecookie/cookie-categories với hành động \"list\" để xem các ID hợp lệ."
+
+#: inc/services/script-blocking-service.php:444
+msgid "Blocking rule updated."
+msgstr "Quy tắc chặn đã được cập nhật."
+
+#: inc/services/script-blocking-service.php:475
+msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
+msgstr "Quy tắc chặn đã bị xóa. Các tài nguyên mà nó bao phủ không còn bị chặn bởi nó nữa."
+
+#: inc/services/script-blocking-service.php:576
+msgid "A domain or URL pattern is required."
+msgstr "Cần có một tên miền hoặc mẫu URL."
+
+#: inc/services/script-blocking-service.php:583
+msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
+msgstr "Mẫu đó quá rộng. Các mẫu được so khớp như chuỗi con, vì vậy một token đơn như \"com\" sẽ khớp với gần như mọi tài nguyên bên thứ ba trên trang. Hãy sử dụng một tên miền đầy đủ như \"example.com\" hoặc một đường dẫn URL."
+
+#: inc/utils/options.php:255
+msgid "This content is blocked because it requires {service} cookies."
+msgstr "Nội dung này bị chặn vì nó yêu cầu cookie {service}."
+
+#: inc/utils/settings-metadata.php:72
+msgid "Banner shape: \"box\" is a floating card, \"banner\" is a full-width bar."
+msgstr "Hình dạng biểu ngữ: \"box\" là một thẻ nổi, \"banner\" là một thanh toàn chiều rộng."
+
+#: inc/utils/settings-metadata.php:73
+msgid "Coupled with notice_position, so set both together: \"box\" takes bottom-left, bottom-center, bottom-right or middle, \"banner\" takes only top or bottom. A mismatched pair is not rejected, it silently renders somewhere else."
+msgstr "Kết hợp với notice_position, vì vậy hãy đặt cả hai cùng nhau: \"box\" nhận các vị trí bottom-left, bottom-center, bottom-right hoặc middle, \"banner\" chỉ nhận top hoặc bottom. Một cặp không khớp sẽ không bị từ chối, nó sẽ hiển thị ở nơi khác một cách im lặng."
+
+#: inc/utils/settings-metadata.php:77
+msgid "Where the banner sits on screen. The legal subset depends on notice_type."
+msgstr "Vị trí biểu ngữ trên màn hình. Tập hợp hợp pháp phụ thuộc vào notice_type."
+
+#: inc/utils/settings-metadata.php:78
+msgid "Not interchangeable across notice_type: a box-only value on a \"banner\" renders as a bottom bar, and top/bottom on a \"box\" falls back to bottom-right, both silently."
+msgstr "Không thể thay thế qua notice_type: một giá trị chỉ dành cho box trên \"banner\" sẽ hiển thị như một thanh dưới cùng, và top/bottom trên \"box\" sẽ trở về bottom-right, cả hai đều im lặng."
+
+#: inc/utils/settings-metadata.php:82
+msgid "Unused. Superseded by notice_position."
+msgstr "Không sử dụng. Được thay thế bởi notice_position."
+
+#: inc/utils/settings-metadata.php:86
+msgid "Banner entrance animation."
+msgstr "Hiệu ứng hoạt hình khi biểu ngữ xuất hiện."
+
+#: inc/utils/settings-metadata.php:89
+msgid "ID of the banner colour preset. Built-ins are blue-purple, purple-pink, blue-cyan, green-lime, red-orange, dark-blue, dark-green, dark-pink and dark-orange, plus \"astra\" while the Astra theme is active. A theme or plugin can register more."
+msgstr "ID của bộ màu biểu ngữ. Các bộ màu tích hợp sẵn là xanh tím, tím hồng, xanh lam ngọc, xanh lá chanh, đỏ cam, xanh đậm, xanh lá đậm, hồng đậm và cam đậm, cộng với \"astra\" khi chủ đề Astra đang hoạt động. Một chủ đề hoặc plugin có thể đăng ký thêm."
+
+#: inc/utils/settings-metadata.php:90
+msgid "Not validated on write: an unknown ID reports success and silently renders the default palette."
+msgstr "Không được xác thực khi ghi: một ID không xác định sẽ báo thành công và hiển thị bộ màu mặc định một cách im lặng."
+
+#: inc/utils/settings-metadata.php:93
+msgid "Dim the page behind the banner and block interaction until the visitor chooses."
+msgstr "Làm mờ trang phía sau biểu ngữ và chặn tương tác cho đến khi khách truy cập chọn."
+
+#: inc/utils/settings-metadata.php:94
+msgid "Forces a consent choice before the site can be used, which conflicts with the freely-given consent requirement in some regions. Confirm with the user before enabling."
+msgstr "Bắt buộc lựa chọn đồng ý trước khi trang web có thể được sử dụng, điều này mâu thuẫn với yêu cầu đồng ý tự nguyện ở một số khu vực. Xác nhận với người dùng trước khi bật."
+
+#: inc/utils/settings-metadata.php:97
+msgid "Master switch for the consent banner."
+msgstr "Công tắc chính cho biểu ngữ đồng ý."
+
+#: inc/utils/settings-metadata.php:98
+msgid "Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent."
+msgstr "Cũng vô hiệu hóa việc chặn script và iframe, bất kể blocking_enabled nói gì, vì vậy tắt nó cho phép các trình theo dõi hoạt động trước khi có đồng ý."
+
+#: inc/utils/settings-metadata.php:101
+msgid "Absolute URL of an image shown at the top of the banner. Empty string removes it."
+msgstr "URL tuyệt đối của hình ảnh hiển thị ở đầu biểu ngữ. Chuỗi rỗng sẽ loại bỏ nó."
+
+#: inc/utils/settings-metadata.php:104
+msgid "Plain-text headline above the banner message. HTML is stripped. Empty renders no heading."
+msgstr "Tiêu đề văn bản thuần phía trên thông điệp biểu ngữ. HTML sẽ bị loại bỏ. Để trống sẽ không hiển thị tiêu đề."
+
+#: inc/utils/settings-metadata.php:107
+msgid "Banner body copy. Accepts post-level HTML such as links and emphasis."
+msgstr "Nội dung chính của biểu ngữ. Chấp nhận HTML cấp bài đăng như liên kết và nhấn mạnh."
+
+#: inc/utils/settings-metadata.php:113
+msgid "Site-wide consent model: \"opt-in\" (GDPR style, nothing non-essential runs before consent) or \"opt-out\" (CCPA style, allowed until the visitor declines)."
+msgstr "Mô hình đồng ý trên toàn trang: \"opt-in\" (kiểu GDPR, không chạy gì không cần thiết trước khi có đồng ý) hoặc \"opt-out\" (kiểu CCPA, được phép cho đến khi khách truy cập từ chối)."
+
+#: inc/utils/settings-metadata.php:114
+msgid "Legally load-bearing. \"opt-out\" lets non-essential trackers fire before any consent, which is unlawful for EU and UK visitors, and it removes the Preferences and Accept All buttons. Confirm the site's jurisdiction with the user before changing it."
+msgstr "Có giá trị pháp lý. \"opt-out\" cho phép các trình theo dõi không cần thiết hoạt động trước khi có bất kỳ đồng ý nào, điều này là bất hợp pháp với khách truy cập EU và UK, và nó loại bỏ các nút Tùy chọn và Chấp nhận tất cả. Xác nhận thẩm quyền của trang web với người dùng trước khi thay đổi."
+
+#: inc/utils/settings-metadata.php:117
+msgid "An {id, name} object naming the regulation the site declares it follows. Only \"name\" is read, and only for usage telemetry, so this does not change banner or blocking behaviour."
+msgstr "Một đối tượng {id, name} đặt tên quy định mà trang web tuyên bố tuân theo. Chỉ \"name\" được đọc, và chỉ để thu thập dữ liệu sử dụng, nên điều này không thay đổi hành vi biểu ngữ hoặc chặn."
+
+#: inc/utils/settings-metadata.php:121
+msgid "How long consent log rows are kept before the daily cleanup cron deletes them. Note the token format is \"<days>_days\", not a bare number."
+msgstr "Thời gian lưu giữ các dòng nhật ký đồng ý trước khi cron dọn dẹp hàng ngày xóa chúng. Lưu ý định dạng token là \"<days>_days\", không phải số thuần."
+
+#: inc/utils/settings-metadata.php:122
+msgid "Destructive. Shortening this makes the next cron run permanently delete every consent row older than the new window, erasing the proof-of-consent evidence GDPR Article 7(1) requires. Read the current value and confirm before lowering it."
+msgstr "Phá hủy. Rút ngắn điều này khiến lần chạy cron tiếp theo sẽ xóa vĩnh viễn mọi dòng đồng ý cũ hơn cửa sổ mới, xóa bằng chứng đồng ý mà Điều 7(1) GDPR yêu cầu. Đọc giá trị hiện tại và xác nhận trước khi giảm nó."
+
+#: inc/utils/settings-metadata.php:125
+msgid "Master switch for pre-consent script and iframe blocking."
+msgstr "Công tắc chính cho việc chặn script và iframe trước khi có đồng ý."
+
+#: inc/utils/settings-metadata.php:126
+msgid "Turning this off lets analytics and marketing tags fire before consent is collected. It is the single most compliance-significant setting after consent_model."
+msgstr "Tắt điều này cho phép các thẻ phân tích và tiếp thị hoạt động trước khi thu thập đồng ý. Đây là cài đặt quan trọng nhất về tuân thủ sau consent_model."
+
+#: inc/utils/settings-metadata.php:129
+msgid "Whether the banner offers an Accept All button."
+msgstr "Biểu ngữ có cung cấp nút Chấp nhận tất cả hay không."
+
+#: inc/utils/settings-metadata.php:130
+msgid "Not cosmetic: with it off the consent-log endpoint rejects every accept-all record with HTTP 422, so existing integrations that post one will start failing."
+msgstr "Không phải trang trí: khi tắt, điểm cuối nhật ký đồng ý từ chối mọi bản ghi chấp nhận tất cả với HTTP 422, vì vậy các tích hợp hiện có gửi một bản ghi sẽ bắt đầu thất bại."
+
+#: inc/utils/settings-metadata.php:133
+msgid "Whether uninstalling the plugin also deletes its data."
+msgstr ""
+
+#: inc/utils/settings-metadata.php:134
+msgid "Arms an irreversible action: on uninstall it drops the consent-log table and deletes every SureCookie option. Never enable it without explicit user confirmation."
+msgstr ""
+
+#: inc/utils/settings-metadata.php:137
+msgid "UNIX timestamp in seconds of the last \"re-request consent\" action. Any consent recorded before this instant is treated as stale."
+msgstr "Dấu thời gian UNIX tính bằng giây của hành động \"yêu cầu đồng ý lại\" cuối cùng. Bất kỳ sự đồng ý nào được ghi lại trước thời điểm này đều được coi là lỗi thời."
+
+#: inc/utils/settings-metadata.php:138
+msgid "Writing the current time invalidates every visitor's existing consent and shows the banner again site-wide. Only set it when the user explicitly asks to re-collect consent."
+msgstr "Ghi thời gian hiện tại sẽ làm mất hiệu lực mọi sự đồng ý hiện có của khách truy cập và hiển thị lại biểu ngữ trên toàn trang. Chỉ đặt khi người dùng yêu cầu rõ ràng để thu thập lại sự đồng ý."
+
+#: inc/utils/settings-metadata.php:141
+msgid "Whether SureCookie registers its WordPress Abilities and MCP server."
+msgstr "Cho biết SureCookie có đăng ký các Khả năng WordPress và máy chủ MCP hay không."
+
+#: inc/utils/settings-metadata.php:142
+msgid "Self-locking: writing false through this ability deregisters every SureCookie ability on the next request, so no AI client can turn it back on. It can only be re-enabled from wp-admin."
+msgstr "Tự khóa: ghi false qua khả năng này sẽ hủy đăng ký mọi khả năng SureCookie trong yêu cầu tiếp theo, nên không có khách hàng AI nào có thể bật lại. Chỉ có thể bật lại từ wp-admin."
+
+#: inc/utils/settings-metadata.php:147
+msgid "Left-to-right order of the banner buttons, as a comma-separated list built from the tokens accept_all, accept (essential only), preferences and decline."
+msgstr "Thứ tự từ trái sang phải của các nút trên biểu ngữ, dưới dạng danh sách phân tách bằng dấu phẩy được xây dựng từ các token accept_all, accept (chỉ thiết yếu), preferences và decline."
+
+#: inc/utils/settings-metadata.php:148
+msgid "Unrecognised tokens are dropped silently, so a value containing none of the four leaves the banner with no buttons at all."
+msgstr "Các token không nhận dạng được sẽ bị loại bỏ im lặng, nên giá trị không chứa bất kỳ trong bốn token sẽ khiến biểu ngữ không có nút nào cả."
+
+#: inc/utils/settings-metadata.php:151
+msgid "Label for the essential-only button. Empty falls back to the translated \"Only Essential\"."
+msgstr "Nhãn cho nút chỉ thiết yếu. Để trống sẽ trở về nhãn đã dịch \"Chỉ Thiết Yếu\"."
+
+#: inc/utils/settings-metadata.php:152
+msgid "This is not the Accept All button, which is accept_all_btn_text. Labelling it \"Accept\" misrepresents what the visitor is consenting to."
+msgstr "Đây không phải là nút Chấp Nhận Tất Cả, nút đó là accept_all_btn_text. Gán nhãn \"Chấp Nhận\" cho nút này sẽ gây hiểu sai về những gì khách truy cập đồng ý."
+
+#: inc/utils/settings-metadata.php:155
+msgid "Label for the Accept All button. Empty falls back to the translated \"Accept All\"."
+msgstr "Nhãn cho nút Chấp Nhận Tất Cả. Để trống sẽ trở về nhãn đã dịch \"Chấp Nhận Tất Cả\"."
+
+#: inc/utils/settings-metadata.php:158
+msgid "Label for the Decline button. Empty falls back to the translated \"Decline\"."
+msgstr "Nhãn cho nút Từ Chối. Để trống sẽ trở về nhãn đã dịch \"Từ Chối\"."
+
+#: inc/utils/settings-metadata.php:163
+msgid "Pro banner colour override, shaped {mode, colors}. Send mode \"custom\" together with the colors map."
+msgstr "Ghi đè màu biểu ngữ chuyên nghiệp, định dạng {mode, colors}. Gửi mode \"custom\" cùng với bản đồ màu."
+
+#: inc/utils/settings-metadata.php:164
+msgid "Writing colors while mode stays \"preset\" is a silent no-op: color_palette continues to win and the write still reports success."
+msgstr "Ghi màu trong khi mode vẫn là \"preset\" là thao tác không hoạt động im lặng: color_palette vẫn được ưu tiên và ghi vẫn báo thành công."
+
+#: inc/utils/settings-metadata.php:167
+msgid "Raw CSS inlined on every frontend page to restyle the banner and preferences modal. Requires the unfiltered_html capability."
+msgstr "CSS thô được nhúng trực tiếp trên mọi trang frontend để thay đổi kiểu biểu ngữ và hộp thoại tùy chọn. Yêu cầu khả năng unfiltered_html."
+
+#: inc/utils/settings-metadata.php:172
+msgid "The consent-category registry the whole consent model derives from. Readable here, but edit it with the surecookie/cookie-categories ability."
+msgstr "Đăng ký danh mục đồng ý mà toàn bộ mô hình đồng ý dựa vào. Có thể đọc ở đây, nhưng chỉnh sửa bằng khả năng surecookie/cookie-categories."
+
+#: inc/utils/settings-metadata.php:175
+msgid "The manually declared cookie registry shown in the preferences modal. Readable here, but edit it with the surecookie/cookie-management ability."
+msgstr "Đăng ký cookie khai báo thủ công hiển thị trong hộp thoại tùy chọn. Có thể đọc ở đây, nhưng chỉnh sửa bằng khả năng surecookie/cookie-management."
+
+#: inc/utils/settings-metadata.php:180
+msgid "Saved manual scan selection, as {label, value} rows whose value is a published post ID. Prefer the surecookie/site-scanner ability with action \"start\", which resolves and validates the rows for you."
+msgstr "Lựa chọn quét thủ công đã lưu, dưới dạng các hàng {label, value} với value là ID bài đăng đã xuất bản. Ưu tiên khả năng surecookie/site-scanner với hành động \"start\", giúp giải quyết và xác thực các hàng cho bạn."
+
+#: inc/utils/settings-metadata.php:183
+msgid "Master switch for unattended scheduled scanning. Enabling it schedules the WP-Cron event."
+msgstr "Công tắc chính cho quét theo lịch không giám sát. Bật nó sẽ lên lịch sự kiện WP-Cron."
+
+#: inc/utils/settings-metadata.php:186
+msgid "Cadence of the automatic scan. \"monthly\" always works; \"weekly\" requires SureCookie Pro. A theme or plugin can register more."
+msgstr "Tần suất quét tự động. \"monthly\" luôn hoạt động; \"weekly\" yêu cầu SureCookie Pro. Một chủ đề hoặc plugin có thể đăng ký thêm."
+
+#: inc/utils/settings-metadata.php:187
+msgid "The clamp is silent: an unsupported value, including \"weekly\" without Pro, is reported as saved but stores \"monthly\"."
+msgstr "Giới hạn im lặng: một giá trị không được hỗ trợ, bao gồm \"weekly\" không có Pro, được báo là đã lưu nhưng lưu \"monthly\"."
+
+#: inc/utils/settings-metadata.php:191
+msgid "What the automatic scan crawls: \"same_as_manual\" reuses scan_pages, \"all_published\" walks published content up to the plan limit, \"selected\" uses auto_scan_pages."
+msgstr "Nội dung quét tự động: \"same_as_manual\" tái sử dụng scan_pages, \"all_published\" quét nội dung đã xuất bản đến giới hạn kế hoạch, \"selected\" sử dụng auto_scan_pages."
+
+#: inc/utils/settings-metadata.php:194
+msgid "Content the automatic scan crawls when auto_scan_scope is \"selected\". Accepts picker rows or bare post IDs, and is ignored under any other scope."
+msgstr "Nội dung quét tự động khi auto_scan_scope là \"selected\". Chấp nhận các hàng chọn hoặc ID bài viết trần, và bị bỏ qua trong các phạm vi khác."
+
+#: inc/utils/settings-metadata.php:199
+msgid "Scan-detected resources marked \"do not block\", keyed per kind as \"script::example.com\" or \"iframe::example.com\"."
+msgstr "Tài nguyên phát hiện quét được đánh dấu \"không chặn\", khóa theo loại như \"script::example.com\" hoặc \"iframe::example.com\"."
+
+#: inc/utils/settings-metadata.php:202
+msgid "Category reassignment for scan-detected scripts and iframes, mapping the same scoped key format as excluded_scan_resources to a cookie category ID."
+msgstr "Phân loại lại cho các script và iframe phát hiện quét, ánh xạ cùng định dạng khóa phạm vi như excluded_scan_resources tới ID danh mục cookie."
+
+#: inc/utils/settings-metadata.php:205
+msgid "Admin-authored blocking rules. Each row needs a non-empty \"value\" URL or domain pattern and a \"category\", optionally narrowed by type, location, path and keywords."
+msgstr "Quy tắc chặn do quản trị viên tạo. Mỗi hàng cần một mẫu URL hoặc tên miền \"value\" không rỗng và một \"category\", tùy chọn thu hẹp theo loại, vị trí, đường dẫn và từ khóa."
+
+#: inc/utils/settings-metadata.php:210
+msgid "Absolute URL of the fallback image on the placeholder that replaces blocked embeds. Empty renders a text-only placeholder."
+msgstr "URL tuyệt đối của hình ảnh dự phòng trên chỗ giữ chỗ thay thế nhúng bị chặn. Trống sẽ hiển thị chỗ giữ chỗ chỉ văn bản."
+
+#: inc/utils/settings-metadata.php:213
+msgid "Body copy of the blocked-content placeholder. Keep the literal token {service}, which is replaced with the vendor name at render time."
+msgstr "Nội dung chính của chỗ giữ chỗ nội dung bị chặn. Giữ nguyên token {service} nguyên văn, token này được thay thế bằng tên nhà cung cấp khi hiển thị."
+
+#: inc/utils/settings-metadata.php:216
+msgid "Label of the consent button on the blocked-content placeholder. Empty renders the built-in \"Accept & Load\"."
+msgstr "Nhãn nút đồng ý trên chỗ giữ chỗ nội dung bị chặn. Trống sẽ hiển thị \"Chấp nhận & Tải\" mặc định."
+
+#: inc/utils/settings-metadata.php:219
+msgid "Show a blocked video's own thumbnail on the placeholder. Currently resolves YouTube URLs only."
+msgstr "Hiển thị hình thu nhỏ riêng của video bị chặn trên chỗ giữ chỗ. Hiện chỉ hỗ trợ URL YouTube."
+
+#: inc/utils/settings-metadata.php:224
+msgid "Post ID of the cookie policy page linked from the banner. 0 means none is linked."
+msgstr "ID bài viết của trang chính sách cookie liên kết từ banner. 0 nghĩa là không liên kết."
+
+#: inc/utils/settings-metadata.php:225
+msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page."
+msgstr "Được làm sạch bằng absint, nên giá trị không phải số hoặc âm sẽ thành 0 và ngầm ngắt liên kết trang chính sách."
+
+#: inc/utils/settings-metadata.php:228
+msgid "Term ID of the nav menu that receives the virtual \"Cookie Preferences\" item, as a numeric string. Empty string injects nothing."
+msgstr "ID thuật ngữ của menu điều hướng nhận mục ảo \"Cookie Preferences\", dưới dạng chuỗi số. Chuỗi rỗng không chèn gì."
+
+#: inc/utils/settings-metadata.php:231
+msgid "Whether SureCookie gets its own top-level admin menu rather than living under Settings."
+msgstr "SureCookie có menu quản trị cấp cao riêng thay vì nằm dưới Cài đặt hay không."
+
+#: inc/utils/settings-metadata.php:237
+msgid "Admin-only preview panel state. No effect on the public site."
+msgstr "Trạng thái bảng xem trước chỉ dành cho quản trị viên. Không ảnh hưởng đến trang công khai."
+
+#: inc/utils/settings-metadata.php:241
+msgid "Unused."
+msgstr "Không sử dụng."
+
+#: inc/utils/settings-metadata.php:245
+msgid "Internal counter mirroring the consent-log table."
+msgstr "Bộ đếm nội bộ phản chiếu bảng nhật ký đồng ý."
+
+#: build/admin.js:2
+#: build/admin.js:84
+msgid "Blocked Content UI"
+msgstr "Giao diện Nội dung Bị chặn"
+
+#: build/admin.js:2
+#: build/admin.js:88
+msgid "Import / Export"
+msgstr "Nhập / Xuất"
+
+#: build/admin.js:4
+msgid "All dates"
+msgstr "Tất cả ngày"
+
+#: build/admin.js:4
+msgid "Select date range"
+msgstr "Chọn khoảng ngày"
+
+#: build/admin.js:4
+msgid "Clear"
+msgstr "Xóa"
+
+#: build/admin.js:28
+msgid "Not In Use"
+msgstr "Không sử dụng"
+
+#: build/admin.js:28
+msgid "Hide Unused Categories"
+msgstr "Ẩn các danh mục không sử dụng"
+
+#: build/admin.js:28
+msgid "Categories with no cookies, scripts, or services are hidden from the preferences modal. A category reappears automatically when usage changes, and is never removed from the consent record."
+msgstr "Các danh mục không có cookie, script hoặc dịch vụ sẽ bị ẩn khỏi cửa sổ tùy chọn. Một danh mục sẽ tự động xuất hiện lại khi có sự thay đổi sử dụng, và không bao giờ bị xóa khỏi hồ sơ đồng ý."
+
+#: build/admin.js:41
+msgid "Failed to update category visibility"
+msgstr "Cập nhật hiển thị danh mục thất bại"
+
+#: build/admin.js:53
+msgid "This is a worldwide banner preview"
+msgstr "Đây là bản xem trước biểu ngữ toàn cầu"
+
+#: build/admin.js:75
+msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
+msgstr "Hiển thị biểu ngữ mặc định của bạn, biểu ngữ mà khách truy cập thấy khi không có Quy tắc Địa lý nào áp dụng. Bật tùy chọn này sẽ đóng mọi bản xem trước quy tắc."
+
+#: build/admin.js:83
+msgid "Edit Worldwide Default"
+msgstr "Chỉnh sửa Mặc định Toàn cầu"
+
+#: build/admin.js:83
+msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
+msgstr "Đặt trạng thái đồng ý mặc định cho tất cả khách truy cập trên toàn thế giới, trước khi họ đưa ra lựa chọn. Các quy tắc khu vực sẽ ghi đè điều này cho vùng của họ, theo luật của từng vùng."
+
+#: build/admin.js:83
+msgid "Worldwide"
+msgstr "Toàn cầu"
+
+#: build/admin.js:83
+msgid "Edit worldwide default consent"
+msgstr "Chỉnh sửa đồng ý mặc định toàn cầu"
+
+#: build/admin.js:84
+msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
+msgstr "Kiểm soát những gì khách truy cập thấy khi nội dung bên thứ ba (như video hoặc bản đồ) bị chặn cho đến khi có sự đồng ý."
+
+#: build/admin.js:84
+msgid "Use video thumbnails"
+msgstr "Sử dụng hình thu nhỏ video"
+
+#: build/admin.js:84
+msgid "Use Video Thumbnails"
+msgstr "Sử dụng Hình thu nhỏ Video"
+
+#: build/admin.js:84
+msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
+msgstr "Hiển thị hình thu nhỏ riêng của video (ví dụ: YouTube) trên chỗ giữ chỗ. Lưu ý: điều này tải hình thu nhỏ từ nhà cung cấp trước khi có sự đồng ý."
+
+#: build/admin.js:84
+msgid "Upload Image"
+msgstr "Tải ảnh lên"
+
+#: build/admin.js:84
+msgid "Default Placeholder Image"
+msgstr "Ảnh chỗ giữ chỗ mặc định"
+
+#: build/admin.js:84
+msgid "Select Placeholder Image"
+msgstr "Chọn ảnh chỗ giữ chỗ"
+
+#: build/admin.js:84
+msgid "Use this image"
+msgstr "Sử dụng ảnh này"
+
+#: build/admin.js:84
+msgid "Placeholder Text"
+msgstr "Văn bản chỗ giữ chỗ"
+
+#: build/admin.js:84
+msgid "Enter placeholder text"
+msgstr "Nhập văn bản chỗ giữ chỗ"
+
+#: build/admin.js:84
+msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
+msgstr "Sử dụng {service} để chèn tên dịch vụ bị chặn (ví dụ: YouTube)."
+
+#: build/admin.js:84
+msgid "Button Text"
+msgstr "Văn bản nút"
+
+#: build/admin.js:87
+msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
+msgstr "Cho phép các khách hàng AI như Claude và Cursor quản lý biểu ngữ cookie, trình quét và cài đặt đồng ý của bạn thông qua SureCookie. Khi tắt, không có khả năng nào được đăng ký và các khách hàng AI không thể kết nối."
+
+#: build/admin.js:87
+#: build/admin.js:88
+msgid "All Settings"
+msgstr "Tất cả cài đặt"
+
+#: build/admin.js:87
+msgid "Your entire portable configuration in one file."
+msgstr "Toàn bộ cấu hình di động của bạn trong một tệp."
+
+#: build/admin.js:87
+msgid "Nothing imported"
+msgstr "Không có gì được nhập"
+
+#: build/admin.js:87
+msgid "Import complete"
+msgstr "Nhập hoàn tất"
+
+#: build/admin.js:87
+msgid "None of the settings in this file could be applied to this site."
+msgstr "Không có cài đặt nào trong tệp này có thể áp dụng cho trang web này."
+
+#: build/admin.js:87
+msgid "Your settings were imported. Here is what happened:"
+msgstr "Cài đặt của bạn đã được nhập. Đây là những gì đã xảy ra:"
+
+#: build/admin.js:87
+msgid "Applied"
+msgstr "Đã áp dụng"
+
+#: build/admin.js:87
+msgid "Skipped (Pro)"
+msgstr "Bỏ qua (Pro)"
+
+#: build/admin.js:87
+msgid "Ignored"
+msgstr "Bị bỏ qua"
+
+#. translators: %d: number of unrecognized fields.
+#: build/admin.js:88
+#, js-format
+msgid "%d unrecognized field(s)"
+msgstr "%d trường không nhận dạng được"
+
+#: build/admin.js:88
+msgid "These settings need SureCookie Pro"
+msgstr "Những cài đặt này cần SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Upgrade to Pro to use the skipped features on this site."
+msgstr "Nâng cấp lên Pro để sử dụng các tính năng bị bỏ qua trên trang web này."
+
+#: build/admin.js:88
+msgid "Move your SureCookie setup between sites with a portable settings export."
+msgstr "Di chuyển thiết lập SureCookie của bạn giữa các trang web với xuất cài đặt di động."
+
+#: build/admin.js:88
+msgid "Export settings"
+msgstr "Xuất cài đặt"
+
+#: build/admin.js:88
+msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
+msgstr "Chọn những gì để bao gồm, sau đó tải xuống tệp JSON của cấu hình SureCookie di động của bạn."
+
+#: build/admin.js:88
+msgid "What to export"
+msgstr "Những gì để xuất"
+
+#: build/admin.js:88
+msgid "Export your entire portable configuration."
+msgstr "Xuất toàn bộ cấu hình di động của bạn."
+
+#: build/admin.js:88
+msgid "Export more with SureCookie Pro"
+msgstr "Xuất nhiều hơn với SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
+msgstr "Pro thêm các cài đặt như nhắm mục tiêu địa lý, chuyển tiếp đồng ý và widget nổi vào bản xuất của bạn."
+
+#: build/admin.js:88
+msgid "Settings exported successfully."
+msgstr "Cài đặt đã được xuất thành công."
+
+#: build/admin.js:88
+msgid "Failed to export settings."
+msgstr "Xuất cài đặt thất bại."
+
+#: build/admin.js:88
+msgid "Please try again."
+msgstr "Vui lòng thử lại."
+
+#: build/admin.js:88
+msgid "Exporting…"
+msgstr "Đang xuất…"
+
+#: build/admin.js:88
+#: build/admin.js:89
+msgid "Import settings"
+msgstr "Nhập cài đặt"
+
+#: build/admin.js:88
+msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
+msgstr "Tải lên tệp xuất SureCookie để hợp nhất vào trang hiện tại hoặc thay thế tất cả các cài đặt có thể chuyển giao."
+
+#: build/admin.js:88
+msgid "JSON export file"
+msgstr "Tệp xuất JSON"
+
+#. translators: %s: selected import filename.
+#: build/admin.js:89
+#, js-format
+msgid "Selected file: %s"
+msgstr "Tệp đã chọn: %s"
+
+#: build/admin.js:89
+msgid "Replace all settings"
+msgstr "Thay thế tất cả cài đặt"
+
+#: build/admin.js:89
+msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
+msgstr "Khi bật, các cài đặt có thể chuyển giao không có trong tệp nhập sẽ được đặt lại về mặc định thay vì giữ giá trị hiện tại của trang."
+
+#: build/admin.js:89
+msgid "No settings were applied from this file."
+msgstr "Không có cài đặt nào được áp dụng từ tệp này."
+
+#: build/admin.js:89
+msgid "Failed to import settings."
+msgstr "Nhập cài đặt thất bại."
+
+#: build/admin.js:89
+msgid "Please check the file and try again."
+msgstr "Vui lòng kiểm tra tệp và thử lại."
+
+#: build/admin.js:89
+msgid "Please choose a SureCookie export file first."
+msgstr "Vui lòng chọn tệp xuất SureCookie trước."
+
+#: build/admin.js:89
+msgid "Importing…"
+msgstr "Đang nhập…"
+
+#: build/admin.js:89
+msgid "Access"
+msgstr "Truy cập"
+
+#: build/admin.js:89
+msgid "28 days left"
+msgstr "Còn 28 ngày"
+
+#: build/admin.js:89
+msgid "Erasure"
+msgstr "Xóa"
+
+#: build/admin.js:89
+msgid "In progress"
+msgstr "Đang tiến hành"
+
+#: build/admin.js:89
+msgid "6 days left"
+msgstr "Còn 6 ngày"
+
+#: build/admin.js:89
+msgid "Portability"
+msgstr "Khả năng di động"
+
+#: build/admin.js:89
+msgid "3 days overdue"
+msgstr "Quá hạn 3 ngày"
+
+#: build/admin.js:89
+msgid "Responded"
+msgstr "Đã phản hồi"
+
+#: build/admin.js:89
+msgid "Data Request Logs"
+msgstr "Nhật ký Yêu cầu Dữ liệu"
+
+#: build/admin.js:89
+msgid "One Form for Every Request"
+msgstr "Một Biểu mẫu cho Mỗi Yêu cầu"
+
+#: build/admin.js:89
+msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
+msgstr "Thêm biểu mẫu bằng shortcode, hoặc để nó xuất hiện trên trang Chính sách Bảo mật của bạn. Các yêu cầu đến đầy đủ, không phải email mơ hồ."
+
+#: build/admin.js:89
+msgid "Every Request Verified by Email"
+msgstr "Mỗi Yêu cầu Được Xác minh qua Email"
+
+#: build/admin.js:89
+msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
+msgstr "Mỗi lần gửi sẽ gửi một liên kết dùng một lần hết hạn trong 24 giờ. Bạn chỉ xử lý các yêu cầu mà người đó thực sự đã gửi."
+
+#: build/admin.js:89
+msgid "A Deadline on Every Request"
+msgstr "Hạn chót cho Mỗi Yêu cầu"
+
+#: build/admin.js:89
+msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
+msgstr "Mỗi yêu cầu đã xác minh có ngày đến hạn, mặc định là 30 ngày, và danh sách sẽ đếm ngược. Các hàng quá hạn sẽ chuyển sang màu đỏ."
+
+#: build/admin.js:89
+msgid "One Reminder Email a Day"
+msgstr "Một Email Nhắc nhở mỗi Ngày"
+
+#: build/admin.js:89
+msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
+msgstr "Một email hàng ngày liệt kê những gì đến hạn trong vòng một tuần hoặc đã quá hạn. Bạn sẽ biết trước khi hạn chót qua."
+
+#: build/admin.js:89
+msgid "Reply With the Data Attached"
+msgstr "Trả lời Kèm Dữ liệu Đính kèm"
+
+#: build/admin.js:89
+msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
+msgstr "Chỉ một cú nhấp chuột thu thập những gì WordPress, các plugin của bạn và SureCookie lưu giữ cho email đó, sau đó đính kèm vào phản hồi của bạn. Không cần phải lắp ráp thủ công."
+
+#: build/admin.js:89
+msgid "A Record of What You Did"
+msgstr "Ghi lại những gì bạn đã làm"
+
+#: build/admin.js:89
+msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
+msgstr "Mỗi bước đều được đánh dấu thời gian: xác minh, ghi chú của bạn, phản hồi đã gửi, thậm chí cả email thất bại. Bạn có thể chứng minh những gì đã xảy ra."
+
+#: build/admin.js:89
+msgid "Available in SureCookie Pro"
+msgstr "Có trong SureCookie Pro"
+
+#: build/admin.js:89
+msgid "You Have 30 Days to Answer a Data Request"
+msgstr "Bạn có 30 ngày để trả lời Yêu cầu Dữ liệu"
+
+#: build/admin.js:89
+msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
+msgstr "Theo GDPR và CCPA, bất kỳ khách truy cập nào cũng có thể yêu cầu bản sao dữ liệu cá nhân của họ hoặc yêu cầu bạn xóa nó, và bạn có một số ngày cố định để trả lời. Nếu làm thủ công, điều đó có nghĩa là một chuỗi email, một bảng tính và một bản xuất bạn tự lắp ráp."
+
+#: build/admin.js:89
+msgid "Grab Launching Offer:"
+msgstr "Nhận Ưu đãi Khởi động:"
+
+#: build/admin.js:89
+msgid "Data Requests is a premium feature. Everything else on this page stays exactly where it is once Pro is active."
+msgstr "Yêu cầu Dữ liệu là một tính năng cao cấp. Mọi thứ khác trên trang này vẫn giữ nguyên khi Pro được kích hoạt."
+
+#: build/admin.js:89
+msgid "How Pro Handles Each Request"
+msgstr "Cách Pro Xử lý Mỗi Yêu cầu"

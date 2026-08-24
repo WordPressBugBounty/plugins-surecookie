@@ -36,8 +36,8 @@ msgstr "https://surecookie.com/"
 msgid "You do not have sufficient permissions to access this page."
 msgstr "У вас недостаточно прав для доступа к этой странице."
 
-#: admin/menu.php:87
-#: admin/menu.php:274
+#: admin/menu.php:107
+#: admin/menu.php:309
 #: build/admin.js:2
 msgid "Settings"
 msgstr "Настройки"
@@ -46,80 +46,80 @@ msgstr "Настройки"
 msgid "A simple yet powerful way to create modern forms for your website."
 msgstr "Простой, но мощный способ создавать современные формы для вашего сайта."
 
-#: inc/api/consent-logs.php:448
+#: inc/api/consent-logs.php:503
 msgid "Consent logs retrieved successfully."
 msgstr "Журналы согласия успешно получены."
 
-#: inc/api/consent-logs.php:490
+#: inc/api/consent-logs.php:545
 msgid "Consent processed successfully (logging disabled)"
 msgstr "Обработка согласия прошла успешно (логирование отключено)"
 
-#: inc/api/consent-logs.php:535
+#: inc/api/consent-logs.php:590
 msgid "Preferences should not be empty."
 msgstr "Настройки должны быть не пустыми."
 
-#: inc/api/consent-logs.php:641
+#: inc/api/consent-logs.php:700
 msgid "Consent saved successfully."
 msgstr "Согласие успешно сохранено."
 
-#: inc/api/consent-logs.php:651
+#: inc/api/consent-logs.php:710
 msgid "Failed to save consent."
 msgstr "Не удалось сохранить согласие."
 
-#: inc/api/consent-logs.php:669
-#: inc/api/consent-logs.php:801
+#: inc/api/consent-logs.php:728
+#: inc/api/consent-logs.php:860
 msgid "Invalid log ID"
 msgstr "Недопустимый ID журнала"
 
-#: inc/api/consent-logs.php:681
+#: inc/api/consent-logs.php:740
 msgid "Log not found."
 msgstr "Журнал не найден."
 
-#: inc/api/consent-logs.php:717
-#: inc/api/consent-logs.php:744
+#: inc/api/consent-logs.php:776
+#: inc/api/consent-logs.php:803
 msgid "Log details retrieved successfully."
 msgstr "Детали журнала успешно получены."
 
-#: inc/api/consent-logs.php:766
+#: inc/api/consent-logs.php:825
 msgid "Invalid log IDs"
 msgstr "Недопустимые ID журналов"
 
 #. translators: %d: number of logs deleted
-#: inc/api/consent-logs.php:787
+#: inc/api/consent-logs.php:846
 #, php-format
 msgid "%d log(s) deleted successfully."
 msgstr "Успешно удалено %d журнал(ов)."
 
-#: inc/api/consent-logs.php:777
-#: inc/api/consent-logs.php:872
+#: inc/api/consent-logs.php:836
+#: inc/api/consent-logs.php:931
 msgid "Failed to delete logs."
 msgstr "Не удалось удалить журналы."
 
-#: inc/api/consent-logs.php:812
+#: inc/api/consent-logs.php:871
 msgid "Log deleted successfully."
 msgstr "Журнал успешно удален."
 
-#: inc/api/consent-logs.php:821
+#: inc/api/consent-logs.php:880
 msgid "Failed to delete log."
 msgstr "Не удалось удалить журнал."
 
-#: inc/api/consent-logs.php:863
+#: inc/api/consent-logs.php:922
 msgid "All logs deleted successfully."
 msgstr "Все журналы успешно удалены."
 
-#: inc/services/cookie-category-service.php:54
+#: inc/services/cookie-category-service.php:60
 msgid "Cookie categories retrieved successfully."
 msgstr "Категории cookie успешно получены."
 
-#: inc/services/cookie-category-service.php:75
+#: inc/services/cookie-category-service.php:83
 msgid "Category name is required."
 msgstr "Требуется название категории."
 
-#: inc/services/cookie-category-service.php:86
+#: inc/services/cookie-category-service.php:94
 msgid "A category with this name already exists."
 msgstr "Категория с таким названием уже существует."
 
-#: inc/services/cookie-category-service.php:103
+#: inc/services/cookie-category-service.php:111
 msgid "Category created successfully."
 msgstr "Категория успешно создана."
 
@@ -127,17 +127,17 @@ msgstr "Категория успешно создана."
 msgid "Failed to create category: "
 msgstr "Не удалось создать категорию:"
 
-#: inc/services/cookie-category-service.php:124
-#: inc/services/cookie-category-service.php:196
+#: inc/services/cookie-category-service.php:132
+#: inc/services/cookie-category-service.php:204
 msgid "Category ID is required."
 msgstr "Требуется ID категории."
 
-#: inc/services/cookie-category-service.php:134
-#: inc/services/cookie-category-service.php:215
+#: inc/services/cookie-category-service.php:142
+#: inc/services/cookie-category-service.php:223
 msgid "Category not found."
 msgstr "Категория не найдена."
 
-#: inc/services/cookie-category-service.php:166
+#: inc/services/cookie-category-service.php:174
 msgid "Category updated successfully."
 msgstr "Категория успешно обновлена."
 
@@ -145,11 +145,11 @@ msgstr "Категория успешно обновлена."
 msgid "Failed to update category: "
 msgstr "Не удалось обновить категорию:"
 
-#: inc/services/cookie-category-service.php:205
+#: inc/services/cookie-category-service.php:213
 msgid "Default categories cannot be deleted."
 msgstr "Категории по умолчанию нельзя удалять."
 
-#: inc/services/cookie-category-service.php:307
+#: inc/services/cookie-category-service.php:315
 msgid "Category deleted successfully."
 msgstr "Категория успешно удалена."
 
@@ -281,7 +281,7 @@ msgstr "Данные промо-плагинов получены"
 msgid "Plugin activated successfully."
 msgstr "Плагин успешно активирован"
 
-#: inc/api/plugin.php:290
+#: inc/api/plugin.php:240
 msgid "Conflicting plugins retrieved."
 msgstr "Получены конфликтующие плагины"
 
@@ -289,31 +289,31 @@ msgstr "Получены конфликтующие плагины"
 msgid "Scanned history retrieved successfully."
 msgstr "История сканирования успешно получена"
 
-#: inc/api/settings.php:120
+#: inc/api/settings.php:201
 msgid "No data found"
 msgstr "Данные не найдены"
 
-#: inc/api/settings.php:144
+#: inc/api/settings.php:208
 msgid "Settings updated"
 msgstr "Настройки обновлены"
 
-#: inc/functions/get.php:118
+#: inc/functions/get.php:128
 msgid "Essential Cookies"
 msgstr "Обязательные Cookies"
 
-#: inc/functions/get.php:124
+#: inc/functions/get.php:134
 msgid "Functional Cookies"
 msgstr "Функциональные Cookies"
 
-#: inc/functions/get.php:130
+#: inc/functions/get.php:140
 msgid "Analytics Cookies"
 msgstr "Аналитические Cookies"
 
-#: inc/functions/get.php:136
+#: inc/functions/get.php:146
 msgid "Marketing Cookies"
 msgstr "Маркетинговые Cookies"
 
-#: inc/functions/get.php:142
+#: inc/functions/get.php:152
 msgid "Uncategorized Cookies"
 msgstr "Неклассифицированные Cookies"
 
@@ -322,14 +322,14 @@ msgstr "Неклассифицированные Cookies"
 msgid "This website uses cookies to enhance your browsing experience, personalize content, provide social media features, and analyze our traffic. You can review and manage your cookie settings at any time, or accept all cookies to proceed."
 msgstr "Этот сайт использует cookies для улучшения вашего опыта, персонализации контента, предоставления функций социальных сетей и анализа трафика. Вы можете просмотреть и управлять настройками cookie в любое время или принять все cookies для продолжения"
 
-#: inc/utils/options.php:71
+#: inc/utils/options.php:84
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Accept All"
 msgstr "Принять все"
 
-#: inc/utils/options.php:75
+#: inc/utils/options.php:89
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
@@ -352,14 +352,14 @@ msgstr "\"%s\" был отключен"
 
 #. translators: %s: Service name (e.g., YouTube, Vimeo, Bunny.net).
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:302
-#: inc/modules/script-blocking/blocker.php:1283
+#: inc/integrations/presto-player/block-handler.php:399
+#: inc/traits/placeholder-content.php:150
 #, php-format
 msgid "This content is blocked because it requires %s cookies."
 msgstr "Этот контент заблокирован, потому что он требует cookies %s"
 
-#: inc/integrations/presto-player/block-handler.php:240
-#: inc/modules/script-blocking/blocker.php:1298
+#: inc/traits/placeholder-content.php:249
+#: inc/utils/options.php:260
 msgid "Accept & Load"
 msgstr "Принять и загрузить"
 
@@ -492,11 +492,11 @@ msgstr "Сканирование не удалось на сервере."
 msgid "Failed to fetch results."
 msgstr "Не удалось получить результаты."
 
-#: inc/utils/options.php:79
+#: inc/utils/options.php:94
 msgid "Cookie Settings"
 msgstr "Настройки cookie"
 
-#: inc/utils/options.php:142
+#: inc/utils/options.php:174
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
@@ -536,6 +536,7 @@ msgstr "Не удалось загрузить категории cookie"
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "Failed to load settings"
 msgstr "Не удалось загрузить настройки"
@@ -563,7 +564,7 @@ msgstr "30 дней"
 msgid "60 days"
 msgstr "60 дней"
 
-#: admin/menu.php:74
+#: admin/menu.php:89
 #: build/admin.js:2
 msgid "Dashboard"
 msgstr "Панель управления"
@@ -578,6 +579,7 @@ msgstr "Сканер cookie"
 msgid "All Cookies"
 msgstr "Все cookie"
 
+#: inc/api/settings.php:620
 #: build/admin.js:2
 msgid "Banner"
 msgstr "Баннер"
@@ -595,18 +597,14 @@ msgstr "Макет"
 msgid "Custom CSS"
 msgstr "Пользовательский CSS"
 
-#: admin/menu.php:82
-#: admin/menu.php:400
-#: build/admin.js:2
-msgid "Logs"
-msgstr "Журналы"
-
+#: admin/menu.php:97
+#: admin/menu.php:482
 #: build/admin.js:2
 #: build/admin.js:21
 msgid "Consent Logs"
 msgstr "Журналы согласия"
 
-#: inc/modules/assisted-scan/collector.php:329
+#: inc/modules/assisted-scan/collector.php:332
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:28
@@ -1385,7 +1383,7 @@ msgstr "Вы можете настроить содержимое и парам�
 msgid "All Countries"
 msgstr "Все страны"
 
-#: inc/utils/options.php:146
+#: inc/utils/options.php:179
 msgid "Privacy Preference"
 msgstr "Настройки конфиденциальности"
 
@@ -1404,7 +1402,7 @@ msgstr "Отклонить все"
 msgid "Confirm My Choices"
 msgstr "Подтвердить мои выборы"
 
-#: inc/utils/localize-data.php:222
+#: inc/utils/localize-data.php:225
 #: build/admin.js:4
 #: build/admin.js:53
 #: build/public.js:4
@@ -1659,7 +1657,7 @@ msgstr "Перейти к панели управления"
 msgid "Exit Setup"
 msgstr "Выйти из настройки"
 
-#: admin/menu.php:130
+#: admin/menu.php:150
 msgid "You don't have access to this page."
 msgstr "У вас нет доступа к этой странице."
 
@@ -1680,15 +1678,15 @@ msgstr "Проверка безопасности не пройдена. Пож�
 msgid "Your session expired. Please refresh the page and try again."
 msgstr "Ваша сессия истекла. Пожалуйста, обновите страницу и попробуйте снова."
 
-#: inc/api/consent-logs.php:146
+#: inc/api/consent-logs.php:151
 msgid "Search by IP address or Session ID"
 msgstr "Поиск по IP-адресу или идентификатору сессии"
 
-#: inc/api/consent-logs.php:892
+#: inc/api/consent-logs.php:951
 msgid "Request origin is not allowed."
 msgstr "Источник запроса не разрешён."
 
-#: inc/api/consent-logs.php:575
+#: inc/api/consent-logs.php:630
 msgid "Session ID is required."
 msgstr "Требуется идентификатор сессии."
 
@@ -1700,27 +1698,27 @@ msgstr "У вас нет разрешения на активацию плаги
 msgid "You don't have permission to deactivate plugins."
 msgstr "У вас нет разрешения на деактивацию плагинов."
 
-#: inc/api/scanned-resources.php:78
+#: inc/api/scanned-resources.php:79
 msgid "Scanned resources retrieved successfully."
 msgstr "Сканированные ресурсы успешно получены."
 
-#: inc/functions/get.php:119
+#: inc/functions/get.php:129
 msgid "Required for basic website functionality."
 msgstr "Требуется для базовой функциональности сайта."
 
-#: inc/functions/get.php:125
+#: inc/functions/get.php:135
 msgid "Enable features like saved preferences and personalized content."
 msgstr "Включите функции, такие как сохранённые настройки и персонализированный контент."
 
-#: inc/functions/get.php:131
+#: inc/functions/get.php:141
 msgid "Help us understand how visitors use our site so we can improve it."
 msgstr "Помогите нам понять, как посетители используют наш сайт, чтобы мы могли его улучшить."
 
-#: inc/functions/get.php:137
+#: inc/functions/get.php:147
 msgid "Used to show you relevant ads based on your interests."
 msgstr "Используется для показа релевантной рекламы на основе ваших интересов."
 
-#: inc/functions/get.php:143
+#: inc/functions/get.php:153
 msgid "Cookies that haven't been categorized yet."
 msgstr "Файлы cookie, которые ещё не были классифицированы."
 
@@ -1884,11 +1882,11 @@ msgstr "Последнее обновление: %s"
 msgid "This website"
 msgstr "Этот веб-сайт"
 
-#: inc/modules/google-consent-mode/consent-handler.php:130
+#: inc/modules/google-consent-mode/consent-handler.php:129
 msgid "SureCookie:"
 msgstr "SureCookie:"
 
-#: inc/modules/google-consent-mode/consent-handler.php:132
+#: inc/modules/google-consent-mode/consent-handler.php:131
 msgid "Google Site Kit's Consent Mode is active. Please disable it in Site Kit settings to use SureCookie's implementation."
 msgstr "Режим согласия Google Site Kit активен. Пожалуйста, отключите его в настройках Site Kit, чтобы использовать реализацию SureCookie."
 
@@ -1916,18 +1914,18 @@ msgstr "Сканирование завершено!"
 msgid "Scan is in progress. Checking again…"
 msgstr "Сканирование в процессе. Проверка повторяется…"
 
-#: inc/utils/options.php:48
+#: inc/utils/options.php:56
 msgid "We use cookies to improve your experience and understand how you use our site. You can review your choices at any time."
 msgstr "Мы используем файлы cookie, чтобы улучшить ваш опыт и понять, как вы используете наш сайт. Вы можете в любое время просмотреть свои настройки."
 
-#: inc/utils/options.php:62
+#: inc/utils/options.php:73
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Only Essential"
 msgstr "Только необходимые"
 
-#: inc/utils/options.php:174
+#: inc/utils/options.php:213
 #: build/admin.js:4
 #: build/admin.js:75
 msgid "Cookie Preferences"
@@ -1958,6 +1956,7 @@ msgstr "365 дней"
 msgid "Re-Consent"
 msgstr "Повторное согласие"
 
+#: inc/api/settings.php:672
 #: build/admin.js:2
 msgid "Google Consent Mode"
 msgstr "Режим согласия Google"
@@ -2045,6 +2044,7 @@ msgstr "Разблокировать эту функцию"
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr "Произошла ошибка при загрузке настроек. Пожалуйста, обновите страницу и попробуйте снова."
@@ -2293,10 +2293,6 @@ msgstr "Powered by SureCookie (открывается в новой вкладк
 #: build/admin.js:53
 msgid "Buttons are for reference only in preview."
 msgstr "Кнопки предназначены только для предварительного просмотра."
-
-#: build/admin.js:53
-msgid "This is a preview"
-msgstr "Это предварительный просмотр"
 
 #: build/admin.js:53
 msgid "Close preview"
@@ -2763,24 +2759,24 @@ msgstr "Принимать все файлы cookie"
 msgid "Real cookie consent for WordPress. Browser-based scanning, smart categorization, strict script blocking, and consent logs stored in your database."
 msgstr "Реальное согласие на использование файлов cookie для WordPress. Сканирование в браузере, умная категоризация, строгая блокировка скриптов и журналы согласий, хранящиеся в вашей базе данных."
 
-#: admin/menu.php:300
-#: admin/menu.php:301
+#: admin/menu.php:335
+#: admin/menu.php:336
 msgid "Upgrade"
 msgstr "Обновить"
 
-#: admin/rating-notice.php:234
+#: admin/rating-notice.php:306
 msgid "If SureCookie has been helpful, would you mind taking a moment to leave a 5-star review on WordPress.org?"
 msgstr "Если SureCookie был полезен, не могли бы вы уделить минуту и оставить 5-звездочный отзыв на WordPress.org?"
 
-#: admin/rating-notice.php:243
+#: admin/rating-notice.php:315
 msgid "Rate SureCookie"
 msgstr "Оценить SureCookie"
 
-#: admin/rating-notice.php:251
+#: admin/rating-notice.php:323
 msgid "Maybe later"
 msgstr "Может быть, позже"
 
-#: admin/rating-notice.php:255
+#: admin/rating-notice.php:327
 msgid "I already did"
 msgstr "Я уже оставил"
 
@@ -2810,6 +2806,7 @@ msgstr "Внести вклад в SureCookie"
 
 #: build/admin.js:53
 #: build/admin.js:84
+#: build/admin.js:89
 msgid "Learn More"
 msgstr "Узнать больше"
 
@@ -2992,16 +2989,16 @@ msgstr "Поддерживаемые сервисы: Analytics 4, Google Ads, Ta
 msgid "Cookie Consent"
 msgstr "Согласие на использование файлов cookie"
 
-#: inc/api/consent-logs.php:318
-#: inc/api/consent-logs.php:345
+#: inc/api/consent-logs.php:339
+#: inc/api/consent-logs.php:366
 msgid "Request origin could not be verified."
 msgstr "Невозможно проверить источник запроса."
 
-#: inc/api/consent-logs.php:614
+#: inc/api/consent-logs.php:669
 msgid "Accept All is not enabled for this site."
 msgstr "Кнопка «Принять все» не включена для этого сайта."
 
-#: inc/api/posts.php:199
+#: inc/api/posts.php:151
 msgid "Post not found."
 msgstr "Публикация не найдена."
 
@@ -3021,7 +3018,7 @@ msgstr "Требуется аутентификация."
 msgid "Failed to fetch quota."
 msgstr "Не удалось получить квоту."
 
-#: inc/utils/options.php:150
+#: inc/utils/options.php:184
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr "Мы используем файлы cookie и аналогичные технологии, чтобы помочь персонализировать контент, адаптировать и измерять рекламу, а также обеспечить лучший опыт."
 
@@ -3154,22 +3151,22 @@ msgstr "Всё готово. Поехали в прямой эфир 🚀"
 msgid "From consent logs to region-based preferences, SureCookie helps you stay compliant while building visitor trust."
 msgstr "От журналов согласий до региональных предпочтений — SureCookie помогает вам оставаться в соответствии с требованиями и строить доверие посетителей."
 
-#: admin/menu.php:91
+#: admin/menu.php:111
 #: build/admin.js:2
 msgid "Learn"
 msgstr "Узнать"
 
-#: inc/api/consent-logs.php:376
-#: inc/api/consent-logs.php:515
+#: inc/api/consent-logs.php:397
+#: inc/api/consent-logs.php:570
 msgid "Too many requests. Please try again later."
 msgstr "Слишком много запросов. Пожалуйста, попробуйте позже."
 
-#: inc/api/consent-logs.php:544
+#: inc/api/consent-logs.php:599
 msgid "Preferences data is too large."
 msgstr "Данные настроек слишком велики."
 
-#: inc/api/consent-logs.php:555
-#: inc/api/consent-logs.php:566
+#: inc/api/consent-logs.php:610
+#: inc/api/consent-logs.php:621
 msgid "Invalid preferences format."
 msgstr "Неверный формат настроек."
 
@@ -3341,35 +3338,35 @@ msgstr "Хотите больше контроля над баннером фа�
 msgid "Upgrade to hide it on selected pages, posts, archives, or on specific user roles."
 msgstr "Обновитесь, чтобы скрывать его на выбранных страницах, записях, архивах или для определенных ролей пользователей."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "IAB Transparency & Consent Framework"
 msgstr "Рамочная структура прозрачности и согласия IAB"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr "Сделайте ваш баннер согласия соответствующим требованиям IAB TCF 2.3 и интегрируйте его с Глобальным списком поставщиков."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr "Разблокировать соответствие IAB TCF 2.3 - скоро будет доступно"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr "Включите полный режим TCF, генерируйте строки TC и отображайте список поставщиков IAB вашим посетителям."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Google Additional Consent (AC)"
 msgstr "Дополнительное согласие Google (AC)"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr "Добавьте Дополнительное согласие Google вместе с IAB TCF для работы с рекламными поставщиками, отсутствующими в Глобальном списке поставщиков IAB."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr "Разблокировать Дополнительное согласие Google - скоро будет доступно"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr "Генерируйте строку AC, зеркально копируйте cookie addtl_consent и отображайте список поставщиков Дополнительного согласия Google вашим посетителям — требуется для полной монетизации Google Ads / GAM."
 
@@ -3393,6 +3390,7 @@ msgstr "Получено от"
 
 #: build/admin.js:3
 #: build/admin.js:4
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Received"
 msgstr "Получено"
@@ -3441,6 +3439,7 @@ msgstr "Обновление экспорта журнала согласий"
 msgid "Preference sections"
 msgstr "Разделы предпочтений"
 
+#: inc/api/settings.php:653
 #: build/admin.js:2
 #: build/admin.js:50
 #: build/public.js:1
@@ -3486,6 +3485,7 @@ msgstr "Сервер SureCookie MCP для настроек согласия н�
 msgid "%s submenu"
 msgstr "%s подменю"
 
+#: inc/api/settings.php:625
 #: build/admin.js:2
 msgid "General"
 msgstr "Общие"
@@ -3494,6 +3494,7 @@ msgstr "Общие"
 msgid "Consent & Data"
 msgstr "Согласие и данные"
 
+#: inc/api/settings.php:630
 #: build/admin.js:2
 msgid "Consent Frameworks"
 msgstr "Рамки согласия"
@@ -3585,18 +3586,6 @@ msgid "VS Code"
 msgstr "VS Code"
 
 #: build/admin.js:84
-msgid "ChatGPT"
-msgstr "ChatGPT"
-
-#: build/admin.js:84
-msgid "go to Settings → Connectors → Add Connector, paste the endpoint URL, and use your WordPress username + Application Password."
-msgstr "Перейдите в Настройки → Коннекторы → Добавить коннектор, вставьте URL конечной точки и используйте ваше имя пользователя WordPress + пароль приложения."
-
-#: build/admin.js:84
-msgid "Learn more about ChatGPT connectors"
-msgstr "Узнайте больше о коннекторах ChatGPT"
-
-#: build/admin.js:84
 msgid "SureCookie Only"
 msgstr "Только SureCookie"
 
@@ -3656,10 +3645,6 @@ msgid "Enable MCP"
 msgstr "Включить MCP"
 
 #: build/admin.js:87
-msgid "Allow AI clients like Claude, ChatGPT, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
-msgstr "Разрешите ИИ клиентам, таким как Claude, ChatGPT и Cursor, управлять вашим баннером cookie, сканером и настройками согласия через SureCookie. При отключении возможности не регистрируются, и ИИ клиенты не могут подключаться."
-
-#: build/admin.js:87
 msgid "WordPress Abilities API not available"
 msgstr "API возможностей WordPress недоступен"
 
@@ -3675,11 +3660,11 @@ msgstr "Несохранённые изменения"
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr "Точка доступа MCP становится активной только после сохранения настроек."
 
-#: inc/api/consent-logs.php:404
+#: inc/api/consent-logs.php:425
 msgid "Unable to determine the current user."
 msgstr "Не удалось определить текущего пользователя."
 
-#: inc/api/consent-logs.php:415
+#: inc/api/consent-logs.php:436
 msgid "Consent logs marked as viewed."
 msgstr "Журналы согласий отмечены как просмотренные."
 
@@ -3727,7 +3712,8 @@ msgstr "Один раз в месяц (SureCookie)"
 msgid "Once Weekly (SureCookie)"
 msgstr "Один раз в неделю (SureCookie)"
 
-#: inc/modules/script-blocking/blocker.php:1279
+#: inc/traits/placeholder-content.php:215
+#: inc/utils/localize-data.php:265
 msgid "This content is currently blocked."
 msgstr "Этот контент в настоящее время заблокирован."
 
@@ -4035,10 +4021,6 @@ msgstr "Будьте в курсе и помогайте формировать 
 msgid "Grow traffic of your website with SureRank - a lightweight SEO toolkit plugin for WordPress users who want better rankings without the complexity."
 msgstr "Увеличьте трафик вашего сайта с SureRank — лёгким SEO-плагином для пользователей WordPress, которые хотят улучшить позиции в поиске без лишней сложности."
 
-#: admin/rating-notice.php:232
-msgid "Amazing! SureCookie discovered cookies on your site - let's keep growing together!"
-msgstr "Отлично! SureCookie обнаружил файлы cookie на вашем сайте — давайте расти вместе!"
-
 #. translators: 1: page URL, 2: error message
 #: inc/modules/site-scanner/saas-client.php:989
 #, php-format
@@ -4104,15 +4086,15 @@ msgstr "Перезапустите вашего ИИ клиента и снов�
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr "Пользуйтесь вашим ИИ клиентом, подключённым к вашему сайту WordPress!"
 
-#: admin/rating-notice.php:156
+#: admin/rating-notice.php:179
 msgid "Invalid nonce."
 msgstr "Неверный nonce."
 
-#: admin/rating-notice.php:158
+#: admin/rating-notice.php:181
 msgid "Unauthorized user."
 msgstr "Неавторизованный пользователь."
 
-#: admin/rating-notice.php:171
+#: admin/rating-notice.php:194
 msgid "Invalid parameters."
 msgstr "Неверные параметры."
 
@@ -4120,11 +4102,11 @@ msgstr "Неверные параметры."
 msgid "More scan limits, geographic targeting, re-consent widget, and more."
 msgstr "Больше ограничений сканирования, географическое таргетирование, виджет повторного согласия и многое другое."
 
-#: inc/integrations/presto-player/block-handler.php:293
+#: inc/integrations/presto-player/block-handler.php:390
 msgid "This audio is blocked until you accept cookies to load it."
 msgstr "Этот аудиофайл заблокирован до тех пор, пока вы не примете файлы cookie для его загрузки."
 
-#: inc/integrations/presto-player/block-handler.php:297
+#: inc/integrations/presto-player/block-handler.php:394
 msgid "This video is blocked until you accept cookies to load it."
 msgstr "Это видео заблокировано до тех пор, пока вы не примете файлы cookie для его загрузки."
 
@@ -4396,7 +4378,7 @@ msgstr "Давайте поможем вам обнаружить cookie, нас
 msgid "Keep consent records locally on the site and export individual records when needed"
 msgstr "Хранить записи согласия локально на сайте и экспортировать отдельные записи по мере необходимости"
 
-#: admin/menu.php:78
+#: admin/menu.php:93
 #: build/admin.js:2
 msgid "Tracking Manager"
 msgstr "Менеджер отслеживания"
@@ -4413,10 +4395,9 @@ msgstr "Spectra Blocks — это полная переработка Spectra н
 msgid "Failed to update cookie categories: "
 msgstr "Не удалось обновить категории cookie:"
 
-#. translators: %s: Provider name (e.g., YouTube, Vimeo)
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:236
-#: inc/modules/script-blocking/blocker.php:1294
+#: inc/traits/placeholder-content.php:227
+#: inc/utils/localize-data.php:267
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Принять и загрузить содержимое %s"
@@ -4459,34 +4440,34 @@ msgid "Assisted scan cancelled."
 msgstr "Ассистированное сканирование отменено."
 
 #. translators: 1: current page number, 2: total pages.
-#: inc/modules/assisted-scan/collector.php:322
+#: inc/modules/assisted-scan/collector.php:325
 #, php-format
 msgid "SureCookie is scanning page %1$d of %2$d"
 msgstr "SureCookie сканирует страницу %1$d из %2$d"
 
-#: inc/modules/assisted-scan/collector.php:323
+#: inc/modules/assisted-scan/collector.php:326
 msgid "Keep this tab in front so the scan can continue."
 msgstr "Держите эту вкладку на переднем плане, чтобы сканирование продолжалось."
 
-#: inc/modules/assisted-scan/collector.php:324
+#: inc/modules/assisted-scan/collector.php:327
 msgid "Paused. Bring this tab to the front to continue."
 msgstr "Пауза. Переключитесь на эту вкладку, чтобы продолжить."
 
-#: inc/modules/assisted-scan/collector.php:325
+#: inc/modules/assisted-scan/collector.php:328
 msgid "Preparing a clean visit…"
 msgstr "Подготовка чистого посещения…"
 
 #. translators: 1: number of cookies, 2: number of services.
-#: inc/modules/assisted-scan/collector.php:327
+#: inc/modules/assisted-scan/collector.php:330
 #, php-format
 msgid "Scan complete: %1$d cookies, %2$d services found"
 msgstr "Сканирование завершено: найдено %1$d cookie, %2$d сервисов"
 
-#: inc/modules/assisted-scan/collector.php:328
+#: inc/modules/assisted-scan/collector.php:331
 msgid "The scan could not be completed. Return to SureCookie to try again."
 msgstr "Сканирование не удалось завершить. Вернитесь в SureCookie и попробуйте снова."
 
-#: inc/modules/assisted-scan/collector.php:330
+#: inc/modules/assisted-scan/collector.php:333
 msgid "SureCookie assisted scan progress"
 msgstr "Прогресс ассистированного сканирования SureCookie"
 
@@ -4522,11 +4503,12 @@ msgstr "Ассистированное сканирование в процес�
 msgid "Assisted scan finished."
 msgstr "Ассистированное сканирование завершено."
 
-#: inc/modules/services/api.php:142
+#: inc/services/known-services-service.php:71
+#: inc/services/known-services-service.php:202
 msgid "Unknown service."
 msgstr "Неизвестный сервис."
 
-#: inc/modules/services/api.php:153
+#: inc/services/known-services-service.php:78
 msgid "This is a Pro service. Upgrade to add it."
 msgstr "Это сервис Pro. Обновитесь, чтобы добавить его."
 
@@ -4546,11 +4528,11 @@ msgstr "Мы не смогли проверить ваш домен, потом�
 msgid "We could not reach your site's REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry."
 msgstr "Мы не смогли получить доступ к REST API вашего сайта по адресу /wp-json/. Включите красивые постоянные ссылки и убедитесь, что ни один плагин безопасности не отключает REST API, затем повторите попытку."
 
-#: inc/services/cookie-category-service.php:247
+#: inc/services/cookie-category-service.php:255
 msgid "Cookies cannot be moved to the category being deleted."
 msgstr "Файлы cookie нельзя переместить в удаляемую категорию."
 
-#: inc/services/cookie-category-service.php:254
+#: inc/services/cookie-category-service.php:262
 #: inc/services/cookie-service.php:440
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "Выбранная категория больше не существует. Пожалуйста, перезагрузите страницу и попробуйте снова."
@@ -4592,6 +4574,7 @@ msgstr "Известные сервисы"
 msgid "Scripts and Embeds"
 msgstr "Скрипты и вставки"
 
+#: inc/api/settings.php:615
 #: build/admin.js:2
 #: build/admin.js:84
 msgid "Geographic Rules"
@@ -4650,6 +4633,7 @@ msgstr "Переместить в категорию…"
 msgid "Applying…"
 msgstr "Применение…"
 
+#: build/admin.js:4
 #: build/admin.js:25
 msgid "Apply"
 msgstr "Применить"
@@ -5532,3 +5516,883 @@ msgstr "Разрешено загружать, пока активен режи�
 #: build/admin.js:77
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. They cannot be removed here."
 msgstr "Эти сервисы Google разрешены к загрузке, пока активен режим согласия Google, вместо блокировки до получения согласия. Для продуктов Google Tag режим согласия контролирует, что они могут сохранять и какие идентификаторы использовать. Это не препятствует их связи с Google. Их нельзя удалить здесь."
+
+#: admin/menu.php:102
+#: admin/menu.php:455
+#: build/admin.js:2
+msgid "Data Requests"
+msgstr "Запросы данных"
+
+#: admin/menu.php:461
+msgid "NEW"
+msgstr "НОВЫЙ"
+
+#. translators: %s: number of visitor consents recorded so far, e.g. "1,204".
+#: admin/rating-notice.php:284
+#, php-format
+msgid "Amazing! SureCookie has recorded %s visitor consent on your site - let's keep growing together!"
+msgid_plural "Amazing! SureCookie has recorded %s visitor consents on your site - let's keep growing together!"
+msgstr[0] "Удивительно! SureCookie зафиксировал %s согласий посетителей на вашем сайте — давайте расти вместе!"
+msgstr[1] ""
+msgstr[2] ""
+
+#: inc/api/consent-logs.php:169
+msgid "Inclusive start of the log date range (Y-m-d)."
+msgstr "Включительно начало диапазона дат журнала (Г-г-м)."
+
+#: inc/api/consent-logs.php:177
+msgid "Inclusive end of the log date range (Y-m-d)."
+msgstr "Включительно конец диапазона дат журнала (Г-г-м)."
+
+#: inc/api/consent-logs.php:482
+msgid "The start date cannot be later than the end date."
+msgstr "Дата начала не может быть позже даты окончания."
+
+#: inc/api/settings.php:288
+msgid "Please upload a SureCookie export file to import."
+msgstr "Пожалуйста, загрузите файл экспорта SureCookie для импорта."
+
+#: inc/api/settings.php:297
+msgid "The selected file is too large to import."
+msgstr "Выбранный файл слишком большой для импорта."
+
+#: inc/api/settings.php:308
+msgid "The uploaded file is not valid JSON."
+msgstr "Загруженный файл не является допустимым JSON."
+
+#: inc/api/settings.php:317
+msgid "The uploaded file is not a valid SureCookie settings export."
+msgstr "Загруженный файл не является допустимым экспортом настроек SureCookie."
+
+#: inc/api/settings.php:326
+msgid "This settings export uses an unsupported schema version."
+msgstr "Этот экспорт настроек использует неподдерживаемую версию схемы."
+
+#: inc/api/settings.php:337
+msgid "The uploaded file does not contain a valid settings payload."
+msgstr "Загруженный файл не содержит допустимых данных настроек."
+
+#: inc/api/settings.php:363
+msgid "No settings were imported. This export contains Pro features that are not available on this site."
+msgstr "Настройки не были импортированы. Этот экспорт содержит функции Pro, недоступные на этом сайте."
+
+#: inc/api/settings.php:376
+msgid "The uploaded file does not contain any importable SureCookie settings for this site."
+msgstr "Загруженный файл не содержит импортируемых настроек SureCookie для этого сайта."
+
+#: inc/api/settings.php:407
+#: build/admin.js:89
+msgid "Settings imported successfully."
+msgstr "Настройки успешно импортированы."
+
+#: inc/api/settings.php:610
+msgid "Cookies & Scripts"
+msgstr "Файлы cookie и скрипты"
+
+#: inc/api/settings.php:611
+msgid "Cookie categories, custom cookies, known services, script blocking and scanning."
+msgstr "Категории файлов cookie, пользовательские cookie, известные сервисы, блокировка и сканирование скриптов."
+
+#: inc/api/settings.php:616
+msgid "Region-based banner rules."
+msgstr "Правила баннера по регионам."
+
+#: inc/api/settings.php:621
+msgid "Banner content, layout, colors, buttons and display."
+msgstr "Содержимое баннера, макет, цвета, кнопки и отображение."
+
+#: inc/api/settings.php:626
+msgid "Consent model, logging, preferences, custom CSS and other plugin settings."
+msgstr "Модель согласия, ведение журнала, предпочтения, пользовательский CSS и другие настройки плагина."
+
+#: inc/api/settings.php:631
+msgid "Google Consent Mode and other consent integrations."
+msgstr "Режим согласия Google и другие интеграции согласия."
+
+#: inc/api/settings.php:635
+msgid "Buttons & labels"
+msgstr "Кнопки и метки"
+
+#: inc/api/settings.php:636
+msgid "Button visibility, order and label text."
+msgstr "Видимость кнопок, порядок и текст меток."
+
+#: inc/api/settings.php:641
+msgid "Consent & compliance"
+msgstr "Согласие и соответствие"
+
+#: inc/api/settings.php:642
+msgid "Compliance law, consent model, logging and duration."
+msgstr "Закон о соответствии, модель согласия, ведение журнала и продолжительность."
+
+#: inc/api/settings.php:647
+msgid "Cookie categories"
+msgstr "Категории файлов cookie"
+
+#: inc/api/settings.php:648
+msgid "Your consent categories."
+msgstr "Ваши категории согласия."
+
+#: inc/api/settings.php:654
+msgid "Custom cookie definitions."
+msgstr "Определения пользовательских файлов cookie."
+
+#: inc/api/settings.php:660
+msgid "Script blocking"
+msgstr "Блокировка скриптов"
+
+#: inc/api/settings.php:661
+msgid "Blocking rules and scan resource overrides."
+msgstr "Правила блокировки и переопределения ресурсов сканирования."
+
+#: inc/api/settings.php:666
+msgid "Known services"
+msgstr "Известные сервисы"
+
+#: inc/api/settings.php:667
+msgid "Services you added or removed for cookie declarations and blocking."
+msgstr "Сервисы, которые вы добавили или удалили для деклараций файлов cookie и блокировки."
+
+#: inc/api/settings.php:673
+msgid "GCM toggle and region defaults."
+msgstr "Переключатель GCM и региональные настройки по умолчанию."
+
+#: inc/api/settings.php:678
+msgid "Automatic scanning"
+msgstr "Автоматическое сканирование"
+
+#: inc/api/settings.php:679
+msgid "Scan frequency and scope."
+msgstr "Частота и область сканирования."
+
+#: inc/api/settings.php:684
+#: build/admin.js:2
+msgid "Advanced"
+msgstr "Дополнительно"
+
+#: inc/api/settings.php:685
+msgid "Custom CSS, integrations and tool settings."
+msgstr "Пользовательский CSS, интеграции и настройки инструментов."
+
+#: inc/integrations/astra/init.php:123
+#: inc/integrations/theme-palette/init.php:81
+msgid "Astra Global Palette"
+msgstr "Глобальная палитра Astra"
+
+#: inc/integrations/theme-palette/init.php:92
+msgid "Kadence Color Palette"
+msgstr "Палитра цветов Kadence"
+
+#: inc/integrations/theme-palette/init.php:104
+msgid "Theme Colors"
+msgstr "Цвета темы"
+
+#: inc/services/known-services-service.php:162
+msgid "The service could not be installed."
+msgstr "Сервис не удалось установить."
+
+#: inc/services/known-services-service.php:177
+msgid "Service installed. Every cookie it declares was already present, so no new cookie definitions were created."
+msgstr "Сервис установлен. Все объявленные им cookie уже присутствовали, поэтому новые определения cookie не были созданы."
+
+#: inc/services/known-services-service.php:178
+msgid "Service installed and its cookies declared."
+msgstr "Сервис установлен и его cookie объявлены."
+
+#: inc/services/known-services-service.php:213
+msgid "Service removed and its declared cookies deleted."
+msgstr "Сервис удалён, а его объявленные cookie удалены."
+
+#: inc/services/known-services-service.php:214
+msgid "That service was not installed, so nothing was removed."
+msgstr "Этот сервис не был установлен, поэтому ничего не было удалено."
+
+#: inc/services/known-services-service.php:244
+msgid "Catalog refreshed."
+msgstr "Каталог обновлён."
+
+#: inc/services/script-blocking-service.php:161
+msgid "A resource domain and a target category are both required."
+msgstr "Требуются домен ресурса и целевая категория."
+
+#: inc/services/script-blocking-service.php:174
+#: inc/services/script-blocking-service.php:433
+msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Такой категории не существует. Используйте surecookie/cookie-categories с действием \"list\", чтобы увидеть допустимые идентификаторы."
+
+#: inc/services/script-blocking-service.php:191
+msgid "Resource category updated."
+msgstr "Категория ресурса обновлена."
+
+#: inc/services/script-blocking-service.php:230
+msgid "That resource was already excluded from blocking."
+msgstr "Этот ресурс уже был исключён из блокировки."
+
+#: inc/services/script-blocking-service.php:231
+msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
+msgstr "Ресурс исключён из блокировки. Обратите внимание, это касается только скриптов и iframe, а не тегов embed или object."
+
+#: inc/services/script-blocking-service.php:253
+msgid "A resource domain is required."
+msgstr "Требуется домен ресурса."
+
+#: inc/services/script-blocking-service.php:280
+msgid "Resource will be blocked again until consent."
+msgstr "Ресурс будет заблокирован снова до получения согласия."
+
+#: inc/services/script-blocking-service.php:281
+msgid "That resource was not excluded, so nothing changed."
+msgstr "Этот ресурс не был исключён, поэтому ничего не изменилось."
+
+#: inc/services/script-blocking-service.php:361
+msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Требуется действительная категория. Используйте surecookie/cookie-categories с действием \"list\", чтобы увидеть допустимые идентификаторы."
+
+#: inc/services/script-blocking-service.php:368
+msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
+msgstr "Правило для этого шаблона уже существует. Используйте \"update_rule\" вместо этого."
+
+#: inc/services/script-blocking-service.php:377
+msgid "Blocking rule created."
+msgstr "Правило блокировки создано."
+
+#: inc/services/script-blocking-service.php:399
+#: inc/services/script-blocking-service.php:465
+msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
+msgstr "Нет правила блокировки, соответствующего этому шаблону. Используйте \"list_rules\", чтобы увидеть текущие правила."
+
+#: inc/services/script-blocking-service.php:417
+msgid "Another rule already uses that pattern."
+msgstr "Другой правило уже использует этот шаблон."
+
+#: inc/services/script-blocking-service.php:429
+msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "Эта категория не является допустимым идентификатором. Используйте surecookie/cookie-categories с действием \"list\", чтобы увидеть допустимые идентификаторы."
+
+#: inc/services/script-blocking-service.php:444
+msgid "Blocking rule updated."
+msgstr "Правило блокировки обновлено."
+
+#: inc/services/script-blocking-service.php:475
+msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
+msgstr "Правило блокировки удалено. Ресурсы, которые оно покрывало, больше не блокируются им."
+
+#: inc/services/script-blocking-service.php:576
+msgid "A domain or URL pattern is required."
+msgstr "Требуется домен или шаблон URL."
+
+#: inc/services/script-blocking-service.php:583
+msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
+msgstr "Этот шаблон слишком общий. Шаблоны сопоставляются как подстроки, поэтому простой токен, например \"com\", будет соответствовать почти каждому стороннему ресурсу на сайте. Используйте полный домен, например \"example.com\", или путь URL."
+
+#: inc/utils/options.php:255
+msgid "This content is blocked because it requires {service} cookies."
+msgstr "Этот контент заблокирован, потому что требует cookies {service}."
+
+#: inc/utils/settings-metadata.php:72
+msgid "Banner shape: \"box\" is a floating card, \"banner\" is a full-width bar."
+msgstr "Форма баннера: \"box\" — плавающая карточка, \"banner\" — полоса на всю ширину."
+
+#: inc/utils/settings-metadata.php:73
+msgid "Coupled with notice_position, so set both together: \"box\" takes bottom-left, bottom-center, bottom-right or middle, \"banner\" takes only top or bottom. A mismatched pair is not rejected, it silently renders somewhere else."
+msgstr "Связано с notice_position, поэтому устанавливайте оба вместе: \"box\" принимает bottom-left, bottom-center, bottom-right или middle, \"banner\" принимает только top или bottom. Несовпадающая пара не отклоняется, а тихо отображается в другом месте."
+
+#: inc/utils/settings-metadata.php:77
+msgid "Where the banner sits on screen. The legal subset depends on notice_type."
+msgstr "Где баннер располагается на экране. Законодательный поднабор зависит от notice_type."
+
+#: inc/utils/settings-metadata.php:78
+msgid "Not interchangeable across notice_type: a box-only value on a \"banner\" renders as a bottom bar, and top/bottom on a \"box\" falls back to bottom-right, both silently."
+msgstr "Не взаимозаменяемо между notice_type: значение только для box на \"banner\" отображается как нижняя полоса, а top/bottom на \"box\" откатывается к bottom-right, оба тихо."
+
+#: inc/utils/settings-metadata.php:82
+msgid "Unused. Superseded by notice_position."
+msgstr "Не используется. Заменено на notice_position."
+
+#: inc/utils/settings-metadata.php:86
+msgid "Banner entrance animation."
+msgstr "Анимация появления баннера."
+
+#: inc/utils/settings-metadata.php:89
+msgid "ID of the banner colour preset. Built-ins are blue-purple, purple-pink, blue-cyan, green-lime, red-orange, dark-blue, dark-green, dark-pink and dark-orange, plus \"astra\" while the Astra theme is active. A theme or plugin can register more."
+msgstr "ID предустановки цвета баннера. Встроенные: сине-фиолетовый, фиолетово-розовый, сине-циановый, зелёно-лаймовый, красно-оранжевый, тёмно-синий, тёмно-зелёный, тёмно-розовый и тёмно-оранжевый, плюс \"astra\" при активной теме Astra. Тема или плагин могут зарегистрировать больше."
+
+#: inc/utils/settings-metadata.php:90
+msgid "Not validated on write: an unknown ID reports success and silently renders the default palette."
+msgstr "Не проверяется при записи: неизвестный ID сообщает об успехе и тихо отображает палитру по умолчанию."
+
+#: inc/utils/settings-metadata.php:93
+msgid "Dim the page behind the banner and block interaction until the visitor chooses."
+msgstr "Затемните страницу за баннером и заблокируйте взаимодействие, пока посетитель не сделает выбор."
+
+#: inc/utils/settings-metadata.php:94
+msgid "Forces a consent choice before the site can be used, which conflicts with the freely-given consent requirement in some regions. Confirm with the user before enabling."
+msgstr "Принуждает к выбору согласия перед использованием сайта, что противоречит требованию свободно выраженного согласия в некоторых регионах. Подтвердите с пользователем перед включением."
+
+#: inc/utils/settings-metadata.php:97
+msgid "Master switch for the consent banner."
+msgstr "Главный переключатель для баннера согласия."
+
+#: inc/utils/settings-metadata.php:98
+msgid "Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent."
+msgstr "Также отключает блокировку скриптов и iframe, независимо от значения blocking_enabled, поэтому отключение позволяет трекерам запускаться до получения согласия."
+
+#: inc/utils/settings-metadata.php:101
+msgid "Absolute URL of an image shown at the top of the banner. Empty string removes it."
+msgstr "Абсолютный URL изображения, отображаемого в верхней части баннера. Пустая строка удаляет его."
+
+#: inc/utils/settings-metadata.php:104
+msgid "Plain-text headline above the banner message. HTML is stripped. Empty renders no heading."
+msgstr "Заголовок простым текстом над сообщением баннера. HTML удаляется. Пустое значение не отображает заголовок."
+
+#: inc/utils/settings-metadata.php:107
+msgid "Banner body copy. Accepts post-level HTML such as links and emphasis."
+msgstr "Текст баннера. Поддерживает HTML на уровне поста, такой как ссылки и выделение."
+
+#: inc/utils/settings-metadata.php:113
+msgid "Site-wide consent model: \"opt-in\" (GDPR style, nothing non-essential runs before consent) or \"opt-out\" (CCPA style, allowed until the visitor declines)."
+msgstr "Модель согласия для всего сайта: «opt-in» (стиль GDPR, ничего не запускается без согласия) или «opt-out» (стиль CCPA, разрешено до отказа посетителя)."
+
+#: inc/utils/settings-metadata.php:114
+msgid "Legally load-bearing. \"opt-out\" lets non-essential trackers fire before any consent, which is unlawful for EU and UK visitors, and it removes the Preferences and Accept All buttons. Confirm the site's jurisdiction with the user before changing it."
+msgstr "Юридически значимо. «opt-out» позволяет запускать несущественные трекеры до получения согласия, что незаконно для посетителей из ЕС и Великобритании, и удаляет кнопки «Настройки» и «Принять всё». Подтвердите юрисдикцию сайта с пользователем перед изменением."
+
+#: inc/utils/settings-metadata.php:117
+msgid "An {id, name} object naming the regulation the site declares it follows. Only \"name\" is read, and only for usage telemetry, so this does not change banner or blocking behaviour."
+msgstr "Объект {id, name}, указывающий регламент, которому сайт заявляет следовать. Читается только «name» и только для телеметрии использования, поэтому это не меняет поведение баннера или блокировки."
+
+#: inc/utils/settings-metadata.php:121
+msgid "How long consent log rows are kept before the daily cleanup cron deletes them. Note the token format is \"<days>_days\", not a bare number."
+msgstr "Сколько времени хранятся записи журнала согласий до удаления их ежедневным заданием cron. Формат токена — «<days>_days», а не просто число."
+
+#: inc/utils/settings-metadata.php:122
+msgid "Destructive. Shortening this makes the next cron run permanently delete every consent row older than the new window, erasing the proof-of-consent evidence GDPR Article 7(1) requires. Read the current value and confirm before lowering it."
+msgstr "Разрушительно. Уменьшение этого значения заставит следующее задание cron навсегда удалить все записи согласий старше нового окна, стирая доказательства согласия, требуемые статьёй 7(1) GDPR. Прочитайте текущее значение и подтвердите перед снижением."
+
+#: inc/utils/settings-metadata.php:125
+msgid "Master switch for pre-consent script and iframe blocking."
+msgstr "Главный переключатель для блокировки скриптов и iframe до получения согласия."
+
+#: inc/utils/settings-metadata.php:126
+msgid "Turning this off lets analytics and marketing tags fire before consent is collected. It is the single most compliance-significant setting after consent_model."
+msgstr "Отключение этого позволяет запускать аналитические и маркетинговые теги до сбора согласия. Это самый важный параметр для соответствия после consent_model."
+
+#: inc/utils/settings-metadata.php:129
+msgid "Whether the banner offers an Accept All button."
+msgstr "Предлагает ли баннер кнопку «Принять всё»."
+
+#: inc/utils/settings-metadata.php:130
+msgid "Not cosmetic: with it off the consent-log endpoint rejects every accept-all record with HTTP 422, so existing integrations that post one will start failing."
+msgstr "Не косметично: при отключении конечная точка журнала согласий отклоняет каждую запись «принять всё» с HTTP 422, поэтому существующие интеграции, отправляющие такие записи, начнут выдавать ошибки."
+
+#: inc/utils/settings-metadata.php:133
+msgid "Whether uninstalling the plugin also deletes its data."
+msgstr "Удаляет ли деинсталляция плагина также его данные."
+
+#: inc/utils/settings-metadata.php:134
+msgid "Arms an irreversible action: on uninstall it drops the consent-log table and deletes every SureCookie option. Never enable it without explicit user confirmation."
+msgstr "Активирует необратимое действие: при деинсталляции удаляет таблицу журнала согласий и удаляет все опции SureCookie. Никогда не включайте без явного подтверждения пользователя."
+
+#: inc/utils/settings-metadata.php:137
+msgid "UNIX timestamp in seconds of the last \"re-request consent\" action. Any consent recorded before this instant is treated as stale."
+msgstr "UNIX-временная метка в секундах последнего действия \"повторный запрос согласия\". Любое согласие, зарегистрированное до этого момента, считается устаревшим."
+
+#: inc/utils/settings-metadata.php:138
+msgid "Writing the current time invalidates every visitor's existing consent and shows the banner again site-wide. Only set it when the user explicitly asks to re-collect consent."
+msgstr "Запись текущего времени аннулирует существующее согласие каждого посетителя и снова показывает баннер на всем сайте. Устанавливайте это только когда пользователь явно просит повторно собрать согласие."
+
+#: inc/utils/settings-metadata.php:141
+msgid "Whether SureCookie registers its WordPress Abilities and MCP server."
+msgstr "Регистрирует ли SureCookie свои возможности WordPress и сервер MCP."
+
+#: inc/utils/settings-metadata.php:142
+msgid "Self-locking: writing false through this ability deregisters every SureCookie ability on the next request, so no AI client can turn it back on. It can only be re-enabled from wp-admin."
+msgstr "Самоблокировка: запись false через эту возможность отменяет регистрацию всех возможностей SureCookie при следующем запросе, так что ни один AI-клиент не сможет включить их обратно. Повторно включить можно только из wp-admin."
+
+#: inc/utils/settings-metadata.php:147
+msgid "Left-to-right order of the banner buttons, as a comma-separated list built from the tokens accept_all, accept (essential only), preferences and decline."
+msgstr "Порядок кнопок баннера слева направо, в виде списка через запятую, состоящего из токенов accept_all, accept (только необходимые), preferences и decline."
+
+#: inc/utils/settings-metadata.php:148
+msgid "Unrecognised tokens are dropped silently, so a value containing none of the four leaves the banner with no buttons at all."
+msgstr "Неопознанные токены игнорируются без предупреждения, поэтому значение, не содержащее ни одного из четырёх, оставляет баннер без кнопок."
+
+#: inc/utils/settings-metadata.php:151
+msgid "Label for the essential-only button. Empty falls back to the translated \"Only Essential\"."
+msgstr "Метка для кнопки только с необходимыми опциями. Пустое значение возвращается к переводу \"Только необходимые\"."
+
+#: inc/utils/settings-metadata.php:152
+msgid "This is not the Accept All button, which is accept_all_btn_text. Labelling it \"Accept\" misrepresents what the visitor is consenting to."
+msgstr "Это не кнопка «Принять все», которая называется accept_all_btn_text. Называть её «Принять» неверно отражает, на что соглашается посетитель."
+
+#: inc/utils/settings-metadata.php:155
+msgid "Label for the Accept All button. Empty falls back to the translated \"Accept All\"."
+msgstr "Метка для кнопки «Принять все». Пустое значение возвращается к переводу \"Принять все\"."
+
+#: inc/utils/settings-metadata.php:158
+msgid "Label for the Decline button. Empty falls back to the translated \"Decline\"."
+msgstr "Метка для кнопки «Отклонить». Пустое значение возвращается к переводу \"Отклонить\"."
+
+#: inc/utils/settings-metadata.php:163
+msgid "Pro banner colour override, shaped {mode, colors}. Send mode \"custom\" together with the colors map."
+msgstr "Переопределение цвета профессионального баннера, в формате {mode, colors}. Отправляйте режим \"custom\" вместе с картой цветов."
+
+#: inc/utils/settings-metadata.php:164
+msgid "Writing colors while mode stays \"preset\" is a silent no-op: color_palette continues to win and the write still reports success."
+msgstr "Запись цветов при режиме \"preset\" — бездействие без ошибок: color_palette продолжает иметь приоритет, а запись всё равно считается успешной."
+
+#: inc/utils/settings-metadata.php:167
+msgid "Raw CSS inlined on every frontend page to restyle the banner and preferences modal. Requires the unfiltered_html capability."
+msgstr "Необработанный CSS, встроенный на каждую страницу фронтенда для изменения стиля баннера и модального окна настроек. Требуется возможность unfiltered_html."
+
+#: inc/utils/settings-metadata.php:172
+msgid "The consent-category registry the whole consent model derives from. Readable here, but edit it with the surecookie/cookie-categories ability."
+msgstr "Реестр категорий согласия, на котором основана вся модель согласия. Доступен для чтения здесь, но редактируется через возможность surecookie/cookie-categories."
+
+#: inc/utils/settings-metadata.php:175
+msgid "The manually declared cookie registry shown in the preferences modal. Readable here, but edit it with the surecookie/cookie-management ability."
+msgstr "Реестр вручную объявленных cookie, отображаемый в модальном окне настроек. Доступен для чтения здесь, но редактируется через возможность surecookie/cookie-management."
+
+#: inc/utils/settings-metadata.php:180
+msgid "Saved manual scan selection, as {label, value} rows whose value is a published post ID. Prefer the surecookie/site-scanner ability with action \"start\", which resolves and validates the rows for you."
+msgstr "Сохранён выбор ручного сканирования в виде строк {label, value}, где value — это ID опубликованного поста. Предпочтительнее использовать возможность surecookie/site-scanner с действием \"start\", которая разрешает и проверяет строки за вас."
+
+#: inc/utils/settings-metadata.php:183
+msgid "Master switch for unattended scheduled scanning. Enabling it schedules the WP-Cron event."
+msgstr "Главный переключатель для автоматического планового сканирования. Включение запускает событие WP-Cron."
+
+#: inc/utils/settings-metadata.php:186
+msgid "Cadence of the automatic scan. \"monthly\" always works; \"weekly\" requires SureCookie Pro. A theme or plugin can register more."
+msgstr "Частота автоматического сканирования. \"monthly\" всегда работает; \"weekly\" требует SureCookie Pro. Тема или плагин могут зарегистрировать другие варианты."
+
+#: inc/utils/settings-metadata.php:187
+msgid "The clamp is silent: an unsupported value, including \"weekly\" without Pro, is reported as saved but stores \"monthly\"."
+msgstr "Ограничение работает тихо: неподдерживаемое значение, включая \"weekly\" без Pro, сохраняется, но фактически устанавливается \"monthly\"."
+
+#: inc/utils/settings-metadata.php:191
+msgid "What the automatic scan crawls: \"same_as_manual\" reuses scan_pages, \"all_published\" walks published content up to the plan limit, \"selected\" uses auto_scan_pages."
+msgstr "Что сканирует автоматическое сканирование: \"same_as_manual\" повторно использует scan_pages, \"all_published\" обходит опубликованный контент до лимита плана, \"selected\" использует auto_scan_pages."
+
+#: inc/utils/settings-metadata.php:194
+msgid "Content the automatic scan crawls when auto_scan_scope is \"selected\". Accepts picker rows or bare post IDs, and is ignored under any other scope."
+msgstr "Контент, который сканирует автоматическое сканирование при auto_scan_scope равном \"selected\". Принимает строки выбора или простые ID постов, игнорируется при любом другом значении scope."
+
+#: inc/utils/settings-metadata.php:199
+msgid "Scan-detected resources marked \"do not block\", keyed per kind as \"script::example.com\" or \"iframe::example.com\"."
+msgstr "Ресурсы, обнаруженные сканированием и помеченные как \"не блокировать\", ключируются по типу, например \"script::example.com\" или \"iframe::example.com\"."
+
+#: inc/utils/settings-metadata.php:202
+msgid "Category reassignment for scan-detected scripts and iframes, mapping the same scoped key format as excluded_scan_resources to a cookie category ID."
+msgstr "Переназначение категории для скриптов и iframe, обнаруженных сканированием, сопоставляющее тот же формат ключа, что и excluded_scan_resources, с ID категории cookie."
+
+#: inc/utils/settings-metadata.php:205
+msgid "Admin-authored blocking rules. Each row needs a non-empty \"value\" URL or domain pattern and a \"category\", optionally narrowed by type, location, path and keywords."
+msgstr "Правила блокировки, созданные администратором. Каждая строка должна содержать непустой \"value\" — URL или шаблон домена, и \"category\", опционально уточнённые по типу, месту, пути и ключевым словам."
+
+#: inc/utils/settings-metadata.php:210
+msgid "Absolute URL of the fallback image on the placeholder that replaces blocked embeds. Empty renders a text-only placeholder."
+msgstr "Абсолютный URL изображения-заполнителя, заменяющего заблокированные вставки. Пустое значение отображает только текстовый заполнитель."
+
+#: inc/utils/settings-metadata.php:213
+msgid "Body copy of the blocked-content placeholder. Keep the literal token {service}, which is replaced with the vendor name at render time."
+msgstr "Текст заполнителя для заблокированного контента. Сохраняйте буквальный токен {service}, который заменяется на имя поставщика при отображении."
+
+#: inc/utils/settings-metadata.php:216
+msgid "Label of the consent button on the blocked-content placeholder. Empty renders the built-in \"Accept & Load\"."
+msgstr "Надпись кнопки согласия на заполнителе заблокированного контента. Пустое значение отображает встроенную \"Принять и загрузить\"."
+
+#: inc/utils/settings-metadata.php:219
+msgid "Show a blocked video's own thumbnail on the placeholder. Currently resolves YouTube URLs only."
+msgstr "Показывать собственный миниатюрный образ заблокированного видео на заполнителе. В настоящее время работает только с URL YouTube."
+
+#: inc/utils/settings-metadata.php:224
+msgid "Post ID of the cookie policy page linked from the banner. 0 means none is linked."
+msgstr "ID поста страницы политики cookie, на которую ссылается баннер. 0 означает отсутствие ссылки."
+
+#: inc/utils/settings-metadata.php:225
+msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page."
+msgstr "Обработано функцией absint, поэтому нечисловое или отрицательное значение становится 0 и тихо отключает ссылку на страницу политики."
+
+#: inc/utils/settings-metadata.php:228
+msgid "Term ID of the nav menu that receives the virtual \"Cookie Preferences\" item, as a numeric string. Empty string injects nothing."
+msgstr "ID термина навигационного меню, в которое добавляется виртуальный пункт \"Настройки cookie\" в виде числовой строки. Пустая строка ничего не добавляет."
+
+#: inc/utils/settings-metadata.php:231
+msgid "Whether SureCookie gets its own top-level admin menu rather than living under Settings."
+msgstr "Будет ли у SureCookie собственное главное меню администратора, а не размещаться в разделе Настройки."
+
+#: inc/utils/settings-metadata.php:237
+msgid "Admin-only preview panel state. No effect on the public site."
+msgstr "Состояние панели предварительного просмотра только для администратора. Не влияет на публичный сайт."
+
+#: inc/utils/settings-metadata.php:241
+msgid "Unused."
+msgstr "Не используется."
+
+#: inc/utils/settings-metadata.php:245
+msgid "Internal counter mirroring the consent-log table."
+msgstr "Внутренний счётчик, отражающий таблицу журнала согласий."
+
+#: build/admin.js:2
+#: build/admin.js:84
+msgid "Blocked Content UI"
+msgstr "Интерфейс заблокированного контента"
+
+#: build/admin.js:2
+#: build/admin.js:88
+msgid "Import / Export"
+msgstr "Импорт / Экспорт"
+
+#: build/admin.js:4
+msgid "All dates"
+msgstr "Все даты"
+
+#: build/admin.js:4
+msgid "Select date range"
+msgstr "Выбрать диапазон дат"
+
+#: build/admin.js:4
+msgid "Clear"
+msgstr "Очистить"
+
+#: build/admin.js:28
+msgid "Not In Use"
+msgstr "Не используется"
+
+#: build/admin.js:28
+msgid "Hide Unused Categories"
+msgstr "Скрыть неиспользуемые категории"
+
+#: build/admin.js:28
+msgid "Categories with no cookies, scripts, or services are hidden from the preferences modal. A category reappears automatically when usage changes, and is never removed from the consent record."
+msgstr "Категории без файлов cookie, скриптов или сервисов скрываются в модальном окне настроек. Категория появляется автоматически при изменении использования и никогда не удаляется из записи согласия."
+
+#: build/admin.js:41
+msgid "Failed to update category visibility"
+msgstr "Не удалось обновить видимость категории"
+
+#: build/admin.js:53
+msgid "This is a worldwide banner preview"
+msgstr "Это предварительный просмотр баннера для всего мира"
+
+#: build/admin.js:75
+msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
+msgstr "Показывает ваш баннер по умолчанию, который видят посетители, когда не применяется географическое правило. Включение этого закрывает любой предварительный просмотр правила."
+
+#: build/admin.js:83
+msgid "Edit Worldwide Default"
+msgstr "Редактировать мировой по умолчанию"
+
+#: build/admin.js:83
+msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
+msgstr "Установите состояние согласия по умолчанию для всех посетителей по всему миру до того, как они сделают выбор. Региональные правила переопределяют это для своих регионов в соответствии с законом каждого региона."
+
+#: build/admin.js:83
+msgid "Worldwide"
+msgstr "Весь мир"
+
+#: build/admin.js:83
+msgid "Edit worldwide default consent"
+msgstr "Редактировать мировой согласие по умолчанию"
+
+#: build/admin.js:84
+msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
+msgstr "Управляйте тем, что видят посетители, когда сторонний контент (например, видео или карты) заблокирован до получения согласия."
+
+#: build/admin.js:84
+msgid "Use video thumbnails"
+msgstr "Использовать миниатюры видео"
+
+#: build/admin.js:84
+msgid "Use Video Thumbnails"
+msgstr "Использовать миниатюры видео"
+
+#: build/admin.js:84
+msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
+msgstr "Показывать собственную миниатюру видео (например, YouTube) на заполнителе. Примечание: миниатюра загружается от провайдера до получения согласия."
+
+#: build/admin.js:84
+msgid "Upload Image"
+msgstr "Загрузить изображение"
+
+#: build/admin.js:84
+msgid "Default Placeholder Image"
+msgstr "Изображение заполнителя по умолчанию"
+
+#: build/admin.js:84
+msgid "Select Placeholder Image"
+msgstr "Выбрать изображение заполнителя"
+
+#: build/admin.js:84
+msgid "Use this image"
+msgstr "Использовать это изображение"
+
+#: build/admin.js:84
+msgid "Placeholder Text"
+msgstr "Текст заполнителя"
+
+#: build/admin.js:84
+msgid "Enter placeholder text"
+msgstr "Введите текст заполнителя"
+
+#: build/admin.js:84
+msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
+msgstr "Используйте {service} для вставки названия заблокированного сервиса (например, YouTube)."
+
+#: build/admin.js:84
+msgid "Button Text"
+msgstr "Текст кнопки"
+
+#: build/admin.js:87
+msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
+msgstr "Разрешить AI-клиентам, таким как Claude и Cursor, управлять вашим баннером cookie, сканером и настройками согласия через SureCookie. При отключении возможности не регистрируются, и AI-клиенты не могут подключаться."
+
+#: build/admin.js:87
+#: build/admin.js:88
+msgid "All Settings"
+msgstr "Все настройки"
+
+#: build/admin.js:87
+msgid "Your entire portable configuration in one file."
+msgstr "Вся ваша портативная конфигурация в одном файле."
+
+#: build/admin.js:87
+msgid "Nothing imported"
+msgstr "Ничего не импортировано"
+
+#: build/admin.js:87
+msgid "Import complete"
+msgstr "Импорт завершён"
+
+#: build/admin.js:87
+msgid "None of the settings in this file could be applied to this site."
+msgstr "Ни одна из настроек в этом файле не могла быть применена к этому сайту."
+
+#: build/admin.js:87
+msgid "Your settings were imported. Here is what happened:"
+msgstr "Ваши настройки были импортированы. Вот что произошло:"
+
+#: build/admin.js:87
+msgid "Applied"
+msgstr "Применено"
+
+#: build/admin.js:87
+msgid "Skipped (Pro)"
+msgstr "Пропущено (Pro)"
+
+#: build/admin.js:87
+msgid "Ignored"
+msgstr "Игнорировано"
+
+#. translators: %d: number of unrecognized fields.
+#: build/admin.js:88
+#, js-format
+msgid "%d unrecognized field(s)"
+msgstr "%d нераспознанное поле(я)"
+
+#: build/admin.js:88
+msgid "These settings need SureCookie Pro"
+msgstr "Для этих настроек требуется SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Upgrade to Pro to use the skipped features on this site."
+msgstr "Обновитесь до Pro, чтобы использовать пропущенные функции на этом сайте."
+
+#: build/admin.js:88
+msgid "Move your SureCookie setup between sites with a portable settings export."
+msgstr "Переносите настройки SureCookie между сайтами с помощью портативного экспорта настроек."
+
+#: build/admin.js:88
+msgid "Export settings"
+msgstr "Экспорт настроек"
+
+#: build/admin.js:88
+msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
+msgstr "Выберите, что включить, затем скачайте JSON-файл вашей портативной конфигурации SureCookie."
+
+#: build/admin.js:88
+msgid "What to export"
+msgstr "Что экспортировать"
+
+#: build/admin.js:88
+msgid "Export your entire portable configuration."
+msgstr "Экспортируйте всю вашу переносимую конфигурацию."
+
+#: build/admin.js:88
+msgid "Export more with SureCookie Pro"
+msgstr "Экспортируйте больше с SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
+msgstr "Pro добавляет настройки, такие как геотаргетинг, пересылка согласия и плавающий виджет в ваш экспорт."
+
+#: build/admin.js:88
+msgid "Settings exported successfully."
+msgstr "Настройки успешно экспортированы."
+
+#: build/admin.js:88
+msgid "Failed to export settings."
+msgstr "Не удалось экспортировать настройки."
+
+#: build/admin.js:88
+msgid "Please try again."
+msgstr "Пожалуйста, попробуйте снова."
+
+#: build/admin.js:88
+msgid "Exporting…"
+msgstr "Экспортируется…"
+
+#: build/admin.js:88
+#: build/admin.js:89
+msgid "Import settings"
+msgstr "Импорт настроек"
+
+#: build/admin.js:88
+msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
+msgstr "Загрузите файл экспорта SureCookie, чтобы объединить его с текущим сайтом или заменить все переносимые настройки."
+
+#: build/admin.js:88
+msgid "JSON export file"
+msgstr "Файл экспорта JSON"
+
+#. translators: %s: selected import filename.
+#: build/admin.js:89
+#, js-format
+msgid "Selected file: %s"
+msgstr "Выбранный файл: %s"
+
+#: build/admin.js:89
+msgid "Replace all settings"
+msgstr "Заменить все настройки"
+
+#: build/admin.js:89
+msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
+msgstr "Если включено, переносимые настройки, отсутствующие в импортируемом файле, будут сброшены к значениям по умолчанию вместо сохранения текущих значений сайта."
+
+#: build/admin.js:89
+msgid "No settings were applied from this file."
+msgstr "Из этого файла не были применены никакие настройки."
+
+#: build/admin.js:89
+msgid "Failed to import settings."
+msgstr "Не удалось импортировать настройки."
+
+#: build/admin.js:89
+msgid "Please check the file and try again."
+msgstr "Пожалуйста, проверьте файл и попробуйте снова."
+
+#: build/admin.js:89
+msgid "Please choose a SureCookie export file first."
+msgstr "Пожалуйста, сначала выберите файл экспорта SureCookie."
+
+#: build/admin.js:89
+msgid "Importing…"
+msgstr "Импортируется…"
+
+#: build/admin.js:89
+msgid "Access"
+msgstr "Доступ"
+
+#: build/admin.js:89
+msgid "28 days left"
+msgstr "Осталось 28 дней"
+
+#: build/admin.js:89
+msgid "Erasure"
+msgstr "Удаление"
+
+#: build/admin.js:89
+msgid "In progress"
+msgstr "В процессе"
+
+#: build/admin.js:89
+msgid "6 days left"
+msgstr "Осталось 6 дней"
+
+#: build/admin.js:89
+msgid "Portability"
+msgstr "Переносимость"
+
+#: build/admin.js:89
+msgid "3 days overdue"
+msgstr "Просрочено на 3 дня"
+
+#: build/admin.js:89
+msgid "Responded"
+msgstr "Ответ дан"
+
+#: build/admin.js:89
+msgid "Data Request Logs"
+msgstr "Журналы запросов данных"
+
+#: build/admin.js:89
+msgid "One Form for Every Request"
+msgstr "Одна форма для каждого запроса"
+
+#: build/admin.js:89
+msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
+msgstr "Добавьте форму с помощью шорткода или позвольте ей появиться на странице вашей Политики конфиденциальности. Запросы приходят полными, а не в виде расплывчатых писем."
+
+#: build/admin.js:89
+msgid "Every Request Verified by Email"
+msgstr "Каждый запрос подтверждается по электронной почте"
+
+#: build/admin.js:89
+msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
+msgstr "Каждая отправка посылает одноразовую ссылку, которая истекает через 24 часа. Вы обрабатываете только те запросы, которые человек действительно сделал."
+
+#: build/admin.js:89
+msgid "A Deadline on Every Request"
+msgstr "Срок для каждого запроса"
+
+#: build/admin.js:89
+msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
+msgstr "Каждому подтвержденному запросу назначается срок выполнения, по умолчанию 30 дней, и список отсчитывает время. Просроченные строки выделяются красным."
+
+#: build/admin.js:89
+msgid "One Reminder Email a Day"
+msgstr "Одно напоминание по электронной почте в день"
+
+#: build/admin.js:89
+msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
+msgstr "Ежедневное письмо содержит список того, что должно быть выполнено в течение недели или уже просрочено. Вы узнаете до истечения срока."
+
+#: build/admin.js:89
+msgid "Reply With the Data Attached"
+msgstr "Ответ с приложенными данными"
+
+#: build/admin.js:89
+msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
+msgstr "Одним кликом собираются данные, которые WordPress, ваши плагины и SureCookie хранят для этого email, и прикрепляются к вашему ответу. Ничего не нужно собирать вручную."
+
+#: build/admin.js:89
+msgid "A Record of What You Did"
+msgstr "Запись о ваших действиях"
+
+#: build/admin.js:89
+msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
+msgstr "Каждый шаг имеет отметку времени: подтверждение, ваши заметки, отправленный ответ, даже неудачная отправка письма. Вы можете показать, что произошло."
+
+#: build/admin.js:89
+msgid "Available in SureCookie Pro"
+msgstr "Доступно в SureCookie Pro"
+
+#: build/admin.js:89
+msgid "You Have 30 Days to Answer a Data Request"
+msgstr "У вас есть 30 дней на ответ на запрос данных"
+
+#: build/admin.js:89
+msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
+msgstr "В соответствии с GDPR и CCPA любой посетитель может запросить копию своих персональных данных или попросить удалить их, и у вас есть фиксированное количество дней на ответ. Если делать это вручную, это означает цепочку писем, таблицу и экспорт, который вы собираете самостоятельно."
+
+#: build/admin.js:89
+msgid "Grab Launching Offer:"
+msgstr "Специальное предложение Grab Launching:"
+
+#: build/admin.js:89
+msgid "Data Requests is a premium feature. Everything else on this page stays exactly where it is once Pro is active."
+msgstr "Запросы данных — это премиальная функция. Всё остальное на этой странице остаётся на своих местах после активации Pro."
+
+#: build/admin.js:89
+msgid "How Pro Handles Each Request"
+msgstr "Как Pro обрабатывает каждый запрос"

@@ -87,6 +87,8 @@ function surecookie_get_option_keys() {
 		// Issue #742 - connected billing-portal account (Auth\Controller::SETTINGS_KEY).
 		'surecookie_auth',
 		'surecookie_onboarding_lead',
+		// Legacy: no longer written since the review prompt moved to a consent-log
+		// trigger. Kept so sites that upgraded from an earlier version still clean up.
 		'surecookie_first_successful_scan',
 		'surecookie_db_version',
 		// Migration completion ledger (Core\Maintenance::LEDGER_OPTION). A single
@@ -109,6 +111,8 @@ function surecookie_get_option_keys() {
 		'surecookie_first_auto_scan_started_flag',
 		// Pro activation redirect.
 		'surecookie_pro_redirect_on_activation',
+		// Rolling record of resources this site actually blocked.
+		'surecookie_matched_resources',
 	];
 }
 
@@ -150,6 +154,7 @@ function surecookie_delete_transients(): void {
 	// Issue #473 - scanner registration / verification transients.
 	delete_transient( 'surecookie_registering_site' );
 	delete_transient( 'surecookie_pending_verification' );
+	delete_transient( 'surecookie_pending_handshake' );
 	// Mirror of SaasClient::SCAN_BYPASS_TRANSIENT_KEY (no autoloader here).
 	delete_transient( 'surecookie_scan_bypass_token' );
 	delete_transient( 'surecookie_scan_quota' );

@@ -37,34 +37,28 @@ msgstr "הסכמה אמיתית לעוגיות עבור וורדפרס. סריק
 msgid "https://surecookie.com/"
 msgstr "https://surecookie.com/"
 
-#: admin/menu.php:74
+#: admin/menu.php:89
 #: build/admin.js:2
 msgid "Dashboard"
 msgstr "לוח בקרה"
 
-#: admin/menu.php:87
-#: admin/menu.php:274
+#: admin/menu.php:107
+#: admin/menu.php:309
 #: build/admin.js:2
 msgid "Settings"
 msgstr "הגדרות"
 
-#: admin/menu.php:82
-#: admin/menu.php:400
-#: build/admin.js:2
-msgid "Logs"
-msgstr "יומנים"
-
-#: admin/menu.php:91
+#: admin/menu.php:111
 #: build/admin.js:2
 msgid "Learn"
 msgstr "ללמוד"
 
-#: admin/menu.php:130
+#: admin/menu.php:150
 msgid "You don't have access to this page."
 msgstr "אין לך גישה לעמוד זה."
 
-#: admin/menu.php:300
-#: admin/menu.php:301
+#: admin/menu.php:335
+#: admin/menu.php:336
 msgid "Upgrade"
 msgstr "שדרוג"
 
@@ -81,19 +75,19 @@ msgstr "אין לך הרשאות מספיקות לגשת לעמוד זה."
 msgid "A simple yet powerful way to create modern forms for your website."
 msgstr "דרך פשוטה אך עוצמתית ליצור טפסים מודרניים לאתר שלך."
 
-#: admin/rating-notice.php:234
+#: admin/rating-notice.php:306
 msgid "If SureCookie has been helpful, would you mind taking a moment to leave a 5-star review on WordPress.org?"
 msgstr "אם SureCookie היה מועיל, האם תוכל להקדיש רגע להשאיר דירוג של 5 כוכבים ב-WordPress.org?"
 
-#: admin/rating-notice.php:243
+#: admin/rating-notice.php:315
 msgid "Rate SureCookie"
 msgstr "דרג את SureCookie"
 
-#: admin/rating-notice.php:251
+#: admin/rating-notice.php:323
 msgid "Maybe later"
 msgstr "אולי מאוחר יותר"
 
-#: admin/rating-notice.php:255
+#: admin/rating-notice.php:327
 msgid "I already did"
 msgstr "כבר עשיתי זאת"
 
@@ -109,99 +103,99 @@ msgstr "בדיקת אבטחה נכשלה. נא רענן את העמוד ונסה
 msgid "Your session expired. Please refresh the page and try again."
 msgstr "הסשן שלך פג תוקף. נא רענן את העמוד ונסה שוב."
 
-#: inc/api/consent-logs.php:146
+#: inc/api/consent-logs.php:151
 msgid "Search by IP address or Session ID"
 msgstr "חפש לפי כתובת IP או מזהה סשן"
 
-#: inc/api/consent-logs.php:318
-#: inc/api/consent-logs.php:345
+#: inc/api/consent-logs.php:339
+#: inc/api/consent-logs.php:366
 msgid "Request origin could not be verified."
 msgstr "לא ניתן לאמת את מקור הבקשה."
 
-#: inc/api/consent-logs.php:892
+#: inc/api/consent-logs.php:951
 msgid "Request origin is not allowed."
 msgstr "מקור הבקשה אינו מורשה."
 
-#: inc/api/consent-logs.php:448
+#: inc/api/consent-logs.php:503
 msgid "Consent logs retrieved successfully."
 msgstr "רישומי ההסכמה התקבלו בהצלחה."
 
-#: inc/api/consent-logs.php:490
+#: inc/api/consent-logs.php:545
 msgid "Consent processed successfully (logging disabled)"
 msgstr "ההסכמה עובדה בהצלחה (רישום מושבת)"
 
-#: inc/api/consent-logs.php:376
-#: inc/api/consent-logs.php:515
+#: inc/api/consent-logs.php:397
+#: inc/api/consent-logs.php:570
 msgid "Too many requests. Please try again later."
 msgstr "יותר מדי בקשות. נא נסה שוב מאוחר יותר."
 
-#: inc/api/consent-logs.php:535
+#: inc/api/consent-logs.php:590
 msgid "Preferences should not be empty."
 msgstr "העדפות לא צריכות להיות ריקות."
 
-#: inc/api/consent-logs.php:544
+#: inc/api/consent-logs.php:599
 msgid "Preferences data is too large."
 msgstr "נתוני ההעדפות גדולים מדי."
 
-#: inc/api/consent-logs.php:555
-#: inc/api/consent-logs.php:566
+#: inc/api/consent-logs.php:610
+#: inc/api/consent-logs.php:621
 msgid "Invalid preferences format."
 msgstr "פורמט העדפות לא חוקי."
 
-#: inc/api/consent-logs.php:575
+#: inc/api/consent-logs.php:630
 msgid "Session ID is required."
 msgstr "נדרש מזהה סשן."
 
-#: inc/api/consent-logs.php:614
+#: inc/api/consent-logs.php:669
 msgid "Accept All is not enabled for this site."
 msgstr "אפשרות \"קבל הכל\" אינה מופעלת לאתר זה."
 
-#: inc/api/consent-logs.php:641
+#: inc/api/consent-logs.php:700
 msgid "Consent saved successfully."
 msgstr "ההסכמה נשמרה בהצלחה."
 
-#: inc/api/consent-logs.php:651
+#: inc/api/consent-logs.php:710
 msgid "Failed to save consent."
 msgstr "שמירת ההסכמה נכשלה."
 
-#: inc/api/consent-logs.php:669
-#: inc/api/consent-logs.php:801
+#: inc/api/consent-logs.php:728
+#: inc/api/consent-logs.php:860
 msgid "Invalid log ID"
 msgstr "מזהה יומן לא חוקי"
 
-#: inc/api/consent-logs.php:681
+#: inc/api/consent-logs.php:740
 msgid "Log not found."
 msgstr "יומן לא נמצא."
 
-#: inc/api/consent-logs.php:717
-#: inc/api/consent-logs.php:744
+#: inc/api/consent-logs.php:776
+#: inc/api/consent-logs.php:803
 msgid "Log details retrieved successfully."
 msgstr "פרטי היומן התקבלו בהצלחה."
 
-#: inc/api/consent-logs.php:766
+#: inc/api/consent-logs.php:825
 msgid "Invalid log IDs"
 msgstr "מזהי יומן לא חוקיים"
 
-#: inc/api/consent-logs.php:777
-#: inc/api/consent-logs.php:872
+#: inc/api/consent-logs.php:836
+#: inc/api/consent-logs.php:931
 msgid "Failed to delete logs."
 msgstr "נכשל המחיקה של היומנים."
 
 #. translators: %d: number of logs deleted
-#: inc/api/consent-logs.php:787
+#: inc/api/consent-logs.php:846
 #, php-format
 msgid "%d log(s) deleted successfully."
 msgstr "%d יומן(ים) נמחקו בהצלחה."
 
-#: inc/api/consent-logs.php:812
+#: inc/api/consent-logs.php:871
 msgid "Log deleted successfully."
 msgstr "היומן נמחק בהצלחה."
 
-#: inc/api/consent-logs.php:821
+#: inc/api/consent-logs.php:880
 msgid "Failed to delete log."
 msgstr "נכשל המחיקה של היומן."
 
-#: inc/api/consent-logs.php:863
+#: inc/api/consent-logs.php:922
 msgid "All logs deleted successfully."
 msgstr "כל היומנים נמחקו בהצלחה."
 
@@ -276,11 +270,11 @@ msgstr "התוסף כבר לא פעיל."
 msgid "Plugin deactivated successfully."
 msgstr "התוסף הושבת בהצלחה."
 
-#: inc/api/plugin.php:290
+#: inc/api/plugin.php:240
 msgid "Conflicting plugins retrieved."
 msgstr "תוספים מתנגשים התקבלו."
 
-#: inc/api/posts.php:199
+#: inc/api/posts.php:151
 msgid "Post not found."
 msgstr "הפוסט לא נמצא."
 
@@ -288,55 +282,55 @@ msgstr "הפוסט לא נמצא."
 msgid "Scanned history retrieved successfully."
 msgstr "היסטוריית הסריקה התקבלה בהצלחה."
 
-#: inc/api/scanned-resources.php:78
+#: inc/api/scanned-resources.php:79
 msgid "Scanned resources retrieved successfully."
 msgstr "משאבי הסריקה התקבלו בהצלחה."
 
-#: inc/api/settings.php:120
+#: inc/api/settings.php:201
 msgid "No data found"
 msgstr "לא נמצאו נתונים"
 
-#: inc/api/settings.php:144
+#: inc/api/settings.php:208
 msgid "Settings updated"
 msgstr "הגדרות עודכנו"
 
-#: inc/functions/get.php:118
+#: inc/functions/get.php:128
 msgid "Essential Cookies"
 msgstr "עוגיות חיוניות"
 
-#: inc/functions/get.php:119
+#: inc/functions/get.php:129
 msgid "Required for basic website functionality."
 msgstr "נדרשות לתפקוד בסיסי של האתר."
 
-#: inc/functions/get.php:124
+#: inc/functions/get.php:134
 msgid "Functional Cookies"
 msgstr "עוגיות פונקציונליות"
 
-#: inc/functions/get.php:125
+#: inc/functions/get.php:135
 msgid "Enable features like saved preferences and personalized content."
 msgstr "מאפשרות תכונות כמו העדפות שמורות ותוכן מותאם אישית."
 
-#: inc/functions/get.php:130
+#: inc/functions/get.php:140
 msgid "Analytics Cookies"
 msgstr "עוגיות אנליטיות"
 
-#: inc/functions/get.php:131
+#: inc/functions/get.php:141
 msgid "Help us understand how visitors use our site so we can improve it."
 msgstr "עוזרות לנו להבין כיצד מבקרים משתמשים באתר כדי לשפר אותו."
 
-#: inc/functions/get.php:136
+#: inc/functions/get.php:146
 msgid "Marketing Cookies"
 msgstr "עוגיות שיווקיות"
 
-#: inc/functions/get.php:137
+#: inc/functions/get.php:147
 msgid "Used to show you relevant ads based on your interests."
 msgstr "משמשות להצגת מודעות רלוונטיות בהתאם לתחומי העניין שלך."
 
-#: inc/functions/get.php:142
+#: inc/functions/get.php:152
 msgid "Uncategorized Cookies"
 msgstr "עוגיות ללא קטגוריה"
 
-#: inc/functions/get.php:143
+#: inc/functions/get.php:153
 msgid "Cookies that haven't been categorized yet."
 msgstr "עוגיות שטרם סווגו."
 
@@ -539,11 +533,11 @@ msgstr "עודכן לאחרונה: %s"
 msgid "This website"
 msgstr "אתר זה"
 
-#: inc/modules/google-consent-mode/consent-handler.php:130
+#: inc/modules/google-consent-mode/consent-handler.php:129
 msgid "SureCookie:"
 msgstr "SureCookie:"
 
-#: inc/modules/google-consent-mode/consent-handler.php:132
+#: inc/modules/google-consent-mode/consent-handler.php:131
 msgid "Google Site Kit's Consent Mode is active. Please disable it in Site Kit settings to use SureCookie's implementation."
 msgstr "מצב ההסכמה של Google Site Kit פעיל. אנא השבת אותו בהגדרות Site Kit כדי להשתמש ביישום SureCookie."
 
@@ -563,14 +557,14 @@ msgstr "\"%s\" הושבת."
 
 #. translators: %s: Service name (e.g., YouTube, Vimeo, Bunny.net).
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:302
-#: inc/modules/script-blocking/blocker.php:1283
+#: inc/integrations/presto-player/block-handler.php:399
+#: inc/traits/placeholder-content.php:150
 #, php-format
 msgid "This content is blocked because it requires %s cookies."
 msgstr "תוכן זה חסום כי הוא דורש עוגיות %s."
 
-#: inc/integrations/presto-player/block-handler.php:240
-#: inc/modules/script-blocking/blocker.php:1298
+#: inc/traits/placeholder-content.php:249
+#: inc/utils/options.php:260
 msgid "Accept & Load"
 msgstr "קבל וטעון"
 
@@ -789,41 +783,41 @@ msgstr "הקידוד של השלמת האימות נכשל."
 msgid "Failed to fetch results."
 msgstr "השליפה של התוצאות נכשלה."
 
-#: inc/services/cookie-category-service.php:54
+#: inc/services/cookie-category-service.php:60
 msgid "Cookie categories retrieved successfully."
 msgstr "קטגוריות העוגיות התקבלו בהצלחה."
 
-#: inc/services/cookie-category-service.php:75
+#: inc/services/cookie-category-service.php:83
 msgid "Category name is required."
 msgstr "שם קטגוריה נדרש."
 
-#: inc/services/cookie-category-service.php:86
+#: inc/services/cookie-category-service.php:94
 msgid "A category with this name already exists."
 msgstr "קטגוריה עם שם זה כבר קיימת."
 
-#: inc/services/cookie-category-service.php:103
+#: inc/services/cookie-category-service.php:111
 msgid "Category created successfully."
 msgstr "הקטגוריה נוצרה בהצלחה."
 
-#: inc/services/cookie-category-service.php:124
-#: inc/services/cookie-category-service.php:196
+#: inc/services/cookie-category-service.php:132
+#: inc/services/cookie-category-service.php:204
 msgid "Category ID is required."
 msgstr "מזהה קטגוריה נדרש."
 
-#: inc/services/cookie-category-service.php:134
-#: inc/services/cookie-category-service.php:215
+#: inc/services/cookie-category-service.php:142
+#: inc/services/cookie-category-service.php:223
 msgid "Category not found."
 msgstr "הקטגוריה לא נמצאה."
 
-#: inc/services/cookie-category-service.php:166
+#: inc/services/cookie-category-service.php:174
 msgid "Category updated successfully."
 msgstr "הקטגוריה עודכנה בהצלחה."
 
-#: inc/services/cookie-category-service.php:205
+#: inc/services/cookie-category-service.php:213
 msgid "Default categories cannot be deleted."
 msgstr "לא ניתן למחוק קטגוריות ברירת מחדל."
 
-#: inc/services/cookie-category-service.php:307
+#: inc/services/cookie-category-service.php:315
 msgid "Category deleted successfully."
 msgstr "הקטגוריה נמחקה בהצלחה."
 
@@ -900,51 +894,51 @@ msgstr "העוגייה לא נמצאה בקטגוריה שצוינה."
 msgid "Cookie category updated successfully."
 msgstr "קטגוריית העוגייה עודכנה בהצלחה."
 
-#: inc/utils/options.php:48
+#: inc/utils/options.php:56
 msgid "We use cookies to improve your experience and understand how you use our site. You can review your choices at any time."
 msgstr "אנו משתמשים בעוגיות כדי לשפר את החוויה שלך ולהבין כיצד אתה משתמש באתר שלנו. באפשרותך לעיין בבחירות שלך בכל עת."
 
-#: inc/utils/options.php:62
+#: inc/utils/options.php:73
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Only Essential"
 msgstr "רק חיוניות"
 
-#: inc/utils/options.php:71
+#: inc/utils/options.php:84
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Accept All"
 msgstr "קבל הכל"
 
-#: inc/utils/options.php:75
+#: inc/utils/options.php:89
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Decline"
 msgstr "סרב"
 
-#: inc/utils/options.php:79
+#: inc/utils/options.php:94
 msgid "Cookie Settings"
 msgstr "הגדרות עוגיות"
 
-#: inc/utils/options.php:142
+#: inc/utils/options.php:174
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Preferences"
 msgstr "העדפות"
 
-#: inc/utils/options.php:146
+#: inc/utils/options.php:179
 msgid "Privacy Preference"
 msgstr "העדפת פרטיות"
 
-#: inc/utils/options.php:150
+#: inc/utils/options.php:184
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr "אנו משתמשים בעוגיות וטכנולוגיות דומות כדי לעזור להתאים תוכן, לכוון ולמדוד פרסומות, ולספק חוויה טובה יותר."
 
-#: inc/utils/options.php:174
+#: inc/utils/options.php:213
 #: build/admin.js:4
 #: build/admin.js:75
 msgid "Cookie Preferences"
@@ -995,6 +989,7 @@ msgstr "נכשל בביטול הסריקה."
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "Failed to load settings"
 msgstr "נכשל בטעינת ההגדרות"
@@ -1044,6 +1039,7 @@ msgstr "סורק עוגיות"
 msgid "All Cookies"
 msgstr "כל העוגיות"
 
+#: inc/api/settings.php:620
 #: build/admin.js:2
 msgid "Banner"
 msgstr "באנר"
@@ -1071,6 +1067,7 @@ msgstr "הסכמה מחדש"
 msgid "Custom CSS"
 msgstr "CSS מותאם אישית"
 
+#: inc/api/settings.php:672
 #: build/admin.js:2
 msgid "Google Consent Mode"
 msgstr "מצב הסכמה של גוגל"
@@ -1079,6 +1076,8 @@ msgstr "מצב הסכמה של גוגל"
 msgid "Additional Consent"
 msgstr "הסכמה נוספת"
 
+#: admin/menu.php:97
+#: admin/menu.php:482
 #: build/admin.js:2
 #: build/admin.js:21
 msgid "Consent Logs"
@@ -1104,7 +1103,7 @@ msgstr "אירעה שגיאה במהלך האימות"
 msgid "Authentication cancelled. Please try again."
 msgstr "האימות בוטל. אנא נסה שוב."
 
-#: inc/modules/assisted-scan/collector.php:329
+#: inc/modules/assisted-scan/collector.php:332
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:28
@@ -1270,6 +1269,7 @@ msgstr "הגדר את תוכן הטקסט שמופיע בבאנר הסכמת ה�
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr "אירעה שגיאה בטעינת ההגדרות. אנא רענן את הדף ונסה שוב."
@@ -1749,6 +1749,7 @@ msgstr "עזור לעצב את עתיד SureCookie. שתף כיצד אתה מש�
 
 #: build/admin.js:53
 #: build/admin.js:84
+#: build/admin.js:89
 msgid "Learn More"
 msgstr "למידע נוסף"
 
@@ -2342,7 +2343,7 @@ msgstr "אשר את הבחירות שלי"
 msgid "Powered by SureCookie (opens in new tab)"
 msgstr "מופעל על ידי SureCookie (נפתח בכרטיסייה חדשה)"
 
-#: inc/utils/localize-data.php:222
+#: inc/utils/localize-data.php:225
 #: build/admin.js:4
 #: build/admin.js:53
 #: build/public.js:4
@@ -2352,10 +2353,6 @@ msgstr "מופעל על ידי"
 #: build/admin.js:53
 msgid "Buttons are for reference only in preview."
 msgstr "כפתורים הם רק להמחשה בתצוגה מקדימה."
-
-#: build/admin.js:53
-msgid "This is a preview"
-msgstr "זו תצוגה מקדימה"
 
 #: build/admin.js:53
 msgid "Close preview"
@@ -3135,35 +3132,35 @@ msgstr "הצג באנר רק באזורים שנבחרו, צור כללים אז
 msgid "Location detection uses GeoLite2 data by MaxMind, available from <link>https://www.maxmind.com</link>."
 msgstr "זיהוי מיקום משתמש בנתוני GeoLite2 של MaxMind, זמין ב-<link>https://www.maxmind.com</link>."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "IAB Transparency & Consent Framework"
 msgstr "מסגרת שקיפות והסכמה של IAB"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr "הפוך את באנר ההסכמה שלך לתואם ל-IAB TCF 2.3 ושילב עם רשימת הספקים הגלובלית."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr "שחרר תאימות ל-IAB TCF 2.3 - בקרוב"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr "הפעל מצב TCF מלא, צור מחרוזות TC, והצג את רשימת הספקים של IAB למבקרים שלך."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Google Additional Consent (AC)"
 msgstr "הסכמה נוספת של גוגל (AC)"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr "הוסף הסכמה נוספת של גוגל לצד IAB TCF לטיפול בספקי טכנולוגיית פרסום שאינם ברשימת הספקים הגלובלית של IAB."
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr "שחרר את הסכמת Google נוספת - בקרוב"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr "צור את מחרוזת ה-AC, השתק את העוגייה addtl_consent, והצג את רשימת ספקי ההסכמה הנוספת של Google למבקרים שלך - נדרש למונטיזציה מלאה של Google Ads / GAM."
 
@@ -3391,6 +3388,7 @@ msgstr "התקבל מ"
 
 #: build/admin.js:3
 #: build/admin.js:4
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Received"
 msgstr "התקבל"
@@ -3439,6 +3437,7 @@ msgstr "שדרוג ייצוא יומן הסכמה"
 msgid "Preference sections"
 msgstr "קטעי העדפות"
 
+#: inc/api/settings.php:653
 #: build/admin.js:2
 #: build/admin.js:50
 #: build/public.js:1
@@ -3484,6 +3483,7 @@ msgstr "שרת SureCookie MCP להגדרות הסכמת עוגיות, יומני
 msgid "%s submenu"
 msgstr "%s תפריט משנה"
 
+#: inc/api/settings.php:625
 #: build/admin.js:2
 msgid "General"
 msgstr "כללי"
@@ -3492,6 +3492,7 @@ msgstr "כללי"
 msgid "Consent & Data"
 msgstr "הסכמה ונתונים"
 
+#: inc/api/settings.php:630
 #: build/admin.js:2
 msgid "Consent Frameworks"
 msgstr "מסגרות הסכמה"
@@ -3581,18 +3582,6 @@ msgid "VS Code"
 msgstr "VS Code"
 
 #: build/admin.js:84
-msgid "ChatGPT"
-msgstr "ChatGPT"
-
-#: build/admin.js:84
-msgid "go to Settings → Connectors → Add Connector, paste the endpoint URL, and use your WordPress username + Application Password."
-msgstr "גש להגדרות → מחברים → הוסף מחבר, הדבק את כתובת ה-URL של נקודת הקצה, והשתמש בשם המשתמש שלך בוורדפרס + סיסמת האפליקציה."
-
-#: build/admin.js:84
-msgid "Learn more about ChatGPT connectors"
-msgstr "למידע נוסף על מחברי ChatGPT"
-
-#: build/admin.js:84
 msgid "SureCookie Only"
 msgstr "רק SureCookie"
 
@@ -3652,10 +3641,6 @@ msgid "Enable MCP"
 msgstr "אפשר MCP"
 
 #: build/admin.js:87
-msgid "Allow AI clients like Claude, ChatGPT, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
-msgstr "אפשר ללקוחות בינה מלאכותית כמו Claude, ChatGPT ו-Cursor לנהל את באנר העוגיות, הסורק והגדרות ההסכמה דרך SureCookie. כאשר מנוטרל, לא נרשמות יכולות והלקוחות לא יכולים להתחבר."
-
-#: build/admin.js:87
 msgid "WordPress Abilities API not available"
 msgstr "API היכולות של וורדפרס אינו זמין"
 
@@ -3671,11 +3656,11 @@ msgstr "שינויים שלא נשמרו"
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr "נקודת הקצה של MCP הופכת לפעילה רק לאחר ששמרת את ההגדרות שלך."
 
-#: inc/api/consent-logs.php:404
+#: inc/api/consent-logs.php:425
 msgid "Unable to determine the current user."
 msgstr "לא ניתן לקבוע את המשתמש הנוכחי."
 
-#: inc/api/consent-logs.php:415
+#: inc/api/consent-logs.php:436
 msgid "Consent logs marked as viewed."
 msgstr "יומני ההסכמה סומנו כנצפים."
 
@@ -3723,7 +3708,8 @@ msgstr "פעם בחודש (SureCookie)"
 msgid "Once Weekly (SureCookie)"
 msgstr "פעם בשבוע (SureCookie)"
 
-#: inc/modules/script-blocking/blocker.php:1279
+#: inc/traits/placeholder-content.php:215
+#: inc/utils/localize-data.php:265
 msgid "This content is currently blocked."
 msgstr "תוכן זה חסום כרגע."
 
@@ -4029,10 +4015,6 @@ msgstr "הישאר מעודכן ועזור לעצב את SureCookie! קבל עד
 msgid "Grow traffic of your website with SureRank - a lightweight SEO toolkit plugin for WordPress users who want better rankings without the complexity."
 msgstr "הגדל את התנועה לאתר שלך עם SureRank - תוסף SEO קל משקל למשתמשי וורדפרס שרוצים דירוגים טובים יותר ללא מורכבות."
 
-#: admin/rating-notice.php:232
-msgid "Amazing! SureCookie discovered cookies on your site - let's keep growing together!"
-msgstr "מדהים! SureCookie גילה עוגיות באתר שלך - בואו נמשיך לצמוח יחד!"
-
 #. translators: 1: page URL, 2: error message
 #: inc/modules/site-scanner/saas-client.php:989
 #, php-format
@@ -4098,15 +4080,15 @@ msgstr "הפעל מחדש את לקוח ה-AI שלך והדבק שוב את הה
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr "תיהנה מלקוח ה-AI שלך המחובר לאתר הוורדפרס שלך!"
 
-#: admin/rating-notice.php:156
+#: admin/rating-notice.php:179
 msgid "Invalid nonce."
 msgstr "נונס לא חוקי."
 
-#: admin/rating-notice.php:158
+#: admin/rating-notice.php:181
 msgid "Unauthorized user."
 msgstr "משתמש לא מורשה."
 
-#: admin/rating-notice.php:171
+#: admin/rating-notice.php:194
 msgid "Invalid parameters."
 msgstr "פרמטרים לא חוקיים."
 
@@ -4114,11 +4096,11 @@ msgstr "פרמטרים לא חוקיים."
 msgid "More scan limits, geographic targeting, re-consent widget, and more."
 msgstr "יותר מגבלות סריקה, מיקוד גיאוגרפי, ווידג'ט לאישור מחדש, ועוד."
 
-#: inc/integrations/presto-player/block-handler.php:293
+#: inc/integrations/presto-player/block-handler.php:390
 msgid "This audio is blocked until you accept cookies to load it."
 msgstr "הקול הזה חסום עד שתקבל עוגיות כדי לטעון אותו."
 
-#: inc/integrations/presto-player/block-handler.php:297
+#: inc/integrations/presto-player/block-handler.php:394
 msgid "This video is blocked until you accept cookies to load it."
 msgstr "הווידאו הזה חסום עד שתקבל עוגיות כדי לטעון אותו."
 
@@ -4390,7 +4372,7 @@ msgstr "בוא נעזור לך לגלות עוגיות, להגדיר בחירו�
 msgid "Keep consent records locally on the site and export individual records when needed"
 msgstr "שמור רשומות הסכמה מקומית באתר וייצא רשומות בודדות בעת הצורך"
 
-#: admin/menu.php:78
+#: admin/menu.php:93
 #: build/admin.js:2
 msgid "Tracking Manager"
 msgstr "מנהל מעקב"
@@ -4407,10 +4389,9 @@ msgstr "Spectra Blocks הוא שיחזור מלא של Spectra על APIs מוד�
 msgid "Failed to update cookie categories: "
 msgstr "נכשל בעדכון קטגוריות העוגיות:"
 
-#. translators: %s: Provider name (e.g., YouTube, Vimeo)
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:236
-#: inc/modules/script-blocking/blocker.php:1294
+#: inc/traits/placeholder-content.php:227
+#: inc/utils/localize-data.php:267
 #, php-format
 msgid "Accept and load %s content"
 msgstr "קבל וטעון תוכן %s"
@@ -4453,34 +4434,34 @@ msgid "Assisted scan cancelled."
 msgstr "הסריקה המסייעת בוטלה."
 
 #. translators: 1: current page number, 2: total pages.
-#: inc/modules/assisted-scan/collector.php:322
+#: inc/modules/assisted-scan/collector.php:325
 #, php-format
 msgid "SureCookie is scanning page %1$d of %2$d"
 msgstr "SureCookie סורקת את העמוד %1$d מתוך %2$d"
 
-#: inc/modules/assisted-scan/collector.php:323
+#: inc/modules/assisted-scan/collector.php:326
 msgid "Keep this tab in front so the scan can continue."
 msgstr "השאר את הכרטיסייה הזו בחזית כדי שהסריקה תוכל להמשיך."
 
-#: inc/modules/assisted-scan/collector.php:324
+#: inc/modules/assisted-scan/collector.php:327
 msgid "Paused. Bring this tab to the front to continue."
 msgstr "הסריקה בהשהיה. הבא את הכרטיסייה הזו לחזית כדי להמשיך."
 
-#: inc/modules/assisted-scan/collector.php:325
+#: inc/modules/assisted-scan/collector.php:328
 msgid "Preparing a clean visit…"
 msgstr "מכין ביקור נקי…"
 
 #. translators: 1: number of cookies, 2: number of services.
-#: inc/modules/assisted-scan/collector.php:327
+#: inc/modules/assisted-scan/collector.php:330
 #, php-format
 msgid "Scan complete: %1$d cookies, %2$d services found"
 msgstr "הסריקה הושלמה: נמצאו %1$d עוגיות, %2$d שירותים"
 
-#: inc/modules/assisted-scan/collector.php:328
+#: inc/modules/assisted-scan/collector.php:331
 msgid "The scan could not be completed. Return to SureCookie to try again."
 msgstr "לא ניתן להשלים את הסריקה. חזור ל-SureCookie ונסה שוב."
 
-#: inc/modules/assisted-scan/collector.php:330
+#: inc/modules/assisted-scan/collector.php:333
 msgid "SureCookie assisted scan progress"
 msgstr "התקדמות סריקה מסייעת של SureCookie"
 
@@ -4516,11 +4497,12 @@ msgstr "סריקה מסייעת מתבצעת..."
 msgid "Assisted scan finished."
 msgstr "הסריקה המסייעת הושלמה."
 
-#: inc/modules/services/api.php:142
+#: inc/services/known-services-service.php:71
+#: inc/services/known-services-service.php:202
 msgid "Unknown service."
 msgstr "שירות לא מוכר."
 
-#: inc/modules/services/api.php:153
+#: inc/services/known-services-service.php:78
 msgid "This is a Pro service. Upgrade to add it."
 msgstr "זהו שירות Pro. שדרג כדי להוסיף אותו."
 
@@ -4540,11 +4522,11 @@ msgstr "לא הצלחנו לאמת את הדומיין שלך כי ספק האח
 msgid "We could not reach your site's REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry."
 msgstr "לא הצלחנו להגיע ל-REST API של האתר שלך ב-/wp-json/. הפעל קישורים יפים וודא שאין תוסף אבטחה שמנטרל את REST API, ואז נסה שוב."
 
-#: inc/services/cookie-category-service.php:247
+#: inc/services/cookie-category-service.php:255
 msgid "Cookies cannot be moved to the category being deleted."
 msgstr "לא ניתן להעביר עוגיות לקטגוריה שנמחקת."
 
-#: inc/services/cookie-category-service.php:254
+#: inc/services/cookie-category-service.php:262
 #: inc/services/cookie-service.php:440
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "הקטגוריה שנבחרה כבר לא קיימת. נא לרענן ולנסות שוב."
@@ -4585,6 +4567,7 @@ msgstr "שירותים מוכרים"
 msgid "Scripts and Embeds"
 msgstr "סקריפטים והטמעות"
 
+#: inc/api/settings.php:615
 #: build/admin.js:2
 #: build/admin.js:84
 msgid "Geographic Rules"
@@ -4643,6 +4626,7 @@ msgstr "העבר לקטגוריה…"
 msgid "Applying…"
 msgstr "מיישם…"
 
+#: build/admin.js:4
 #: build/admin.js:25
 msgid "Apply"
 msgstr "החל"
@@ -5517,3 +5501,882 @@ msgstr "מותר לטעון בזמן שמצב ההסכמה של Google פעיל,
 #: build/admin.js:77
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. They cannot be removed here."
 msgstr "שירותי Google אלה מורשים לטעון בזמן שמצב ההסכמה של Google פעיל, במקום להיחסם לפני ההסכמה. עבור מוצרי תג Google, מצב ההסכמה שולט אז במה שהם יכולים לאחסן ואילו מזהים הם יכולים להשתמש. זה לא מונע מהם ליצור קשר עם Google. לא ניתן להסיר אותם כאן."
+
+#: admin/menu.php:102
+#: admin/menu.php:455
+#: build/admin.js:2
+msgid "Data Requests"
+msgstr "בקשות נתונים"
+
+#: admin/menu.php:461
+msgid "NEW"
+msgstr "חדש"
+
+#. translators: %s: number of visitor consents recorded so far, e.g. "1,204".
+#: admin/rating-notice.php:284
+#, php-format
+msgid "Amazing! SureCookie has recorded %s visitor consent on your site - let's keep growing together!"
+msgid_plural "Amazing! SureCookie has recorded %s visitor consents on your site - let's keep growing together!"
+msgstr[0] "מדהים! SureCookie רשמה %s הסכמות מבקרים באתר שלך - בוא נמשיך לגדול יחד!"
+msgstr[1] ""
+
+#: inc/api/consent-logs.php:169
+msgid "Inclusive start of the log date range (Y-m-d)."
+msgstr "תחילת טווח התאריכים של הלוג כלולה (Y-m-d)."
+
+#: inc/api/consent-logs.php:177
+msgid "Inclusive end of the log date range (Y-m-d)."
+msgstr "סוף טווח התאריכים של הלוג כלול (Y-m-d)."
+
+#: inc/api/consent-logs.php:482
+msgid "The start date cannot be later than the end date."
+msgstr "תאריך ההתחלה לא יכול להיות מאוחר מתאריך הסיום."
+
+#: inc/api/settings.php:288
+msgid "Please upload a SureCookie export file to import."
+msgstr "אנא העלה קובץ ייצוא של SureCookie לייבוא."
+
+#: inc/api/settings.php:297
+msgid "The selected file is too large to import."
+msgstr "הקובץ שנבחר גדול מדי לייבוא."
+
+#: inc/api/settings.php:308
+msgid "The uploaded file is not valid JSON."
+msgstr "הקובץ שהועלה אינו JSON תקין."
+
+#: inc/api/settings.php:317
+msgid "The uploaded file is not a valid SureCookie settings export."
+msgstr "הקובץ שהועלה אינו ייצוא הגדרות SureCookie תקין."
+
+#: inc/api/settings.php:326
+msgid "This settings export uses an unsupported schema version."
+msgstr "ייצוא ההגדרות הזה משתמש בגרסת סכימה שלא נתמכת."
+
+#: inc/api/settings.php:337
+msgid "The uploaded file does not contain a valid settings payload."
+msgstr "הקובץ שהועלה אינו מכיל מטען הגדרות תקין."
+
+#: inc/api/settings.php:363
+msgid "No settings were imported. This export contains Pro features that are not available on this site."
+msgstr "לא יובאו הגדרות. ייצוא זה מכיל תכונות Pro שאינן זמינות באתר זה."
+
+#: inc/api/settings.php:376
+msgid "The uploaded file does not contain any importable SureCookie settings for this site."
+msgstr "הקובץ שהועלה אינו מכיל הגדרות SureCookie לייבוא עבור אתר זה."
+
+#: inc/api/settings.php:407
+#: build/admin.js:89
+msgid "Settings imported successfully."
+msgstr "ההגדרות יובאו בהצלחה."
+
+#: inc/api/settings.php:610
+msgid "Cookies & Scripts"
+msgstr "עוגיות וסקריפטים"
+
+#: inc/api/settings.php:611
+msgid "Cookie categories, custom cookies, known services, script blocking and scanning."
+msgstr "קטגוריות עוגיות, עוגיות מותאמות אישית, שירותים מוכרים, חסימת סקריפטים וסריקה."
+
+#: inc/api/settings.php:616
+msgid "Region-based banner rules."
+msgstr "כללי באנר מבוססי אזור."
+
+#: inc/api/settings.php:621
+msgid "Banner content, layout, colors, buttons and display."
+msgstr "תוכן הבאנר, פריסה, צבעים, כפתורים ותצוגה."
+
+#: inc/api/settings.php:626
+msgid "Consent model, logging, preferences, custom CSS and other plugin settings."
+msgstr "מודל הסכמה, רישום, העדפות, CSS מותאם אישית והגדרות תוסף נוספות."
+
+#: inc/api/settings.php:631
+msgid "Google Consent Mode and other consent integrations."
+msgstr "מצב הסכמה של Google ואינטגרציות הסכמה נוספות."
+
+#: inc/api/settings.php:635
+msgid "Buttons & labels"
+msgstr "כפתורים ותוויות"
+
+#: inc/api/settings.php:636
+msgid "Button visibility, order and label text."
+msgstr "נראות הכפתור, סדר וטקסט התווית."
+
+#: inc/api/settings.php:641
+msgid "Consent & compliance"
+msgstr "הסכמה וציות"
+
+#: inc/api/settings.php:642
+msgid "Compliance law, consent model, logging and duration."
+msgstr "חוק ציות, מודל הסכמה, רישום ומשך."
+
+#: inc/api/settings.php:647
+msgid "Cookie categories"
+msgstr "קטגוריות עוגיות"
+
+#: inc/api/settings.php:648
+msgid "Your consent categories."
+msgstr "קטגוריות ההסכמה שלך."
+
+#: inc/api/settings.php:654
+msgid "Custom cookie definitions."
+msgstr "הגדרות עוגיות מותאמות אישית."
+
+#: inc/api/settings.php:660
+msgid "Script blocking"
+msgstr "חסימת סקריפטים"
+
+#: inc/api/settings.php:661
+msgid "Blocking rules and scan resource overrides."
+msgstr "כללי חסימה והחלפות משאבי סריקה."
+
+#: inc/api/settings.php:666
+msgid "Known services"
+msgstr "שירותים מוכרים"
+
+#: inc/api/settings.php:667
+msgid "Services you added or removed for cookie declarations and blocking."
+msgstr "שירותים שהוספת או הסרת להצהרות עוגיות וחסימה."
+
+#: inc/api/settings.php:673
+msgid "GCM toggle and region defaults."
+msgstr "מתג GCM והגדרות ברירת מחדל לאזור."
+
+#: inc/api/settings.php:678
+msgid "Automatic scanning"
+msgstr "סריקה אוטומטית"
+
+#: inc/api/settings.php:679
+msgid "Scan frequency and scope."
+msgstr "תדירות וסוג הסריקה."
+
+#: inc/api/settings.php:684
+#: build/admin.js:2
+msgid "Advanced"
+msgstr "מתקדם"
+
+#: inc/api/settings.php:685
+msgid "Custom CSS, integrations and tool settings."
+msgstr "CSS מותאם אישית, אינטגרציות והגדרות כלים."
+
+#: inc/integrations/astra/init.php:123
+#: inc/integrations/theme-palette/init.php:81
+msgid "Astra Global Palette"
+msgstr "פלטת צבעים גלובלית של Astra"
+
+#: inc/integrations/theme-palette/init.php:92
+msgid "Kadence Color Palette"
+msgstr "פלטת צבעים של Kadence"
+
+#: inc/integrations/theme-palette/init.php:104
+msgid "Theme Colors"
+msgstr "צבעי נושא"
+
+#: inc/services/known-services-service.php:162
+msgid "The service could not be installed."
+msgstr "השירות לא הצליח להתקין."
+
+#: inc/services/known-services-service.php:177
+msgid "Service installed. Every cookie it declares was already present, so no new cookie definitions were created."
+msgstr "השירות הותקן. כל העוגיות שהצהיר כבר היו קיימות, לכן לא נוצרו הגדרות עוגיות חדשות."
+
+#: inc/services/known-services-service.php:178
+msgid "Service installed and its cookies declared."
+msgstr "השירות הותקן והעוגיות שלו הוצהרו."
+
+#: inc/services/known-services-service.php:213
+msgid "Service removed and its declared cookies deleted."
+msgstr "השירות הוסר והעוגיות שהוצהרו נמחקו."
+
+#: inc/services/known-services-service.php:214
+msgid "That service was not installed, so nothing was removed."
+msgstr "השירות לא היה מותקן, לכן לא הוסר דבר."
+
+#: inc/services/known-services-service.php:244
+msgid "Catalog refreshed."
+msgstr "הקטלוג עודכן."
+
+#: inc/services/script-blocking-service.php:161
+msgid "A resource domain and a target category are both required."
+msgstr "נדרש גם דומיין משאב וגם קטגוריית יעד."
+
+#: inc/services/script-blocking-service.php:174
+#: inc/services/script-blocking-service.php:433
+msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "קטגוריה זו אינה קיימת. השתמש ב-surecookie/cookie-categories עם הפעולה \"list\" כדי לראות מזהים תקפים."
+
+#: inc/services/script-blocking-service.php:191
+msgid "Resource category updated."
+msgstr "קטגוריית המשאב עודכנה."
+
+#: inc/services/script-blocking-service.php:230
+msgid "That resource was already excluded from blocking."
+msgstr "המשאב הזה כבר הוצא מהחסימה."
+
+#: inc/services/script-blocking-service.php:231
+msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
+msgstr "המשאב הוצא מהחסימה. שים לב שזה מכסה רק סקריפטים ו-iframes, לא תגיות embed או object."
+
+#: inc/services/script-blocking-service.php:253
+msgid "A resource domain is required."
+msgstr "נדרש דומיין של המשאב."
+
+#: inc/services/script-blocking-service.php:280
+msgid "Resource will be blocked again until consent."
+msgstr "המשאב יחסם שוב עד לקבלת הסכמה."
+
+#: inc/services/script-blocking-service.php:281
+msgid "That resource was not excluded, so nothing changed."
+msgstr "המשאב הזה לא הוצא, לכן לא קרה שינוי."
+
+#: inc/services/script-blocking-service.php:361
+msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "נדרשת קטגוריה תקפה. השתמש ב-surecookie/cookie-categories עם הפעולה \"list\" כדי לראות מזהים תקפים."
+
+#: inc/services/script-blocking-service.php:368
+msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
+msgstr "כלל עבור התבנית הזו כבר קיים. השתמש ב-\"update_rule\" במקום."
+
+#: inc/services/script-blocking-service.php:377
+msgid "Blocking rule created."
+msgstr "כלל חסימה נוצר."
+
+#: inc/services/script-blocking-service.php:399
+#: inc/services/script-blocking-service.php:465
+msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
+msgstr "אין כלל חסימה התואם לתבנית הזו. השתמש ב-\"list_rules\" כדי לראות את הכללים הנוכחיים."
+
+#: inc/services/script-blocking-service.php:417
+msgid "Another rule already uses that pattern."
+msgstr "כלל אחר כבר משתמש בתבנית הזו."
+
+#: inc/services/script-blocking-service.php:429
+msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "הקטגוריה הזו אינה מזהה תקפה. השתמש ב-surecookie/cookie-categories עם הפעולה \"list\" כדי לראות מזהים תקפים."
+
+#: inc/services/script-blocking-service.php:444
+msgid "Blocking rule updated."
+msgstr "כלל חסימה עודכן."
+
+#: inc/services/script-blocking-service.php:475
+msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
+msgstr "כלל חסימה נמחק. המשאבים שהוא כיסה אינם חסומים יותר על ידו."
+
+#: inc/services/script-blocking-service.php:576
+msgid "A domain or URL pattern is required."
+msgstr "נדרש דומיין או תבנית URL."
+
+#: inc/services/script-blocking-service.php:583
+msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
+msgstr "התבנית הזו רחבה מדי. תבניות תואמות כמחרוזות משנה, לכן טוקן פשוט כמו \"com\" יתאים כמעט לכל משאב צד שלישי באתר. השתמש בדומיין מלא כמו \"example.com\" או נתיב URL."
+
+#: inc/utils/options.php:255
+msgid "This content is blocked because it requires {service} cookies."
+msgstr "תוכן זה חסום כי הוא דורש עוגיות {service}."
+
+#: inc/utils/settings-metadata.php:72
+msgid "Banner shape: \"box\" is a floating card, \"banner\" is a full-width bar."
+msgstr "צורת הבאנר: \"box\" הוא כרטיס צף, \"banner\" הוא פס רוחב מלא."
+
+#: inc/utils/settings-metadata.php:73
+msgid "Coupled with notice_position, so set both together: \"box\" takes bottom-left, bottom-center, bottom-right or middle, \"banner\" takes only top or bottom. A mismatched pair is not rejected, it silently renders somewhere else."
+msgstr "משולב עם notice_position, לכן יש להגדיר את שניהם יחד: \"box\" תופס את התחתון-שמאל, תחתון-מרכז, תחתון-ימין או אמצע, \"banner\" תופס רק עליון או תחתון. זוג לא תואם לא נדחה, הוא מוצג בשקט במקום אחר."
+
+#: inc/utils/settings-metadata.php:77
+msgid "Where the banner sits on screen. The legal subset depends on notice_type."
+msgstr "מיקום הבאנר על המסך. התת-קבוצה החוקית תלויה ב-notice_type."
+
+#: inc/utils/settings-metadata.php:78
+msgid "Not interchangeable across notice_type: a box-only value on a \"banner\" renders as a bottom bar, and top/bottom on a \"box\" falls back to bottom-right, both silently."
+msgstr "לא ניתן להחלפה בין notice_type: ערך של box בלבד על \"banner\" מוצג כפס תחתון, ו-top/bottom על \"box\" חוזר ל-bottom-right, שניהם בשקט."
+
+#: inc/utils/settings-metadata.php:82
+msgid "Unused. Superseded by notice_position."
+msgstr "לא בשימוש. הוחלף על ידי notice_position."
+
+#: inc/utils/settings-metadata.php:86
+msgid "Banner entrance animation."
+msgstr "אנימציית כניסת הבאנר."
+
+#: inc/utils/settings-metadata.php:89
+msgid "ID of the banner colour preset. Built-ins are blue-purple, purple-pink, blue-cyan, green-lime, red-orange, dark-blue, dark-green, dark-pink and dark-orange, plus \"astra\" while the Astra theme is active. A theme or plugin can register more."
+msgstr "מזהה של ערכת צבעי הבאנר. ברירת המחדל כוללת כחול-סגול, סגול-ורוד, כחול-ציאן, ירוק-ליים, אדום-כתום, כחול כהה, ירוק כהה, ורוד כהה וכתום כהה, בנוסף ל-\"astra\" כאשר ערכת Astra פעילה. ערכה או תוסף יכולים להוסיף נוספים."
+
+#: inc/utils/settings-metadata.php:90
+msgid "Not validated on write: an unknown ID reports success and silently renders the default palette."
+msgstr "לא מאומת בכתיבה: מזהה לא מוכר מדווח הצלחה ומציג בשקט את פלטת הצבעים ברירת המחדל."
+
+#: inc/utils/settings-metadata.php:93
+msgid "Dim the page behind the banner and block interaction until the visitor chooses."
+msgstr "הכהה את הדף שמאחורי הבאנר וחסום אינטראקציה עד שהמבקר יבחר."
+
+#: inc/utils/settings-metadata.php:94
+msgid "Forces a consent choice before the site can be used, which conflicts with the freely-given consent requirement in some regions. Confirm with the user before enabling."
+msgstr "כופה בחירת הסכמה לפני שניתן להשתמש באתר, מה שסותר את דרישת ההסכמה החופשית באזורים מסוימים. אשר עם המשתמש לפני ההפעלה."
+
+#: inc/utils/settings-metadata.php:97
+msgid "Master switch for the consent banner."
+msgstr "מתג ראשי לבאנר ההסכמה."
+
+#: inc/utils/settings-metadata.php:98
+msgid "Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent."
+msgstr "גם מבטל חסימת סקריפטים ו-iframe, ללא קשר ל-blocking_enabled, כך שכיבויו מאפשר למעקבים לפעול לפני ההסכמה."
+
+#: inc/utils/settings-metadata.php:101
+msgid "Absolute URL of an image shown at the top of the banner. Empty string removes it."
+msgstr "כתובת URL מוחלטת של תמונה המוצגת בראש הבאנר. מחרוזת ריקה מסירה אותה."
+
+#: inc/utils/settings-metadata.php:104
+msgid "Plain-text headline above the banner message. HTML is stripped. Empty renders no heading."
+msgstr "כותרת טקסט פשוט מעל הודעת הבאנר. HTML מוסר. ריק מציג ללא כותרת."
+
+#: inc/utils/settings-metadata.php:107
+msgid "Banner body copy. Accepts post-level HTML such as links and emphasis."
+msgstr "טקסט גוף הבאנר. מקבל HTML ברמת הפוסט כגון קישורים והדגשות."
+
+#: inc/utils/settings-metadata.php:113
+msgid "Site-wide consent model: \"opt-in\" (GDPR style, nothing non-essential runs before consent) or \"opt-out\" (CCPA style, allowed until the visitor declines)."
+msgstr "מודל הסכמה לכל האתר: \"opt-in\" (סגנון GDPR, שום דבר לא חיוני לא רץ לפני ההסכמה) או \"opt-out\" (סגנון CCPA, מותר עד שהמבקר מסרב)."
+
+#: inc/utils/settings-metadata.php:114
+msgid "Legally load-bearing. \"opt-out\" lets non-essential trackers fire before any consent, which is unlawful for EU and UK visitors, and it removes the Preferences and Accept All buttons. Confirm the site's jurisdiction with the user before changing it."
+msgstr "חוקי מחייב. \"opt-out\" מאפשר למעקבים לא חיוניים לפעול לפני כל הסכמה, דבר שאינו חוקי למבקרים מהאיחוד האירופי ובריטניה, ומסיר את כפתורי ההעדפות וקבל הכל. אשר את תחום השיפוט של האתר עם המשתמש לפני שינוי."
+
+#: inc/utils/settings-metadata.php:117
+msgid "An {id, name} object naming the regulation the site declares it follows. Only \"name\" is read, and only for usage telemetry, so this does not change banner or blocking behaviour."
+msgstr "אובייקט {id, name} שמציין את התקנה שהאתר מצהיר שהוא עומד בה. רק \"name\" נקרא, ורק לצורך טלמטריית שימוש, כך שזה לא משנה את התנהגות הבאנר או החסימה."
+
+#: inc/utils/settings-metadata.php:121
+msgid "How long consent log rows are kept before the daily cleanup cron deletes them. Note the token format is \"<days>_days\", not a bare number."
+msgstr "כמה זמן שורות יומן ההסכמה נשמרות לפני שה-cron לניקוי יומי מוחק אותן. שים לב שהפורמט הוא \"<days>_days\", לא מספר בלבד."
+
+#: inc/utils/settings-metadata.php:122
+msgid "Destructive. Shortening this makes the next cron run permanently delete every consent row older than the new window, erasing the proof-of-consent evidence GDPR Article 7(1) requires. Read the current value and confirm before lowering it."
+msgstr "הרסני. קיצור זה גורם להרצת ה-cron הבאה למחוק לצמיתות כל שורת הסכמה שקדמה לחלון החדש, ומוחק את הראיות להוכחת ההסכמה שנדרשות לפי GDPR סעיף 7(1). קרא את הערך הנוכחי ואשר לפני הקטנה."
+
+#: inc/utils/settings-metadata.php:125
+msgid "Master switch for pre-consent script and iframe blocking."
+msgstr "מתג ראשי לחסימת סקריפטים ו-iframe לפני ההסכמה."
+
+#: inc/utils/settings-metadata.php:126
+msgid "Turning this off lets analytics and marketing tags fire before consent is collected. It is the single most compliance-significant setting after consent_model."
+msgstr "כיבוי זה מאפשר לתגי אנליטיקה ושיווק לפעול לפני איסוף ההסכמה. זה ההגדרה החשובה ביותר לציות אחרי consent_model."
+
+#: inc/utils/settings-metadata.php:129
+msgid "Whether the banner offers an Accept All button."
+msgstr "האם הבאנר מציע כפתור קבל הכל."
+
+#: inc/utils/settings-metadata.php:130
+msgid "Not cosmetic: with it off the consent-log endpoint rejects every accept-all record with HTTP 422, so existing integrations that post one will start failing."
+msgstr "לא קוסמטי: כשהוא כבוי נקודת הקצה של יומן ההסכמה דוחה כל רשומת קבל-כל עם HTTP 422, כך ששילובים קיימים שישלחו אחת יתחילו להיכשל."
+
+#: inc/utils/settings-metadata.php:133
+msgid "Whether uninstalling the plugin also deletes its data."
+msgstr "האם הסרת התוסף גם מוחקת את הנתונים שלו."
+
+#: inc/utils/settings-metadata.php:134
+msgid "Arms an irreversible action: on uninstall it drops the consent-log table and deletes every SureCookie option. Never enable it without explicit user confirmation."
+msgstr "מפעיל פעולה בלתי הפיכה: בהסרה הוא מוחק את טבלת יומן ההסכמה ומוחק כל אפשרות SureCookie. אל תפעיל זאת ללא אישור מפורש מהמשתמש."
+
+#: inc/utils/settings-metadata.php:137
+msgid "UNIX timestamp in seconds of the last \"re-request consent\" action. Any consent recorded before this instant is treated as stale."
+msgstr "חותמת זמן UNIX בשניות של הפעולה האחרונה \"בקשת הסכמה מחדש\". כל הסכמה שנרשמה לפני רגע זה נחשבת כלא עדכנית."
+
+#: inc/utils/settings-metadata.php:138
+msgid "Writing the current time invalidates every visitor's existing consent and shows the banner again site-wide. Only set it when the user explicitly asks to re-collect consent."
+msgstr "כתיבת הזמן הנוכחי מבטלת את כל ההסכמות הקיימות של המבקרים ומציגה שוב את הבאנר בכל האתר. יש להגדיר זאת רק כאשר המשתמש מבקש במפורש לאסוף הסכמה מחדש."
+
+#: inc/utils/settings-metadata.php:141
+msgid "Whether SureCookie registers its WordPress Abilities and MCP server."
+msgstr "האם SureCookie רושמת את היכולות של WordPress ואת שרת MCP שלה."
+
+#: inc/utils/settings-metadata.php:142
+msgid "Self-locking: writing false through this ability deregisters every SureCookie ability on the next request, so no AI client can turn it back on. It can only be re-enabled from wp-admin."
+msgstr "נעילה עצמית: כתיבת false דרך יכולת זו מבטלת את רישום כל יכולות SureCookie בבקשה הבאה, כך שאף לקוח AI לא יוכל להפעיל אותה מחדש. ניתן להפעיל אותה מחדש רק מ-wp-admin."
+
+#: inc/utils/settings-metadata.php:147
+msgid "Left-to-right order of the banner buttons, as a comma-separated list built from the tokens accept_all, accept (essential only), preferences and decline."
+msgstr "סדר משמאל לימין של כפתורי הבאנר, כרשימה מופרדת בפסיקים הבנויה מהטוקנים accept_all, accept (הכרחי בלבד), preferences ו-decline."
+
+#: inc/utils/settings-metadata.php:148
+msgid "Unrecognised tokens are dropped silently, so a value containing none of the four leaves the banner with no buttons at all."
+msgstr "טוקנים לא מזוהים מושלכים בשקט, כך שערך שאינו מכיל אף אחד מארבעת הטוקנים משאיר את הבאנר ללא כפתורים כלל."
+
+#: inc/utils/settings-metadata.php:151
+msgid "Label for the essential-only button. Empty falls back to the translated \"Only Essential\"."
+msgstr "תווית לכפתור ההכרחי בלבד. ריק יחזיר את התרגום של \"רק הכרחי\"."
+
+#: inc/utils/settings-metadata.php:152
+msgid "This is not the Accept All button, which is accept_all_btn_text. Labelling it \"Accept\" misrepresents what the visitor is consenting to."
+msgstr "זה לא כפתור \"קבל הכל\", שהוא accept_all_btn_text. תיוגו כ\"קבל\" מטעה לגבי מה שהמבקר מסכים לו."
+
+#: inc/utils/settings-metadata.php:155
+msgid "Label for the Accept All button. Empty falls back to the translated \"Accept All\"."
+msgstr "תווית לכפתור קבל הכל. ריק יחזיר את התרגום של \"קבל הכל\"."
+
+#: inc/utils/settings-metadata.php:158
+msgid "Label for the Decline button. Empty falls back to the translated \"Decline\"."
+msgstr "תווית לכפתור דחה. ריק יחזיר את התרגום של \"דחה\"."
+
+#: inc/utils/settings-metadata.php:163
+msgid "Pro banner colour override, shaped {mode, colors}. Send mode \"custom\" together with the colors map."
+msgstr "החלפת צבעים מתקדמת לבאנר, בצורה {mode, colors}. שלח מצב \"custom\" יחד עם מפת הצבעים."
+
+#: inc/utils/settings-metadata.php:164
+msgid "Writing colors while mode stays \"preset\" is a silent no-op: color_palette continues to win and the write still reports success."
+msgstr "כתיבת צבעים כאשר המצב נשאר \"preset\" היא פעולה שקטה ללא השפעה: color_palette ממשיך לנצח והכתיבה מדווחת על הצלחה."
+
+#: inc/utils/settings-metadata.php:167
+msgid "Raw CSS inlined on every frontend page to restyle the banner and preferences modal. Requires the unfiltered_html capability."
+msgstr "CSS גולמי מוטמע בכל דף קדמי לעיצוב מחדש של הבאנר והמודל העדפות. דורש את היכולת unfiltered_html."
+
+#: inc/utils/settings-metadata.php:172
+msgid "The consent-category registry the whole consent model derives from. Readable here, but edit it with the surecookie/cookie-categories ability."
+msgstr "רישום קטגוריות ההסכמה שממנו נגזר כל מודל ההסכמה. ניתן לקרוא כאן, אך לערוך אותו עם היכולת surecookie/cookie-categories."
+
+#: inc/utils/settings-metadata.php:175
+msgid "The manually declared cookie registry shown in the preferences modal. Readable here, but edit it with the surecookie/cookie-management ability."
+msgstr "רישום העוגיות שהוכרז ידנית המוצג במודל ההעדפות. ניתן לקרוא כאן, אך לערוך אותו עם היכולת surecookie/cookie-management."
+
+#: inc/utils/settings-metadata.php:180
+msgid "Saved manual scan selection, as {label, value} rows whose value is a published post ID. Prefer the surecookie/site-scanner ability with action \"start\", which resolves and validates the rows for you."
+msgstr "בחירת סריקה ידנית שנשמרה, כשורות {label, value} שערכן הוא מזהה פוסט שפורסם. העדף את היכולת של surecookie/site-scanner עם הפעולה \"start\", שמפענחת ומאמתת את השורות עבורך."
+
+#: inc/utils/settings-metadata.php:183
+msgid "Master switch for unattended scheduled scanning. Enabling it schedules the WP-Cron event."
+msgstr "מתג ראשי לסריקה מתוזמנת ללא השגחה. הפעלתו מתזמנת את אירוע WP-Cron."
+
+#: inc/utils/settings-metadata.php:186
+msgid "Cadence of the automatic scan. \"monthly\" always works; \"weekly\" requires SureCookie Pro. A theme or plugin can register more."
+msgstr "תדירות הסריקה האוטומטית. \"monthly\" תמיד עובד; \"weekly\" דורש SureCookie Pro. תבנית או תוסף יכולים להירשם ליותר."
+
+#: inc/utils/settings-metadata.php:187
+msgid "The clamp is silent: an unsupported value, including \"weekly\" without Pro, is reported as saved but stores \"monthly\"."
+msgstr "ההגבלה שקטה: ערך לא נתמך, כולל \"weekly\" ללא Pro, מדווח כנשמר אך מאחסן \"monthly\"."
+
+#: inc/utils/settings-metadata.php:191
+msgid "What the automatic scan crawls: \"same_as_manual\" reuses scan_pages, \"all_published\" walks published content up to the plan limit, \"selected\" uses auto_scan_pages."
+msgstr "מה הסריקה האוטומטית סורקת: \"same_as_manual\" משתמשת מחדש ב-scan_pages, \"all_published\" סורקת תוכן שפורסם עד למגבלת התוכנית, \"selected\" משתמשת ב-auto_scan_pages."
+
+#: inc/utils/settings-metadata.php:194
+msgid "Content the automatic scan crawls when auto_scan_scope is \"selected\". Accepts picker rows or bare post IDs, and is ignored under any other scope."
+msgstr "תוכן שהסריקה האוטומטית סורקת כאשר auto_scan_scope הוא \"selected\". מקבל שורות בורר או מזהי פוסט בלבד, ומתעלם בכל טווח אחר."
+
+#: inc/utils/settings-metadata.php:199
+msgid "Scan-detected resources marked \"do not block\", keyed per kind as \"script::example.com\" or \"iframe::example.com\"."
+msgstr "משאבים שזוהו בסריקה וסומנו כ\"אל תחסום\", ממוינים לפי סוג כ-\"script::example.com\" או \"iframe::example.com\"."
+
+#: inc/utils/settings-metadata.php:202
+msgid "Category reassignment for scan-detected scripts and iframes, mapping the same scoped key format as excluded_scan_resources to a cookie category ID."
+msgstr "הקצאת קטגוריה מחדש לסקריפטים ואייפריימים שזוהו בסריקה, ממפה את אותו פורמט מפתח טווח כמו excluded_scan_resources למזהה קטגוריית עוגיות."
+
+#: inc/utils/settings-metadata.php:205
+msgid "Admin-authored blocking rules. Each row needs a non-empty \"value\" URL or domain pattern and a \"category\", optionally narrowed by type, location, path and keywords."
+msgstr "כללי חסימה שנכתבו על ידי מנהל. כל שורה צריכה \"value\" לא ריקה של URL או תבנית דומיין ו\"category\", שניתן לצמצם לפי סוג, מיקום, נתיב ומילות מפתח."
+
+#: inc/utils/settings-metadata.php:210
+msgid "Absolute URL of the fallback image on the placeholder that replaces blocked embeds. Empty renders a text-only placeholder."
+msgstr "כתובת URL מוחלטת של תמונת הגיבוי במקומו של התוכן החסום. ריק מציג מחליף טקסט בלבד."
+
+#: inc/utils/settings-metadata.php:213
+msgid "Body copy of the blocked-content placeholder. Keep the literal token {service}, which is replaced with the vendor name at render time."
+msgstr "טקסט גוף של מחליף התוכן החסום. שמור את הטוקן המילולי {service}, שמוחלף בשם הספק בזמן ההצגה."
+
+#: inc/utils/settings-metadata.php:216
+msgid "Label of the consent button on the blocked-content placeholder. Empty renders the built-in \"Accept & Load\"."
+msgstr "תווית כפתור ההסכמה במחליף התוכן החסום. ריק מציג את \"Accept & Load\" המובנה."
+
+#: inc/utils/settings-metadata.php:219
+msgid "Show a blocked video's own thumbnail on the placeholder. Currently resolves YouTube URLs only."
+msgstr "הצג תמונת מיני-תצוגה של וידאו חסום במחליף. כרגע פותר רק כתובות YouTube."
+
+#: inc/utils/settings-metadata.php:224
+msgid "Post ID of the cookie policy page linked from the banner. 0 means none is linked."
+msgstr "מזהה הפוסט של דף מדיניות העוגיות המקושר מהבאנר. 0 פירושו שאין קישור."
+
+#: inc/utils/settings-metadata.php:225
+msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page."
+msgstr "מעובד עם absint, כך שערך לא מספרי או שלילי הופך ל-0 ומנתק בשקט את דף המדיניות."
+
+#: inc/utils/settings-metadata.php:228
+msgid "Term ID of the nav menu that receives the virtual \"Cookie Preferences\" item, as a numeric string. Empty string injects nothing."
+msgstr "מזהה מונח של תפריט הניווט שמקבל את הפריט הווירטואלי \"Cookie Preferences\", כמחרוזת מספרית. מחרוזת ריקה לא מזריקה כלום."
+
+#: inc/utils/settings-metadata.php:231
+msgid "Whether SureCookie gets its own top-level admin menu rather than living under Settings."
+msgstr "האם ל-SureCookie תהיה תפריט מנהל ראשי משלו במקום להיות תחת הגדרות."
+
+#: inc/utils/settings-metadata.php:237
+msgid "Admin-only preview panel state. No effect on the public site."
+msgstr "מצב לוח תצוגה מקדימה למנהלים בלבד. ללא השפעה על האתר הציבורי."
+
+#: inc/utils/settings-metadata.php:241
+msgid "Unused."
+msgstr "לא בשימוש."
+
+#: inc/utils/settings-metadata.php:245
+msgid "Internal counter mirroring the consent-log table."
+msgstr "מונה פנימי המשקף את טבלת יומן ההסכמה."
+
+#: build/admin.js:2
+#: build/admin.js:84
+msgid "Blocked Content UI"
+msgstr "ממשק תוכן חסום"
+
+#: build/admin.js:2
+#: build/admin.js:88
+msgid "Import / Export"
+msgstr "ייבוא / ייצוא"
+
+#: build/admin.js:4
+msgid "All dates"
+msgstr "כל התאריכים"
+
+#: build/admin.js:4
+msgid "Select date range"
+msgstr "בחר טווח תאריכים"
+
+#: build/admin.js:4
+msgid "Clear"
+msgstr "נקה"
+
+#: build/admin.js:28
+msgid "Not In Use"
+msgstr "לא בשימוש"
+
+#: build/admin.js:28
+msgid "Hide Unused Categories"
+msgstr "הסתר קטגוריות לא בשימוש"
+
+#: build/admin.js:28
+msgid "Categories with no cookies, scripts, or services are hidden from the preferences modal. A category reappears automatically when usage changes, and is never removed from the consent record."
+msgstr "קטגוריות ללא עוגיות, סקריפטים או שירותים מוסתרות מחלון ההעדפות. קטגוריה מופיעה מחדש אוטומטית כאשר השימוש משתנה, ולעולם לא מוסרת מרשומת ההסכמה."
+
+#: build/admin.js:41
+msgid "Failed to update category visibility"
+msgstr "נכשל בעדכון נראות הקטגוריה"
+
+#: build/admin.js:53
+msgid "This is a worldwide banner preview"
+msgstr "זו תצוגה מקדימה של באנר עולמי"
+
+#: build/admin.js:75
+msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
+msgstr "מציג את הבאנר ברירת המחדל שלך, זה שהמבקרים רואים כאשר אין כלל גיאוגרפי חל. הפעלת אפשרות זו סוגרת כל תצוגה מקדימה של כלל."
+
+#: build/admin.js:83
+msgid "Edit Worldwide Default"
+msgstr "ערוך ברירת מחדל עולמית"
+
+#: build/admin.js:83
+msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
+msgstr "הגדר את מצב ההסכמה ברירת המחדל לכל המבקרים ברחבי העולם, לפני שהם מבצעים בחירה. כללים אזוריים גוברים על כך עבור האזורים שלהם, בהתאם לחוק כל אזור."
+
+#: build/admin.js:83
+msgid "Worldwide"
+msgstr "עולמי"
+
+#: build/admin.js:83
+msgid "Edit worldwide default consent"
+msgstr "ערוך הסכמה ברירת מחדל עולמית"
+
+#: build/admin.js:84
+msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
+msgstr "שלוט במה שהמבקרים רואים כאשר תוכן צד שלישי (כגון סרטונים או מפות) חסום עד שניתנת הסכמה."
+
+#: build/admin.js:84
+msgid "Use video thumbnails"
+msgstr "השתמש בתמונות ממוזערות של וידאו"
+
+#: build/admin.js:84
+msgid "Use Video Thumbnails"
+msgstr "השתמש בתמונות ממוזערות של וידאו"
+
+#: build/admin.js:84
+msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
+msgstr "הצג את תמונת הממוזער של הווידאו עצמו (למשל YouTube) במקום הממלא. הערה: תמונה זו נטענת מהספק לפני מתן ההסכמה."
+
+#: build/admin.js:84
+msgid "Upload Image"
+msgstr "העלה תמונה"
+
+#: build/admin.js:84
+msgid "Default Placeholder Image"
+msgstr "תמונת ממלא ברירת מחדל"
+
+#: build/admin.js:84
+msgid "Select Placeholder Image"
+msgstr "בחר תמונת ממלא"
+
+#: build/admin.js:84
+msgid "Use this image"
+msgstr "השתמש בתמונה זו"
+
+#: build/admin.js:84
+msgid "Placeholder Text"
+msgstr "טקסט ממלא"
+
+#: build/admin.js:84
+msgid "Enter placeholder text"
+msgstr "הזן טקסט ממלא"
+
+#: build/admin.js:84
+msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
+msgstr "השתמש ב-{service} כדי להכניס את שם השירות החסום (למשל YouTube)."
+
+#: build/admin.js:84
+msgid "Button Text"
+msgstr "טקסט כפתור"
+
+#: build/admin.js:87
+msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
+msgstr "אפשר ללקוחות AI כמו Claude ו-Cursor לנהל את באנר העוגיות, הסורק והגדרות ההסכמה שלך דרך SureCookie. כאשר מושבת, לא נרשמות יכולות ולקוחות AI אינם יכולים להתחבר."
+
+#: build/admin.js:87
+#: build/admin.js:88
+msgid "All Settings"
+msgstr "כל ההגדרות"
+
+#: build/admin.js:87
+msgid "Your entire portable configuration in one file."
+msgstr "כל תצורת הנייד שלך בקובץ אחד."
+
+#: build/admin.js:87
+msgid "Nothing imported"
+msgstr "לא יובא דבר"
+
+#: build/admin.js:87
+msgid "Import complete"
+msgstr "הייבוא הושלם"
+
+#: build/admin.js:87
+msgid "None of the settings in this file could be applied to this site."
+msgstr "אף אחת מההגדרות בקובץ זה לא יושמה באתר זה."
+
+#: build/admin.js:87
+msgid "Your settings were imported. Here is what happened:"
+msgstr "ההגדרות שלך יובאו. הנה מה שקרה:"
+
+#: build/admin.js:87
+msgid "Applied"
+msgstr "הוחל"
+
+#: build/admin.js:87
+msgid "Skipped (Pro)"
+msgstr "דלג (Pro)"
+
+#: build/admin.js:87
+msgid "Ignored"
+msgstr "התעלם"
+
+#. translators: %d: number of unrecognized fields.
+#: build/admin.js:88
+#, js-format
+msgid "%d unrecognized field(s)"
+msgstr "%d שדה(ות) לא מזוהה(ות)"
+
+#: build/admin.js:88
+msgid "These settings need SureCookie Pro"
+msgstr "הגדרות אלו דורשות SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Upgrade to Pro to use the skipped features on this site."
+msgstr "שדרג ל-Pro כדי להשתמש בתכונות שהודחו באתר זה."
+
+#: build/admin.js:88
+msgid "Move your SureCookie setup between sites with a portable settings export."
+msgstr "העבר את הגדרת SureCookie שלך בין אתרים עם ייצוא הגדרות נייד."
+
+#: build/admin.js:88
+msgid "Export settings"
+msgstr "ייצא הגדרות"
+
+#: build/admin.js:88
+msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
+msgstr "בחר מה לכלול, ואז הורד קובץ JSON של תצורת SureCookie הניידת שלך."
+
+#: build/admin.js:88
+msgid "What to export"
+msgstr "מה לייצא"
+
+#: build/admin.js:88
+msgid "Export your entire portable configuration."
+msgstr "ייצא את כל תצורת הנייד שלך."
+
+#: build/admin.js:88
+msgid "Export more with SureCookie Pro"
+msgstr "ייצא יותר עם SureCookie Pro"
+
+#: build/admin.js:88
+msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
+msgstr "הגרסה Pro מוסיפה הגדרות כמו מיקוד גיאוגרפי, העברת הסכמה והווידג'ט הצף לייצוא שלך."
+
+#: build/admin.js:88
+msgid "Settings exported successfully."
+msgstr "ההגדרות יוצרו בהצלחה."
+
+#: build/admin.js:88
+msgid "Failed to export settings."
+msgstr "הייצוא של ההגדרות נכשל."
+
+#: build/admin.js:88
+msgid "Please try again."
+msgstr "אנא נסה שוב."
+
+#: build/admin.js:88
+msgid "Exporting…"
+msgstr "מייצא…"
+
+#: build/admin.js:88
+#: build/admin.js:89
+msgid "Import settings"
+msgstr "ייבא הגדרות"
+
+#: build/admin.js:88
+msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
+msgstr "העלה קובץ ייצוא SureCookie כדי למזג אותו לאתר הנוכחי, או להחליף את כל ההגדרות הניתנות להעברה."
+
+#: build/admin.js:88
+msgid "JSON export file"
+msgstr "קובץ ייצוא JSON"
+
+#. translators: %s: selected import filename.
+#: build/admin.js:89
+#, js-format
+msgid "Selected file: %s"
+msgstr "קובץ נבחר: %s"
+
+#: build/admin.js:89
+msgid "Replace all settings"
+msgstr "החלף את כל ההגדרות"
+
+#: build/admin.js:89
+msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
+msgstr "כאשר מופעל, הגדרות ניתנות להעברה שאינן קיימות בקובץ הייבוא יאופסו לברירות המחדל שלהן במקום לשמור על ערכי האתר הנוכחיים."
+
+#: build/admin.js:89
+msgid "No settings were applied from this file."
+msgstr "לא הוחלו הגדרות מקובץ זה."
+
+#: build/admin.js:89
+msgid "Failed to import settings."
+msgstr "הייבוא של ההגדרות נכשל."
+
+#: build/admin.js:89
+msgid "Please check the file and try again."
+msgstr "אנא בדוק את הקובץ ונסה שוב."
+
+#: build/admin.js:89
+msgid "Please choose a SureCookie export file first."
+msgstr "אנא בחר תחילה קובץ ייצוא SureCookie."
+
+#: build/admin.js:89
+msgid "Importing…"
+msgstr "מייבא…"
+
+#: build/admin.js:89
+msgid "Access"
+msgstr "גישה"
+
+#: build/admin.js:89
+msgid "28 days left"
+msgstr "נותרו 28 ימים"
+
+#: build/admin.js:89
+msgid "Erasure"
+msgstr "מחיקה"
+
+#: build/admin.js:89
+msgid "In progress"
+msgstr "בתהליך"
+
+#: build/admin.js:89
+msgid "6 days left"
+msgstr "נותרו 6 ימים"
+
+#: build/admin.js:89
+msgid "Portability"
+msgstr "ניידות"
+
+#: build/admin.js:89
+msgid "3 days overdue"
+msgstr "3 ימים באיחור"
+
+#: build/admin.js:89
+msgid "Responded"
+msgstr "הושבה"
+
+#: build/admin.js:89
+msgid "Data Request Logs"
+msgstr "יומני בקשות נתונים"
+
+#: build/admin.js:89
+msgid "One Form for Every Request"
+msgstr "טופס אחד לכל בקשה"
+
+#: build/admin.js:89
+msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
+msgstr "הוסף את הטופס עם קוד קצר, או אפשר לו להופיע בדף מדיניות הפרטיות שלך. הבקשות מגיעות שלמות, לא כהודעות דוא\"ל לא ברורות."
+
+#: build/admin.js:89
+msgid "Every Request Verified by Email"
+msgstr "כל בקשה מאומתת בדוא\"ל"
+
+#: build/admin.js:89
+msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
+msgstr "כל הגשה שולחת קישור לשימוש חד-פעמי שפג תוקפו תוך 24 שעות. אתה פועל רק על בקשות שהאדם אכן הגיש."
+
+#: build/admin.js:89
+msgid "A Deadline on Every Request"
+msgstr "מועד אחרון על כל בקשה"
+
+#: build/admin.js:89
+msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
+msgstr "לכל בקשה מאומתת יש תאריך יעד, 30 ימים כברירת מחדל, והרשימה סופרת לאחור. שורות באיחור הופכות לאדומות."
+
+#: build/admin.js:89
+msgid "One Reminder Email a Day"
+msgstr "תזכורת אחת בדוא\"ל ביום"
+
+#: build/admin.js:89
+msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
+msgstr "דוא\"ל יומי מפרט מה צפוי תוך שבוע או כבר באיחור. אתה מקבל התראה לפני שפג המועד."
+
+#: build/admin.js:89
+msgid "Reply With the Data Attached"
+msgstr "השב עם הנתונים מצורפים"
+
+#: build/admin.js:89
+msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
+msgstr "בלחיצה אחת נאסף מה שוורדפרס, התוספים שלך ו-SureCookie מחזיקים עבור אותו דוא\"ל, ואז מצורף לתשובתך. אין צורך להרכיב ידנית."
+
+#: build/admin.js:89
+msgid "A Record of What You Did"
+msgstr "רשומה של מה שעשית"
+
+#: build/admin.js:89
+msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
+msgstr "כל שלב מתועד עם חותמת זמן: אימות, ההערות שלך, התשובה שנשלחה, אפילו דוא\"ל שנכשל. אתה יכול להראות מה קרה."
+
+#: build/admin.js:89
+msgid "Available in SureCookie Pro"
+msgstr "זמין ב-SureCookie Pro"
+
+#: build/admin.js:89
+msgid "You Have 30 Days to Answer a Data Request"
+msgstr "יש לך 30 ימים לענות על בקשת נתונים"
+
+#: build/admin.js:89
+msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
+msgstr "על פי GDPR ו-CCPA, כל מבקר יכול לבקש עותק של הנתונים האישיים שלו או לבקש למחוק אותם, ויש לך מספר ימים קבועים לענות. טיפול ידני אומר שרשור דוא\"ל, גיליון אלקטרוני וייצוא שאתה מרכיב בעצמך."
+
+#: build/admin.js:89
+msgid "Grab Launching Offer:"
+msgstr "הצעת השקה של Grab:"
+
+#: build/admin.js:89
+msgid "Data Requests is a premium feature. Everything else on this page stays exactly where it is once Pro is active."
+msgstr "בקשות נתונים הן תכונה פרימיום. כל השאר בדף זה נשאר בדיוק במקום שבו הוא ברגע ש-Pro פעיל."
+
+#: build/admin.js:89
+msgid "How Pro Handles Each Request"
+msgstr "כיצד Pro מטפל בכל בקשה"

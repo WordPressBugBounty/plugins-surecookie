@@ -51,6 +51,23 @@ class Analytics {
 	];
 
 	/**
+	 * Public-content volume bands keyed by their exclusive upper bound. The first
+	 * bound a count falls under wins, so a site reports one band and never the
+	 * wider ones above it; 1000 and up falls through to `greater_than_1000`.
+	 *
+	 * @since x.x.x
+	 */
+	private const CONTENT_VOLUME_BUCKETS = [
+		10   => 'less_than_10',
+		50   => 'less_than_50',
+		100  => 'less_than_100',
+		150  => 'less_than_150',
+		200  => 'less_than_200',
+		500  => 'less_than_500',
+		1000 => 'less_than_1000',
+	];
+
+	/**
 	 * Events tracker.
 	 *
 	 * @var \BSF_Analytics_Events|null
@@ -548,7 +565,11 @@ class Analytics {
 		if ( (bool) Settings::get( 'banner_overlay_enabled' ) ) {
 			$banner_signals[] = 'overlay';
 		}
-		if ( Settings::get( 'notice_type' ) !== 'banner' ) {
+		// Compared against the schema default (not a literal) so a default
+		// change never silently breaks the signal. Legacy sites pinned to the
+		// old full-width look by the upgrade migration will report this
+		// signal - accurate, since they now diverge from the shipped default.
+		if ( Settings::get( 'notice_type' ) !== ( Settings::get_settings_defaults()['notice_type'] ?? '' ) ) {
 			$banner_signals[] = 'notice_type';
 		}
 		if ( ! empty( $banner_signals ) ) {
@@ -621,6 +642,40 @@ class Analytics {
 			);
 		}
 
+		// ── 28. known_services_installed ─────────────────────────────────
+		// At least one catalog service is actively managed, i.e. the admin declared a
+		// blocked embed's cookies rather than leaving the policy incomplete. `count`
+		// separates "tried one" from "curated the site", captured at first adoption.
+		$installed_services = get_option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [] );
+		$installed_slugs    = is_array( $installed_services ) && is_array( $installed_services['installed'] ?? null )
+			? $installed_services['installed']
+			: [];
+		if ( $installed_slugs !== [] ) {
+			$events->track(
+				'known_services_installed',
+				'installed',
+				[
+					'version'            => SURECOOKIE_VERSION,
+					'days_since_install' => (string) $days_since_install,
+					'count'              => (string) count( $installed_slugs ),
+				]
+			);
+		}
+
+		// ── 29. site_content_volume ──────────────────────────────────────
+		// Sizes the site's frontend-reachable content to scope the planned Complete
+		// Site Scan. Banded, not raw, so the breakdown stays one row per band;
+		// `count` keeps the exact figure in case the bands need redrawing.
+		$content_count = $this->get_public_content_count();
+		$events->track(
+			'site_content_volume',
+			$this->get_content_volume_bucket( $content_count ),
+			[
+				'version' => SURECOOKIE_VERSION,
+				'count'   => (string) $content_count,
+			]
+		);
+
 		/**
 		 * Fires after SureCookie has queued its own state-based events, letting
 		 * add-ons (e.g. SureCookie Pro) push their events through the shared
@@ -686,6 +741,45 @@ class Analytics {
 	// ============================================
 	// Helpers
 	// ============================================
+
+	/**
+	 * Count published entries across every frontend-reachable post type.
+	 *
+	 * Mirrors core's sitemap definition - public and viewable, minus attachments -
+	 * so the total matches what a full-site crawl would have to visit.
+	 *
+	 * @since x.x.x
+	 * @return int Published public entries across posts, pages and public CPTs.
+	 */
+	private function get_public_content_count(): int {
+		$post_types = get_post_types( [ 'public' => true ], 'names' );
+		unset( $post_types['attachment'] );
+
+		$total = 0;
+		foreach ( array_filter( $post_types, 'is_post_type_viewable' ) as $post_type ) {
+			$counts = (array) wp_count_posts( $post_type );
+			$total += (int) ( $counts['publish'] ?? 0 );
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Resolve a content count to its volume band.
+	 *
+	 * @param int $count Published public entries.
+	 * @since x.x.x
+	 * @return string Band name, e.g. `less_than_50`.
+	 */
+	private function get_content_volume_bucket( int $count ): string {
+		foreach ( self::CONTENT_VOLUME_BUCKETS as $upper_bound => $bucket ) {
+			if ( $count < $upper_bound ) {
+				return $bucket;
+			}
+		}
+
+		return 'greater_than_1000';
+	}
 
 	/**
 	 * Get number of days since plugin installation.

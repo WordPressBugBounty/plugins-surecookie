@@ -50,11 +50,11 @@ class CookieService {
 	 * @since 0.0.0-alpha.1
 	 */
 	public function get_scanned_cookies(): array {
-		$scanned_cookies       = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+		$scanned_cookies       = Get::scanned_cookies_for_display();
 		$cookie_categories     = Settings::get( 'cookie_categories' );
 		$final_cookies_dataset = [];
 
-		if ( empty( $scanned_cookies ) || ! is_array( $scanned_cookies ) || empty( $cookie_categories ) ) {
+		if ( empty( $scanned_cookies ) || empty( $cookie_categories ) ) {
 			return [
 				'success' => false,
 				'message' => __( 'No scanned cookies found.', 'surecookie' ),

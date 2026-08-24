@@ -81,6 +81,9 @@ class Collector {
 
 		// See the file docblock: fidelity, not convenience.
 		add_filter( 'surecookie_should_block_scripts', '__return_false' );
+		// Unblocking the tags is only half of it: Google Consent Mode would still
+		// tell them to store nothing, so they would run and set no cookies.
+		add_filter( 'surecookie_is_scan_probe', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_false' );
 
 		// A scan URL must never be indexed or cached.

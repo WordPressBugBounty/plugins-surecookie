@@ -37,34 +37,28 @@ msgstr "适用于WordPress的真实Cookie同意。基于浏览器的扫描、智
 msgid "https://surecookie.com/"
 msgstr "https://surecookie.com/"
 
-#: admin/menu.php:74
+#: admin/menu.php:89
 #: build/admin.js:2
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: admin/menu.php:87
-#: admin/menu.php:274
+#: admin/menu.php:107
+#: admin/menu.php:309
 #: build/admin.js:2
 msgid "Settings"
 msgstr "设置"
 
-#: admin/menu.php:82
-#: admin/menu.php:400
-#: build/admin.js:2
-msgid "Logs"
-msgstr "日志"
-
-#: admin/menu.php:91
+#: admin/menu.php:111
 #: build/admin.js:2
 msgid "Learn"
 msgstr "学习"
 
-#: admin/menu.php:130
+#: admin/menu.php:150
 msgid "You don't have access to this page."
 msgstr "您无权访问此页面。"
 
-#: admin/menu.php:300
-#: admin/menu.php:301
+#: admin/menu.php:335
+#: admin/menu.php:336
 msgid "Upgrade"
 msgstr "升级"
 
@@ -81,19 +75,19 @@ msgstr "您没有足够的权限访问此页面。"
 msgid "A simple yet powerful way to create modern forms for your website."
 msgstr "为您的网站创建现代表单的简单而强大的方式。"
 
-#: admin/rating-notice.php:234
+#: admin/rating-notice.php:306
 msgid "If SureCookie has been helpful, would you mind taking a moment to leave a 5-star review on WordPress.org?"
 msgstr "如果SureCookie对您有帮助，您愿意花点时间在WordPress.org上留下五星好评吗？"
 
-#: admin/rating-notice.php:243
+#: admin/rating-notice.php:315
 msgid "Rate SureCookie"
 msgstr "评价SureCookie"
 
-#: admin/rating-notice.php:251
+#: admin/rating-notice.php:323
 msgid "Maybe later"
 msgstr "也许以后"
 
-#: admin/rating-notice.php:255
+#: admin/rating-notice.php:327
 msgid "I already did"
 msgstr "我已经评价过了"
 
@@ -109,99 +103,99 @@ msgstr "安全检查失败。请刷新页面后重试。"
 msgid "Your session expired. Please refresh the page and try again."
 msgstr "您的会话已过期。请刷新页面后重试。"
 
-#: inc/api/consent-logs.php:146
+#: inc/api/consent-logs.php:151
 msgid "Search by IP address or Session ID"
 msgstr "按IP地址或会话ID搜索"
 
-#: inc/api/consent-logs.php:318
-#: inc/api/consent-logs.php:345
+#: inc/api/consent-logs.php:339
+#: inc/api/consent-logs.php:366
 msgid "Request origin could not be verified."
 msgstr "无法验证请求来源。"
 
-#: inc/api/consent-logs.php:892
+#: inc/api/consent-logs.php:951
 msgid "Request origin is not allowed."
 msgstr "请求来源不被允许。"
 
-#: inc/api/consent-logs.php:448
+#: inc/api/consent-logs.php:503
 msgid "Consent logs retrieved successfully."
 msgstr "同意日志检索成功。"
 
-#: inc/api/consent-logs.php:490
+#: inc/api/consent-logs.php:545
 msgid "Consent processed successfully (logging disabled)"
 msgstr "同意处理成功（日志记录已禁用）"
 
-#: inc/api/consent-logs.php:376
-#: inc/api/consent-logs.php:515
+#: inc/api/consent-logs.php:397
+#: inc/api/consent-logs.php:570
 msgid "Too many requests. Please try again later."
 msgstr "请求过多。请稍后再试。"
 
-#: inc/api/consent-logs.php:535
+#: inc/api/consent-logs.php:590
 msgid "Preferences should not be empty."
 msgstr "偏好设置不能为空。"
 
-#: inc/api/consent-logs.php:544
+#: inc/api/consent-logs.php:599
 msgid "Preferences data is too large."
 msgstr "偏好设置数据过大。"
 
-#: inc/api/consent-logs.php:555
-#: inc/api/consent-logs.php:566
+#: inc/api/consent-logs.php:610
+#: inc/api/consent-logs.php:621
 msgid "Invalid preferences format."
 msgstr "偏好设置格式无效。"
 
-#: inc/api/consent-logs.php:575
+#: inc/api/consent-logs.php:630
 msgid "Session ID is required."
 msgstr "需要会话ID。"
 
-#: inc/api/consent-logs.php:614
+#: inc/api/consent-logs.php:669
 msgid "Accept All is not enabled for this site."
 msgstr "此站点未启用“全部接受”。"
 
-#: inc/api/consent-logs.php:641
+#: inc/api/consent-logs.php:700
 msgid "Consent saved successfully."
 msgstr "同意保存成功。"
 
-#: inc/api/consent-logs.php:651
+#: inc/api/consent-logs.php:710
 msgid "Failed to save consent."
 msgstr "保存同意失败。"
 
-#: inc/api/consent-logs.php:669
-#: inc/api/consent-logs.php:801
+#: inc/api/consent-logs.php:728
+#: inc/api/consent-logs.php:860
 msgid "Invalid log ID"
 msgstr "日志ID无效"
 
-#: inc/api/consent-logs.php:681
+#: inc/api/consent-logs.php:740
 msgid "Log not found."
 msgstr "未找到日志。"
 
-#: inc/api/consent-logs.php:717
-#: inc/api/consent-logs.php:744
+#: inc/api/consent-logs.php:776
+#: inc/api/consent-logs.php:803
 msgid "Log details retrieved successfully."
 msgstr "日志详情检索成功。"
 
-#: inc/api/consent-logs.php:766
+#: inc/api/consent-logs.php:825
 msgid "Invalid log IDs"
 msgstr "无效的日志ID"
 
-#: inc/api/consent-logs.php:777
-#: inc/api/consent-logs.php:872
+#: inc/api/consent-logs.php:836
+#: inc/api/consent-logs.php:931
 msgid "Failed to delete logs."
 msgstr "删除日志失败。"
 
 #. translators: %d: number of logs deleted
-#: inc/api/consent-logs.php:787
+#: inc/api/consent-logs.php:846
 #, php-format
 msgid "%d log(s) deleted successfully."
 msgstr "%d 条日志删除成功。"
 
-#: inc/api/consent-logs.php:812
+#: inc/api/consent-logs.php:871
 msgid "Log deleted successfully."
 msgstr "日志删除成功。"
 
-#: inc/api/consent-logs.php:821
+#: inc/api/consent-logs.php:880
 msgid "Failed to delete log."
 msgstr "删除日志失败。"
 
-#: inc/api/consent-logs.php:863
+#: inc/api/consent-logs.php:922
 msgid "All logs deleted successfully."
 msgstr "所有日志删除成功。"
 
@@ -276,11 +270,11 @@ msgstr "插件已处于非激活状态。"
 msgid "Plugin deactivated successfully."
 msgstr "插件停用成功。"
 
-#: inc/api/plugin.php:290
+#: inc/api/plugin.php:240
 msgid "Conflicting plugins retrieved."
 msgstr "冲突插件已检索。"
 
-#: inc/api/posts.php:199
+#: inc/api/posts.php:151
 msgid "Post not found."
 msgstr "未找到帖子。"
 
@@ -288,55 +282,55 @@ msgstr "未找到帖子。"
 msgid "Scanned history retrieved successfully."
 msgstr "扫描历史检索成功。"
 
-#: inc/api/scanned-resources.php:78
+#: inc/api/scanned-resources.php:79
 msgid "Scanned resources retrieved successfully."
 msgstr "扫描资源检索成功。"
 
-#: inc/api/settings.php:120
+#: inc/api/settings.php:201
 msgid "No data found"
 msgstr "未找到数据"
 
-#: inc/api/settings.php:144
+#: inc/api/settings.php:208
 msgid "Settings updated"
 msgstr "设置已更新"
 
-#: inc/functions/get.php:118
+#: inc/functions/get.php:128
 msgid "Essential Cookies"
 msgstr "必要的Cookie"
 
-#: inc/functions/get.php:119
+#: inc/functions/get.php:129
 msgid "Required for basic website functionality."
 msgstr "网站基本功能所必需。"
 
-#: inc/functions/get.php:124
+#: inc/functions/get.php:134
 msgid "Functional Cookies"
 msgstr "功能性Cookie"
 
-#: inc/functions/get.php:125
+#: inc/functions/get.php:135
 msgid "Enable features like saved preferences and personalized content."
 msgstr "启用保存偏好和个性化内容等功能。"
 
-#: inc/functions/get.php:130
+#: inc/functions/get.php:140
 msgid "Analytics Cookies"
 msgstr "分析Cookie"
 
-#: inc/functions/get.php:131
+#: inc/functions/get.php:141
 msgid "Help us understand how visitors use our site so we can improve it."
 msgstr "帮助我们了解访客如何使用我们的网站，以便改进。"
 
-#: inc/functions/get.php:136
+#: inc/functions/get.php:146
 msgid "Marketing Cookies"
 msgstr "营销Cookie"
 
-#: inc/functions/get.php:137
+#: inc/functions/get.php:147
 msgid "Used to show you relevant ads based on your interests."
 msgstr "用于根据您的兴趣向您展示相关广告。"
 
-#: inc/functions/get.php:142
+#: inc/functions/get.php:152
 msgid "Uncategorized Cookies"
 msgstr "未分类Cookie"
 
-#: inc/functions/get.php:143
+#: inc/functions/get.php:153
 msgid "Cookies that haven't been categorized yet."
 msgstr "尚未分类的Cookie。"
 
@@ -539,11 +533,11 @@ msgstr "最后更新：%s"
 msgid "This website"
 msgstr "本网站"
 
-#: inc/modules/google-consent-mode/consent-handler.php:130
+#: inc/modules/google-consent-mode/consent-handler.php:129
 msgid "SureCookie:"
 msgstr "SureCookie："
 
-#: inc/modules/google-consent-mode/consent-handler.php:132
+#: inc/modules/google-consent-mode/consent-handler.php:131
 msgid "Google Site Kit's Consent Mode is active. Please disable it in Site Kit settings to use SureCookie's implementation."
 msgstr "Google Site Kit的同意模式已启用。请在Site Kit设置中禁用它以使用SureCookie的实现。"
 
@@ -563,14 +557,14 @@ msgstr "\"%s\" 已被禁用。"
 
 #. translators: %s: Service name (e.g., YouTube, Vimeo, Bunny.net).
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:302
-#: inc/modules/script-blocking/blocker.php:1283
+#: inc/integrations/presto-player/block-handler.php:399
+#: inc/traits/placeholder-content.php:150
 #, php-format
 msgid "This content is blocked because it requires %s cookies."
 msgstr "此内容被阻止，因为它需要 %s Cookie。"
 
-#: inc/integrations/presto-player/block-handler.php:240
-#: inc/modules/script-blocking/blocker.php:1298
+#: inc/traits/placeholder-content.php:249
+#: inc/utils/options.php:260
 msgid "Accept & Load"
 msgstr "接受并加载"
 
@@ -789,41 +783,41 @@ msgstr "编码验证完成失败。"
 msgid "Failed to fetch results."
 msgstr "获取结果失败。"
 
-#: inc/services/cookie-category-service.php:54
+#: inc/services/cookie-category-service.php:60
 msgid "Cookie categories retrieved successfully."
 msgstr "Cookie 分类获取成功。"
 
-#: inc/services/cookie-category-service.php:75
+#: inc/services/cookie-category-service.php:83
 msgid "Category name is required."
 msgstr "需要分类名称。"
 
-#: inc/services/cookie-category-service.php:86
+#: inc/services/cookie-category-service.php:94
 msgid "A category with this name already exists."
 msgstr "具有此名称的分类已存在。"
 
-#: inc/services/cookie-category-service.php:103
+#: inc/services/cookie-category-service.php:111
 msgid "Category created successfully."
 msgstr "分类创建成功。"
 
-#: inc/services/cookie-category-service.php:124
-#: inc/services/cookie-category-service.php:196
+#: inc/services/cookie-category-service.php:132
+#: inc/services/cookie-category-service.php:204
 msgid "Category ID is required."
 msgstr "需要分类 ID。"
 
-#: inc/services/cookie-category-service.php:134
-#: inc/services/cookie-category-service.php:215
+#: inc/services/cookie-category-service.php:142
+#: inc/services/cookie-category-service.php:223
 msgid "Category not found."
 msgstr "未找到分类。"
 
-#: inc/services/cookie-category-service.php:166
+#: inc/services/cookie-category-service.php:174
 msgid "Category updated successfully."
 msgstr "分类更新成功。"
 
-#: inc/services/cookie-category-service.php:205
+#: inc/services/cookie-category-service.php:213
 msgid "Default categories cannot be deleted."
 msgstr "默认分类无法删除。"
 
-#: inc/services/cookie-category-service.php:307
+#: inc/services/cookie-category-service.php:315
 msgid "Category deleted successfully."
 msgstr "分类删除成功。"
 
@@ -900,51 +894,51 @@ msgstr "指定类别中未找到 Cookie。"
 msgid "Cookie category updated successfully."
 msgstr "Cookie 类别更新成功。"
 
-#: inc/utils/options.php:48
+#: inc/utils/options.php:56
 msgid "We use cookies to improve your experience and understand how you use our site. You can review your choices at any time."
 msgstr "我们使用 Cookie 来提升您的体验并了解您如何使用我们的网站。您可以随时查看您的选择。"
 
-#: inc/utils/options.php:62
+#: inc/utils/options.php:73
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Only Essential"
 msgstr "仅限必要"
 
-#: inc/utils/options.php:71
+#: inc/utils/options.php:84
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Accept All"
 msgstr "全部接受"
 
-#: inc/utils/options.php:75
+#: inc/utils/options.php:89
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Decline"
 msgstr "拒绝"
 
-#: inc/utils/options.php:79
+#: inc/utils/options.php:94
 msgid "Cookie Settings"
 msgstr "Cookie 设置"
 
-#: inc/utils/options.php:142
+#: inc/utils/options.php:174
 #: build/admin.js:2
 #: build/admin.js:53
 #: build/public.js:4
 msgid "Preferences"
 msgstr "偏好设置"
 
-#: inc/utils/options.php:146
+#: inc/utils/options.php:179
 msgid "Privacy Preference"
 msgstr "隐私偏好"
 
-#: inc/utils/options.php:150
+#: inc/utils/options.php:184
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr "我们使用 Cookie 及类似技术来帮助个性化内容、定制和衡量广告，并提供更好的体验。"
 
-#: inc/utils/options.php:174
+#: inc/utils/options.php:213
 #: build/admin.js:4
 #: build/admin.js:75
 msgid "Cookie Preferences"
@@ -995,6 +989,7 @@ msgstr "取消扫描失败。"
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "Failed to load settings"
 msgstr "加载设置失败"
@@ -1044,6 +1039,7 @@ msgstr "Cookie 扫描器"
 msgid "All Cookies"
 msgstr "所有 Cookie"
 
+#: inc/api/settings.php:620
 #: build/admin.js:2
 msgid "Banner"
 msgstr "横幅"
@@ -1071,6 +1067,7 @@ msgstr "重新同意"
 msgid "Custom CSS"
 msgstr "自定义 CSS"
 
+#: inc/api/settings.php:672
 #: build/admin.js:2
 msgid "Google Consent Mode"
 msgstr "Google 同意模式"
@@ -1079,6 +1076,8 @@ msgstr "Google 同意模式"
 msgid "Additional Consent"
 msgstr "额外同意"
 
+#: admin/menu.php:97
+#: admin/menu.php:482
 #: build/admin.js:2
 #: build/admin.js:21
 msgid "Consent Logs"
@@ -1104,7 +1103,7 @@ msgstr "身份验证过程中发生错误"
 msgid "Authentication cancelled. Please try again."
 msgstr "身份验证已取消。请重试。"
 
-#: inc/modules/assisted-scan/collector.php:329
+#: inc/modules/assisted-scan/collector.php:332
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:28
@@ -1270,6 +1269,7 @@ msgstr "配置显示在您的 Cookie 同意横幅和偏好设置模态框中的�
 #: build/admin.js:75
 #: build/admin.js:77
 #: build/admin.js:78
+#: build/admin.js:84
 #: build/admin.js:87
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr "加载设置时发生错误。请刷新页面重试。"
@@ -1742,6 +1742,7 @@ msgstr "帮助塑造 SureCookie 的未来。分享您如何使用该插件，以
 
 #: build/admin.js:53
 #: build/admin.js:84
+#: build/admin.js:89
 msgid "Learn More"
 msgstr "了解更多"
 
@@ -2330,7 +2331,7 @@ msgstr "确认我的选择"
 msgid "Powered by SureCookie (opens in new tab)"
 msgstr "由 SureCookie 提供支持（新标签页打开）"
 
-#: inc/utils/localize-data.php:222
+#: inc/utils/localize-data.php:225
 #: build/admin.js:4
 #: build/admin.js:53
 #: build/public.js:4
@@ -2340,10 +2341,6 @@ msgstr "提供支持"
 #: build/admin.js:53
 msgid "Buttons are for reference only in preview."
 msgstr "按钮仅供预览参考。"
-
-#: build/admin.js:53
-msgid "This is a preview"
-msgstr "这是预览"
 
 #: build/admin.js:53
 msgid "Close preview"
@@ -3123,35 +3120,35 @@ msgstr "仅在选定区域显示横幅，创建自定义区域规则，并控制
 msgid "Location detection uses GeoLite2 data by MaxMind, available from <link>https://www.maxmind.com</link>."
 msgstr "位置检测使用 MaxMind 的 GeoLite2 数据，来源于 <link>https://www.maxmind.com</link>。"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "IAB Transparency & Consent Framework"
 msgstr "IAB 透明度与同意框架"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr "使您的同意横幅符合 IAB TCF 2.3 标准，并与全球供应商列表集成。"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr "解锁 IAB TCF 2.3 合规 - 即将推出"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr "启用完整 TCF 模式，生成 TC 字符串，并向访客显示 IAB 供应商列表。"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Google Additional Consent (AC)"
 msgstr "Google 额外同意 (AC)"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr "在 IAB TCF 之外添加 Google 额外同意，以处理不在 IAB 全球供应商列表中的广告技术供应商。"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr "解锁谷歌附加同意 - 即将推出"
 
-#: build/admin.js:87
+#: build/admin.js:89
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr "生成 AC 字符串，镜像 addtl_consent cookie，并向您的访客显示谷歌的附加同意提供者列表 - 这是实现完整谷歌广告 / GAM 变现所必需的。"
 
@@ -3379,6 +3376,7 @@ msgstr "接收自"
 
 #: build/admin.js:3
 #: build/admin.js:4
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Received"
 msgstr "已接收"
@@ -3427,6 +3425,7 @@ msgstr "同意日志导出升级"
 msgid "Preference sections"
 msgstr "偏好部分"
 
+#: inc/api/settings.php:653
 #: build/admin.js:2
 #: build/admin.js:50
 #: build/public.js:1
@@ -3472,6 +3471,7 @@ msgstr "用于 cookie 同意设置、同意日志、cookie 管理和网站扫描
 msgid "%s submenu"
 msgstr "%s 子菜单"
 
+#: inc/api/settings.php:625
 #: build/admin.js:2
 msgid "General"
 msgstr "常规"
@@ -3480,6 +3480,7 @@ msgstr "常规"
 msgid "Consent & Data"
 msgstr "同意与数据"
 
+#: inc/api/settings.php:630
 #: build/admin.js:2
 msgid "Consent Frameworks"
 msgstr "同意框架"
@@ -3555,18 +3556,6 @@ msgid "VS Code"
 msgstr "VS Code"
 
 #: build/admin.js:84
-msgid "ChatGPT"
-msgstr "ChatGPT"
-
-#: build/admin.js:84
-msgid "go to Settings → Connectors → Add Connector, paste the endpoint URL, and use your WordPress username + Application Password."
-msgstr "前往设置 → 连接器 → 添加连接器，粘贴端点 URL，并使用您的 WordPress 用户名 + 应用密码。"
-
-#: build/admin.js:84
-msgid "Learn more about ChatGPT connectors"
-msgstr "了解更多关于 ChatGPT 连接器的信息"
-
-#: build/admin.js:84
 msgid "SureCookie Only"
 msgstr "仅限 SureCookie"
 
@@ -3626,10 +3615,6 @@ msgid "Enable MCP"
 msgstr "启用 MCP"
 
 #: build/admin.js:87
-msgid "Allow AI clients like Claude, ChatGPT, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
-msgstr "允许 Claude、ChatGPT 和 Cursor 等 AI 客户端通过 SureCookie 管理您的 cookie 横幅、扫描器和同意设置。禁用时，不会注册任何权限，AI 客户端无法连接。"
-
-#: build/admin.js:87
 msgid "WordPress Abilities API not available"
 msgstr "WordPress 权限 API 不可用"
 
@@ -3645,11 +3630,11 @@ msgstr "未保存的更改"
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr "只有在您保存设置后，MCP 端点才会激活。"
 
-#: inc/api/consent-logs.php:404
+#: inc/api/consent-logs.php:425
 msgid "Unable to determine the current user."
 msgstr "无法确定当前用户。"
 
-#: inc/api/consent-logs.php:415
+#: inc/api/consent-logs.php:436
 msgid "Consent logs marked as viewed."
 msgstr "同意日志已标记为已查看。"
 
@@ -3697,7 +3682,8 @@ msgstr "每月一次（SureCookie）"
 msgid "Once Weekly (SureCookie)"
 msgstr "每周一次（SureCookie）"
 
-#: inc/modules/script-blocking/blocker.php:1279
+#: inc/traits/placeholder-content.php:215
+#: inc/utils/localize-data.php:265
 msgid "This content is currently blocked."
 msgstr "此内容当前被阻止。"
 
@@ -3993,10 +3979,6 @@ msgstr "保持关注并帮助塑造SureCookie！获取功能更新，并通过�
 msgid "Grow traffic of your website with SureRank - a lightweight SEO toolkit plugin for WordPress users who want better rankings without the complexity."
 msgstr "使用 SureRank 提升您网站的流量 - 一款轻量级的 WordPress SEO 工具包插件，专为希望获得更好排名而无需复杂操作的用户打造。"
 
-#: admin/rating-notice.php:232
-msgid "Amazing! SureCookie discovered cookies on your site - let's keep growing together!"
-msgstr "太棒了！SureCookie 在您的网站上发现了 Cookie - 让我们一起继续成长！"
-
 #. translators: 1: page URL, 2: error message
 #: inc/modules/site-scanner/saas-client.php:989
 #, php-format
@@ -4062,15 +4044,15 @@ msgstr "重启您的 AI 客户端，并将复制的提示再次粘贴到您的 A
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr "尽情使用已连接到您 WordPress 站点的 AI 客户端吧！"
 
-#: admin/rating-notice.php:156
+#: admin/rating-notice.php:179
 msgid "Invalid nonce."
 msgstr "无效的随机数。"
 
-#: admin/rating-notice.php:158
+#: admin/rating-notice.php:181
 msgid "Unauthorized user."
 msgstr "未授权的用户。"
 
-#: admin/rating-notice.php:171
+#: admin/rating-notice.php:194
 msgid "Invalid parameters."
 msgstr "参数无效。"
 
@@ -4114,11 +4096,11 @@ msgstr[0] "新追踪域"
 msgid "More scan limits, geographic targeting, re-consent widget, and more."
 msgstr "更多扫描限制、地理定位、重新同意小部件等功能。"
 
-#: inc/integrations/presto-player/block-handler.php:293
+#: inc/integrations/presto-player/block-handler.php:390
 msgid "This audio is blocked until you accept cookies to load it."
 msgstr "此音频被阻止，直到您接受加载它所需的 Cookie。"
 
-#: inc/integrations/presto-player/block-handler.php:297
+#: inc/integrations/presto-player/block-handler.php:394
 msgid "This video is blocked until you accept cookies to load it."
 msgstr "此视频被阻止，直到您接受加载它所需的 Cookie。"
 
@@ -4390,7 +4372,7 @@ msgstr "让我们帮助您发现 Cookie，配置同意选择，并改善您的�
 msgid "Keep consent records locally on the site and export individual records when needed"
 msgstr "在网站本地保存同意记录，并在需要时导出单个记录"
 
-#: admin/menu.php:78
+#: admin/menu.php:93
 #: build/admin.js:2
 msgid "Tracking Manager"
 msgstr "跟踪管理器"
@@ -4407,10 +4389,9 @@ msgstr "Spectra Blocks 是基于 WordPress 现代核心区块 API 完全重建�
 msgid "Failed to update cookie categories: "
 msgstr "更新 cookie 分类失败："
 
-#. translators: %s: Provider name (e.g., YouTube, Vimeo)
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/integrations/presto-player/block-handler.php:236
-#: inc/modules/script-blocking/blocker.php:1294
+#: inc/traits/placeholder-content.php:227
+#: inc/utils/localize-data.php:267
 #, php-format
 msgid "Accept and load %s content"
 msgstr "接受并加载 %s 内容"
@@ -4453,34 +4434,34 @@ msgid "Assisted scan cancelled."
 msgstr "辅助扫描已取消。"
 
 #. translators: 1: current page number, 2: total pages.
-#: inc/modules/assisted-scan/collector.php:322
+#: inc/modules/assisted-scan/collector.php:325
 #, php-format
 msgid "SureCookie is scanning page %1$d of %2$d"
 msgstr "SureCookie 正在扫描第 %1$d 页，共 %2$d 页"
 
-#: inc/modules/assisted-scan/collector.php:323
+#: inc/modules/assisted-scan/collector.php:326
 msgid "Keep this tab in front so the scan can continue."
 msgstr "保持此标签页在前，以便扫描继续。"
 
-#: inc/modules/assisted-scan/collector.php:324
+#: inc/modules/assisted-scan/collector.php:327
 msgid "Paused. Bring this tab to the front to continue."
 msgstr "已暂停。将此标签页置于前端以继续。"
 
-#: inc/modules/assisted-scan/collector.php:325
+#: inc/modules/assisted-scan/collector.php:328
 msgid "Preparing a clean visit…"
 msgstr "正在准备干净访问…"
 
 #. translators: 1: number of cookies, 2: number of services.
-#: inc/modules/assisted-scan/collector.php:327
+#: inc/modules/assisted-scan/collector.php:330
 #, php-format
 msgid "Scan complete: %1$d cookies, %2$d services found"
 msgstr "扫描完成：发现 %1$d 个 cookie，%2$d 个服务"
 
-#: inc/modules/assisted-scan/collector.php:328
+#: inc/modules/assisted-scan/collector.php:331
 msgid "The scan could not be completed. Return to SureCookie to try again."
 msgstr "扫描无法完成。返回 SureCookie 重试。"
 
-#: inc/modules/assisted-scan/collector.php:330
+#: inc/modules/assisted-scan/collector.php:333
 msgid "SureCookie assisted scan progress"
 msgstr "SureCookie 辅助扫描进度"
 
@@ -4516,11 +4497,12 @@ msgstr "辅助扫描进行中…"
 msgid "Assisted scan finished."
 msgstr "辅助扫描完成。"
 
-#: inc/modules/services/api.php:142
+#: inc/services/known-services-service.php:71
+#: inc/services/known-services-service.php:202
 msgid "Unknown service."
 msgstr "未知服务。"
 
-#: inc/modules/services/api.php:153
+#: inc/services/known-services-service.php:78
 msgid "This is a Pro service. Upgrade to add it."
 msgstr "这是一个专业服务。升级以添加它。"
 
@@ -4540,11 +4522,11 @@ msgstr "我们无法验证您的域名，因为您的主机阻止了我们对 /w
 msgid "We could not reach your site's REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry."
 msgstr "我们无法访问您网站的 REST API，路径为 /wp-json/。请启用美化固定链接，并确保没有安全插件禁用 REST API，然后重试。"
 
-#: inc/services/cookie-category-service.php:247
+#: inc/services/cookie-category-service.php:255
 msgid "Cookies cannot be moved to the category being deleted."
 msgstr "无法将 Cookie 移动到正在删除的类别。"
 
-#: inc/services/cookie-category-service.php:254
+#: inc/services/cookie-category-service.php:262
 #: inc/services/cookie-service.php:440
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "所选类别已不存在。请重新加载并重试。"
@@ -4584,6 +4566,7 @@ msgstr "已知服务"
 msgid "Scripts and Embeds"
 msgstr "脚本和嵌入"
 
+#: inc/api/settings.php:615
 #: build/admin.js:2
 #: build/admin.js:84
 msgid "Geographic Rules"
@@ -4642,6 +4625,7 @@ msgstr "移动到类别…"
 msgid "Applying…"
 msgstr "应用中…"
 
+#: build/admin.js:4
 #: build/admin.js:25
 msgid "Apply"
 msgstr "应用"
@@ -5508,3 +5492,881 @@ msgstr "允许在 Google 同意模式激活时加载，而不是在获得同意�
 #: build/admin.js:77
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. They cannot be removed here."
 msgstr "这些 Google 服务允许在 Google 同意模式激活时加载，而不是在获得同意前被阻止。对于 Google 标签产品，同意模式会控制它们可以存储的内容以及可以使用的标识符。它不会阻止它们与 Google 联系。它们无法在此处移除。"
+
+#: admin/menu.php:102
+#: admin/menu.php:455
+#: build/admin.js:2
+msgid "Data Requests"
+msgstr "数据请求"
+
+#: admin/menu.php:461
+msgid "NEW"
+msgstr "新建"
+
+#. translators: %s: number of visitor consents recorded so far, e.g. "1,204".
+#: admin/rating-notice.php:284
+#, php-format
+msgid "Amazing! SureCookie has recorded %s visitor consent on your site - let's keep growing together!"
+msgid_plural "Amazing! SureCookie has recorded %s visitor consents on your site - let's keep growing together!"
+msgstr[0] "太棒了！SureCookie 已在您的网站上记录了 %s 位访客的同意——让我们一起持续增长！"
+
+#: inc/api/consent-logs.php:169
+msgid "Inclusive start of the log date range (Y-m-d)."
+msgstr "日志日期范围的起始日期（包含）（Y-m-d）。"
+
+#: inc/api/consent-logs.php:177
+msgid "Inclusive end of the log date range (Y-m-d)."
+msgstr "日志日期范围的结束日期（包含）（Y-m-d）。"
+
+#: inc/api/consent-logs.php:482
+msgid "The start date cannot be later than the end date."
+msgstr "起始日期不能晚于结束日期。"
+
+#: inc/api/settings.php:288
+msgid "Please upload a SureCookie export file to import."
+msgstr "请上传 SureCookie 导出文件以进行导入。"
+
+#: inc/api/settings.php:297
+msgid "The selected file is too large to import."
+msgstr "所选文件过大，无法导入。"
+
+#: inc/api/settings.php:308
+msgid "The uploaded file is not valid JSON."
+msgstr "上传的文件不是有效的 JSON。"
+
+#: inc/api/settings.php:317
+msgid "The uploaded file is not a valid SureCookie settings export."
+msgstr "上传的文件不是有效的 SureCookie 设置导出文件。"
+
+#: inc/api/settings.php:326
+msgid "This settings export uses an unsupported schema version."
+msgstr "此设置导出使用了不支持的架构版本。"
+
+#: inc/api/settings.php:337
+msgid "The uploaded file does not contain a valid settings payload."
+msgstr "上传的文件不包含有效的设置负载。"
+
+#: inc/api/settings.php:363
+msgid "No settings were imported. This export contains Pro features that are not available on this site."
+msgstr "未导入任何设置。此导出包含本网站不可用的专业版功能。"
+
+#: inc/api/settings.php:376
+msgid "The uploaded file does not contain any importable SureCookie settings for this site."
+msgstr "上传的文件不包含任何可导入到本网站的 SureCookie 设置。"
+
+#: inc/api/settings.php:407
+#: build/admin.js:89
+msgid "Settings imported successfully."
+msgstr "设置导入成功。"
+
+#: inc/api/settings.php:610
+msgid "Cookies & Scripts"
+msgstr "Cookies 与脚本"
+
+#: inc/api/settings.php:611
+msgid "Cookie categories, custom cookies, known services, script blocking and scanning."
+msgstr "Cookie 分类、自定义 Cookie、已知服务、脚本阻止与扫描。"
+
+#: inc/api/settings.php:616
+msgid "Region-based banner rules."
+msgstr "基于区域的横幅规则。"
+
+#: inc/api/settings.php:621
+msgid "Banner content, layout, colors, buttons and display."
+msgstr "横幅内容、布局、颜色、按钮和显示。"
+
+#: inc/api/settings.php:626
+msgid "Consent model, logging, preferences, custom CSS and other plugin settings."
+msgstr "同意模型、日志记录、偏好设置、自定义 CSS 及其他插件设置。"
+
+#: inc/api/settings.php:631
+msgid "Google Consent Mode and other consent integrations."
+msgstr "Google 同意模式及其他同意集成。"
+
+#: inc/api/settings.php:635
+msgid "Buttons & labels"
+msgstr "按钮与标签"
+
+#: inc/api/settings.php:636
+msgid "Button visibility, order and label text."
+msgstr "按钮可见性、顺序和标签文本。"
+
+#: inc/api/settings.php:641
+msgid "Consent & compliance"
+msgstr "同意与合规"
+
+#: inc/api/settings.php:642
+msgid "Compliance law, consent model, logging and duration."
+msgstr "合规法律、同意模型、日志记录和持续时间。"
+
+#: inc/api/settings.php:647
+msgid "Cookie categories"
+msgstr "Cookie 分类"
+
+#: inc/api/settings.php:648
+msgid "Your consent categories."
+msgstr "您的同意类别。"
+
+#: inc/api/settings.php:654
+msgid "Custom cookie definitions."
+msgstr "自定义 Cookie 定义。"
+
+#: inc/api/settings.php:660
+msgid "Script blocking"
+msgstr "脚本阻止"
+
+#: inc/api/settings.php:661
+msgid "Blocking rules and scan resource overrides."
+msgstr "阻止规则和扫描资源覆盖。"
+
+#: inc/api/settings.php:666
+msgid "Known services"
+msgstr "已知服务"
+
+#: inc/api/settings.php:667
+msgid "Services you added or removed for cookie declarations and blocking."
+msgstr "您添加或移除的用于 Cookie 声明和阻止的服务。"
+
+#: inc/api/settings.php:673
+msgid "GCM toggle and region defaults."
+msgstr "GCM 切换和区域默认设置。"
+
+#: inc/api/settings.php:678
+msgid "Automatic scanning"
+msgstr "自动扫描"
+
+#: inc/api/settings.php:679
+msgid "Scan frequency and scope."
+msgstr "扫描频率和范围。"
+
+#: inc/api/settings.php:684
+#: build/admin.js:2
+msgid "Advanced"
+msgstr "高级"
+
+#: inc/api/settings.php:685
+msgid "Custom CSS, integrations and tool settings."
+msgstr "自定义 CSS、集成和工具设置。"
+
+#: inc/integrations/astra/init.php:123
+#: inc/integrations/theme-palette/init.php:81
+msgid "Astra Global Palette"
+msgstr "Astra 全局调色板"
+
+#: inc/integrations/theme-palette/init.php:92
+msgid "Kadence Color Palette"
+msgstr "Kadence 调色板"
+
+#: inc/integrations/theme-palette/init.php:104
+msgid "Theme Colors"
+msgstr "主题颜色"
+
+#: inc/services/known-services-service.php:162
+msgid "The service could not be installed."
+msgstr "服务无法安装。"
+
+#: inc/services/known-services-service.php:177
+msgid "Service installed. Every cookie it declares was already present, so no new cookie definitions were created."
+msgstr "服务已安装。其声明的所有 Cookie 均已存在，因此未创建新的 Cookie 定义。"
+
+#: inc/services/known-services-service.php:178
+msgid "Service installed and its cookies declared."
+msgstr "服务已安装并声明了其 Cookie。"
+
+#: inc/services/known-services-service.php:213
+msgid "Service removed and its declared cookies deleted."
+msgstr "服务已移除，其声明的 Cookie 已删除。"
+
+#: inc/services/known-services-service.php:214
+msgid "That service was not installed, so nothing was removed."
+msgstr "该服务未安装，因此未移除任何内容。"
+
+#: inc/services/known-services-service.php:244
+msgid "Catalog refreshed."
+msgstr "目录已刷新。"
+
+#: inc/services/script-blocking-service.php:161
+msgid "A resource domain and a target category are both required."
+msgstr "资源域和目标类别均为必需。"
+
+#: inc/services/script-blocking-service.php:174
+#: inc/services/script-blocking-service.php:433
+msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "该类别不存在。使用 surecookie/cookie-categories 并执行“list”操作以查看有效 ID。"
+
+#: inc/services/script-blocking-service.php:191
+msgid "Resource category updated."
+msgstr "资源类别已更新。"
+
+#: inc/services/script-blocking-service.php:230
+msgid "That resource was already excluded from blocking."
+msgstr "该资源已被排除在阻止之外。"
+
+#: inc/services/script-blocking-service.php:231
+msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
+msgstr "资源已排除阻止。请注意，这仅涵盖脚本和 iframe，不包括 embed 或 object 标签。"
+
+#: inc/services/script-blocking-service.php:253
+msgid "A resource domain is required."
+msgstr "需要资源域名。"
+
+#: inc/services/script-blocking-service.php:280
+msgid "Resource will be blocked again until consent."
+msgstr "资源将在获得同意前再次被阻止。"
+
+#: inc/services/script-blocking-service.php:281
+msgid "That resource was not excluded, so nothing changed."
+msgstr "该资源未被排除，因此未发生任何更改。"
+
+#: inc/services/script-blocking-service.php:361
+msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "需要有效的类别。使用 surecookie/cookie-categories 的 \"list\" 操作查看有效 ID。"
+
+#: inc/services/script-blocking-service.php:368
+msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
+msgstr "该模式的规则已存在。请改用 \"update_rule\"。"
+
+#: inc/services/script-blocking-service.php:377
+msgid "Blocking rule created."
+msgstr "阻止规则已创建。"
+
+#: inc/services/script-blocking-service.php:399
+#: inc/services/script-blocking-service.php:465
+msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
+msgstr "没有阻止规则匹配该模式。使用 \"list_rules\" 查看当前规则。"
+
+#: inc/services/script-blocking-service.php:417
+msgid "Another rule already uses that pattern."
+msgstr "另一个规则已使用该模式。"
+
+#: inc/services/script-blocking-service.php:429
+msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
+msgstr "该类别不是有效的 ID。使用 surecookie/cookie-categories 的 \"list\" 操作查看有效 ID。"
+
+#: inc/services/script-blocking-service.php:444
+msgid "Blocking rule updated."
+msgstr "阻止规则已更新。"
+
+#: inc/services/script-blocking-service.php:475
+msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
+msgstr "阻止规则已删除。其覆盖的资源不再被该规则阻止。"
+
+#: inc/services/script-blocking-service.php:576
+msgid "A domain or URL pattern is required."
+msgstr "需要域名或 URL 模式。"
+
+#: inc/services/script-blocking-service.php:583
+msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
+msgstr "该模式过于宽泛。模式作为子字符串匹配，因此像 \"com\" 这样的裸令牌会匹配网站上几乎所有第三方资源。请使用完整域名如 \"example.com\" 或 URL 路径。"
+
+#: inc/utils/options.php:255
+msgid "This content is blocked because it requires {service} cookies."
+msgstr "此内容被阻止，因为它需要 {service} cookies。"
+
+#: inc/utils/settings-metadata.php:72
+msgid "Banner shape: \"box\" is a floating card, \"banner\" is a full-width bar."
+msgstr "横幅形状：“box” 是浮动卡片，“banner” 是全宽条。"
+
+#: inc/utils/settings-metadata.php:73
+msgid "Coupled with notice_position, so set both together: \"box\" takes bottom-left, bottom-center, bottom-right or middle, \"banner\" takes only top or bottom. A mismatched pair is not rejected, it silently renders somewhere else."
+msgstr "与 notice_position 配合使用，因此两者需一起设置：“box” 可取 bottom-left、bottom-center、bottom-right 或 middle，“banner” 仅可取 top 或 bottom。不匹配的组合不会被拒绝，而是静默渲染到其他位置。"
+
+#: inc/utils/settings-metadata.php:77
+msgid "Where the banner sits on screen. The legal subset depends on notice_type."
+msgstr "横幅在屏幕上的位置。合法子集取决于 notice_type。"
+
+#: inc/utils/settings-metadata.php:78
+msgid "Not interchangeable across notice_type: a box-only value on a \"banner\" renders as a bottom bar, and top/bottom on a \"box\" falls back to bottom-right, both silently."
+msgstr "不同 notice_type 之间不可互换：在 “banner” 上使用仅限 box 的值会渲染为底部条，在 “box” 上使用 top/bottom 会回退到底部右侧，均为静默处理。"
+
+#: inc/utils/settings-metadata.php:82
+msgid "Unused. Superseded by notice_position."
+msgstr "未使用。已被 notice_position 取代。"
+
+#: inc/utils/settings-metadata.php:86
+msgid "Banner entrance animation."
+msgstr "横幅进入动画。"
+
+#: inc/utils/settings-metadata.php:89
+msgid "ID of the banner colour preset. Built-ins are blue-purple, purple-pink, blue-cyan, green-lime, red-orange, dark-blue, dark-green, dark-pink and dark-orange, plus \"astra\" while the Astra theme is active. A theme or plugin can register more."
+msgstr "横幅颜色预设的 ID。内置有蓝紫、紫粉、蓝青、绿黄、红橙、深蓝、深绿、深粉和深橙，以及 Astra 主题激活时的 “astra”。主题或插件可注册更多。"
+
+#: inc/utils/settings-metadata.php:90
+msgid "Not validated on write: an unknown ID reports success and silently renders the default palette."
+msgstr "写入时不验证：未知 ID 报告成功并静默渲染默认调色板。"
+
+#: inc/utils/settings-metadata.php:93
+msgid "Dim the page behind the banner and block interaction until the visitor chooses."
+msgstr "在横幅后面使页面变暗并阻止交互，直到访客做出选择。"
+
+#: inc/utils/settings-metadata.php:94
+msgid "Forces a consent choice before the site can be used, which conflicts with the freely-given consent requirement in some regions. Confirm with the user before enabling."
+msgstr "强制在使用网站之前做出同意选择，这与某些地区自由给予同意的要求相冲突。启用前请与用户确认。"
+
+#: inc/utils/settings-metadata.php:97
+msgid "Master switch for the consent banner."
+msgstr "同意横幅的主开关。"
+
+#: inc/utils/settings-metadata.php:98
+msgid "Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent."
+msgstr "无论 blocking_enabled 如何，也会禁用脚本和 iframe 阻止，因此关闭它会让跟踪器在获得同意前运行。"
+
+#: inc/utils/settings-metadata.php:101
+msgid "Absolute URL of an image shown at the top of the banner. Empty string removes it."
+msgstr "显示在横幅顶部的图片的绝对 URL。空字符串则移除该图片。"
+
+#: inc/utils/settings-metadata.php:104
+msgid "Plain-text headline above the banner message. HTML is stripped. Empty renders no heading."
+msgstr "横幅消息上方的纯文本标题。HTML 会被剥离。为空则不显示标题。"
+
+#: inc/utils/settings-metadata.php:107
+msgid "Banner body copy. Accepts post-level HTML such as links and emphasis."
+msgstr "横幅正文内容。支持帖子级别的 HTML，如链接和强调。"
+
+#: inc/utils/settings-metadata.php:113
+msgid "Site-wide consent model: \"opt-in\" (GDPR style, nothing non-essential runs before consent) or \"opt-out\" (CCPA style, allowed until the visitor declines)."
+msgstr "全站同意模型：“opt-in”（GDPR 风格，未同意前不运行非必要内容）或“opt-out”（CCPA 风格，允许运行直到访客拒绝）。"
+
+#: inc/utils/settings-metadata.php:114
+msgid "Legally load-bearing. \"opt-out\" lets non-essential trackers fire before any consent, which is unlawful for EU and UK visitors, and it removes the Preferences and Accept All buttons. Confirm the site's jurisdiction with the user before changing it."
+msgstr "具有法律效力。“opt-out” 允许非必要跟踪器在任何同意之前运行，这对欧盟和英国访客是非法的，并且会移除“偏好设置”和“全部接受”按钮。更改前请与用户确认网站的司法管辖区。"
+
+#: inc/utils/settings-metadata.php:117
+msgid "An {id, name} object naming the regulation the site declares it follows. Only \"name\" is read, and only for usage telemetry, so this does not change banner or blocking behaviour."
+msgstr "一个 {id, name} 对象，标明网站声明遵循的法规。仅读取“name”，且仅用于使用情况遥测，因此不会改变横幅或阻止行为。"
+
+#: inc/utils/settings-metadata.php:121
+msgid "How long consent log rows are kept before the daily cleanup cron deletes them. Note the token format is \"<days>_days\", not a bare number."
+msgstr "同意日志行在每日清理任务删除前保留的时间。注意令牌格式为“<days>_days”，而非纯数字。"
+
+#: inc/utils/settings-metadata.php:122
+msgid "Destructive. Shortening this makes the next cron run permanently delete every consent row older than the new window, erasing the proof-of-consent evidence GDPR Article 7(1) requires. Read the current value and confirm before lowering it."
+msgstr "破坏性操作。缩短此时间会使下一次清理任务永久删除所有比新窗口更旧的同意记录，抹去 GDPR 第7(1)条要求的同意证据。降低前请读取当前值并确认。"
+
+#: inc/utils/settings-metadata.php:125
+msgid "Master switch for pre-consent script and iframe blocking."
+msgstr "预同意脚本和 iframe 阻止的主开关。"
+
+#: inc/utils/settings-metadata.php:126
+msgid "Turning this off lets analytics and marketing tags fire before consent is collected. It is the single most compliance-significant setting after consent_model."
+msgstr "关闭此项会让分析和营销标签在收集同意前运行。它是继 consent_model 之后最重要的合规设置。"
+
+#: inc/utils/settings-metadata.php:129
+msgid "Whether the banner offers an Accept All button."
+msgstr "横幅是否提供“全部接受”按钮。"
+
+#: inc/utils/settings-metadata.php:130
+msgid "Not cosmetic: with it off the consent-log endpoint rejects every accept-all record with HTTP 422, so existing integrations that post one will start failing."
+msgstr "非表面设置：关闭后，同意日志端点会以 HTTP 422 拒绝所有“全部接受”记录，因此现有集成中发送此记录的将开始失败。"
+
+#: inc/utils/settings-metadata.php:133
+msgid "Whether uninstalling the plugin also deletes its data."
+msgstr "是否在卸载插件时同时删除其数据。"
+
+#: inc/utils/settings-metadata.php:134
+msgid "Arms an irreversible action: on uninstall it drops the consent-log table and deletes every SureCookie option. Never enable it without explicit user confirmation."
+msgstr "启动不可逆操作：卸载时会删除 consent-log 表并删除所有 SureCookie 选项。未经用户明确确认，切勿启用此功能。"
+
+#: inc/utils/settings-metadata.php:137
+msgid "UNIX timestamp in seconds of the last \"re-request consent\" action. Any consent recorded before this instant is treated as stale."
+msgstr "上次“重新请求同意”操作的 UNIX 时间戳（秒）。此时间点之前记录的任何同意均视为过时。"
+
+#: inc/utils/settings-metadata.php:138
+msgid "Writing the current time invalidates every visitor's existing consent and shows the banner again site-wide. Only set it when the user explicitly asks to re-collect consent."
+msgstr "写入当前时间会使所有访客现有的同意失效，并在全站范围内重新显示横幅。仅在用户明确要求重新收集同意时设置。"
+
+#: inc/utils/settings-metadata.php:141
+msgid "Whether SureCookie registers its WordPress Abilities and MCP server."
+msgstr "SureCookie 是否注册其 WordPress 权限和 MCP 服务器。"
+
+#: inc/utils/settings-metadata.php:142
+msgid "Self-locking: writing false through this ability deregisters every SureCookie ability on the next request, so no AI client can turn it back on. It can only be re-enabled from wp-admin."
+msgstr "自我锁定：通过此权限写入 false 会在下一次请求时注销所有 SureCookie 权限，因此任何 AI 客户端都无法重新启用。只能从 wp-admin 重新启用。"
+
+#: inc/utils/settings-metadata.php:147
+msgid "Left-to-right order of the banner buttons, as a comma-separated list built from the tokens accept_all, accept (essential only), preferences and decline."
+msgstr "横幅按钮的从左到右顺序，以逗号分隔的列表，由 accept_all、accept（仅限必要）、preferences 和 decline 令牌组成。"
+
+#: inc/utils/settings-metadata.php:148
+msgid "Unrecognised tokens are dropped silently, so a value containing none of the four leaves the banner with no buttons at all."
+msgstr "未识别的令牌会被静默丢弃，因此如果值不包含这四个中的任何一个，横幅将完全没有按钮。"
+
+#: inc/utils/settings-metadata.php:151
+msgid "Label for the essential-only button. Empty falls back to the translated \"Only Essential\"."
+msgstr "仅限必要按钮的标签。为空时回退为已翻译的“仅限必要”。"
+
+#: inc/utils/settings-metadata.php:152
+msgid "This is not the Accept All button, which is accept_all_btn_text. Labelling it \"Accept\" misrepresents what the visitor is consenting to."
+msgstr "这不是“全部接受”按钮，后者是 accept_all_btn_text。将其标记为“接受”会误导访客对其同意内容的理解。"
+
+#: inc/utils/settings-metadata.php:155
+msgid "Label for the Accept All button. Empty falls back to the translated \"Accept All\"."
+msgstr "“全部接受”按钮的标签。为空时回退为已翻译的“全部接受”。"
+
+#: inc/utils/settings-metadata.php:158
+msgid "Label for the Decline button. Empty falls back to the translated \"Decline\"."
+msgstr "拒绝按钮的标签。为空时回退为已翻译的“拒绝”。"
+
+#: inc/utils/settings-metadata.php:163
+msgid "Pro banner colour override, shaped {mode, colors}. Send mode \"custom\" together with the colors map."
+msgstr "专业横幅颜色覆盖，格式为 {mode, colors}。发送模式“custom”及颜色映射。"
+
+#: inc/utils/settings-metadata.php:164
+msgid "Writing colors while mode stays \"preset\" is a silent no-op: color_palette continues to win and the write still reports success."
+msgstr "当模式保持为“preset”时写入颜色是静默无操作：color_palette 继续生效，写入仍报告成功。"
+
+#: inc/utils/settings-metadata.php:167
+msgid "Raw CSS inlined on every frontend page to restyle the banner and preferences modal. Requires the unfiltered_html capability."
+msgstr "在每个前端页面内联的原始 CSS，用于重新样式化横幅和偏好设置模态框。需要 unfiltered_html 权限。"
+
+#: inc/utils/settings-metadata.php:172
+msgid "The consent-category registry the whole consent model derives from. Readable here, but edit it with the surecookie/cookie-categories ability."
+msgstr "整个同意模型所依赖的同意类别注册表。此处可读，但需通过 surecookie/cookie-categories 权限编辑。"
+
+#: inc/utils/settings-metadata.php:175
+msgid "The manually declared cookie registry shown in the preferences modal. Readable here, but edit it with the surecookie/cookie-management ability."
+msgstr "偏好设置模态框中显示的手动声明的 Cookie 注册表。此处可读，但需通过 surecookie/cookie-management 权限编辑。"
+
+#: inc/utils/settings-metadata.php:180
+msgid "Saved manual scan selection, as {label, value} rows whose value is a published post ID. Prefer the surecookie/site-scanner ability with action \"start\", which resolves and validates the rows for you."
+msgstr "保存的手动扫描选择，作为 {label, value} 行，其中 value 是已发布的帖子 ID。优先使用带有“start”操作的 surecookie/site-scanner 功能，它会为您解析和验证这些行。"
+
+#: inc/utils/settings-metadata.php:183
+msgid "Master switch for unattended scheduled scanning. Enabling it schedules the WP-Cron event."
+msgstr "无人值守计划扫描的主开关。启用后会安排 WP-Cron 事件。"
+
+#: inc/utils/settings-metadata.php:186
+msgid "Cadence of the automatic scan. \"monthly\" always works; \"weekly\" requires SureCookie Pro. A theme or plugin can register more."
+msgstr "自动扫描的频率。“monthly” 总是有效；“weekly” 需要 SureCookie Pro。主题或插件可以注册更多选项。"
+
+#: inc/utils/settings-metadata.php:187
+msgid "The clamp is silent: an unsupported value, including \"weekly\" without Pro, is reported as saved but stores \"monthly\"."
+msgstr "限制是静默的：不支持的值，包括无 Pro 的“weekly”，会被报告为已保存，但实际存储为“monthly”。"
+
+#: inc/utils/settings-metadata.php:191
+msgid "What the automatic scan crawls: \"same_as_manual\" reuses scan_pages, \"all_published\" walks published content up to the plan limit, \"selected\" uses auto_scan_pages."
+msgstr "自动扫描爬取的内容：“same_as_manual” 重用 scan_pages，“all_published” 遍历已发布内容直到计划限制，“selected” 使用 auto_scan_pages。"
+
+#: inc/utils/settings-metadata.php:194
+msgid "Content the automatic scan crawls when auto_scan_scope is \"selected\". Accepts picker rows or bare post IDs, and is ignored under any other scope."
+msgstr "当 auto_scan_scope 为“selected”时，自动扫描爬取的内容。接受选择器行或裸帖 ID，其他范围下忽略。"
+
+#: inc/utils/settings-metadata.php:199
+msgid "Scan-detected resources marked \"do not block\", keyed per kind as \"script::example.com\" or \"iframe::example.com\"."
+msgstr "扫描检测到的资源标记为“不阻止”，按类型键入，如“script::example.com”或“iframe::example.com”。"
+
+#: inc/utils/settings-metadata.php:202
+msgid "Category reassignment for scan-detected scripts and iframes, mapping the same scoped key format as excluded_scan_resources to a cookie category ID."
+msgstr "扫描检测到的脚本和 iframe 的类别重新分配，映射与 excluded_scan_resources 相同的范围键格式到 cookie 类别 ID。"
+
+#: inc/utils/settings-metadata.php:205
+msgid "Admin-authored blocking rules. Each row needs a non-empty \"value\" URL or domain pattern and a \"category\", optionally narrowed by type, location, path and keywords."
+msgstr "管理员创建的阻止规则。每行需要非空的“value”URL 或域名模式和“category”，可选地按类型、位置、路径和关键字细化。"
+
+#: inc/utils/settings-metadata.php:210
+msgid "Absolute URL of the fallback image on the placeholder that replaces blocked embeds. Empty renders a text-only placeholder."
+msgstr "替代被阻止嵌入内容的占位符上的回退图片的绝对 URL。为空则显示纯文本占位符。"
+
+#: inc/utils/settings-metadata.php:213
+msgid "Body copy of the blocked-content placeholder. Keep the literal token {service}, which is replaced with the vendor name at render time."
+msgstr "被阻止内容占位符的正文。保留字面量标记 {service}，渲染时替换为供应商名称。"
+
+#: inc/utils/settings-metadata.php:216
+msgid "Label of the consent button on the blocked-content placeholder. Empty renders the built-in \"Accept & Load\"."
+msgstr "被阻止内容占位符上的同意按钮标签。为空则显示内置的“接受并加载”。"
+
+#: inc/utils/settings-metadata.php:219
+msgid "Show a blocked video's own thumbnail on the placeholder. Currently resolves YouTube URLs only."
+msgstr "在占位符上显示被阻止视频的缩略图。目前仅解析 YouTube URL。"
+
+#: inc/utils/settings-metadata.php:224
+msgid "Post ID of the cookie policy page linked from the banner. 0 means none is linked."
+msgstr "横幅中链接的 cookie 政策页面的帖子 ID。0 表示未链接。"
+
+#: inc/utils/settings-metadata.php:225
+msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page."
+msgstr "使用 absint 进行净化，非数字或负值变为 0 并静默取消链接政策页面。"
+
+#: inc/utils/settings-metadata.php:228
+msgid "Term ID of the nav menu that receives the virtual \"Cookie Preferences\" item, as a numeric string. Empty string injects nothing."
+msgstr "接收虚拟“Cookie Preferences”项的导航菜单的术语 ID，作为数字字符串。空字符串表示不注入任何内容。"
+
+#: inc/utils/settings-metadata.php:231
+msgid "Whether SureCookie gets its own top-level admin menu rather than living under Settings."
+msgstr "是否让 SureCookie 拥有自己的顶级管理员菜单，而不是放在设置下。"
+
+#: inc/utils/settings-metadata.php:237
+msgid "Admin-only preview panel state. No effect on the public site."
+msgstr "仅管理员预览面板状态。对公共网站无影响。"
+
+#: inc/utils/settings-metadata.php:241
+msgid "Unused."
+msgstr "未使用。"
+
+#: inc/utils/settings-metadata.php:245
+msgid "Internal counter mirroring the consent-log table."
+msgstr "内部计数器，镜像同意日志表。"
+
+#: build/admin.js:2
+#: build/admin.js:84
+msgid "Blocked Content UI"
+msgstr "被阻止内容界面"
+
+#: build/admin.js:2
+#: build/admin.js:88
+msgid "Import / Export"
+msgstr "导入 / 导出"
+
+#: build/admin.js:4
+msgid "All dates"
+msgstr "所有日期"
+
+#: build/admin.js:4
+msgid "Select date range"
+msgstr "选择日期范围"
+
+#: build/admin.js:4
+msgid "Clear"
+msgstr "清除"
+
+#: build/admin.js:28
+msgid "Not In Use"
+msgstr "未使用"
+
+#: build/admin.js:28
+msgid "Hide Unused Categories"
+msgstr "隐藏未使用类别"
+
+#: build/admin.js:28
+msgid "Categories with no cookies, scripts, or services are hidden from the preferences modal. A category reappears automatically when usage changes, and is never removed from the consent record."
+msgstr "没有 cookie、脚本或服务的类别会从偏好设置模态框中隐藏。类别在使用情况变化时会自动重新出现，且永远不会从同意记录中移除。"
+
+#: build/admin.js:41
+msgid "Failed to update category visibility"
+msgstr "更新类别可见性失败"
+
+#: build/admin.js:53
+msgid "This is a worldwide banner preview"
+msgstr "这是一个全球横幅预览"
+
+#: build/admin.js:75
+msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
+msgstr "显示您的默认横幅，即当没有地理规则适用时访客看到的横幅。开启此项会关闭任何规则预览。"
+
+#: build/admin.js:83
+msgid "Edit Worldwide Default"
+msgstr "编辑全球默认"
+
+#: build/admin.js:83
+msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
+msgstr "设置全球所有访客的默认同意状态，在他们做出选择之前。区域规则会根据各区域法律覆盖此设置。"
+
+#: build/admin.js:83
+msgid "Worldwide"
+msgstr "全球"
+
+#: build/admin.js:83
+msgid "Edit worldwide default consent"
+msgstr "编辑全球默认同意"
+
+#: build/admin.js:84
+msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
+msgstr "控制访客在第三方内容（如视频或地图）被阻止直到获得同意时看到的内容。"
+
+#: build/admin.js:84
+msgid "Use video thumbnails"
+msgstr "使用视频缩略图"
+
+#: build/admin.js:84
+msgid "Use Video Thumbnails"
+msgstr "使用视频缩略图"
+
+#: build/admin.js:84
+msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
+msgstr "在占位符上显示视频自身的缩略图（例如 YouTube）。注意：这会在获得同意前从提供者加载缩略图。"
+
+#: build/admin.js:84
+msgid "Upload Image"
+msgstr "上传图片"
+
+#: build/admin.js:84
+msgid "Default Placeholder Image"
+msgstr "默认占位符图片"
+
+#: build/admin.js:84
+msgid "Select Placeholder Image"
+msgstr "选择占位符图片"
+
+#: build/admin.js:84
+msgid "Use this image"
+msgstr "使用此图片"
+
+#: build/admin.js:84
+msgid "Placeholder Text"
+msgstr "占位符文本"
+
+#: build/admin.js:84
+msgid "Enter placeholder text"
+msgstr "输入占位符文本"
+
+#: build/admin.js:84
+msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
+msgstr "使用 {service} 插入被阻止的服务名称（例如 YouTube）。"
+
+#: build/admin.js:84
+msgid "Button Text"
+msgstr "按钮文本"
+
+#: build/admin.js:87
+msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
+msgstr "允许 Claude 和 Cursor 等 AI 客户端通过 SureCookie 管理您的 cookie 横幅、扫描器和同意设置。禁用时，不会注册任何功能，AI 客户端无法连接。"
+
+#: build/admin.js:87
+#: build/admin.js:88
+msgid "All Settings"
+msgstr "所有设置"
+
+#: build/admin.js:87
+msgid "Your entire portable configuration in one file."
+msgstr "您的完整便携配置文件。"
+
+#: build/admin.js:87
+msgid "Nothing imported"
+msgstr "未导入任何内容"
+
+#: build/admin.js:87
+msgid "Import complete"
+msgstr "导入完成"
+
+#: build/admin.js:87
+msgid "None of the settings in this file could be applied to this site."
+msgstr "此文件中的设置均无法应用于此站点。"
+
+#: build/admin.js:87
+msgid "Your settings were imported. Here is what happened:"
+msgstr "您的设置已导入。结果如下："
+
+#: build/admin.js:87
+msgid "Applied"
+msgstr "已应用"
+
+#: build/admin.js:87
+msgid "Skipped (Pro)"
+msgstr "跳过（专业版）"
+
+#: build/admin.js:87
+msgid "Ignored"
+msgstr "忽略"
+
+#. translators: %d: number of unrecognized fields.
+#: build/admin.js:88
+#, js-format
+msgid "%d unrecognized field(s)"
+msgstr "%d 个无法识别的字段"
+
+#: build/admin.js:88
+msgid "These settings need SureCookie Pro"
+msgstr "这些设置需要 SureCookie 专业版"
+
+#: build/admin.js:88
+msgid "Upgrade to Pro to use the skipped features on this site."
+msgstr "升级到专业版以在此站点使用被跳过的功能。"
+
+#: build/admin.js:88
+msgid "Move your SureCookie setup between sites with a portable settings export."
+msgstr "通过便携设置导出在站点间移动您的 SureCookie 配置。"
+
+#: build/admin.js:88
+msgid "Export settings"
+msgstr "导出设置"
+
+#: build/admin.js:88
+msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
+msgstr "选择包含内容，然后下载您的便携 SureCookie 配置的 JSON 文件。"
+
+#: build/admin.js:88
+msgid "What to export"
+msgstr "导出内容"
+
+#: build/admin.js:88
+msgid "Export your entire portable configuration."
+msgstr "导出您的整个便携配置。"
+
+#: build/admin.js:88
+msgid "Export more with SureCookie Pro"
+msgstr "使用 SureCookie Pro 导出更多内容"
+
+#: build/admin.js:88
+msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
+msgstr "Pro 版在导出中添加了地理定位、同意转发和浮动小部件等设置。"
+
+#: build/admin.js:88
+msgid "Settings exported successfully."
+msgstr "设置导出成功。"
+
+#: build/admin.js:88
+msgid "Failed to export settings."
+msgstr "设置导出失败。"
+
+#: build/admin.js:88
+msgid "Please try again."
+msgstr "请重试。"
+
+#: build/admin.js:88
+msgid "Exporting…"
+msgstr "正在导出…"
+
+#: build/admin.js:88
+#: build/admin.js:89
+msgid "Import settings"
+msgstr "导入设置"
+
+#: build/admin.js:88
+msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
+msgstr "上传 SureCookie 导出文件，将其合并到当前站点，或替换所有可转移设置。"
+
+#: build/admin.js:88
+msgid "JSON export file"
+msgstr "JSON 导出文件"
+
+#. translators: %s: selected import filename.
+#: build/admin.js:89
+#, js-format
+msgid "Selected file: %s"
+msgstr "已选择文件：%s"
+
+#: build/admin.js:89
+msgid "Replace all settings"
+msgstr "替换所有设置"
+
+#: build/admin.js:89
+msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
+msgstr "启用时，导入文件中不存在的可转移设置将重置为默认值，而不是保留当前站点的值。"
+
+#: build/admin.js:89
+msgid "No settings were applied from this file."
+msgstr "此文件未应用任何设置。"
+
+#: build/admin.js:89
+msgid "Failed to import settings."
+msgstr "导入设置失败。"
+
+#: build/admin.js:89
+msgid "Please check the file and try again."
+msgstr "请检查文件并重试。"
+
+#: build/admin.js:89
+msgid "Please choose a SureCookie export file first."
+msgstr "请先选择 SureCookie 导出文件。"
+
+#: build/admin.js:89
+msgid "Importing…"
+msgstr "正在导入…"
+
+#: build/admin.js:89
+msgid "Access"
+msgstr "访问"
+
+#: build/admin.js:89
+msgid "28 days left"
+msgstr "剩余 28 天"
+
+#: build/admin.js:89
+msgid "Erasure"
+msgstr "删除"
+
+#: build/admin.js:89
+msgid "In progress"
+msgstr "进行中"
+
+#: build/admin.js:89
+msgid "6 days left"
+msgstr "剩余 6 天"
+
+#: build/admin.js:89
+msgid "Portability"
+msgstr "可移植性"
+
+#: build/admin.js:89
+msgid "3 days overdue"
+msgstr "逾期 3 天"
+
+#: build/admin.js:89
+msgid "Responded"
+msgstr "已回复"
+
+#: build/admin.js:89
+msgid "Data Request Logs"
+msgstr "数据请求日志"
+
+#: build/admin.js:89
+msgid "One Form for Every Request"
+msgstr "每个请求一个表单"
+
+#: build/admin.js:89
+msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
+msgstr "通过短代码添加表单，或让它出现在您的隐私政策页面。请求完整到达，而非模糊的电子邮件。"
+
+#: build/admin.js:89
+msgid "Every Request Verified by Email"
+msgstr "每个请求通过电子邮件验证"
+
+#: build/admin.js:89
+msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
+msgstr "每次提交都会发送一个24小时内过期的一次性链接。您只处理用户实际提出的请求。"
+
+#: build/admin.js:89
+msgid "A Deadline on Every Request"
+msgstr "每个请求都有截止日期"
+
+#: build/admin.js:89
+msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
+msgstr "每个已验证请求都有一个截止日期，默认30天，列表会倒计时。逾期行会变红。"
+
+#: build/admin.js:89
+msgid "One Reminder Email a Day"
+msgstr "每天一封提醒邮件"
+
+#: build/admin.js:89
+msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
+msgstr "每日邮件列出一周内到期或已逾期的事项。您会在截止日期前收到通知。"
+
+#: build/admin.js:89
+msgid "Reply With the Data Attached"
+msgstr "回复时附带数据"
+
+#: build/admin.js:89
+msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
+msgstr "一键收集 WordPress、您的插件和 SureCookie 为该邮箱保存的数据，然后附加到您的回复中。无需手动整理。"
+
+#: build/admin.js:89
+msgid "A Record of What You Did"
+msgstr "操作记录"
+
+#: build/admin.js:89
+msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
+msgstr "每一步都有时间戳：验证、您的备注、发送的回复，甚至失败的邮件。您可以展示发生了什么。"
+
+#: build/admin.js:89
+msgid "Available in SureCookie Pro"
+msgstr "SureCookie Pro 可用"
+
+#: build/admin.js:89
+msgid "You Have 30 Days to Answer a Data Request"
+msgstr "您有 30 天时间回复数据请求"
+
+#: build/admin.js:89
+msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
+msgstr "根据 GDPR 和 CCPA，任何访客都可以请求其个人数据的副本或要求删除，您有固定天数回复。手动处理意味着邮件线程、电子表格和您自己组装的导出文件。"
+
+#: build/admin.js:89
+msgid "Grab Launching Offer:"
+msgstr "Grab 启动优惠："
+
+#: build/admin.js:89
+msgid "Data Requests is a premium feature. Everything else on this page stays exactly where it is once Pro is active."
+msgstr "数据请求是高级功能。一旦激活 Pro，本页上的其他内容将保持原位。"
+
+#: build/admin.js:89
+msgid "How Pro Handles Each Request"
+msgstr "Pro 如何处理每个请求"

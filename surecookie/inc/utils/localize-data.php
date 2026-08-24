@@ -18,6 +18,8 @@ use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\WpConsentApi\Consent_Handler;
 use SureCookie\Inc\Modules\AssistedScan\Utils as AssistedScanUtils;
 use SureCookie\Inc\Modules\Nudges\Utils;
+use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
+use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
 use SureCookie\Inc\Modules\SiteScanner\Utils as SiteScannerUtils;
 
@@ -106,13 +108,83 @@ class LocalizeData {
 	}
 
 	/**
+	 * Doc article for each admin page, keyed by its React route path.
+	 *
+	 * Drives the "Learn More" icon in page headers: a route listed here gets the icon,
+	 * a route absent from the map gets none, so a page whose article is not published
+	 * yet never shows a link that dead-ends. Pro routes are listed here too, so Pro
+	 * inherits the icon without its own map.
+	 *
+	 * @return array<string, string> Route path => UTM-tagged doc URL.
+	 * @since x.x.x
+	 */
+	public static function get_page_doc_links(): array {
+		$pages = [
+			// Tracking Manager.
+			'/cookie-manager/scan'                    => 'docs/cookie-scanner/',
+			'/cookie-manager/auto-scan'               => 'docs/automatic-scheduled-scanning/',
+			'/cookie-manager/known-services'          => 'docs/using-known-services/',
+			'/cookie-manager/create'                  => 'docs/cookie-manager/',
+			'/cookie-manager/cookie-policy'           => 'docs/how-to-generate-cookie-policy-page/',
+			'/cookie-manager/scripts-and-embeds'      => 'docs/resource-script-blocking/',
+			'/cookie-manager/geo-rules'               => 'docs/how-to-set-up-geographic-targeting/',
+			'/cookie-manager/consent-sharing'         => 'docs/consent-forwarding-multisite-network/',
+
+			// Settings > Banner.
+			'/banner/content'                         => 'docs/customizing-banner-content/',
+			'/banner/layout'                          => 'docs/customizing-banner-layout/',
+			'/banner/visibility'                      => 'docs/customize-banner-visibility-settings-in-surecookie/',
+			'/banner/re-consent'                      => 'docs/re-consent/',
+			'/banner/custom-css'                      => 'docs/custom-css-for-banner-styling/',
+
+			// Settings > General.
+			'/settings/general/consent-data'          => 'docs/consent-and-data-settings/',
+			'/settings/general/preferences'           => 'docs/preferences-settings-menu-branding-analytics/',
+
+			// Settings > Advanced.
+			'/settings/advanced/blocked-content-ui'   => 'docs/customizing-the-blocked-content-ui/',
+			'/settings/advanced/data-requests'        => 'docs/handling-data-requests/',
+
+			// Settings > Consent Frameworks. The coming-soon pages are left out until they ship.
+			'/settings/framework/google-consent-mode' => 'docs/setting-up-google-consent-mode-v2/',
+
+			// Settings > Tools.
+			'/settings/tools/mcp'                     => 'docs/connecting-ai-assistants-mcp/',
+			'/settings/tools/import-export'           => 'docs/importing-and-exporting-surecookie-settings/',
+
+			// Settings > License (Pro).
+			'/settings/license'                       => 'docs/installing-surecookie-pro/',
+
+			// Learn - the checklist points at the docs home rather than one article.
+			'/learn'                                  => 'docs/',
+		];
+
+		$links = [];
+		foreach ( $pages as $route => $path ) {
+			// /cookie-manager/scan -> doc_cookie_manager_scan.
+			$content         = 'doc_' . trim( str_replace( [ '/', '-' ], '_', $route ), '_' );
+			$links[ $route ] = Helper::get_marketing_link( $path, $content );
+		}
+
+		/**
+		 * Filter the per-page doc links before they are exposed to JS, so pro/addons
+		 * can point their own admin routes at an article.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array<string, string> $links Map of route path => UTM-tagged doc URL.
+		 */
+		return apply_filters( 'surecookie_page_doc_links', $links );
+	}
+
+	/**
 	 * Translatable default strings exposed to the admin UI as placeholder fallbacks.
 	 *
 	 * @return array<string, string>
 	 * @since 0.0.1-beta.2
 	 */
 	public static function get_translatable_defaults(): array {
-		$keys = [ 'message_heading', 'message_description', 'preferences_modal_heading', 'preferences_modal_description' ];
+		$keys = [ 'message_heading', 'message_description', 'preferences_modal_heading', 'preferences_modal_description', 'placeholder_description' ];
 		return array_map( 'strval', array_intersect_key( Settings::get_settings_defaults(), array_flip( $keys ) ) );
 	}
 
@@ -160,6 +232,7 @@ class LocalizeData {
 				'is_pro_active'              => Helper::is_pro_active(),
 				'is_pro_installed'           => Helper::is_pro_installed(),
 				'website_links'              => self::get_website_links(),
+				'page_doc_links'             => self::get_page_doc_links(),
 				'core_version'               => SURECOOKIE_VERSION,
 				'eu_countries'               => Get::eu_countries(),
 				'navMenus'                   => Get::nav_menus(),
@@ -221,6 +294,7 @@ class LocalizeData {
 				// Static UI chrome localized server-side - the public bundle
 				// ships without wp-i18n, so it cannot translate at runtime.
 				'branding_powered_by'      => __( 'Powered by', 'surecookie' ),
+				'placeholder'              => self::get_placeholder_data(),
 			]
 		);
 
@@ -233,6 +307,40 @@ class LocalizeData {
 		// wp_localize_script() html_entity_decode()s every top-level scalar, so
 		// pre-empt it here - this payload reaches every anonymous visitor.
 		return Sanitize::rich_text_keys_after_decode( $data );
+	}
+
+	/**
+	 * Pieces the frontend needs to render a consent placeholder for an embed the
+	 * DOM guard blocked at runtime.
+	 *
+	 * A server-blocked embed gets its placeholder rendered in PHP, where all of
+	 * this is already in scope. One blocked in the browser has no server-rendered
+	 * wrapper, so the same copy, palette and vendor names have to travel with the
+	 * page. Empty when blocking is off, since nothing can be parked then.
+	 *
+	 * @since 1.4.0
+	 * @return array<string, mixed>
+	 */
+	private static function get_placeholder_data(): array {
+		if ( ! Blocking_Utils::is_blocking_enabled() ) {
+			return [];
+		}
+
+		return [
+			// Carries the `{service}` token; the frontend substitutes the vendor.
+			// Sanitized here, not in the browser, so the value that crosses into
+			// innerHTML has already been through the same filter the PHP builder
+			// applies at render.
+			'description' => wp_kses_post( Blocker::placeholder_description_template() ),
+			'button'      => Blocker::placeholder_button_text(),
+			'blocked'     => __( 'This content is currently blocked.', 'surecookie' ),
+			/* translators: %s: Service name (e.g., YouTube, Google Maps) */
+			'accept_aria' => __( 'Accept and load %s content', 'surecookie' ),
+			'colors'      => Get::banner_display_colors(),
+			// Service key => vendor label, so a parked element can name who it is
+			// waiting on. The element only carries the key.
+			'labels'      => Get::blocking_service_labels(),
+		];
 	}
 
 	/**

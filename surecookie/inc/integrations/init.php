@@ -13,8 +13,12 @@
 
 namespace SureCookie\Inc\Integrations;
 
+use SureCookie\Inc\Integrations\Astra\Init as Astra;
+use SureCookie\Inc\Integrations\Cache\Init as Cache;
+use SureCookie\Inc\Integrations\Elementor\Init as Elementor;
 use SureCookie\Inc\Integrations\Multilingual\Init as Multilingual;
 use SureCookie\Inc\Integrations\PrestoPlayer\Init as Presto_Player;
+use SureCookie\Inc\Integrations\ThemePalette\Init as Theme_Palette;
 use SureCookie\Inc\Integrations\Wordpress\Init as Wordpress_Abilities;
 use SureCookie\Inc\Integrations\WpConsentApi\Init as Wp_Consent_Api;
 use SureCookie\Inc\Traits\GetInstance;
@@ -56,5 +60,19 @@ class Init {
 
 		// Presto Player block-level content blocker (gated inside Init).
 		Presto_Player::get_instance();
+
+		// Elementor widgets that build their embed client-side (gated inside Init).
+		Elementor::get_instance();
+
+		// Astra Global Color Palette (gated inside Init).
+		Astra::get_instance();
+
+		// Theme palette presets for the Custom Colors pickers (Astra or
+		// block-theme cascade resolved inside).
+		Theme_Palette::get_instance();
+
+		// Cache and optimisation plugin compatibility. Always on: the exclusions
+		// are filters the host plugins simply never call when absent.
+		Cache::get_instance();
 	}
 }

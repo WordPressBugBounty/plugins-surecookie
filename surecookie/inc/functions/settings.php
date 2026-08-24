@@ -93,6 +93,18 @@ class Settings {
 			}
 		}
 
+		/*
+		 * Display-only companion to `hide_unused_categories`: the ids the consent UI
+		 * may render. `cookie_categories` itself is never filtered, because the
+		 * consent model, the WP Consent API map and the multilingual pass all derive
+		 * from it. Computed here rather than in LocalizeData so the localized page
+		 * payload and the public REST route cannot disagree. Skipped entirely when
+		 * the setting is off, which keeps the option reads off the default path.
+		 */
+		$public_settings['categories_in_use'] = ! empty( $public_settings['hide_unused_categories'] )
+			? Get::categories_in_use()
+			: [];
+
 		return apply_filters( 'surecookie_public_settings', $public_settings );
 	}
 

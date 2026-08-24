@@ -104,10 +104,29 @@ class Init {
 		$ability_classes = Actions::get_abilities();
 
 		foreach ( $ability_classes as $class ) {
-			if ( class_exists( $class ) && is_subclass_of( $class, Base::class ) ) {
-				$ability = new $class();
-				$ability->register();
+			if ( ! class_exists( $class ) || ! is_subclass_of( $class, Base::class ) ) {
+				continue;
 			}
+
+			$ability = new $class();
+
+			/**
+			 * Filters whether an individual ability should register.
+			 *
+			 * `enable_mcp` is all-or-nothing, so this is the only way to keep,
+			 * say, read-only consent-log access while withholding a destructive
+			 * ability. Code-level only; there is no admin UI for it.
+			 *
+			 * @param bool   $enabled Whether to register. Default true.
+			 * @param string $name    Ability name, e.g. 'surecookie/consent-logs'.
+			 * @param string $class   Ability class name.
+			 * @since 1.4.0
+			 */
+			if ( ! apply_filters( 'surecookie_ability_enabled', true, $ability->get_ability_name(), $class ) ) {
+				continue;
+			}
+
+			$ability->register();
 		}
 	}
 }

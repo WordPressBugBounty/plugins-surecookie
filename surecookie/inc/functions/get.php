@@ -8,6 +8,8 @@
 
 namespace SureCookie\Inc\Functions;
 
+use SureCookie\Inc\Modules\ScriptBlocking\Resource_Categories;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -18,6 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.0.1
  */
 class Get {
+	/**
+	 * Per-request memo for the category usage tally. Never persisted: the tally
+	 * must stay dynamic so a newly detected cookie or script reveals its category.
+	 *
+	 * @var array<string, array{cookies: int, scripts: int, services: int}>|null
+	 */
+	private static ?array $category_usage_memo = null;
+
 	/**
 	 * Check whether current locale direction is RTL.
 	 *
@@ -414,17 +424,42 @@ class Get {
 	}
 
 	/**
+	 * Scan-observed cookies as the display surfaces should see them.
+	 *
+	 * Applies `surecookie_scanned_cookies`, so a service known only because the
+	 * blocker gated it reaches All Cookies AND the public cookie policy. Read
+	 * the option directly where you intend to write it back.
+	 *
+	 * @since x.x.x
+	 * @return array<string, mixed> Cookies grouped by category id.
+	 */
+	public static function scanned_cookies_for_display(): array {
+		/**
+		 * Filter: the scan-observed cookie set, grouped by category id.
+		 *
+		 * Applied on the read path only, so a source other than a scan can add
+		 * to what is displayed without those rows being written back to the
+		 * option by a read-modify-write caller.
+		 *
+		 * @since x.x.x
+		 * @param array<string, mixed> $cookies Cookies grouped by category id.
+		 */
+		$cookies = apply_filters(
+			'surecookie_scanned_cookies',
+			self::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' )
+		);
+
+		return is_array( $cookies ) ? $cookies : [];
+	}
+
+	/**
 	 * Get scanned cookies as a flat array with category field added to each cookie.
 	 *
 	 * @since 0.0.1
 	 * @return array<int, array<string, mixed>> Flat array of scanned cookies.
 	 */
 	public static function all_scanned_cookies(): array {
-		$scanned_raw = self::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
-
-		if ( ! is_array( $scanned_raw ) ) {
-			return [];
-		}
+		$scanned_raw = self::scanned_cookies_for_display();
 
 		$flat = [];
 
@@ -450,6 +485,166 @@ class Get {
 	}
 
 	/**
+	 * Per-category tally of what actually exists on THIS site, keyed by category id.
+	 *
+	 * Only per-site evidence, and only evidence that is actually gated: the bundled
+	 * catalog spans every core category (so counting it would mark everything in
+	 * use), and a "Do not block" domain gates nothing. Catalog precedence and admin
+	 * recategorization are both replayed, so a resource counts for the category the
+	 * blocker really gates it under, not the one the scanner guessed.
+	 *
+	 * @since 1.4.0
+	 * @return array<string, array{cookies: int, scripts: int, services: int}>
+	 */
+	public static function category_usage_map(): array {
+		if ( self::$category_usage_memo !== null ) {
+			return self::$category_usage_memo;
+		}
+
+		$categories = Settings::get( 'cookie_categories' );
+		$usage      = [];
+
+		foreach ( is_array( $categories ) ? $categories : [] as $key => $category ) {
+			$id = is_array( $category ) && ! empty( $category['id'] ) ? (string) $category['id'] : (string) $key;
+			if ( $id !== '' ) {
+				$usage[ $id ] = [
+					'cookies'  => 0,
+					'scripts'  => 0,
+					'services' => 0,
+				];
+			}
+		}
+
+		// Scanned cookies. Sync pre-creates all five default buckets as empty
+		// arrays, so an existing key proves nothing - only a non-empty one does.
+		foreach ( self::scanned_cookies_for_display() as $category_id => $cookies ) {
+			if ( is_array( $cookies ) && ! empty( $cookies ) && isset( $usage[ $category_id ] ) ) {
+				$usage[ $category_id ]['cookies'] += count( $cookies );
+			}
+		}
+
+		// Custom cookies, which also cover cookies declared by installing a known service.
+		foreach ( self::formatted_custom_cookies() as $category_id => $cookies ) {
+			if ( is_array( $cookies ) && isset( $usage[ $category_id ] ) ) {
+				$usage[ $category_id ]['cookies'] += count( $cookies );
+			}
+		}
+
+		// Scan-detected resources, after "Do not block" and after recategorization.
+		$resources = self::option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [], 'array' );
+		foreach ( [
+			'scripts' => 'script',
+			'iframes' => 'iframe',
+		] as $bucket => $kind ) {
+			foreach ( is_array( $resources[ $bucket ] ?? null ) ? $resources[ $bucket ] : [] as $resource ) {
+				$domain = is_array( $resource ) ? trim( (string) ( $resource['domain'] ?? '' ) ) : '';
+				if ( $domain === '' || Resource_Categories::is_excluded_domain( $domain, $kind ) ) {
+					continue;
+				}
+				$category_id = Resource_Categories::gated_category( $domain, (string) ( $resource['category'] ?? 'uncategorized' ), $kind );
+				if ( isset( $usage[ $category_id ] ) ) {
+					++$usage[ $category_id ]['scripts'];
+				}
+			}
+		}
+
+		// Manually authored block rules. `custom_blocked_scripts` is not in the
+		// options registry, so Settings::get() returns null rather than [].
+		$rules = Settings::get( 'custom_blocked_scripts' );
+		foreach ( is_array( $rules ) ? $rules : [] as $rule ) {
+			$category_id = is_array( $rule ) ? sanitize_key( (string) ( $rule['category'] ?? '' ) ) : '';
+			$category_id = $category_id !== '' ? $category_id : 'uncategorized';
+			if ( isset( $usage[ $category_id ] ) ) {
+				++$usage[ $category_id ]['scripts'];
+			}
+		}
+
+		// Installed known services. A service can declare zero cookies, so the
+		// registry is the only place its category is visible. `suppressed` entries
+		// are the admin saying "not on this site" and are ignored.
+		$registry = self::option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [], 'array' );
+		foreach ( is_array( $registry['installed'] ?? null ) ? $registry['installed'] : [] as $entry ) {
+			$category_id = is_array( $entry ) ? sanitize_key( (string) ( $entry['category'] ?? '' ) ) : '';
+			$category_id = $category_id !== '' ? $category_id : 'uncategorized';
+			if ( isset( $usage[ $category_id ] ) ) {
+				++$usage[ $category_id ]['services'];
+			}
+		}
+
+		self::$category_usage_memo = $usage;
+
+		return $usage;
+	}
+
+	/**
+	 * Ids of the categories the consent UI may show when "hide unused" is on.
+	 *
+	 * Never used to build the consent model itself: every registered category
+	 * stays in the model regardless, hidden ones simply default to denied.
+	 *
+	 * @since 1.4.0
+	 * @return array<int, string>
+	 */
+	public static function categories_in_use(): array {
+		$usage  = self::category_usage_map();
+		$in_use = [];
+
+		foreach ( $usage as $id => $counts ) {
+			if ( ( $counts['cookies'] + $counts['scripts'] + $counts['services'] ) > 0 ) {
+				$in_use[] = $id;
+			}
+		}
+
+		// Fail visible: no evidence at all means we know nothing about this site, not
+		// that every category is unused. Must run BEFORE required ids are added, or
+		// this never fires and a fresh install shows only the always-active row.
+		if ( empty( $in_use ) ) {
+			return array_keys( $usage );
+		}
+
+		// A category the visitor must always be able to see. Keyed off `required`
+		// rather than the literal 'essential' id, because custom categories may
+		// set it too.
+		$categories = Settings::get( 'cookie_categories' );
+		foreach ( is_array( $categories ) ? $categories : [] as $key => $category ) {
+			if ( is_array( $category ) && ! empty( $category['required'] ) ) {
+				$in_use[] = ! empty( $category['id'] ) ? (string) $category['id'] : (string) $key;
+			}
+		}
+
+		return array_values( array_unique( $in_use ) );
+	}
+
+	/**
+	 * Whether a category is currently hidden from the consent UI.
+	 *
+	 * A hidden category has no toggle anywhere, so it must not be grantable from
+	 * a blocked-content placeholder either: the visitor would have no way to
+	 * withdraw what they granted.
+	 *
+	 * @since 1.4.0
+	 * @param string $category_id Category id.
+	 * @return bool
+	 */
+	public static function is_category_hidden( string $category_id ): bool {
+		if ( $category_id === '' || empty( Settings::get( 'hide_unused_categories' ) ) ) {
+			return false;
+		}
+
+		return ! in_array( $category_id, self::categories_in_use(), true );
+	}
+
+	/**
+	 * Drop the per-request usage memo. Used after a mutation and by tests.
+	 *
+	 * @since 1.4.0
+	 * @return void
+	 */
+	public static function clear_category_usage_cache(): void {
+		self::$category_usage_memo = null;
+	}
+
+	/**
 	 * Get CSS variables for the active color palette.
 	 *
 	 * @since 0.0.1
@@ -458,6 +653,14 @@ class Get {
 	public static function palette_root_css(): string {
 		$color_palette = sanitize_key( (string) Settings::get( 'color_palette' ) );
 		$palette_codes = self::color_palette_codes();
+
+		// A saved id can vanish (e.g. 'astra' after switching themes); fall
+		// back to the default palette instead of emitting no variables, which
+		// would leave var()-less CSS rules with no color at all.
+		if ( ! isset( $palette_codes[ $color_palette ] ) ) {
+			$defaults      = Settings::get_settings_defaults();
+			$color_palette = sanitize_key( (string) ( $defaults['color_palette'] ?? '' ) );
+		}
 
 		if ( ! isset( $palette_codes[ $color_palette ] ) ) {
 			return '';
@@ -491,7 +694,8 @@ class Get {
 
 		$css_output = ':root {';
 		foreach ( $css_variables as $variable => $value ) {
-			$sanitized_value = sanitize_hex_color( (string) $value );
+			// Hex or strict rgba() - Pro's custom palette supports alpha.
+			$sanitized_value = Sanitize::css_color( (string) $value );
 			if ( empty( $sanitized_value ) ) {
 				continue;
 			}
@@ -507,6 +711,86 @@ class Get {
 		$css_output .= "\n/* Color Palette: {$color_palette} */\n";
 
 		return $css_output;
+	}
+
+	/**
+	 * Vendor label for every service in the blocking catalog, keyed by service.
+	 *
+	 * A blocked element only carries its service key, so this is what lets the
+	 * frontend name the vendor a placeholder is waiting on. Read from the same
+	 * `surecookie_known_scripts` view the blocker matches against, so the label a
+	 * visitor sees is the one the admin sees.
+	 *
+	 * @since 1.4.0
+	 * @return array<string, string>
+	 */
+	public static function blocking_service_labels(): array {
+		$catalog = apply_filters( 'surecookie_known_scripts', [] );
+		if ( ! is_array( $catalog ) ) {
+			return [];
+		}
+
+		$labels = [];
+
+		foreach ( $catalog as $services ) {
+			if ( ! is_array( $services ) ) {
+				continue;
+			}
+
+			foreach ( $services as $key => $service ) {
+				$label = is_array( $service ) ? (string) ( $service['label'] ?? '' ) : '';
+				// Only worth sending when it differs from the key the element
+				// already carries; the frontend falls back to that key.
+				if ( $label !== '' && $label !== (string) $key ) {
+					$labels[ (string) $key ] = $label;
+				}
+			}
+		}
+
+		return $labels;
+	}
+
+	/**
+	 * Effective banner colors for surfaces painted like the banner (e.g. the
+	 * blocked-content placeholder), as literal hex. Background comes from the
+	 * active palette (with the same `surecookie_resolved_palette_colors` filter
+	 * the banner honors, so Pro custom colors apply); the text color is computed
+	 * from that background's brightness so it ALWAYS contrasts - never dark-on-dark
+	 * or light-on-light. Emitting literal hex inline avoids any CSS-var mismatch.
+	 *
+	 * @since 1.4.0
+	 * @return array{background: string, text: string, primary: string}
+	 */
+	public static function banner_display_colors(): array {
+		$palette_codes = self::color_palette_codes();
+		$color_palette = (string) Settings::get( 'color_palette' );
+		$palette       = isset( $palette_codes[ $color_palette ] ) && is_array( $palette_codes[ $color_palette ] )
+			? $palette_codes[ $color_palette ]
+			: [];
+
+		$filtered = apply_filters( 'surecookie_resolved_palette_colors', $palette, $color_palette );
+		$palette  = is_array( $filtered ) ? $filtered : $palette;
+
+		$valid = static function ( $color ): string {
+			$color = is_string( $color ) ? trim( $color ) : '';
+			return preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $color ) ? $color : '';
+		};
+
+		$background = $valid( $palette['bgColor'] ?? '' );
+		if ( $background === '' ) {
+			$background = '#1f2937';
+		}
+
+		$primary = $valid( $palette['acceptButton'] ?? '' );
+		if ( $primary === '' ) {
+			$primary = '#2563eb';
+		}
+
+		return [
+			'background' => $background,
+			'text'       => self::readable_text_color( $background ),
+			'primary'    => $primary,
+		];
 	}
 
 	/**
@@ -612,6 +896,35 @@ class Get {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Legible text color (near-black or white) for a background hex, using
+	 * perceived brightness (ITU-R BT.601). Guarantees the placeholder text
+	 * contrasts its background regardless of palette. White for invalid input.
+	 *
+	 * @since 1.4.0
+	 * @param string $hex Background color (hex).
+	 * @return string '#111827' (dark) or '#ffffff' (light).
+	 */
+	private static function readable_text_color( string $hex ): string {
+		$hex = ltrim( trim( $hex ), '#' );
+
+		if ( strlen( $hex ) === 3 ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+
+		if ( ! preg_match( '/^[0-9a-fA-F]{6}$/', $hex ) ) {
+			return '#ffffff';
+		}
+
+		$r = (int) hexdec( substr( $hex, 0, 2 ) );
+		$g = (int) hexdec( substr( $hex, 2, 2 ) );
+		$b = (int) hexdec( substr( $hex, 4, 2 ) );
+
+		$brightness = ( $r * 299 + $g * 587 + $b * 114 ) / 1000;
+
+		return $brightness > 140 ? '#111827' : '#ffffff';
 	}
 
 	/**

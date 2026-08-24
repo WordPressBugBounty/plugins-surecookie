@@ -50,15 +50,17 @@ class Actions {
 	 * @return array<string, mixed>
 	 * @since 0.0.0-alpha.1
 	 */
-	public function add_gcm_settings_to_dataset( $settings ) {
+	public static function add_gcm_settings_to_dataset( $settings ) {
 		$gcm_settings = [
 			'gcm_enabled'         => [
 				'type'    => 'bool',
 				'default' => false,
+				'group'   => 'gcm',
 			],
 			'gcm_wait_for_update' => [
 				'type'    => 'int',
 				'default' => 500,
+				'group'   => 'gcm',
 			],
 			'gcm_default_consent' => [
 				'type'    => 'array',
@@ -79,6 +81,7 @@ class Actions {
 						'functional' => false,
 					],
 				],
+				'group'   => 'gcm',
 			],
 		];
 
@@ -103,8 +106,9 @@ class Actions {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function init_hooks(): void {
-		// Add Google Consent Mode settings to plugin configuration dataset.
-		add_filter( 'surecookie_plugin_settings_dataset', [ $this, 'add_gcm_settings_to_dataset' ] );
+		// The settings-dataset contribution is registered on plugins_loaded by
+		// Loader::register_settings_dataset(); this module boots at init:999,
+		// which is after the abilities schema and settings defaults are built.
 
 		// Add Google Consent Mode settings to frontend options.
 		add_filter( 'surecookie_frontend_setting_keys', [ $this, 'add_gcm_frontend_options' ] );

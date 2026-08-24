@@ -147,6 +147,22 @@ class SaasClient {
 	public const PENDING_VERIFICATION_TTL = 60;
 
 	/**
+	 * Handshake kept alive after a failed verification so Retry can re-run step 2
+	 * against the same token; step 1 would mint a new one and void the TXT record.
+	 *
+	 * @since x.x.x
+	 */
+	public const PENDING_HANDSHAKE_TRANSIENT = 'surecookie_pending_handshake';
+
+	/**
+	 * Handshake TTL - DNS can take a day. The nonce alone grants nothing, since
+	 * completing still requires proving domain control.
+	 *
+	 * @since x.x.x
+	 */
+	public const PENDING_HANDSHAKE_TTL = DAY_IN_SECONDS;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 0.0.1
@@ -1495,7 +1511,7 @@ class SaasClient {
 	 *  Step 4: Persist the issued key to the dedicated wp_option.
 	 *
 	 * @since 0.0.1-beta.3
-	 * @return array{success: bool, message?: string}
+	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
 	 */
 	private function register_site(): array {
 		$site_url = Utils::get_site_url();
@@ -1598,10 +1614,27 @@ class SaasClient {
 			];
 		}
 
-		// Make the token discoverable by the REST verification handler. The
-		// handler returns this value when the SaaS GETs /site-verify/{token}.
-		set_transient( self::PENDING_VERIFICATION_TRANSIENT, $verification_token, self::PENDING_VERIFICATION_TTL );
+		$completion = $this->complete_registration( $wp_site_id, $install_nonce, $verification_token );
+		if ( ! $completion['success'] ) {
+			return $completion;
+		}
 
+		return $this->finalize_registration( $completion['data'], (string) $domain );
+	}
+
+	/**
+	 * Run step 2 of the handshake: ask the SaaS to verify and issue the key.
+	 *
+	 * Split out so the DNS-fallback retry can re-run it without re-running step 1, which
+	 * would mint a fresh token and invalidate any TXT record the user has published.
+	 *
+	 * @param string $wp_site_id         Site id issued by step 1.
+	 * @param string $install_nonce      Nonce the pending registration was opened with.
+	 * @param string $verification_token Token the REST handler should serve.
+	 * @since x.x.x
+	 * @return array{success: true, data: array<string, mixed>}|array{success: false, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null} Success with `data`, or a failure describing why.
+	 */
+	private function complete_registration( string $wp_site_id, string $install_nonce, string $verification_token ): array {
 		$complete_body = wp_json_encode(
 			[
 				'wp_site_id'    => $wp_site_id,
@@ -1615,6 +1648,11 @@ class SaasClient {
 				'message' => __( 'Failed to encode verification completion.', 'surecookie' ),
 			];
 		}
+
+		// Make the token discoverable by the REST verification handler. The handler
+		// returns this value when the SaaS GETs /site-verify/{token}. Set on every
+		// attempt, so a retry still tries HTTP before falling back to DNS.
+		set_transient( self::PENDING_VERIFICATION_TRANSIENT, $verification_token, self::PENDING_VERIFICATION_TTL );
 
 		$complete_resp = wp_remote_post(
 			$this->get_api_base_url() . 'register/complete',
@@ -1641,36 +1679,211 @@ class SaasClient {
 
 		$step2_code = (int) wp_remote_retrieve_response_code( $complete_resp );
 		$step2_data = json_decode( (string) wp_remote_retrieve_body( $complete_resp ), true );
-		if ( $step2_code !== 201 || ! is_array( $step2_data ) || empty( $step2_data['api_key'] ) || empty( $step2_data['key_prefix'] ) ) {
-			Logger::get_instance()->save_log( sprintf( 'Registration step 2 returned unexpected response (HTTP %d).', $step2_code ) );
+		$step2_data = is_array( $step2_data ) ? $step2_data : [];
 
-			// Verification requires the SaaS to reach our public /wp-json verify endpoint.
-			// A 422 almost always means that inbound GET was blocked or the REST API is
-			// unreachable - diagnose locally to tell the user the real cause + fix.
-			$diagnosis = $this->diagnose_verification_failure();
-
-			if ( $diagnosis === 'ssl_invalid' ) {
-				$message = __( 'We could not verify your domain because your site\'s SSL certificate could not be validated (it may be self-signed, expired, or issued for a different domain). Install a valid certificate (for example Let\'s Encrypt), or scan your live domain that already has one, then retry.', 'surecookie' );
-			} elseif ( $diagnosis === 'external_block' ) {
-				$message = __( 'We could not verify your domain because your host is blocking our verification request to /wp-json/. This is common on SiteGround. Allowlist our scanner IPs/User-Agent (or ask your host to) and retry - or add your services manually in the meantime.', 'surecookie' );
-			} else {
-				$message = __( 'We could not reach your site\'s REST API at /wp-json/. Enable pretty permalinks and make sure no security plugin is disabling the REST API, then retry.', 'surecookie' );
-			}
-
+		if ( $step2_code === 201 && ! empty( $step2_data['api_key'] ) && ! empty( $step2_data['key_prefix'] ) ) {
+			delete_transient( self::PENDING_HANDSHAKE_TRANSIENT );
 			return [
-				'success'   => false,
-				'code'      => 'verification_failed',
-				'diagnosis' => $diagnosis,
-				'message'   => $message,
+				'success' => true,
+				'data'    => $step2_data,
 			];
 		}
 
+		return $this->describe_completion_failure(
+			$step2_code,
+			$step2_data,
+			$wp_site_id,
+			$install_nonce
+		);
+	}
+
+	/**
+	 * Turn a failed step 2 into a message the user can act on.
+	 *
+	 * The server distinguishes five causes and only one of them is about a firewall, so the
+	 * server's own `error` decides the wording. The local self-test is a refinement for that
+	 * one case, never a substitute: it has been observed reporting a block on a site whose
+	 * REST API answered fine from outside.
+	 *
+	 * @param int                  $status        HTTP status returned by step 2.
+	 * @param array<string, mixed> $data          Decoded response body.
+	 * @param string               $wp_site_id    Site id issued by step 1.
+	 * @param string               $install_nonce Nonce the pending registration was opened with.
+	 * @since x.x.x
+	 * @return array{success: false, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
+	 */
+	private function describe_completion_failure( int $status, array $data, string $wp_site_id, string $install_nonce ): array {
+		$error = isset( $data['error'] ) ? (string) $data['error'] : '';
+
+		Logger::get_instance()->save_log(
+			sprintf(
+				'Registration step 2 failed (HTTP %1$d, %2$s): %3$s',
+				$status,
+				$error !== '' ? $error : 'no error code',
+				isset( $data['message'] ) ? (string) $data['message'] : 'no message'
+			)
+		);
+
+		$messages = [
+			'validation_failed'       => __( 'The registration request was rejected as malformed. This is a bug in the plugin rather than something you can fix - please contact support.', 'surecookie' ),
+			'site_not_found'          => __( 'No pending registration matches this site. Start registration again.', 'surecookie' ),
+			'install_nonce_mismatch'  => __( 'The registration handshake got out of step, usually because two attempts overlapped. Wait a moment and start registration again.', 'surecookie' ),
+			'no_pending_verification' => __( 'Registration was never started for this site. Start it again.', 'surecookie' ),
+		];
+
+		if ( isset( $messages[ $error ] ) ) {
+			return [
+				'success' => false,
+				'code'    => $error,
+				'message' => $messages[ $error ],
+			];
+		}
+
+		if ( $error !== 'verification_failed' ) {
+			return [
+				'success' => false,
+				'code'    => $error !== '' ? $error : 'registration_failed',
+				'message' => __( 'Registration could not be completed. Please retry, and contact support if it keeps failing.', 'surecookie' ),
+			];
+		}
+
+		$dns = isset( $data['dns_verification'] ) && is_array( $data['dns_verification'] )
+			? $data['dns_verification']
+			: null;
+
+		// Keep the handshake alive so Retry can re-run step 2 against the same token.
+		if ( $dns !== null ) {
+			set_transient(
+				self::PENDING_HANDSHAKE_TRANSIENT,
+				[
+					'wp_site_id'    => $wp_site_id,
+					'install_nonce' => $install_nonce,
+					'token'         => $this->token_from_dns_value( (string) ( $dns['value'] ?? '' ) ),
+				],
+				self::PENDING_HANDSHAKE_TTL
+			);
+		}
+
+		$diagnosis = $this->diagnose_verification_failure();
+
+		$message = __( 'We could not confirm that you control this domain, because our verification request to your site did not come back with the expected token.', 'surecookie' );
+
+		if ( $diagnosis === 'ssl_invalid' ) {
+			$message .= ' ' . __( 'Your site\'s SSL certificate also failed validation from here, so that is the likely cause: it may be self-signed, expired, or issued for a different domain.', 'surecookie' );
+		} elseif ( $diagnosis === 'rest_unreachable' ) {
+			$message .= ' ' . __( 'The REST API at /wp-json/ did not respond from here either, so check that pretty permalinks are on and no security plugin has disabled it.', 'surecookie' );
+		} else {
+			$message .= ' ' . __( 'A firewall or security plugin blocking our request is the most common cause.', 'surecookie' );
+		}
+
+		if ( $dns !== null ) {
+			$message .= ' ' . __( 'You can prove ownership with a DNS record instead, which works even when a firewall blocks us.', 'surecookie' );
+		}
+
+		return [
+			'success'          => false,
+			'code'             => 'verification_failed',
+			'diagnosis'        => $diagnosis,
+			'message'          => $message,
+			'dns_verification' => $dns,
+			'verify_url'       => isset( $data['verify_url'] ) ? (string) $data['verify_url'] : null,
+		];
+	}
+
+	/**
+	 * Pull the raw token out of the TXT value the SaaS hands back.
+	 *
+	 * @param string $value TXT record value, `surecookie-verification=<token>`.
+	 * @since x.x.x
+	 * @return string
+	 */
+	private function token_from_dns_value( string $value ): string {
+		$token = substr( $value, strlen( 'surecookie-verification=' ) );
+		return strncmp( $value, 'surecookie-verification=', 24 ) === 0 && preg_match( '/^[a-f0-9]{64}$/', $token ) === 1
+			? $token
+			: '';
+	}
+
+	/**
+	 * Re-run step 2 after the user has published the DNS record.
+	 *
+	 * @since x.x.x
+	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
+	 */
+	public function retry_registration(): array {
+		if ( $this->get_api_key() !== '' ) {
+			return [ 'success' => true ];
+		}
+
+		// Same lock register_site() runs behind: two Retry clicks inside the window
+		// would otherwise both complete the handshake and mint a second key.
+		if ( get_transient( self::REGISTERING_LOCK_TRANSIENT ) !== false ) {
+			return [
+				'success' => false,
+				'code'    => 'registration_in_progress',
+				'message' => __( 'A verification attempt is already running. Please try again in a moment.', 'surecookie' ),
+			];
+		}
+		set_transient( self::REGISTERING_LOCK_TRANSIENT, 1, self::REGISTERING_LOCK_TTL );
+
+		try {
+			return $this->run_pending_handshake();
+		} finally {
+			delete_transient( self::REGISTERING_LOCK_TRANSIENT );
+		}
+	}
+
+	/**
+	 * Complete a handshake that is already pending, using the stored token.
+	 *
+	 * @since x.x.x
+	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
+	 */
+	private function run_pending_handshake(): array {
+		$pending = get_transient( self::PENDING_HANDSHAKE_TRANSIENT );
+		if ( ! is_array( $pending ) || empty( $pending['wp_site_id'] ) || empty( $pending['install_nonce'] ) ) {
+			return [
+				'success' => false,
+				'code'    => 'no_pending_handshake',
+				'message' => __( 'There is no registration waiting to be completed. Start a scan to register again.', 'surecookie' ),
+			];
+		}
+
+		$domain = wp_parse_url( Utils::get_site_url(), PHP_URL_HOST );
+		if ( empty( $domain ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'Could not determine site domain.', 'surecookie' ),
+			];
+		}
+
+		$completion = $this->complete_registration(
+			(string) $pending['wp_site_id'],
+			(string) $pending['install_nonce'],
+			(string) ( $pending['token'] ?? '' )
+		);
+		if ( ! $completion['success'] ) {
+			return $completion;
+		}
+
+		return $this->finalize_registration( $completion['data'], (string) $domain );
+	}
+
+	/**
+	 * Persist the issued key and announce the registration.
+	 *
+	 * @param array<string, mixed> $step2_data Successful step 2 body.
+	 * @param string               $domain     Registered domain.
+	 * @since x.x.x
+	 * @return array{success: bool}
+	 */
+	private function finalize_registration( array $step2_data, string $domain ): array {
 		// install_nonce is intentionally NOT persisted - it's only meaningful during the
 		// in-flight handshake, so keeping it out of wp_options shrinks the sensitive surface.
 		$payload = [
 			'api_key'           => (string) $step2_data['api_key'],
 			'key_prefix'        => (string) $step2_data['key_prefix'],
-			'registered_domain' => (string) $domain,
+			'registered_domain' => $domain,
 			'registered_at'     => time(),
 		];
 
@@ -1687,7 +1900,7 @@ class SaasClient {
 		 * @param string $key_prefix Public key prefix (sk_xxxxxxxx).
 		 * @param string $domain     Registered domain.
 		 */
-		do_action( 'surecookie_site_registered', (string) $payload['key_prefix'], (string) $domain );
+		do_action( 'surecookie_site_registered', (string) $payload['key_prefix'], $domain );
 
 		Logger::get_instance()->save_log( 'Site registered successfully with SaaS scanner.' );
 

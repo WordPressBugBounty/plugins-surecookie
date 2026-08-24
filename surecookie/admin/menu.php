@@ -30,6 +30,19 @@ class Menu {
 	use GetInstance;
 
 	/**
+	 * Admin page hooks that render the SureCookie app.
+	 *
+	 * @since 1.4.0
+	 */
+	private const PLUGIN_SCREEN_HOOKS = [
+		'toplevel_page_surecookie',
+		'settings_page_surecookie',
+		'surecookie_page_surecookie-banner',
+		'surecookie_page_surecookie-settings',
+		'surecookie_page_surecookie-advanced',
+	];
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.1
@@ -37,6 +50,8 @@ class Menu {
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		// Late, so it wins over plugins that enqueue on the default priority.
+		add_action( 'admin_enqueue_scripts', [ $this, 'dequeue_conflicting_styles' ], 999 );
 		add_filter( 'plugin_action_links_' . SURECOOKIE_BASE, [ $this, 'plugin_action_links' ] );
 
 		if ( ! Helper::is_pro_active() && Settings::get( 'top_level_menu_enabled' ) ) {
@@ -79,8 +94,13 @@ class Menu {
 				],
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/analytics',
-					'page_title' => __( 'Logs', 'surecookie' ),
+					'page_title' => __( 'Consent Logs', 'surecookie' ),
 					'menu_title' => $this->get_logs_submenu_title( $unread_logs ),
+				],
+				[
+					'id'         => SURECOOKIE_PREFIX . '#/data-requests',
+					'page_title' => __( 'Data Requests', 'surecookie' ),
+					'menu_title' => $this->get_data_requests_submenu_title( $this->get_open_data_requests_count() ),
 				],
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/banner/content',
@@ -145,15 +165,7 @@ class Menu {
 	public function enqueue_admin_assets( $hook ): void {
 		$this->enqueue_admin_menu_icon_style();
 
-		$allowed_hooks = [
-			'toplevel_page_surecookie',
-			'settings_page_surecookie',
-			'surecookie_page_surecookie-banner',
-			'surecookie_page_surecookie-settings',
-			'surecookie_page_surecookie-advanced',
-		];
-
-		if ( ! in_array( $hook, $allowed_hooks, true ) ) {
+		if ( ! in_array( $hook, self::PLUGIN_SCREEN_HOOKS, true ) ) {
 			return;
 		}
 
@@ -212,6 +224,29 @@ class Menu {
 
 		// Localize admin data using utility.
 		LocalizeData::localize_admin_script( 'surecookie-admin' );
+	}
+
+	/**
+	 * Drop other plugins' unscoped stylesheets from SureCookie's own screens.
+	 *
+	 * MemberPress Courses enqueues simplegrid.css on EVERY admin page; its
+	 * generic selectors (`.grid`, `[class*='col-']`) restyle Tailwind's grid
+	 * and col-span utilities and mangle this app's layout (ticket 1507247).
+	 * `mpcs-admin-shared` lists simplegrid as a dependency, so it has to go
+	 * too or WordPress prints simplegrid right back.
+	 *
+	 * @since 1.4.0
+	 * @param string $hook The current admin page.
+	 * @return void
+	 */
+	public function dequeue_conflicting_styles( $hook ): void {
+		if ( ! in_array( $hook, self::PLUGIN_SCREEN_HOOKS, true ) ) {
+			return;
+		}
+
+		foreach ( [ 'mpcs-admin-shared', 'mpcs-simplegrid', 'mepr-simplegrid' ] as $handle ) {
+			wp_dequeue_style( $handle );
+		}
 	}
 
 	/**
@@ -389,6 +424,53 @@ class Menu {
 	}
 
 	/**
+	 * Count the data requests still awaiting action.
+	 *
+	 * Free ships no data-request storage, so the number comes from Pro through
+	 * the filter; without Pro it stays 0 and the submenu shows the "New" badge.
+	 *
+	 * @since 1.4.0
+	 * @return int
+	 */
+	private function get_open_data_requests_count(): int {
+		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+			return 0;
+		}
+
+		return max( 0, (int) apply_filters( 'surecookie_open_data_requests_count', 0 ) );
+	}
+
+	/**
+	 * Build the Data Requests submenu title.
+	 *
+	 * Mirrors the Consent Logs badge: an attention count when requests are
+	 * waiting, and a "New" pill in its place while there are none, so the
+	 * feature is still discoverable on a site that has never received one.
+	 *
+	 * @since 1.4.0
+	 * @param int $open_count Number of data requests awaiting action.
+	 * @return string
+	 */
+	private function get_data_requests_submenu_title( int $open_count ): string {
+		$label = __( 'Data Requests', 'surecookie' );
+
+		if ( $open_count <= 0 ) {
+			return sprintf(
+				'%1$s <span class="surecookie-new-badge">%2$s</span>',
+				$label,
+				esc_html__( 'NEW', 'surecookie' )
+			);
+		}
+
+		return sprintf(
+			'%1$s <span class="update-plugins count-%2$d" data-surecookie-data-requests-badge="true"><span class="plugin-count">%3$s</span></span>',
+			$label,
+			$open_count,
+			esc_html( number_format_i18n( $open_count ) )
+		);
+	}
+
+	/**
 	 * Build the Logs submenu title with an unread-count badge when needed.
 	 *
 	 * @since 1.2.0
@@ -397,7 +479,7 @@ class Menu {
 	 * @return string
 	 */
 	private function get_logs_submenu_title( int $unread_count ): string {
-		$label = __( 'Logs', 'surecookie' );
+		$label = __( 'Consent Logs', 'surecookie' );
 
 		if ( $unread_count <= 0 ) {
 			return $label;
@@ -429,7 +511,9 @@ class Menu {
 				content: "";
 				width: calc(100% + 26px);
 			}
-			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/cookie-manager/scan"]:after,
+			#toplevel_page_surecookie li:not(:last-child) a[href="admin.php?page=surecookie"]:after,
+			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/analytics"]:after,
+			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/learn"]:after,
 			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/banner/content"]:after {
 				content: none;
 			}';
@@ -450,6 +534,15 @@ class Menu {
 				border-radius: 50%;
 				background: #d63638;
 				vertical-align: middle;
+			}
+			#toplevel_page_surecookie .wp-submenu .surecookie-new-badge {
+				background-color: #377a00;
+				font-size: 9px;
+				color: #fff;
+				padding: 2px 4px;
+				margin-left: 4px;
+				border-radius: 4px;
+				font-weight: 600;
 			}';
 	}
 

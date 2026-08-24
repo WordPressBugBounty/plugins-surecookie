@@ -61,6 +61,13 @@ class Api extends Base {
 	protected const QUOTA = '/site-scanner/quota';
 
 	/**
+	 * Re-run domain verification after the user publishes the DNS record.
+	 *
+	 * @since x.x.x
+	 */
+	protected const VERIFY_RETRY = '/site-scanner/verify-retry';
+
+	/**
 	 * Register API routes.
 	 *
 	 * @since 0.0.1
@@ -74,6 +81,18 @@ class Api extends Base {
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'start_scan' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+			]
+		);
+
+		// Retry verification only, without re-registering: step 1 would mint a new
+		// token and invalidate the DNS record the user has just published.
+		register_rest_route(
+			$this->get_api_namespace(),
+			self::VERIFY_RETRY,
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'retry_verification' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
 			]
 		);
@@ -284,11 +303,13 @@ class Api extends Base {
 				// Return error with code and rate limit details from SaaS response.
 				SendJson::error(
 					[
-						'code'      => $result['code'] ?? 'scan_failed',
-						'message'   => $result['message'] ?? __( 'Failed to start scan.', 'surecookie' ),
-						'limit'     => $result['limit'] ?? null,
-						'used'      => $result['used'] ?? null,
-						'remaining' => $result['remaining'] ?? 0,
+						'code'             => $result['code'] ?? 'scan_failed',
+						'message'          => $result['message'] ?? __( 'Failed to start scan.', 'surecookie' ),
+						'limit'            => $result['limit'] ?? null,
+						'used'             => $result['used'] ?? null,
+						'remaining'        => $result['remaining'] ?? 0,
+						// Registration can fail with a DNS fallback the user can act on.
+						'dns_verification' => $result['dns_verification'] ?? null,
 					]
 				);
 				return;
@@ -315,6 +336,35 @@ class Api extends Base {
 				]
 			);
 		}
+	}
+
+
+	/**
+	 * Re-run step 2 of registration against the token already issued.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	public function retry_verification(): void {
+		$result = SaasClient::get_instance()->retry_registration();
+
+		if ( empty( $result['success'] ) ) {
+			SendJson::error(
+				[
+					'code'             => $result['code'] ?? 'verification_failed',
+					'message'          => $result['message'] ?? __( 'Verification failed.', 'surecookie' ),
+					'dns_verification' => $result['dns_verification'] ?? null,
+				]
+			);
+			return;
+		}
+
+		SendJson::success(
+			[
+				'message'     => __( 'Domain verified.', 'surecookie' ),
+				'description' => __( 'Your site is registered and can now be scanned.', 'surecookie' ),
+			]
+		);
 	}
 
 }

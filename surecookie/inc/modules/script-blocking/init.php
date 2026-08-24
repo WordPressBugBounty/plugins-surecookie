@@ -32,6 +32,11 @@ class Init {
 		Blocker::get_instance();
 		Scan_Scripts::get_instance();
 
+		// Nothing else reads the catalog, so a resource gated only by a catalog
+		// pattern has no row on any admin screen. Record what the blocker matches
+		// and surface those as rows.
+		Matched_Resources::get_instance();
+
 		// The catalog domain (Services_Source, Known_Scripts blocking view, the
 		// refresh Cron, declared cookies) now lives in the Services module and is
 		// consumed here purely through the `surecookie_known_scripts` filter.

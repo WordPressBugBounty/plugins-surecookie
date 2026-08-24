@@ -235,6 +235,24 @@ class Plugin extends Base {
 	 * @since 0.0.1
 	 */
 	public function get_conflicting_plugins( $request ): void {
+		SendJson::success(
+			[
+				'message' => __( 'Conflicting plugins retrieved.', 'surecookie' ),
+				'plugins' => $this->detect_conflicting_plugins(),
+			]
+		);
+	}
+
+	/**
+	 * Active plugins that look like competing cookie-consent plugins.
+	 *
+	 * Split out of the REST handler so the site-health ability can run the same
+	 * detection: that handler terminates the request through SendJson.
+	 *
+	 * @since 1.4.0
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function detect_conflicting_plugins(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -285,12 +303,7 @@ class Plugin extends Base {
 			];
 		}
 
-		SendJson::success(
-			[
-				'message' => __( 'Conflicting plugins retrieved.', 'surecookie' ),
-				'plugins' => array_values( $conflicting_plugins ),
-			]
-		);
+		return array_values( $conflicting_plugins );
 	}
 
 	/**

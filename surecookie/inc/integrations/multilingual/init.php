@@ -44,6 +44,8 @@ class Init {
 		'preferences_modal_heading',
 		'preferences_modal_description',
 		'consent_forwarding_description',
+		'placeholder_description',
+		'placeholder_button_text',
 	];
 
 	/**

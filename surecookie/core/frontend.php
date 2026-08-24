@@ -29,62 +29,43 @@ class Frontend {
 	use GetInstance;
 
 	/**
+	 * Whether the banner mount point has been printed for this request.
+	 *
+	 * @var bool
+	 */
+	private bool $root_printed = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.1
 	 */
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_public_assets' ] );
-		// The banner is mounted client-side into an initially empty root, so its stylesheet
-		// is never needed for first paint - load it off the critical path (non-render-blocking).
-		add_filter( 'style_loader_tag', [ $this, 'async_public_style' ], 10, 3 );
-		// Use wp_body_open to put the banner root at the very top of the body for better accessibility.
-		// Fallback to wp_footer if the theme doesn't support wp_body_open.
-		if ( function_exists( 'wp_body_open' ) ) {
-			add_action( 'wp_body_open', [ $this, 'add_public_root' ], 1 );
-		} else {
-			add_action( 'wp_footer', [ $this, 'add_public_root' ] );
-		}
+
+		// wp_body_open puts the banner root at the top of the body, which is
+		// better for accessibility. function_exists() only proves WordPress
+		// supports the hook, not that the running template calls it - a plugin
+		// owning a post type's template may not - so register both and let the
+		// footer pass no-op once the root is out.
+		add_action( 'wp_body_open', [ $this, 'add_public_root' ], 1 );
+		add_action( 'wp_footer', [ $this, 'add_public_root' ] );
 	}
 
 	/**
-	 * Add public root div to footer.
+	 * Print the banner mount point, once per request.
 	 *
 	 * @since 0.0.1
 	 * @return void
 	 */
 	public function add_public_root(): void {
-		echo '<div id="surecookie-public-root"></div>';
-	}
-
-	/**
-	 * Load the public banner stylesheet without blocking render.
-	 *
-	 * The consent banner is mounted client-side by the deferred public bundle into an
-	 * initially empty root ( see add_public_root() ), so its stylesheet is never required
-	 * for first paint. Serving it with media="print" and swapping to media="all" once it
-	 * finishes keeps the request off the critical path while it still downloads at page
-	 * start. Keyed on the handle, so both style.css and its RTL twin are covered, with a
-	 * noscript fallback so the banner stays styled when JavaScript is unavailable.
-	 *
-	 * @since 1.2.3
-	 *
-	 * @param string $tag    The full HTML link tag for the enqueued stylesheet.
-	 * @param string $handle The stylesheet's registered handle.
-	 * @param string $href   The stylesheet source URL.
-	 * @return string The original tag, or the non-render-blocking variant for our handle.
-	 */
-	public function async_public_style( string $tag, string $handle, string $href ): string {
-		if ( $handle !== 'surecookie-public' ) {
-			return $tag;
+		if ( $this->root_printed ) {
+			return;
 		}
 
-		return sprintf(
-			'<link rel="stylesheet" id="%1$s-css" href="%2$s" media="print" onload="this.media=\'all\';this.onload=null;" />' . "\n" .
-			'<noscript><link rel="stylesheet" href="%2$s" media="all" /></noscript>' . "\n",
-			esc_attr( $handle ),
-			esc_url( $href )
-		);
+		$this->root_printed = true;
+
+		echo '<div id="surecookie-public-root"></div>';
 	}
 
 	/**
@@ -106,6 +87,9 @@ class Frontend {
 		}
 		$assets_info = include $assets_file;
 
+		// Must stay a plain render-blocking link. A media="print" + onload swap reads as
+		// removable to cache plugins: WP Fastest Cache drops the tag entirely, leaving the
+		// banner unstyled.
 		wp_enqueue_style(
 			'surecookie-public',
 			SURECOOKIE_URL . 'assets/css/' . Get::shared_style_css(),

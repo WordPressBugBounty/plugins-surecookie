@@ -96,6 +96,11 @@ class ConsentLogs extends Base {
 	private const RATE_LIMIT_SHARDS = 64;
 
 	/**
+	 * Object-cache group for rate limit counters.
+	 */
+	private const RATE_LIMIT_CACHE_GROUP = 'surecookie_rate';
+
+	/**
 	 * Transient key prefix for fixed-window consent log rate limiting.
 	 */
 	private const RATE_LIMIT_TRANSIENT_PREFIX = 'surecookie_consent_rate_';
@@ -156,6 +161,22 @@ class ConsentLogs extends Base {
 						'required'          => false,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
+					],
+					'date_from'  => [
+						'required'          => false,
+						'type'              => 'string',
+						'format'            => 'date',
+						'description'       => __( 'Inclusive start of the log date range (Y-m-d).', 'surecookie' ),
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => [ $this, 'validate_date_param' ],
+					],
+					'date_to'    => [
+						'required'          => false,
+						'type'              => 'string',
+						'format'            => 'date',
+						'description'       => __( 'Inclusive end of the log date range (Y-m-d).', 'surecookie' ),
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => [ $this, 'validate_date_param' ],
 					],
 				],
 			]
@@ -419,6 +440,26 @@ class ConsentLogs extends Base {
 	}
 
 	/**
+	 * Validate an optional Y-m-d date parameter.
+	 *
+	 * Checked with a strict round-trip rather than strtotime(), which accepts
+	 * impossible dates like 2026-02-30 and silently rolls them into March.
+	 *
+	 * @param mixed $value Raw parameter value.
+	 * @since 1.4.0
+	 * @return bool
+	 */
+	public function validate_date_param( $value ): bool {
+		if ( ! is_string( $value ) || $value === '' ) {
+			return true;
+		}
+
+		$date = \DateTimeImmutable::createFromFormat( '!Y-m-d', $value );
+
+		return $date instanceof \DateTimeImmutable && $date->format( 'Y-m-d' ) === $value;
+	}
+
+	/**
 	 * Get admin settings
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
@@ -426,11 +467,25 @@ class ConsentLogs extends Base {
 	 * @return void
 	 */
 	public function get_consent_logs( $request ): void {
-		$limit   = max( 1, (int) ( $request->get_param( 'limit' ) ?? 10 ) );
-		$page    = max( 1, (int) ( $request->get_param( 'page' ) ?? 1 ) );
-		$search  = $request->get_param( 'search' ) ?? '';
-		$action  = $request->get_param( 'log_action' ) ?? '';
-		$country = $request->get_param( 'country' ) ?? '';
+		$limit     = max( 1, (int) ( $request->get_param( 'limit' ) ?? 10 ) );
+		$page      = max( 1, (int) ( $request->get_param( 'page' ) ?? 1 ) );
+		$search    = $request->get_param( 'search' ) ?? '';
+		$action    = $request->get_param( 'log_action' ) ?? '';
+		$country   = $request->get_param( 'country' ) ?? '';
+		$date_from = (string) ( $request->get_param( 'date_from' ) ?? '' );
+		$date_to   = (string) ( $request->get_param( 'date_to' ) ?? '' );
+
+		// An inverted range would silently return nothing, which reads as data loss.
+		if ( $date_from !== '' && $date_to !== '' && $date_from > $date_to ) {
+			SendJson::error(
+				[
+					'message' => __( 'The start date cannot be later than the end date.', 'surecookie' ),
+					'code'    => 'invalid_date_range',
+				],
+				400
+			);
+			return;
+		}
 
 		// IP addresses are anonymized before storage (last octet zeroed for IPv4).
 		// If the search term is a valid IP, anonymize it so it matches the stored value.
@@ -440,8 +495,8 @@ class ConsentLogs extends Base {
 
 		$offset = ( $page - 1 ) * $limit;
 
-		$logs   = DBConsentLog::get_filtered( $search, $action, $country, $limit, $offset );
-		$counts = DBConsentLog::count_all_actions( $search, $country, $action );
+		$logs   = DBConsentLog::get_filtered( $search, $action, $country, $limit, $offset, $date_from, $date_to );
+		$counts = DBConsentLog::count_all_actions( $search, $country, $action, $date_from, $date_to );
 
 		SendJson::success(
 			[
@@ -970,10 +1025,10 @@ class ConsentLogs extends Base {
 	/**
 	 * Check and increment per-IP consent log submission counters.
 	 *
-	 * Fixed-window + 64-shard transient strategy: bounds wp_options row count
-	 * (≤128 active rows across two overlapping windows) regardless of IP cardinality.
-	 * Race note: get/set is non-atomic so concurrent bursts may exceed the limit
-	 * by a handful of requests - acceptable for an abuse-prevention control.
+	 * An external object cache gives a real atomic INCR, so a parallel burst cannot
+	 * lost-update the counter. The transient fallback keeps the 64-shard packing -
+	 * every visitor hits this endpoint, so one key per IP would grow wp_options
+	 * without bound - and stays non-atomic, overshooting a burst by roughly its width.
 	 *
 	 * @param string $raw_ip           Client IP address.
 	 * @param string $transient_prefix Rate-limit pool (transient key prefix).
@@ -983,6 +1038,23 @@ class ConsentLogs extends Base {
 	private function is_rate_limited( string $raw_ip, string $transient_prefix = self::RATE_LIMIT_TRANSIENT_PREFIX ): bool {
 		$ip_hash      = wp_hash( $raw_ip );
 		$window_index = (int) floor( time() / self::RATE_LIMIT_WINDOW_SECONDS );
+		// Keep buckets briefly past the window edge to avoid boundary races between
+		// near-simultaneous requests that straddle expiration.
+		$ttl = self::RATE_LIMIT_WINDOW_SECONDS + MINUTE_IN_SECONDS;
+
+		if ( wp_using_ext_object_cache() ) {
+			$key = $transient_prefix . $window_index . '_' . $ip_hash;
+
+			// add() is atomic set-if-absent, so two requests racing to seed a window
+			// cannot both write 1 and lose a count the way incr-then-set would.
+			// phpcs:ignore WordPressVIPMinimum.Performance.LowExpiryCacheTime.CacheTimeUndetermined -- $ttl is 360s, above the 300s floor; the sniff can't resolve the constants.
+			if ( wp_cache_add( $key, 1, self::RATE_LIMIT_CACHE_GROUP, $ttl ) ) {
+				return false; // First request in this window.
+			}
+
+			return (int) wp_cache_incr( $key, 1, self::RATE_LIMIT_CACHE_GROUP ) > self::RATE_LIMIT_MAX_ATTEMPTS;
+		}
+
 		// crc32() can return signed ints; cast via unsigned string for stable,
 		// non-negative shard assignment across 32-bit/64-bit PHP runtimes.
 		$shard       = (int) ( sprintf( '%u', crc32( $ip_hash ) ) % self::RATE_LIMIT_SHARDS );
@@ -996,9 +1068,7 @@ class ConsentLogs extends Base {
 		}
 
 		$window_data[ $ip_hash ] = $attempts + 1;
-		// Keep bucket briefly past the window edge to avoid boundary races between
-		// near-simultaneous requests that straddle expiration.
-		set_transient( $transient, $window_data, self::RATE_LIMIT_WINDOW_SECONDS + MINUTE_IN_SECONDS );
+		set_transient( $transient, $window_data, $ttl );
 
 		return false;
 	}

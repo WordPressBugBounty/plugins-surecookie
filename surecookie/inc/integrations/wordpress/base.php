@@ -75,13 +75,23 @@ abstract class Base {
 				'meta'                => [
 					'show_in_rest' => $this->show_in_rest(),
 					'annotations'  => $this->get_annotations(),
-					'mcp'          => [
-						'public' => true,
-						'type'   => 'tool',
-					],
+					'mcp'          => $this->get_mcp_meta(),
 				],
 			]
 		);
+	}
+
+	/**
+	 * Public accessor for the ability name.
+	 *
+	 * The name getter is protected, but the registrar needs the name before the
+	 * ability registers so it can be offered to the enable filter.
+	 *
+	 * @return string
+	 * @since 1.4.0
+	 */
+	public function get_ability_name(): string {
+		return $this->get_name();
 	}
 
 	/**
@@ -172,5 +182,21 @@ abstract class Base {
 	 */
 	protected function show_in_rest(): bool {
 		return true;
+	}
+
+	/**
+	 * Get the MCP meta for this ability.
+	 *
+	 * Defaults to a public MCP tool. Override to hide an ability from MCP while
+	 * keeping it on REST, or to expose it as a resource rather than a tool.
+	 *
+	 * @return array{public: bool, type: string}
+	 * @since 1.4.0
+	 */
+	protected function get_mcp_meta(): array {
+		return [
+			'public' => apply_filters( 'surecookie_wordpress_abilities_public_listing', true ),
+			'type'   => 'tool',
+		];
 	}
 }

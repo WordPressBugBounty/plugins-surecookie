@@ -221,23 +221,40 @@ class Declared_Cookies {
 
 		$matched_services = $matcher->match_services( array_keys( $catalog ), $urls );
 
-		// Do not re-declare a service the admin explicitly removed from the Known
-		// Services library until they add it back (suppression sticks).
-		$installed        = Installed_Services::get_instance();
-		$matched_services = array_values(
-			array_filter(
-				$matched_services,
-				static fn( string $slug ): bool => ! $installed->is_suppressed( $slug )
-			)
-		);
-		if ( empty( $matched_services ) ) {
+		return $this->build_for_services( $matched_services );
+	}
+
+	/**
+	 * Declared cookies (grouped by category) for a set of catalog services.
+	 *
+	 * Split out from build_from_pages() because a service can be known to be
+	 * present without a scan having seen it: the blocker matches it at render
+	 * time, and by then the resource has been replaced with a placeholder that
+	 * carries no URL for any scan to collect.
+	 *
+	 * @param array<int, string> $services Catalog service slugs.
+	 * @since x.x.x
+	 * @return array<string, array<int, array<string, mixed>>> Declared cookies grouped by category id.
+	 */
+	public function build_for_services( array $services ): array {
+		$catalog = $this->get_catalog();
+		if ( empty( $catalog ) || empty( $services ) ) {
 			return [];
 		}
 
+		$installed           = Installed_Services::get_instance();
 		$valid_categories    = Get::default_cookie_categories_keys();
 		$cookies_by_category = [];
 
-		foreach ( $matched_services as $service ) {
+		foreach ( $services as $service ) {
+			$service = (string) $service;
+
+			// Suppression sticks: never re-declare a service the admin removed
+			// from the Known Services library until they add it back.
+			if ( ! isset( $catalog[ $service ] ) || $installed->is_suppressed( $service ) ) {
+				continue;
+			}
+
 			foreach ( $catalog[ $service ] as $definition ) {
 				if ( ! is_array( $definition ) || empty( $definition['name'] ) ) {
 					continue;

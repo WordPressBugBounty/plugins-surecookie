@@ -41,9 +41,15 @@ class CookieCategoryService {
 	public const DEFAULT_TARGET_CATEGORY = 'uncategorized';
 
 	/**
-	 * Get all cookie categories.
+	 * Get all cookie categories, with the per-category usage tally alongside them.
 	 *
-	 * @return array{success: bool, message: string, categories: array<string, mixed>, count: int}
+	 * `usage` and `in_use` are siblings rather than fields on each record, because
+	 * the category shape `{ id, name, description, required }` is assumed verbatim
+	 * by the consent-API map, the services resolver and the policy shortcode.
+	 * Categories are NEVER filtered out of this response: the admin must be able to
+	 * see and edit a category that visitors currently cannot see.
+	 *
+	 * @return array{success: bool, message: string, categories: array<string, mixed>, count: int, usage: array<string, array{cookies: int, scripts: int, services: int}>, in_use: array<int, string>}
 	 * @since 0.0.0-alpha.1
 	 */
 	public function get_categories(): array {
@@ -54,7 +60,49 @@ class CookieCategoryService {
 			'message'    => __( 'Cookie categories retrieved successfully.', 'surecookie' ),
 			'categories' => $categories,
 			'count'      => is_array( $categories ) ? count( $categories ) : 0,
+			'usage'      => Get::category_usage_map(),
+			'in_use'     => Get::categories_in_use(),
 		];
+	}
+
+	/**
+	 * Whether another category already carries this name.
+	 *
+	 * The id is a fresh UUID so it can never collide; the name is what the admin
+	 * sees, and duplicates split their cookies between identical-looking rows.
+	 *
+	 * @param array<string, mixed> $categories Existing categories keyed by id.
+	 * @param string               $name       Sanitized candidate name.
+	 * @param string               $ignore_id  Category being renamed, so it keeps its own name.
+	 * @since x.x.x
+	 * @return bool
+	 */
+	private function name_taken( array $categories, string $name, string $ignore_id = '' ): bool {
+		$needle = $this->fold( $name );
+
+		foreach ( $categories as $id => $category ) {
+			if ( (string) $id === $ignore_id || ! is_array( $category ) ) {
+				continue;
+			}
+
+			if ( $this->fold( (string) ( $category['name'] ?? '' ) ) === $needle ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Normalise a name for comparison. Trimmed here, not left to the sanitizer.
+	 *
+	 * @param string $value Name to fold.
+	 * @since x.x.x
+	 * @return string
+	 */
+	private function fold( string $value ): string {
+		$value = trim( $value );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
 	}
 
 	/**
@@ -76,16 +124,17 @@ class CookieCategoryService {
 			];
 		}
 
-		$categories  = Settings::get( 'cookie_categories' );
-		$category_id = Get::unique_id( 'category_' );
+		$categories = Settings::get( 'cookie_categories' );
+		$categories = is_array( $categories ) ? $categories : [];
 
-		// Check if category already exists in the associative array.
-		if ( isset( $categories[ $category_id ] ) ) {
+		if ( $this->name_taken( $categories, $name ) ) {
 			return [
 				'success' => false,
 				'message' => __( 'A category with this name already exists.', 'surecookie' ),
 			];
 		}
+
+		$category_id = Get::unique_id( 'category_' );
 
 		$new_category = [
 			'id'          => $category_id,
@@ -143,7 +192,18 @@ class CookieCategoryService {
 
 		// Update fields if provided.
 		if ( isset( $data['name'] ) && is_string( $data['name'] ) ) {
-			$category['name'] = sanitize_text_field( $data['name'] );
+			$name = sanitize_text_field( $data['name'] );
+
+			// Guard a real rename only, so an install already holding duplicates
+			// can still edit either one.
+			if ( $name !== (string) ( $category['name'] ?? '' ) && $this->name_taken( $categories, $name, $category_id ) ) {
+				return [
+					'success' => false,
+					'message' => __( 'A category with this name already exists.', 'surecookie' ),
+				];
+			}
+
+			$category['name'] = $name;
 		}
 
 		if ( isset( $data['description'] ) && is_string( $data['description'] ) ) {

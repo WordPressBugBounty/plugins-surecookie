@@ -14,7 +14,7 @@
 namespace SureCookie\Inc\Modules\Services;
 
 use SureCookie\Inc\API\Base;
-use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Services\KnownServicesService;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -131,28 +131,20 @@ class Api extends Base {
 	 * @return WP_REST_Response
 	 */
 	public function install_service( $request ): WP_REST_Response {
-		$slug    = (string) $request->get_param( 'slug' );
-		$catalog = Services_Source::get_instance()->get_catalog();
+		$slug = (string) $request->get_param( 'slug' );
 
-		if ( ! isset( $catalog[ $slug ] ) ) {
+		// Shared with the known-services ability so the Pro gate has one
+		// definition and cannot be bypassed through the other path.
+		$blocked = ( new KnownServicesService() )->check_installable( $slug );
+
+		if ( $blocked !== null ) {
 			return new WP_REST_Response(
 				[
 					'success' => false,
-					'code'    => 'unknown_service',
-					'message' => __( 'Unknown service.', 'surecookie' ),
+					'code'    => $blocked['code'],
+					'message' => $blocked['message'],
 				],
-				404
-			);
-		}
-
-		if ( ! empty( $catalog[ $slug ]['pro'] ) && ! Helper::is_pro_active() ) {
-			return new WP_REST_Response(
-				[
-					'success' => false,
-					'code'    => 'pro_required',
-					'message' => __( 'This is a Pro service. Upgrade to add it.', 'surecookie' ),
-				],
-				403
+				$blocked['code'] === 'unknown_service' ? 404 : 403
 			);
 		}
 

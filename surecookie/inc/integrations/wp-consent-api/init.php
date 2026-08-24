@@ -34,7 +34,7 @@ class Init {
 	 */
 	private function __construct() {
 		// Only initialize if WP Consent API plugin is active.
-		if ( ! $this->is_wp_consent_api_active() ) {
+		if ( ! self::is_wp_consent_api_active() ) {
 			return;
 		}
 
@@ -87,7 +87,7 @@ class Init {
 	 * @return bool True if WP Consent API functions are available.
 	 * @since 0.0.1-beta.1
 	 */
-	private function is_wp_consent_api_active(): bool {
+	public static function is_wp_consent_api_active(): bool {
 		return class_exists( 'WP_Consent_API' );
 	}
 

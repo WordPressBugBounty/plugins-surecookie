@@ -166,6 +166,19 @@
         },
         "cookies": []
     },
+    "bootstrapcdn": {
+        "label": "BootstrapCDN",
+        "description": "Open-source library CDN for Bootstrap, Popper and Font Awesome.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "bootstrapcdn.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
     "braintree": {
         "label": "Braintree",
         "description": "PayPal-owned payment processing.",
@@ -210,8 +223,8 @@
     },
     "bunny-cdn": {
         "label": "Bunny CDN",
-        "description": "Delivers site assets and hosted video streams.",
-        "category": "functional",
+        "description": "Delivers site assets.",
+        "category": "essential",
         "pro": true,
         "patterns": {
             "scripts": [
@@ -291,6 +304,20 @@
             "scripts": [
                 "cm.g.doubleclick.net",
                 "campaignmanager.google.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "cdn77": {
+        "label": "CDN77",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "cdn77.org",
+                "cdn77-ssl.net"
             ],
             "iframes": []
         },
@@ -594,6 +621,19 @@
         "patterns": {
             "scripts": [
                 "js.driftt.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "ewww-easy-io": {
+        "label": "EWWW Easy IO",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "exactdn.com"
             ],
             "iframes": []
         },
@@ -1170,6 +1210,19 @@
         },
         "cookies": []
     },
+    "imagekit": {
+        "label": "ImageKit",
+        "description": "Delivers the site's own media and assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "ik.imagekit.io"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
     "impact": {
         "label": "impact.com",
         "description": "Partnership and affiliate tracking.",
@@ -1236,6 +1289,19 @@
             "scripts": [
                 "widget.intercom.io",
                 "js.intercomcdn.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "jetpack-site-accelerator": {
+        "label": "Jetpack Site Accelerator",
+        "description": "Delivers WordPress core, theme and plugin assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "c0.wp.com"
             ],
             "iframes": []
         },
@@ -1322,6 +1388,19 @@
             "iframes": [
                 "content.jwplatform.com"
             ]
+        },
+        "cookies": []
+    },
+    "kinsta-cdn": {
+        "label": "Kinsta CDN",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "kinstacdn.com"
+            ],
+            "iframes": []
         },
         "cookies": []
     },
@@ -1666,6 +1745,19 @@
         },
         "cookies": []
     },
+    "nitropack": {
+        "label": "NitroPack",
+        "description": "Delivers optimized site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "nitrocdn.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
     "olark": {
         "label": "Olark",
         "description": "Live chat support widget.",
@@ -1739,6 +1831,19 @@
         "patterns": {
             "scripts": [
                 "cdn.optimizely.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "optimole": {
+        "label": "Optimole",
+        "description": "Delivers the site's own images and assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "i.optimole.com"
             ],
             "iframes": []
         },
@@ -2006,6 +2111,19 @@
         },
         "cookies": []
     },
+    "rocketcdn": {
+        "label": "RocketCDN",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "rocketcdn.me"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
     "rudderstack": {
         "label": "RudderStack",
         "description": "Customer data pipeline.",
@@ -2070,6 +2188,19 @@
                 "platform-api.sharethis.com",
                 "s.sharethis.com",
                 "sharethis.com/js"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "shortpixel": {
+        "label": "ShortPixel Adaptive Images",
+        "description": "Delivers the site's own images and assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "cdn.shortpixel.ai"
             ],
             "iframes": []
         },
@@ -2233,6 +2364,22 @@
         },
         "cookies": []
     },
+    "stackpath-cdn": {
+        "label": "StackPath CDN (MaxCDN)",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "stackpathcdn.com",
+                "stackpathdns.com",
+                "netdna-cdn.com",
+                "netdna-ssl.com"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
     "statcounter": {
         "label": "StatCounter",
         "description": "Website visitor statistics.",
@@ -2241,6 +2388,19 @@
         "patterns": {
             "scripts": [
                 "statcounter.com/counter"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "statically": {
+        "label": "Statically",
+        "description": "Delivers site assets.",
+        "category": "essential",
+        "pro": true,
+        "patterns": {
+            "scripts": [
+                "cdn.statically.io"
             ],
             "iframes": []
         },

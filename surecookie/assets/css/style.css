@@ -231,6 +231,14 @@
 	--surecookie-z-modal: 2147483647;
 }
 
+/* Admin preview: the values above outrank every drawer, so stay below Force
+   UI's z-50 drawer context. */
+#surecookie-public-root.surecookie-preview-admin {
+	--surecookie-z-overlay: 20;
+	--surecookie-z-banner: 30;
+	--surecookie-z-modal: 40;
+}
+
 /* Full-screen dim behind the banner (opt-in). Sits just below the banner so
    the banner stays interactive while the rest of the page is blocked. */
 #surecookie-public-root .surecookie-banner-overlay {
@@ -391,6 +399,10 @@
 	margin: 0;
 	line-height: 1.6;
 	color: var(--surecookie-banner-text-color);
+}
+.surecookie-banner-description,
+.surecookie-modal-description {
+	overflow-wrap: anywhere;
 }
 .surecookie-banner-description p,
 .surecookie-modal-description p {
@@ -1202,6 +1214,20 @@
 	text-transform: none;
 	letter-spacing: normal;
 }
+/* Rich-text (Jodit) content inside the placeholder description. */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text p {
+	margin: 0;
+	color: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text p:not(:last-child) {
+	margin-bottom: 8px;
+}
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text a {
+	color: inherit;
+	text-decoration: underline;
+}
 /* When there is no Accept & Load button (e.g. quarantined trackers held by the
    Compliance Guard), the text is the last child - drop its bottom margin so the
    overlay content stays vertically centered. */
@@ -1233,6 +1259,42 @@
 .surecookie-placeholder.surecookie-placeholder button.surecookie-placeholder-button:focus {
 	outline: 2px solid var(--surecookie-banner-primary-color, #60a5fa);
 	outline-offset: 2px;
+}
+
+/* Optional preview image shown behind the overlay while consent is pending */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-image {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border: 0;
+	margin: 0;
+	padding: 0;
+	display: none;
+	z-index: 1;
+}
+.surecookie-placeholder.surecookie-pending .surecookie-placeholder-image {
+	display: block;
+}
+.surecookie-placeholder.surecookie-loaded .surecookie-placeholder-image {
+	display: none;
+}
+/* With an image, the overlay sits over a dark scrim instead of a solid card so
+   the image stays visible while keeping the text/button legible. */
+.surecookie-placeholder.surecookie-placeholder-has-image .surecookie-placeholder-content {
+	background-color: rgb(0 0 0 / 0.55);
+	box-shadow: none;
+	border-radius: 0;
+}
+/* The scrim is always dark, so light text over it. The blocker sets #fff inline
+   for the image case, so theme styles can't override; a text-shadow keeps it
+   readable over busy images. */
+.surecookie-placeholder.surecookie-placeholder-has-image .surecookie-placeholder-text,
+.surecookie-placeholder.surecookie-placeholder-has-image .surecookie-placeholder-text p,
+.surecookie-placeholder.surecookie-placeholder-has-image .surecookie-placeholder-text a {
+	color: #fff;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 0.7);
 }
 
 /* Responsive styles */

@@ -63,6 +63,68 @@ class Installed_Services {
 	}
 
 	/**
+	 * Sanitize an untrusted registry shape (settings import boundary): every
+	 * entry field validated by type, unknown fields dropped, malformed
+	 * entries removed. Mirrors the stored shape documented on this class.
+	 *
+	 * @param mixed $raw Untrusted registry value.
+	 * @since 1.4.0
+	 * @return array{installed: array<string, array<string, mixed>>, suppressed: array<int, string>}
+	 */
+	public static function sanitize_registry( $raw ): array {
+		$raw       = is_array( $raw ) ? $raw : [];
+		$installed = [];
+
+		$entries = isset( $raw['installed'] ) && is_array( $raw['installed'] ) ? $raw['installed'] : [];
+		foreach ( $entries as $slug => $entry ) {
+			$slug = sanitize_key( (string) $slug );
+			if ( $slug === '' || ! is_array( $entry ) ) {
+				continue;
+			}
+
+			$cookie_ids = isset( $entry['cookie_ids'] ) && is_array( $entry['cookie_ids'] ) ? $entry['cookie_ids'] : [];
+			$cookie_ids = array_values(
+				array_filter(
+					array_map(
+						static function ( $id ): string {
+							return is_string( $id ) ? sanitize_text_field( $id ) : '';
+						},
+						$cookie_ids
+					)
+				)
+			);
+
+			$installed[ $slug ] = [
+				'slug'       => $slug,
+				'label'      => isset( $entry['label'] ) && is_string( $entry['label'] ) ? sanitize_text_field( $entry['label'] ) : $slug,
+				'category'   => isset( $entry['category'] ) && is_string( $entry['category'] ) ? sanitize_key( $entry['category'] ) : '',
+				'added_at'   => isset( $entry['added_at'] ) ? absint( $entry['added_at'] ) : 0,
+				'version'    => isset( $entry['version'] ) && is_string( $entry['version'] ) ? sanitize_text_field( $entry['version'] ) : '',
+				'cookie_ids' => $cookie_ids,
+			];
+		}
+
+		$suppressed = isset( $raw['suppressed'] ) && is_array( $raw['suppressed'] ) ? $raw['suppressed'] : [];
+		$suppressed = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static function ( $slug ): string {
+							return is_string( $slug ) ? sanitize_key( $slug ) : '';
+						},
+						$suppressed
+					)
+				)
+			)
+		);
+
+		return [
+			'installed'  => $installed,
+			'suppressed' => $suppressed,
+		];
+	}
+
+	/**
 	 * The installed-service entries, keyed by slug.
 	 *
 	 * @since 1.3.0

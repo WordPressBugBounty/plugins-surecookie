@@ -11,7 +11,6 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
-use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,13 +35,6 @@ class Scan_Scripts {
 	private static ?array $cached_resources = null;
 
 	/**
-	 * Cached excluded domains list (avoids repeated DB reads on every script/iframe).
-	 *
-	 * @var array<int, string>|null
-	 */
-	private static ?array $cached_excluded = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.0-alpha.2
@@ -53,8 +45,8 @@ class Scan_Scripts {
 		// Skip blocking for scripts/iframes whose src matches an excluded domain.
 		// Kind-specific callbacks so a "script"-scoped exclusion never skips an
 		// iframe on the same host, and vice versa.
-		add_filter( 'surecookie_skip_script', [ $this, 'should_skip_excluded_script' ], 10, 2 );
-		add_filter( 'surecookie_skip_iframe', [ $this, 'should_skip_excluded_iframe' ], 10, 2 );
+		add_filter( 'surecookie_skip_script', [ $this, 'should_skip_excluded_script' ], 10, 5 );
+		add_filter( 'surecookie_skip_iframe', [ $this, 'should_skip_excluded_iframe' ], 10, 5 );
 	}
 
 	/**
@@ -71,19 +63,17 @@ class Scan_Scripts {
 			return $scripts;
 		}
 
-		$excluded_domains = $this->get_excluded_domains();
-
 		// Build a flat list of all existing patterns to avoid duplicates.
 		$existing_patterns = $this->build_existing_pattern_index( $scripts );
 
 		// Merge scan-detected scripts.
 		foreach ( $resources['scripts'] ?? [] as $resource ) {
-			$this->merge_resource( $scripts, $resource, 'scripts', $excluded_domains, $existing_patterns );
+			$this->merge_resource( $scripts, $resource, 'scripts', $existing_patterns );
 		}
 
 		// Merge scan-detected iframes.
 		foreach ( $resources['iframes'] ?? [] as $resource ) {
-			$this->merge_resource( $scripts, $resource, 'iframes', $excluded_domains, $existing_patterns );
+			$this->merge_resource( $scripts, $resource, 'iframes', $existing_patterns );
 		}
 
 		return $scripts;
@@ -97,7 +87,7 @@ class Scan_Scripts {
 	 */
 	public static function clear_cache(): void {
 		self::$cached_resources = null;
-		self::$cached_excluded  = null;
+		Resource_Categories::clear_cache();
 	}
 
 	/**
@@ -105,12 +95,15 @@ class Scan_Scripts {
 	 * script-scoped (or legacy bare-domain) exclusion.
 	 *
 	 * @since 1.3.0
-	 * @param bool   $skip Whether the resource is already marked to skip.
-	 * @param string $src  The script src.
+	 * @param bool   $skip     Whether the resource is already marked to skip.
+	 * @param string $src      The script src.
+	 * @param string $name     Matched service key.
+	 * @param string $category Matched service category.
+	 * @param string $pattern  Pattern that matched, for resources with no src.
 	 * @return bool
 	 */
-	public function should_skip_excluded_script( bool $skip, string $src ): bool {
-		return $this->should_skip_excluded_resource( $skip, $src, 'script' );
+	public function should_skip_excluded_script( bool $skip, string $src, string $name = '', string $category = '', string $pattern = '' ): bool {
+		return $this->should_skip_excluded_resource( $skip, $src, 'script', $pattern );
 	}
 
 	/**
@@ -118,12 +111,15 @@ class Scan_Scripts {
 	 * iframe-scoped (or legacy bare-domain) exclusion.
 	 *
 	 * @since 1.3.0
-	 * @param bool   $skip Whether the resource is already marked to skip.
-	 * @param string $src  The iframe src.
+	 * @param bool   $skip     Whether the resource is already marked to skip.
+	 * @param string $src      The iframe src.
+	 * @param string $name     Matched service key.
+	 * @param string $category Matched service category.
+	 * @param string $pattern  Pattern that matched, for resources with no src.
 	 * @return bool
 	 */
-	public function should_skip_excluded_iframe( bool $skip, string $src ): bool {
-		return $this->should_skip_excluded_resource( $skip, $src, 'iframe' );
+	public function should_skip_excluded_iframe( bool $skip, string $src, string $name = '', string $category = '', string $pattern = '' ): bool {
+		return $this->should_skip_excluded_resource( $skip, $src, 'iframe', $pattern );
 	}
 
 	/**
@@ -134,67 +130,18 @@ class Scan_Scripts {
 	 * toggle on a script does not also unblock the iframe on the same host.
 	 *
 	 * @since 0.0.0-alpha.2
-	 * @param bool   $skip Whether the resource is already marked to skip.
-	 * @param string $src  The resource URL (script src or iframe src).
-	 * @param string $kind Resource kind ('script'|'iframe').
+	 * @param bool   $skip    Whether the resource is already marked to skip.
+	 * @param string $src     The resource URL (script src or iframe src).
+	 * @param string $kind    Resource kind ('script'|'iframe').
+	 * @param string $pattern Pattern that matched, for resources with no src.
 	 * @return bool
 	 */
-	public function should_skip_excluded_resource( bool $skip, string $src, string $kind = 'any' ): bool {
-		if ( $skip || empty( $src ) ) {
+	public function should_skip_excluded_resource( bool $skip, string $src, string $kind = 'any', string $pattern = '' ): bool {
+		if ( $skip ) {
 			return $skip;
 		}
 
-		foreach ( $this->get_excluded_domains_cached() as $entry ) {
-			[ $entry_kind, $domain ] = $this->parse_scoped_key( (string) $entry );
-			if ( $domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
-				continue;
-			}
-			if ( strpos( $src, $domain ) !== false ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Whether a scan-detected domain of a given kind is excluded from blocking.
-	 *
-	 * @param string             $domain   Scan-detected resource domain.
-	 * @param string             $kind     Resource kind ('script'|'iframe').
-	 * @param array<int, string> $excluded Excluded entries (scoped or legacy).
-	 * @since 1.3.0
-	 * @return bool
-	 */
-	private function is_domain_excluded( string $domain, string $kind, array $excluded ): bool {
-		foreach ( $excluded as $entry ) {
-			[ $entry_kind, $entry_domain ] = $this->parse_scoped_key( (string) $entry );
-			if ( $entry_domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
-				continue;
-			}
-			if ( $entry_domain === $domain ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Split a scoped exclusion entry into [ kind, domain ]. "script::host" /
-	 * "iframe::host" scope to a kind; a bare "host" is legacy and applies to
-	 * any kind. Mirrors Blocker::parse_scoped_key (shared key format).
-	 *
-	 * @param string $key Stored entry.
-	 * @since 1.3.0
-	 * @return array{0: string, 1: string} [ kind, domain ].
-	 */
-	private function parse_scoped_key( string $key ): array {
-		$key = trim( $key );
-		$pos = strpos( $key, '::' );
-		if ( $pos === false ) {
-			return [ 'any', $key ];
-		}
-		return [ substr( $key, 0, $pos ), substr( $key, $pos + 2 ) ];
+		return Resource_Categories::matches_excluded_any( [ $src, $pattern ], $kind );
 	}
 
 	/**
@@ -203,12 +150,11 @@ class Scan_Scripts {
 	 * @param array<mixed>         $scripts          Known scripts (by reference).
 	 * @param array<string, mixed> $resource         Scan-detected resource.
 	 * @param string               $type             Resource type ('scripts' or 'iframes').
-	 * @param array<int, string>   $excluded_domains Domains excluded from blocking.
 	 * @param array<string, bool>  $existing_patterns  Index of existing patterns.
 	 * @since 0.0.0-alpha.2
 	 * @return void
 	 */
-	private function merge_resource( array &$scripts, array $resource, string $type, array $excluded_domains, array $existing_patterns ): void {
+	private function merge_resource( array &$scripts, array $resource, string $type, array $existing_patterns ): void {
 		$domain   = $resource['domain'] ?? '';
 		$category = $resource['category'] ?? 'marketing';
 
@@ -219,7 +165,7 @@ class Scan_Scripts {
 		// Skip if excluded by admin. Kind-scoped: a script exclusion does not
 		// stop the iframe on the same host from being blocked, and vice versa.
 		$kind = $type === 'iframes' ? 'iframe' : 'script';
-		if ( $this->is_domain_excluded( (string) $domain, $kind, $excluded_domains ) ) {
+		if ( Resource_Categories::is_excluded_domain( (string) $domain, $kind ) ) {
 			return;
 		}
 
@@ -279,21 +225,6 @@ class Scan_Scripts {
 	}
 
 	/**
-	 * Get excluded domains with static cache (called once per page load, then reused).
-	 *
-	 * @since 0.0.0-alpha.2
-	 * @return array<int, string>
-	 */
-	private function get_excluded_domains_cached(): array {
-		if ( self::$cached_excluded !== null ) {
-			return self::$cached_excluded;
-		}
-
-		self::$cached_excluded = $this->get_excluded_domains();
-		return self::$cached_excluded;
-	}
-
-	/**
 	 * Get scanned resources from the database (with static cache).
 	 *
 	 * @since 0.0.0-alpha.2
@@ -315,19 +246,4 @@ class Scan_Scripts {
 		return self::$cached_resources;
 	}
 
-	/**
-	 * Get domains excluded from scan-based blocking.
-	 *
-	 * @since 0.0.0-alpha.2
-	 * @return array<int, string>
-	 */
-	private function get_excluded_domains(): array {
-		$excluded = Settings::get( 'excluded_scan_resources' );
-
-		if ( ! is_array( $excluded ) ) {
-			return [];
-		}
-
-		return $excluded;
-	}
 }

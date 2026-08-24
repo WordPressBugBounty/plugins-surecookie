@@ -12,6 +12,7 @@ namespace SureCookie\Inc\Modules\GoogleConsentMode;
 
 use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -90,7 +91,7 @@ class Consent_Handler {
 	 */
 	public function inject_consent_script( $buffer ): string {
 		// Check for conflicts before injecting.
-		if ( $this->has_consent_mode_conflict() ) {
+		if ( self::has_consent_mode_conflict() ) {
 			return $buffer;
 		}
 
@@ -149,10 +150,32 @@ class Consent_Handler {
 		if ( ! Settings::get( 'gcm_enabled' ) ) {
 			return;
 		}
-		if ( ! $this->has_consent_mode_conflict() ) {
+		if ( ! self::has_consent_mode_conflict() ) {
 			return;
 		}
 		$this->show_site_kit_conflict_notice();
+	}
+
+	/**
+	 * Check for Google Consent Mode conflicts with other plugins.
+	 *
+	 * Critical Fix #10: Google Site Kit conflict detection.
+	 *
+	 * @return bool True if conflict detected.
+	 * @since 0.0.0-alpha.1
+	 */
+	public static function has_consent_mode_conflict(): bool {
+		// Pure detection (no side effects): Site Kit present AND its Consent Mode
+		// enabled. Callers act on the result - the frontend skips injecting our
+		// script; the admin conflict notice is wired separately in the constructor
+		// (previously an add_action here, which never fired since this only runs
+		// during frontend output buffering).
+		if ( class_exists( 'Google\Site_Kit\Core\Consent_Mode\Consent_Mode' ) ) {
+			$sitekit_options = get_option( 'googlesitekit_consent_mode', [] );
+			return ! empty( $sitekit_options['enabled'] );
+		}
+
+		return false;
 	}
 
 	/**
@@ -180,7 +203,24 @@ class Consent_Handler {
 			'marketing'  => false,
 		];
 
-		if ( $gpc_enabled ) {
+		/*
+		 * A scan is measuring what this site sets, not consenting on anyone's
+		 * behalf, and it is checked before GPC because it is not a visitor at all.
+		 * Denying here is what made a Consent Mode site undetectable: the scanner
+		 * already stands the blocker down so the real tags run, then this told
+		 * them to store nothing, and the scan reported the resulting silence as
+		 * the site's cookie list.
+		 */
+		$is_scan = Blocking_Utils::is_scan_probe();
+
+		if ( $is_scan ) {
+			$preferences = [
+				'essential'  => true,
+				'functional' => true,
+				'analytics'  => true,
+				'marketing'  => true,
+			];
+		} elseif ( $gpc_enabled ) {
 			$preferences = $default_denied;
 		} elseif ( $cookie_preferences !== null ) {
 			$preferences = $cookie_preferences;
@@ -191,8 +231,10 @@ class Consent_Handler {
 		// Map to Google consent parameters.
 		$consent_state = $this->map_to_google_consent( $preferences );
 
-		// Get settings with validation.
-		$wait_time = $this->validate_wait_time( Settings::get( 'gcm_wait_for_update' ) );
+		// Get settings with validation. A scan waits for no update - the page is
+		// captured within a few seconds, and holding the tags for the configured
+		// delay is long enough to miss the cookies they were unblocked to set.
+		$wait_time = $is_scan ? 0 : $this->validate_wait_time( Settings::get( 'gcm_wait_for_update' ) );
 
 		// Add required parameters (Critical Fix #1 - wait_for_update).
 		$consent_state['wait_for_update'] = $wait_time;
@@ -244,6 +286,13 @@ class Consent_Handler {
 	private function generate_region_consent_defaults( bool $has_recorded_choice, $gpc_enabled, $wait_time, $json_flags ): string {
 		// If user already has consent or GPC is active, region defaults are not needed because the global default already reflects the correct state.
 		if ( $gpc_enabled || $has_recorded_choice ) {
+			return '';
+		}
+
+		// A region default overrides the global one for the regions it names, so
+		// emitting these would put the scanner straight back on denied wherever
+		// its egress IP happens to resolve.
+		if ( Blocking_Utils::is_scan_probe() ) {
 			return '';
 		}
 
@@ -421,28 +470,6 @@ class Consent_Handler {
 	private function validate_wait_time( $value ): int {
 		$int_value = absint( $value );
 		return min( max( $int_value, 0 ), 2000 ); // Clamp to 0-2000ms range.
-	}
-
-	/**
-	 * Check for Google Consent Mode conflicts with other plugins.
-	 *
-	 * Critical Fix #10: Google Site Kit conflict detection.
-	 *
-	 * @return bool True if conflict detected.
-	 * @since 0.0.0-alpha.1
-	 */
-	private function has_consent_mode_conflict(): bool {
-		// Pure detection (no side effects): Site Kit present AND its Consent Mode
-		// enabled. Callers act on the result - the frontend skips injecting our
-		// script; the admin conflict notice is wired separately in the constructor
-		// (previously an add_action here, which never fired since this only runs
-		// during frontend output buffering).
-		if ( class_exists( 'Google\Site_Kit\Core\Consent_Mode\Consent_Mode' ) ) {
-			$sitekit_options = get_option( 'googlesitekit_consent_mode', [] );
-			return ! empty( $sitekit_options['enabled'] );
-		}
-
-		return false;
 	}
 
 	/**

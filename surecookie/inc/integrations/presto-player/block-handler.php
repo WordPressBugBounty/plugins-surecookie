@@ -23,8 +23,12 @@
 
 namespace SureCookie\Inc\Integrations\PrestoPlayer;
 
+use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\ScriptBlocking\Matched_Resources;
+use SureCookie\Inc\Modules\ScriptBlocking\Resource_Categories;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils;
 use SureCookie\Inc\Traits\GetInstance;
+use SureCookie\Inc\Traits\PlaceholderContent;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -37,6 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Block_Handler {
 	use GetInstance;
+	use PlaceholderContent;
 
 	/**
 	 * Container blocks that render through `render_block` but build the player
@@ -80,6 +85,17 @@ class Block_Handler {
 			'category' => 'functional',
 			'label'    => 'Audio',
 		],
+	];
+
+	/**
+	 * Presto provider key => catalog service slug, where the two differ.
+	 *
+	 * Presto calls its Bunny Stream provider `bunny`; the catalog has no service
+	 * by that name, only `bunny-stream` (bunny-cdn and bunny-fonts are different
+	 * products). Anything absent here uses the provider key as the slug.
+	 */
+	private const CATALOG_SLUGS = [
+		'bunny' => 'bunny-stream',
 	];
 
 	/**
@@ -179,6 +195,22 @@ class Block_Handler {
 			return $block_content;
 		}
 
+		// PROVIDER_MAP is only a fallback. The catalog owns the category, so an
+		// admin recategorising a service is honoured here too - otherwise the same
+		// service can be functional in the catalog and marketing here, and no
+		// setting on any screen can reconcile the two.
+		$provider['category'] = $this->resolve_provider_category( $provider, $block_name, $attributes );
+
+		// The placeholder keeps only the service name and category, so the host is
+		// gone by the time anything else looks. Record it now or this video is
+		// invisible on every admin screen.
+		Matched_Resources::get_instance()->record(
+			'iframe',
+			$this->resolve_embed_src( $block_name, $attributes ),
+			self::CATALOG_SLUGS[ $provider['service'] ] ?? (string) $provider['service'],
+			(string) $provider['category']
+		);
+
 		/**
 		 * Filter: Allow bypassing Presto-block consent gating for a specific block.
 		 *
@@ -192,12 +224,18 @@ class Block_Handler {
 			return $block_content;
 		}
 
+		// An essential-category embed is never gated, matching the tag passes and
+		// the Elementor handler.
+		if ( $this->is_skippable_category( (string) $provider['category'] ) ) {
+			return $block_content;
+		}
+
 		// Always wrap server-side (cache-safe): the rendered HTML must not vary on
 		// the visitor's consent cookie, or a full-page cache warmed by a consented
 		// visitor would serve un-gated players to everyone. consentManager.js
 		// restores the block in place for visitors who have already consented - the
 		// same model the core script blocker uses for iframes/scripts.
-		return $this->build_placeholder( $provider, $attributes, $block_content );
+		return $this->build_placeholder( $provider, $attributes, $block_content, $block_name );
 	}
 
 	/**
@@ -208,16 +246,38 @@ class Block_Handler {
 	 * @param array{service: string, category: string, label: string} $provider      Resolved provider info.
 	 * @param array<string, mixed>                                    $attributes    Block attributes.
 	 * @param string                                                  $block_content Original rendered block.
+	 * @param string                                                  $block_name    Presto block name (for poster resolution).
 	 * @return string
 	 */
-	private function build_placeholder( array $provider, array $attributes, string $block_content ): string {
+	private function build_placeholder( array $provider, array $attributes, string $block_content, string $block_name ): string {
 		$service  = $provider['service'];
 		$category = $provider['category'];
 
 		$is_audio      = $service === 'audio';
 		$wrapper_style = $this->aspect_ratio_style( $is_audio, $attributes );
 
-		$out  = '<div class="surecookie-placeholder surecookie-placeholder-presto surecookie-placeholder-' . esc_attr( $service ) . '"';
+		// Resolve the placeholder image so Presto matches the custom placeholder:
+		// the block's own Presto poster wins, then the shared filter / global
+		// placeholder_image fallback. Audio blocks skip the image - the short bar
+		// would hard-crop a poster.
+		$poster = $is_audio ? '' : $this->resolve_poster( $block_name, $attributes );
+		// Pass the block's embed src so a YouTube-sourced block WITHOUT a
+		// poster can still derive that video's own thumbnail (opt-in via
+		// placeholder_video_thumbnails, same as core-blocked iframes).
+		$src   = $is_audio ? '' : $this->resolve_embed_src( $block_name, $attributes );
+		$image = $is_audio
+			? ''
+			: ( $poster !== '' ? $poster : $this->resolve_placeholder_image( $service, $category, $src ) );
+
+		// Banner root classes (surecookie-styles + surecookie-public-banner-wrapper)
+		// so the placeholder inherits the banner's reset and is insulated from the
+		// active theme, exactly like the consent banner.
+		$wrapper_class = 'surecookie-styles surecookie-public-banner-wrapper surecookie-placeholder surecookie-placeholder-presto surecookie-placeholder-' . $service;
+		if ( $image !== '' ) {
+			$wrapper_class .= ' surecookie-placeholder-has-image';
+		}
+
+		$out  = '<div class="' . esc_attr( $wrapper_class ) . '"';
 		$out .= ' data-surecookie-name="' . esc_attr( $service ) . '"';
 		$out .= ' data-surecookie-category="' . esc_attr( $category ) . '"';
 		if ( $wrapper_style !== '' ) {
@@ -225,21 +285,9 @@ class Block_Handler {
 		}
 		$out .= '>';
 
-		$out .= '<div class="surecookie-placeholder-content">';
-		$out .= '<p class="surecookie-placeholder-text">';
-		$out .= esc_html( $this->placeholder_message( $provider['label'] ) );
-		$out .= '</p>';
-		// aria-label carries the provider name so multiple blocked embeds don't
-		// all expose the identical accessible name "Accept & Load".
-		$button_aria = sprintf(
-			/* translators: %s: Provider name (e.g., YouTube, Vimeo) */
-			__( 'Accept and load %s content', 'surecookie' ),
-			$provider['label']
-		);
-		$out .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $category ) . '" aria-label="' . esc_attr( $button_aria ) . '">';
-		$out .= esc_html__( 'Accept & Load', 'surecookie' );
-		$out .= '</button>';
-		$out .= '</div>';
+		// Presto keeps its own media-aware copy; everything else about the overlay
+		// is the shared one, so the two builders can't drift apart.
+		$out .= $this->render_placeholder_overlay( $category, $provider['label'], $image, $this->placeholder_text( $provider['label'] ) );
 
 		// Inert template - custom elements inside don't upgrade until cloned.
 		// consentManager.js clones the content into the placeholder's position
@@ -249,6 +297,114 @@ class Block_Handler {
 		$out .= '</div>';
 
 		return $out;
+	}
+
+	/**
+	 * Effective consent category for a Presto block.
+	 *
+	 * Catalog first, the hardcoded provider map as a fallback for services the
+	 * catalog does not carry (self-hosted video, audio, popups), then any admin
+	 * override keyed on the host the embed would have loaded from.
+	 *
+	 * @param array{service: string, category: string, label: string} $provider   Resolved provider.
+	 * @param string                                                  $block_name Presto block name.
+	 * @param array<string, mixed>                                    $attributes Block attributes.
+	 * @since x.x.x
+	 * @return string
+	 */
+	private function resolve_provider_category( array $provider, string $block_name, array $attributes ): string {
+		$service  = (string) $provider['service'];
+		$slug     = self::CATALOG_SLUGS[ $service ] ?? $service;
+		$catalog  = $this->resolve_catalog_service( $slug );
+		$category = $catalog['category'] ?? (string) $provider['category'];
+
+		$src = $this->resolve_embed_src( $block_name, $attributes );
+
+		return $src === '' ? $category : Resource_Categories::resolve( $src, $category, 'iframe' );
+	}
+
+	/**
+	 * Resolve the Presto Player poster image for a block. Direct provider blocks
+	 * carry it as `attrs['poster']`; reusable / media-hub containers reference a
+	 * video post whose poster is read via Presto's own model. Returns '' when no
+	 * poster is available (falls through to the global placeholder image).
+	 *
+	 * @since 1.4.0
+	 * @param string               $block_name Presto block name.
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string Poster URL or ''.
+	 */
+	private function resolve_poster( string $block_name, array $attributes ): string {
+		if ( isset( $attributes['poster'] ) && is_string( $attributes['poster'] ) && $attributes['poster'] !== '' ) {
+			return esc_url_raw( $attributes['poster'] );
+		}
+
+		$containers = [ 'presto-player/reusable-display', 'presto-player/media-hub' ];
+		if (
+			in_array( $block_name, $containers, true )
+			&& isset( $attributes['id'] )
+			&& class_exists( '\PrestoPlayer\Models\ReusableVideo' )
+		) {
+			$poster = ( new \PrestoPlayer\Models\ReusableVideo( absint( $attributes['id'] ) ) )->getPosterFromBlock();
+			return is_string( $poster ) ? esc_url_raw( $poster ) : '';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Resolve the embed source URL for a block, mirroring resolve_poster:
+	 * direct provider blocks carry it as `attrs['src']`; reusable / media-hub
+	 * containers reference a video post whose inner block carries it. Used to
+	 * derive the video's own thumbnail when no poster is set.
+	 *
+	 * @since 1.4.0
+	 * @param string               $block_name Presto block name.
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string Embed URL or ''.
+	 */
+	private function resolve_embed_src( string $block_name, array $attributes ): string {
+		if ( isset( $attributes['src'] ) && is_string( $attributes['src'] ) && $attributes['src'] !== '' ) {
+			return $attributes['src'];
+		}
+
+		$containers = [ 'presto-player/reusable-display', 'presto-player/media-hub' ];
+		if (
+			in_array( $block_name, $containers, true )
+			&& isset( $attributes['id'] )
+			&& class_exists( '\PrestoPlayer\Models\ReusableVideo' )
+		) {
+			$block = ( new \PrestoPlayer\Models\ReusableVideo( absint( $attributes['id'] ) ) )->getBlock();
+			$src   = is_array( $block ) ? ( $block['attrs']['src'] ?? '' ) : '';
+			return is_string( $src ) ? $src : '';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Placeholder overlay text. A custom admin placeholder_description wins (with
+	 * `{service}` expansion via the shared trait); otherwise Presto's media-aware
+	 * default wording is used so generic "Video"/"Audio" labels read naturally.
+	 *
+	 * @since 1.4.0
+	 * @param string $label Provider label.
+	 * @return string
+	 */
+	private function placeholder_text( string $label ): string {
+		$custom   = (string) Settings::get( 'placeholder_description' );
+		$defaults = Settings::get_settings_defaults();
+		$default  = is_array( $defaults ) ? (string) ( $defaults['placeholder_description'] ?? '' ) : '';
+
+		// Honor the admin's description only when they've actually customized it
+		// (the setting ships with a non-empty default, so compare against it);
+		// otherwise keep Presto's media-aware wording, which reads better for the
+		// generic "Video"/"Audio" labels than "requires Video cookies".
+		if ( $custom !== '' && $custom !== $default ) {
+			return self::placeholder_description( $label );
+		}
+
+		return $this->placeholder_message( $label );
 	}
 
 	/**

@@ -161,12 +161,6 @@ class Sync {
 			update_option( 'surecookie_first_scan_pages_scanned', count( $pages ), false );
 		}
 
-		// Rating-notice milestone: timestamp the first scan that actually discovered cookies.
-		// Read by Rating_Notice to decide whether to prompt for a WordPress.org review.
-		if ( $cookies_count > 0 && ! get_option( SURECOOKIE_FIRST_SUCCESSFUL_SCAN_OPTION, false ) ) {
-			update_option( SURECOOKIE_FIRST_SUCCESSFUL_SCAN_OPTION, time(), false );
-		}
-
 		/**
 		 * Fires after a scan's results have been processed and persisted.
 		 *

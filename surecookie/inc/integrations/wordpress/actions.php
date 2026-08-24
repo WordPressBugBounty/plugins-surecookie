@@ -15,9 +15,13 @@
 namespace SureCookie\Inc\Integrations\Wordpress;
 
 use SureCookie\Inc\Integrations\Wordpress\Abilities\ConsentLogs;
+use SureCookie\Inc\Integrations\Wordpress\Abilities\ContentLookup;
 use SureCookie\Inc\Integrations\Wordpress\Abilities\CookieCategories;
 use SureCookie\Inc\Integrations\Wordpress\Abilities\CookieManagement;
+use SureCookie\Inc\Integrations\Wordpress\Abilities\KnownServices;
 use SureCookie\Inc\Integrations\Wordpress\Abilities\ManageSettings;
+use SureCookie\Inc\Integrations\Wordpress\Abilities\ScriptBlocking;
+use SureCookie\Inc\Integrations\Wordpress\Abilities\SiteHealth;
 use SureCookie\Inc\Integrations\Wordpress\Abilities\SiteScanner;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -49,6 +53,10 @@ class Actions {
 			CookieManagement::class,
 			CookieCategories::class,
 			SiteScanner::class,
+			ContentLookup::class,
+			ScriptBlocking::class,
+			KnownServices::class,
+			SiteHealth::class,
 		];
 
 		/**

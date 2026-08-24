@@ -451,6 +451,7 @@ class Maintenance {
 			'scanned_cookie_providers'   => [ self::class, 'backfill_scanned_cookie_providers' ],
 			'cookie_category_memory'     => [ self::class, 'backfill_cookie_category_memory' ],
 			'first_party_cookie_domains' => [ self::class, 'repair_first_party_cookie_domains' ],
+			'full_width_banner_default'  => [ self::class, 'preserve_full_width_banner_default' ],
 		];
 	}
 
@@ -863,6 +864,54 @@ class Maintenance {
 	 */
 	private static function repair_first_party_cookie_domains(): void {
 		First_Party_Repair::run();
+	}
+
+	/**
+	 * Preserve the full-width banner look on existing installs.
+	 *
+	 * The shipped default for `notice_type` / `notice_position` changed from the
+	 * full-width bar (`banner` / `bottom`) to the floating box (`box` /
+	 * `bottom-right`, issue #892). Settings::get() merges stored values over
+	 * defaults at read time, so a site whose admin never saved a layout choice
+	 * would silently flip its live banner style on update. Pin the old default
+	 * into the stored option for such sites; fresh installs are seeded past this
+	 * migration and get the new floating default.
+	 *
+	 * Idempotent: keys already present (user-chosen or previously backfilled)
+	 * are never touched. Reads the raw stored array, not the defaults-merged
+	 * one, so it cannot materialise every default into the database.
+	 *
+	 * @since 1.4.0
+	 * @throws \RuntimeException When the backfill did not persist.
+	 * @return void
+	 */
+	private static function preserve_full_width_banner_default(): void {
+		$settings = get_option( SURECOOKIE_SETTINGS_OPTION, [] );
+		$settings = is_array( $settings ) ? $settings : [];
+
+		$patch = [];
+
+		if ( ! array_key_exists( 'notice_type', $settings ) ) {
+			$patch['notice_type'] = 'banner';
+		}
+
+		if ( ! array_key_exists( 'notice_position', $settings ) ) {
+			$patch['notice_position'] = 'bottom';
+		}
+
+		if ( $patch === [] ) {
+			return;
+		}
+
+		update_option( SURECOOKIE_SETTINGS_OPTION, array_merge( $settings, $patch ) );
+
+		$stored = get_option( SURECOOKIE_SETTINGS_OPTION, [] );
+
+		foreach ( array_keys( $patch ) as $key ) {
+			if ( ! is_array( $stored ) || ! array_key_exists( $key, $stored ) ) {
+				throw new \RuntimeException( sprintf( 'SureCookie: banner default backfill did not persist `%s`.', $key ) );
+			}
+		}
 	}
 
 	/**

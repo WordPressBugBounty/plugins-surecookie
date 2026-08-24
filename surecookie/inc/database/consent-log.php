@@ -356,23 +356,27 @@ class ConsentLog extends Base {
 	 * @param string $country Filter by country. Empty string returns all countries.
 	 * @param int    $limit   Number of results to return.
 	 * @param int    $offset  Number of results to skip.
+	 * @param string $date_from Inclusive lower bound as Y-m-d. Empty returns all.
+	 * @param string $date_to   Inclusive upper bound as Y-m-d. Empty returns all.
 	 * @since 0.0.1
 	 * @return array<mixed> Array of log rows.
 	 */
-	public static function get_filtered( string $search, string $action, string $country, int $limit, int $offset ): array {
+	public static function get_filtered( string $search, string $action, string $country, int $limit, int $offset, string $date_from = '', string $date_to = '' ): array {
 		global $wpdb;
 
 		$table_name                        = self::get_instance()->get_tablename();
 		[ $action_enum, $forwarding_type ] = self::split_action_filter( $action );
-		$where_sql                         = self::build_filter_where_clause( $search, $country, $action_enum, $forwarding_type );
+		$where_sql                         = self::build_filter_where_clause( $search, $country, $action_enum, $forwarding_type, $date_from, $date_to );
 		$cache_key                         = self::get_query_cache_key(
 			'filtered',
 			[
-				'search'  => $search,
-				'action'  => $action,
-				'country' => $country,
-				'limit'   => $limit,
-				'offset'  => $offset,
+				'search'    => $search,
+				'action'    => $action,
+				'country'   => $country,
+				'limit'     => $limit,
+				'offset'    => $offset,
+				'date_from' => $date_from,
+				'date_to'   => $date_to,
 			]
 		);
 		$cached                            = wp_cache_get( $cache_key, self::QUERY_CACHE_GROUP );
@@ -408,19 +412,23 @@ class ConsentLog extends Base {
 	 * @param string $search  Search term matched against ip_address and session_id.
 	 * @param string $country Filter by country. Empty string matches all countries.
 	 * @param string $action  Filter by action (accepted|declined|partially_accepted|received|shared). Empty matches all.
+	 * @param string $date_from Inclusive lower bound as Y-m-d. Empty matches all.
+	 * @param string $date_to   Inclusive upper bound as Y-m-d. Empty matches all.
 	 * @since 0.0.1
 	 * @return array{total: int, accepted: int, declined: int, partially_accepted: int}
 	 */
-	public static function count_all_actions( string $search, string $country, string $action = '' ): array {
+	public static function count_all_actions( string $search, string $country, string $action = '', string $date_from = '', string $date_to = '' ): array {
 		global $wpdb;
 
 		$table_name = self::get_instance()->get_tablename();
 		$cache_key  = self::get_query_cache_key(
 			'action-counts',
 			[
-				'search'  => $search,
-				'country' => $country,
-				'action'  => $action,
+				'search'    => $search,
+				'country'   => $country,
+				'action'    => $action,
+				'date_from' => $date_from,
+				'date_to'   => $date_to,
 			]
 		);
 		$cached     = wp_cache_get( $cache_key, self::QUERY_CACHE_GROUP );
@@ -431,7 +439,7 @@ class ConsentLog extends Base {
 
 		// Build WHERE with active filters so chart counts match the filtered dataset.
 		[ $action_enum, $forwarding_type ] = self::split_action_filter( $action );
-		$where_sql                         = self::build_filter_where_clause( $search, $country, $action_enum, $forwarding_type );
+		$where_sql                         = self::build_filter_where_clause( $search, $country, $action_enum, $forwarding_type, $date_from, $date_to );
 		$query                             = "SELECT
 			COUNT(*) AS total,
 			SUM(action = 'accepted') AS accepted,
@@ -1103,10 +1111,12 @@ class ConsentLog extends Base {
 	 * @param string $country         Empty matches all countries.
 	 * @param string $action_enum     Empty | accepted | declined | partially_accepted.
 	 * @param string $forwarding_type Empty | received | shared.
+	 * @param string $date_from       Inclusive lower bound as Y-m-d. Empty matches all.
+	 * @param string $date_to         Inclusive upper bound as Y-m-d. Empty matches all.
 	 * @since 0.0.1
 	 * @return array{sql: string, values: array<int, string>} Prepared WHERE clause data.
 	 */
-	private static function build_filter_where_clause( string $search, string $country, string $action_enum, string $forwarding_type = '' ): array {
+	private static function build_filter_where_clause( string $search, string $country, string $action_enum, string $forwarding_type = '', string $date_from = '', string $date_to = '' ): array {
 		global $wpdb;
 
 		$where_parts = [];
@@ -1137,10 +1147,40 @@ class ConsentLog extends Base {
 			$values[]      = '[]';
 		}
 
+		if ( ! empty( $date_from ) ) {
+			$where_parts[] = 'timestamp >= %s';
+			$values[]      = self::utc_bound( $date_from, '00:00:00' );
+		}
+
+		if ( ! empty( $date_to ) ) {
+			$where_parts[] = 'timestamp <= %s';
+			$values[]      = self::utc_bound( $date_to, '23:59:59' );
+		}
+
 		return [
 			'sql'    => ! empty( $where_parts ) ? ' WHERE ' . implode( ' AND ', $where_parts ) : '',
 			'values' => $values,
 		];
+	}
+
+	/**
+	 * Turn a picker date into the UTC bound stored in `timestamp`.
+	 *
+	 * Rows are written with current_time( 'mysql', true ) and listed back in the
+	 * site timezone, so a date the user picked means a site-timezone day. The
+	 * end of day is included so a datetime column is not cut off at midnight.
+	 *
+	 * @param string $date Y-m-d in the site timezone.
+	 * @param string $time Boundary time, 00:00:00 or 23:59:59.
+	 * @since 1.4.0
+	 * @return string
+	 */
+	private static function utc_bound( string $date, string $time ): string {
+		$local = $date . ' ' . $time;
+
+		return function_exists( 'get_gmt_from_date' )
+			? (string) get_gmt_from_date( $local, 'Y-m-d H:i:s' )
+			: $local;
 	}
 
 	/**

@@ -41,7 +41,17 @@ class ConsentLogs extends Base {
 			$search  = sanitize_text_field( $input['search'] ?? '' );
 			$action  = sanitize_text_field( $input['action'] ?? '' );
 			$country = sanitize_text_field( $input['country'] ?? '' );
-			$offset  = ( $page - 1 ) * $limit;
+
+			$date_from = sanitize_text_field( $input['date_from'] ?? '' );
+			$date_to   = sanitize_text_field( $input['date_to'] ?? '' );
+			$offset    = ( $page - 1 ) * $limit;
+
+			if ( $date_from !== '' && $date_to !== '' && $date_from > $date_to ) {
+				return [
+					'success' => false,
+					'message' => __( 'The start date cannot be later than the end date.', 'surecookie' ),
+				];
+			}
 
 			// wpdb returns every column as a string and the rows carry extra
 			// columns, so normalize to the exact shape the output schema
@@ -49,19 +59,24 @@ class ConsentLogs extends Base {
 			$logs = array_map(
 				static function ( array $row ): array {
 					return [
-						'id'          => (int) ( $row['id'] ?? 0 ),
-						'ip_address'  => (string) ( $row['ip_address'] ?? '' ),
-						'session_id'  => (string) ( $row['session_id'] ?? '' ),
-						'preferences' => (string) ( $row['preferences'] ?? '' ),
-						'action'      => (string) ( $row['action'] ?? '' ),
-						'timestamp'   => (string) ( $row['timestamp'] ?? '' ),
-						'country'     => (string) ( $row['country'] ?? '' ),
+						'id'            => (int) ( $row['id'] ?? 0 ),
+						'ip_address'    => (string) ( $row['ip_address'] ?? '' ),
+						'session_id'    => (string) ( $row['session_id'] ?? '' ),
+						'preferences'   => (string) ( $row['preferences'] ?? '' ),
+						'action'        => (string) ( $row['action'] ?? '' ),
+						'timestamp'     => (string) ( $row['timestamp'] ?? '' ),
+						'country'       => (string) ( $row['country'] ?? '' ),
+						'user_id'       => ( $row['user_id'] ?? null ) === null ? 0 : (int) $row['user_id'],
+						'geo_preset_id' => (string) ( $row['geo_preset_id'] ?? '' ),
+						'is_forwarded'  => (bool) ( $row['is_forwarded'] ?? false ),
+						'origin_site'   => (string) ( $row['origin_site'] ?? '' ),
+						'forwarded_to'  => (string) ( $row['forwarded_to'] ?? '' ),
 					];
 				},
-				ConsentLog::get_filtered( $search, $action, $country, $limit, $offset )
+				ConsentLog::get_filtered( $search, $action, $country, $limit, $offset, $date_from, $date_to )
 			);
 
-			$counts = ConsentLog::count_all_actions( $search, $country, $action );
+			$counts = ConsentLog::count_all_actions( $search, $country, $action, $date_from, $date_to );
 
 			return [
 				'success' => true,
@@ -124,26 +139,36 @@ class ConsentLogs extends Base {
 		return [
 			'type'       => 'object',
 			'properties' => [
-				'page'    => [
+				'page'      => [
 					'type'        => 'integer',
 					'description' => __( 'Page number for pagination. Default: 1.', 'surecookie' ),
 				],
-				'limit'   => [
+				'limit'     => [
 					'type'        => 'integer',
 					'description' => __( 'Number of logs per page (1-100). Default: 10.', 'surecookie' ),
 				],
-				'search'  => [
+				'search'    => [
 					'type'        => 'string',
 					'description' => __( 'Search by IP address or session ID.', 'surecookie' ),
 				],
-				'action'  => [
+				'action'    => [
 					'type'        => 'string',
-					'enum'        => [ 'accepted', 'declined', 'partially_accepted' ],
-					'description' => __( 'Filter by consent action type.', 'surecookie' ),
+					'enum'        => [ 'accepted', 'declined', 'partially_accepted', 'received', 'shared' ],
+					'description' => __( 'Filter by consent action type. "received" and "shared" filter on consent forwarding rather than the visitor decision, and only return rows on sites running Consent Forwarding.', 'surecookie' ),
 				],
-				'country' => [
+				'country'   => [
 					'type'        => 'string',
 					'description' => __( 'Filter by country name.', 'surecookie' ),
+				],
+				'date_from' => [
+					'type'        => 'string',
+					'format'      => 'date',
+					'description' => __( 'Inclusive start of the log date range (Y-m-d).', 'surecookie' ),
+				],
+				'date_to'   => [
+					'type'        => 'string',
+					'format'      => 'date',
+					'description' => __( 'Inclusive end of the log date range (Y-m-d).', 'surecookie' ),
 				],
 			],
 		];
@@ -170,13 +195,33 @@ class ConsentLogs extends Base {
 					'items'       => [
 						'type'       => 'object',
 						'properties' => [
-							'id'          => [ 'type' => 'integer' ],
-							'ip_address'  => [ 'type' => 'string' ],
-							'session_id'  => [ 'type' => 'string' ],
-							'preferences' => [ 'type' => 'string' ],
-							'action'      => [ 'type' => 'string' ],
-							'timestamp'   => [ 'type' => 'string' ],
-							'country'     => [ 'type' => 'string' ],
+							'id'            => [ 'type' => 'integer' ],
+							'ip_address'    => [ 'type' => 'string' ],
+							'session_id'    => [ 'type' => 'string' ],
+							'preferences'   => [ 'type' => 'string' ],
+							'action'        => [ 'type' => 'string' ],
+							'timestamp'     => [ 'type' => 'string' ],
+							'country'       => [ 'type' => 'string' ],
+							'user_id'       => [
+								'type'        => 'integer',
+								'description' => __( 'WordPress user ID, or 0 when the visitor was logged out.', 'surecookie' ),
+							],
+							'geo_preset_id' => [
+								'type'        => 'string',
+								'description' => __( 'Geo rule in force when consent was captured. Empty when no rule applied.', 'surecookie' ),
+							],
+							'is_forwarded'  => [
+								'type'        => 'boolean',
+								'description' => __( 'True when this record arrived from a partner site rather than being captured here.', 'surecookie' ),
+							],
+							'origin_site'   => [
+								'type'        => 'string',
+								'description' => __( 'Site the consent was originally captured on, when forwarded.', 'surecookie' ),
+							],
+							'forwarded_to'  => [
+								'type'        => 'string',
+								'description' => __( 'Partner sites this consent was forwarded to.', 'surecookie' ),
+							],
 						],
 					],
 				],

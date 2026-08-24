@@ -11,7 +11,9 @@
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Utils\Logger;
 use SureCookie\Inc\Traits\GetInstance;
+use SureCookie\Inc\Traits\PlaceholderContent;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -26,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Blocker {
 	use GetInstance;
+	use PlaceholderContent;
 
 	/**
 	 * Script `type` values the browser executes. Mirrors the allowlist in
@@ -34,13 +37,29 @@ class Blocker {
 	private const EXECUTABLE_SCRIPT_TYPES = [ 'text/javascript', 'module', 'application/javascript', 'application/ecmascript', 'text/ecmascript', 'importmap', 'speculationrules' ];
 
 	/**
+	 * Types that list other resources rather than carry tracker code, so a
+	 * pattern hit inside one is always collateral. Still in
+	 * EXECUTABLE_SCRIPT_TYPES, which consentManager.js validates against.
+	 *
+	 * @since x.x.x
+	 */
+	private const MANIFEST_SCRIPT_TYPES = [ 'importmap', 'speculationrules' ];
+
+	/**
+	 * Memoized core asset bases as [ host, path ]. See core_bases().
+	 *
+	 * @var array<int, array{0: string, 1: string}>|null
+	 */
+	private static ?array $core_bases = null;
+
+	/**
 	 * Reserved blocking category for newly-detected trackers held by the Pro
 	 * Compliance Guard. Resources in this category are blocked until an admin
 	 * reviews them and are NEVER released by visitor consent. Mirrored in
 	 * `src/utils/consentManager.js` (`isAllowed`) and the Pro Guard
 	 * (`Guard::QUARANTINE_CATEGORY`).
 	 */
-	private const QUARANTINE_CATEGORY = 'quarantine';
+	public const QUARANTINE_CATEGORY = 'quarantine';
 
 	/**
 	 * Marker comment printed at the very start of `wp_footer`, giving the
@@ -48,6 +67,13 @@ class Blocker {
 	 * Always stripped from the final output.
 	 */
 	private const FOOTER_MARKER = '<!--surecookie:footer-->';
+
+	/**
+	 * Largest `data:` script payload worth decoding for pattern matching, in bytes.
+	 *
+	 * @since x.x.x
+	 */
+	private const MAX_DATA_URI_PAYLOAD = 262144;
 
 	/**
 	 * Per-request cache of iframe-pattern lookup map (shared across
@@ -58,13 +84,22 @@ class Blocker {
 	private ?array $iframe_patterns_cache = null;
 
 	/**
-	 * Per-request cache of admin category overrides ({ domain => category }),
-	 * from the `resource_category_overrides` setting. Lets an admin recategorize
-	 * a detected resource so consent gating follows the chosen category.
+	 * Whether the processing buffer has been opened for this request.
 	 *
-	 * @var array<string, string>|null
+	 * @var bool
 	 */
-	private ?array $category_overrides = null;
+	private bool $buffer_open = false;
+
+	/**
+	 * Memoized should_process() verdict.
+	 *
+	 * It fires `surecookie_scanner_request_detected`, and the buffer is now
+	 * attempted on two hooks, so an unmemoized false verdict double-counted
+	 * every scanner request.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $should_process = null;
 
 	/**
 	 * Constructor.
@@ -87,7 +122,7 @@ class Blocker {
 	 * @return string
 	 */
 	public function intercept_template( ?string $template ): string {
-		if ( ! $this->should_process() || $template === null || $template === '' || ! file_exists( $template ) ) {
+		if ( $template === null || $template === '' || ! file_exists( $template ) ) {
 			return $template ?? '';
 		}
 
@@ -110,9 +145,40 @@ class Blocker {
 		 * renders and enhances the page as usual - its buffer nests inside ours -
 		 * and our callback processes the already-corrected HTML.
 		 */
-		ob_start( [ $this, 'process_buffer' ] );
+		$this->start_buffer();
 
 		return $template;
+	}
+
+	/**
+	 * `template_redirect` callback: open the buffer before any plugin that
+	 * renders a page from this action can finish and exit.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	public function open_buffer(): void {
+		$this->start_buffer();
+	}
+
+	/**
+	 * Open the processing buffer once per request.
+	 *
+	 * Opening it before WordPress 7.0's own template-enhancement buffer (started
+	 * at `wp_before_include_template`) keeps ours on the outside, so block-style
+	 * hoisting still runs and we post-process the corrected HTML.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	private function start_buffer(): void {
+		if ( $this->buffer_open || ! $this->should_process() ) {
+			return;
+		}
+
+		$this->buffer_open = true;
+
+		ob_start( [ $this, 'process_buffer' ] );
 	}
 
 	/**
@@ -139,6 +205,25 @@ class Blocker {
 			$buffer = $this->block_iframes( $buffer );
 			$buffer = $this->block_embeds( $buffer );
 			$buffer = $this->block_objects( $buffer );
+
+			/**
+			 * Filter the blocked page HTML, for integrations that must gate markup
+			 * the tag-level passes above cannot see - a page builder that carries an
+			 * embed as widget config and builds the iframe in the browser, say.
+			 *
+			 * Runs inside `should_process()`, so the scan bypass, geo rules and the
+			 * admin/AJAX/REST guards already apply to every callback.
+			 *
+			 * @since 1.4.0
+			 * @param string $buffer Page HTML after the built-in blocking passes.
+			 */
+			$buffer = (string) apply_filters( 'surecookie_blocked_buffer', $buffer );
+
+			// Last, so block_scripts() never sees it: the guard carries the whole
+			// pattern catalog inline, which would self-match and neutralize it.
+			// Injection position, not processing order, is what puts it first in
+			// the finished document.
+			$buffer = Dom_Guard::get_instance()->inject( $buffer );
 		}
 
 		// The footer-boundary marker is internal - never ship it.
@@ -164,6 +249,12 @@ class Blocker {
 	 * @return void
 	 */
 	private function register_hooks(): void {
+		// A plugin that owns a post type's templates can render the whole page
+		// from template_redirect and exit, so template_include never fires and
+		// the buffer never opens. Blocking is compliance-critical and must not be
+		// cancellable that way, so open as early as a front-end request allows;
+		// template_include stays as the fallback and no-ops if we already did.
+		add_action( 'template_redirect', [ $this, 'open_buffer' ], -PHP_INT_MAX );
 		add_filter( 'template_include', [ $this, 'intercept_template' ], PHP_INT_MAX );
 
 		// Before every other wp_footer callback, so all footer scripts land
@@ -178,6 +269,20 @@ class Blocker {
 	 * @return bool
 	 */
 	private function should_process(): bool {
+		if ( $this->should_process === null ) {
+			$this->should_process = $this->evaluate_should_process();
+		}
+
+		return $this->should_process;
+	}
+
+	/**
+	 * Decide, once per request, whether blocking runs.
+	 *
+	 * @since 0.0.1
+	 * @return bool
+	 */
+	private function evaluate_should_process(): bool {
 		// Check if blocking feature is enabled.
 		if ( ! Utils::is_blocking_enabled() ) {
 			return false;
@@ -249,6 +354,12 @@ class Blocker {
 	 * @return bool
 	 */
 	private function is_html( string $buffer ): bool {
+		// ltrim() does not strip a UTF-8 BOM, and a single byte before the doctype
+		// would otherwise turn blocking off for the entire page, silently.
+		if ( str_starts_with( $buffer, "\xEF\xBB\xBF" ) ) {
+			$buffer = substr( $buffer, 3 );
+		}
+
 		$trimmed = ltrim( $buffer );
 
 		// Check if starts with HTML-like content.
@@ -258,6 +369,13 @@ class Blocker {
 
 		// Skip JSON (starts with { or [).
 		if ( $trimmed[0] === '{' || $trimmed[0] === '[' ) {
+			return false;
+		}
+
+		// Skip XML. The buffer now opens at template_redirect, which is where
+		// core renders wp-sitemap.xsl, and that document carries a <head> the
+		// guard would inject a raw <script> into - leaving it non-well-formed.
+		if ( stripos( $trimmed, '<?xml' ) === 0 ) {
 			return false;
 		}
 
@@ -333,6 +451,37 @@ class Blocker {
 	}
 
 	/**
+	 * Result of one rewrite pass, or the original HTML when PCRE gave up.
+	 *
+	 * PCRE returns null when it exceeds pcre.backtrack_limit, which on a large
+	 * page is indistinguishable from "nothing matched" - the page then ships
+	 * with that pass silently disabled. Say so loudly instead: save_log()
+	 * reaches production, where the failure actually happens.
+	 *
+	 * @since x.x.x
+	 * @param string|null $result Callback result.
+	 * @param string      $html   Original HTML.
+	 * @param string      $kind   Pass name, for the log line.
+	 * @return string
+	 */
+	private static function settled( ?string $result, string $html, string $kind ): string {
+		if ( $result !== null ) {
+			return $result;
+		}
+
+		Logger::get_instance()->save_log(
+			sprintf(
+				'SureCookie: %s blocking did not run on %s - the page (%d KB) exceeded PHP\'s pcre.backtrack_limit, so its tags were left untouched. Raise pcre.backtrack_limit or reduce the page size.',
+				$kind,
+				esc_url_raw( home_url( add_query_arg( [] ) ) ),
+				(int) ( strlen( $html ) / 1024 )
+			)
+		);
+
+		return $html;
+	}
+
+	/**
 	 * Run the script-tag rewrite pass over one HTML chunk.
 	 *
 	 * @param string               $html     HTML content.
@@ -342,14 +491,14 @@ class Blocker {
 	 */
 	private function rewrite_script_tags( string $html, array $patterns ): string {
 		$result = preg_replace_callback(
-			'/<script\b([^>]*)>(.*?)<\/script>/is',
+			'/<script\b([^>]*+)>((?:[^<]++|<(?!\/script>))*+)<\/script>/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_script_tag( $matches, $patterns );
 			},
 			$html
 		);
 
-		return $result ?? $html;
+		return self::settled( $result, $html, 'script' );
 	}
 
 	/**
@@ -443,14 +592,14 @@ class Blocker {
 
 		// Use regex to find and modify iframe tags.
 		$result = preg_replace_callback(
-			'/<iframe\b([^>]*)(?:>(.*?)<\/iframe>|\s*\/>)/is',
+			'/<iframe\b([^>]*+)(?:>((?:[^<]++|<(?!\/iframe>))*+)<\/iframe>|\s*\/>)/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_iframe_tag( $matches, $patterns );
 			},
 			$html
 		);
 
-		return $result ?? $html;
+		return self::settled( $result, $html, 'iframe' );
 	}
 
 	/**
@@ -479,7 +628,7 @@ class Blocker {
 			$html
 		);
 
-		return $result ?? $html;
+		return self::settled( $result, $html, 'embed' );
 	}
 
 	/**
@@ -503,14 +652,14 @@ class Blocker {
 		// Covers both self-closed `<object … />` and full `<object …>…</object>` forms,
 		// mirroring how block_iframes() handles its two shapes.
 		$result = preg_replace_callback(
-			'/<object\b([^>]*?)(?:\s*\/>|>(.*?)<\/object>)/is',
+			'/<object\b([^>]*?)(?:\s*\/>|>((?:[^<]++|<(?!\/object>))*+)<\/object>)/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_object_tag( $matches, $patterns );
 			},
 			$html
 		);
 
-		return $result ?? $html;
+		return self::settled( $result, $html, 'object' );
 	}
 
 	/**
@@ -624,6 +773,13 @@ class Blocker {
 			return $full_tag;
 		}
 
+		// A manifest is never the tracker, and gating an importmap is unrecoverable:
+		// the browser ignores one restored after module resolution began, so consent
+		// cannot repair the page view - only a reload can.
+		if ( in_array( $type, self::MANIFEST_SCRIPT_TYPES, true ) ) {
+			return $full_tag;
+		}
+
 		// Extract src attribute.
 		$src = '';
 		if ( preg_match( '/src\s*=\s*["\']([^"\']+)["\']/i', $attributes, $src_match ) ) {
@@ -633,12 +789,35 @@ class Blocker {
 		// Try to match against known scripts.
 		$match_result = $this->match_pattern( $src, $content, $patterns );
 
+		// A performance plugin may have inlined this script as a data: URI, which
+		// hides the tracker URL from the matcher. Decode and retry on the real body.
+		if ( $match_result === null && $src !== '' ) {
+			$decoded = $this->decode_data_uri_script( $src );
+			if ( $decoded !== '' ) {
+				$match_result = $this->match_pattern( '', $decoded, $patterns );
+			}
+		}
+
 		if ( $match_result === null ) {
 			return $full_tag;
 		}
 
+		// Only when the resource's OWN url matched: the src regex also lifts
+		// `data-src` off a lazy tag, and exempting on that would hide an inline
+		// tracker whose body is the real signal.
+		if ( ( $match_result['matched_in'] ?? '' ) === 'src' && $this->is_core_asset( $src ) ) {
+			return $full_tag;
+		}
+
 		// Honor an admin category override for this resource.
-		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'script' );
+		$keys                     = $this->resolution_keys( $src, $match_result );
+		$match_result['category'] = Resource_Categories::resolve_first( $keys, $match_result['category'], 'script' );
+
+		// The catalog is not readable from any admin screen, so note what we
+		// matched or this resource stays invisible there. $keys[0] is the src for
+		// a normal match and the pattern for one matched on inline content, which
+		// has no src of its own to record.
+		Matched_Resources::get_instance()->record( 'script', $keys[0] ?? '', $match_result['name'], $match_result['category'] );
 
 		// Check if this script should be skipped.
 		$skip = apply_filters(
@@ -646,7 +825,8 @@ class Blocker {
 			false,
 			$src,
 			$match_result['name'],
-			$match_result['category']
+			$match_result['category'],
+			(string) ( $match_result['matched_pattern'] ?? '' )
 		);
 
 		if ( $skip ) {
@@ -703,7 +883,14 @@ class Blocker {
 		}
 
 		// Honor an admin category override for this resource.
-		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'iframe' );
+		$keys                     = $this->resolution_keys( $src, $match_result );
+		$match_result['category'] = Resource_Categories::resolve_first( $keys, $match_result['category'], 'iframe' );
+
+		// The catalog is not readable from any admin screen, so note what we
+		// matched or this resource stays invisible there. $keys[0] is the src for
+		// a normal match and the pattern for one matched on inline content, which
+		// has no src of its own to record.
+		Matched_Resources::get_instance()->record( 'iframe', $keys[0] ?? '', $match_result['name'], $match_result['category'] );
 
 		// Check if this iframe should be skipped.
 		$skip = apply_filters(
@@ -711,7 +898,8 @@ class Blocker {
 			false,
 			$src,
 			$match_result['name'],
-			$match_result['category']
+			$match_result['category'],
+			(string) ( $match_result['matched_pattern'] ?? '' )
 		);
 
 		if ( $skip ) {
@@ -773,7 +961,14 @@ class Blocker {
 		}
 
 		// Honor an admin category override for this resource.
-		$match_result['category'] = $this->resolve_category( $src, $match_result['category'], 'iframe' );
+		$keys                     = $this->resolution_keys( $src, $match_result );
+		$match_result['category'] = Resource_Categories::resolve_first( $keys, $match_result['category'], 'iframe' );
+
+		// The catalog is not readable from any admin screen, so note what we
+		// matched or this resource stays invisible there. $keys[0] is the src for
+		// a normal match and the pattern for one matched on inline content, which
+		// has no src of its own to record.
+		Matched_Resources::get_instance()->record( 'iframe', $keys[0] ?? '', $match_result['name'], $match_result['category'] );
 
 		/**
 		 * Filter: Allow bypassing <embed> blocking for a specific URL/service.
@@ -782,6 +977,7 @@ class Blocker {
 		 * @param string $src      <embed> src URL.
 		 * @param string $name     Matched service key.
 		 * @param string $category Matched service category.
+		 * @param string $pattern  Blocking pattern that matched.
 		 * @since 0.0.1-beta.2
 		 */
 		$skip = apply_filters(
@@ -789,7 +985,8 @@ class Blocker {
 			false,
 			$src,
 			$match_result['name'],
-			$match_result['category']
+			$match_result['category'],
+			(string) ( $match_result['matched_pattern'] ?? '' )
 		);
 
 		if ( $skip ) {
@@ -859,7 +1056,14 @@ class Blocker {
 		}
 
 		// Honor an admin category override for this resource.
-		$match_result['category'] = $this->resolve_category( $data, $match_result['category'], 'iframe' );
+		$keys                     = $this->resolution_keys( $data, $match_result );
+		$match_result['category'] = Resource_Categories::resolve_first( $keys, $match_result['category'], 'iframe' );
+
+		// The catalog is not readable from any admin screen, so note what we
+		// matched or this resource stays invisible there. $keys[0] is the src for
+		// a normal match and the pattern for one matched on inline content, which
+		// has no src of its own to record.
+		Matched_Resources::get_instance()->record( 'iframe', $keys[0] ?? '', $match_result['name'], $match_result['category'] );
 
 		/**
 		 * Filter: Allow bypassing <object> blocking for a specific URL/service.
@@ -868,6 +1072,7 @@ class Blocker {
 		 * @param string $data     <object> resource URL.
 		 * @param string $name     Matched service key.
 		 * @param string $category Matched service category.
+		 * @param string $pattern  Blocking pattern that matched.
 		 * @since 0.0.1-beta.2
 		 */
 		$skip = apply_filters(
@@ -875,7 +1080,8 @@ class Blocker {
 			false,
 			$data,
 			$match_result['name'],
-			$match_result['category']
+			$match_result['category'],
+			(string) ( $match_result['matched_pattern'] ?? '' )
 		);
 
 		if ( $skip ) {
@@ -941,6 +1147,98 @@ class Blocker {
 	}
 
 	/**
+	 * Whether a script URL is a WordPress core asset, which must always load.
+	 *
+	 * Host-gated against the URLs WordPress itself emits, so
+	 * `https://evil.test/wp-includes/track.js` cannot borrow the exemption.
+	 * Deliberately stops at core: the catalog targets self-hosted trackers under
+	 * `/wp-content/` by filename (`matomo.js`), so exempting it would free them.
+	 *
+	 * @param string $src Script `src`; empty for an inline script.
+	 * @since x.x.x
+	 * @return bool
+	 */
+	private function is_core_asset( string $src ): bool {
+		$src = trim( $src );
+
+		// Only a root-relative path or http(s) can name a core file. A `data:` URI
+		// is out: its body parses as the path, so an inlined tracker would borrow this.
+		if ( strpos( $src, '//' ) === 0 ) {
+			$src = 'https:' . $src;
+		} elseif ( $src === '' || ( strpos( $src, '/' ) !== 0 && preg_match( '#^https?://#i', $src ) !== 1 ) ) {
+			return false;
+		}
+
+		$parts = wp_parse_url( $src );
+		$parts = is_array( $parts ) ? $parts : [];
+		$host  = self::without_www( strtolower( (string) ( $parts['host'] ?? '' ) ) );
+		$path  = (string) ( $parts['path'] ?? '' );
+
+		// A `..` segment means the path does not resolve where it reads. Decoded, or
+		// `%2e%2e` walks past; per segment, so `foo..min.js` still counts.
+		if ( $path === '' || in_array( '..', explode( '/', rawurldecode( $path ) ), true ) ) {
+			return false;
+		}
+
+		// Anchored on the real core URLs, so a subdirectory or multisite install
+		// follows, and a nested `/wp-content/uploads/wp-includes/` cannot pass.
+		foreach ( self::core_bases() as [ $core_host, $core_path ] ) {
+			if ( $host !== '' && $host !== $core_host ) {
+				continue;
+			}
+
+			if ( stripos( $path, $core_path ) === 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Core asset bases as [ host, path ] pairs, resolved once per request.
+	 *
+	 * Memoized: is_core_asset() runs per tag and nothing here changes mid-request.
+	 * Shared with Dom_Guard so both layers agree on which host is ours.
+	 *
+	 * @since x.x.x
+	 * @return array<int, array{0: string, 1: string}>
+	 */
+	public static function core_bases(): array {
+		if ( self::$core_bases !== null ) {
+			return self::$core_bases;
+		}
+
+		$bases = [];
+		foreach ( [ includes_url(), admin_url() ] as $base ) {
+			$parts = wp_parse_url( $base );
+			$parts = is_array( $parts ) ? $parts : [];
+			$path  = (string) ( $parts['path'] ?? '' );
+
+			if ( $path === '' ) {
+				continue;
+			}
+
+			$bases[] = [ self::without_www( strtolower( (string) ( $parts['host'] ?? '' ) ) ), $path ];
+		}
+
+		self::$core_bases = $bases;
+
+		return $bases;
+	}
+
+	/**
+	 * Drop a leading `www.` so a host comparison is not defeated by the prefix.
+	 *
+	 * @param string $host Lowercased host.
+	 * @since x.x.x
+	 * @return string
+	 */
+	public static function without_www( string $host ): string {
+		return strpos( $host, 'www.' ) === 0 ? substr( $host, 4 ) : $host;
+	}
+
+	/**
 	 * Check whether a URL has the same host as the current site.
 	 *
 	 * Used to avoid wrapping first-party PDFs/SVGs embedded via <embed>/<object>.
@@ -996,85 +1294,44 @@ class Blocker {
 	}
 
 	/**
-	 * Admin per-domain category overrides ({ domain => category }), read once
-	 * per request. Invalid rows are skipped.
+	 * Decode a script inlined into a `data:` URI back to its JavaScript body.
 	 *
-	 * @since 1.3.0
-	 * @return array<string, string>
+	 * Performance plugins rewrite inline scripts to `data:text/javascript;base64,...`
+	 * so they can carry `defer`. That buries the tracker URL where substring matching
+	 * cannot see it, so decode the payload and match against that instead.
+	 *
+	 * @param string $src Script src attribute.
+	 * @since x.x.x
+	 * @return string Decoded JavaScript, or an empty string when $src is not a decodable script data URI.
 	 */
-	private function get_category_overrides(): array {
-		if ( $this->category_overrides !== null ) {
-			return $this->category_overrides;
+	private function decode_data_uri_script( string $src ): string {
+		if ( stripos( $src, 'data:' ) !== 0 ) {
+			return '';
 		}
 
-		$this->category_overrides = [];
-		$stored                   = Settings::get( 'resource_category_overrides' );
-		if ( is_array( $stored ) ) {
-			foreach ( $stored as $domain => $category ) {
-				$domain   = trim( (string) $domain );
-				$category = trim( (string) $category );
-				if ( $domain !== '' && $category !== '' ) {
-					$this->category_overrides[ $domain ] = $category;
-				}
-			}
+		$comma = strpos( $src, ',' );
+		if ( $comma === false ) {
+			return '';
 		}
 
-		return $this->category_overrides;
-	}
+		$meta    = strtolower( substr( $src, 5, $comma - 5 ) );
+		$payload = substr( $src, $comma + 1 );
 
-	/**
-	 * Apply an admin category override to a matched resource when its src
-	 * contains an overridden domain, so consent gating follows the admin choice.
-	 *
-	 * Overrides are keyed per (kind, domain) so a script and an iframe on the
-	 * same host stay independent. An exact-kind override wins; a legacy
-	 * bare-domain override applies to any kind. `$kind` is 'script' for scripts
-	 * and 'iframe' for iframe/embed/object resources.
-	 *
-	 * @param string $src      Resource URL.
-	 * @param string $category Category resolved from the pattern match.
-	 * @param string $kind     Resource kind ('script'|'iframe').
-	 * @since 1.3.0
-	 * @return string Overridden category, or the original when no override matches.
-	 */
-	private function resolve_category( string $src, string $category, string $kind = 'any' ): string {
-		if ( $src === '' ) {
-			return $category;
+		// Only script payloads are worth decoding.
+		if ( strpos( $meta, 'javascript' ) === false && strpos( $meta, 'ecmascript' ) === false ) {
+			return '';
 		}
-		$legacy = null;
-		foreach ( $this->get_category_overrides() as $key => $target ) {
-			[ $entry_kind, $domain ] = $this->parse_scoped_key( (string) $key );
-			if ( $domain === '' || strpos( $src, $domain ) === false ) {
-				continue;
-			}
-			if ( $entry_kind === $kind ) {
-				return $target; // Exact-kind override wins.
-			}
-			if ( $entry_kind === 'any' && $legacy === null ) {
-				$legacy = $target; // Legacy bare-domain key applies to any kind.
-			}
-		}
-		return $legacy ?? $category;
-	}
 
-	/**
-	 * Split a scoped override key into [ kind, domain ].
-	 *
-	 * Keys are stored as "script::host" or "iframe::host" so a script and an
-	 * iframe on the same host can be gated independently; a bare "host" (no
-	 * "::") is a legacy key that applies to any kind.
-	 *
-	 * @param string $key Stored key.
-	 * @since 1.3.0
-	 * @return array{0: string, 1: string} [ kind ('script'|'iframe'|'any'), domain ].
-	 */
-	private function parse_scoped_key( string $key ): array {
-		$key = trim( $key );
-		$pos = strpos( $key, '::' );
-		if ( $pos === false ) {
-			return [ 'any', $key ];
+		if ( strlen( $payload ) > self::MAX_DATA_URI_PAYLOAD ) {
+			return '';
 		}
-		return [ substr( $key, 0, $pos ), substr( $key, $pos + 2 ) ];
+
+		if ( strpos( $meta, 'base64' ) !== false ) {
+			$decoded = base64_decode( $payload, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding our own page markup to match tracker patterns.
+			return is_string( $decoded ) ? $decoded : '';
+		}
+
+		return rawurldecode( $payload );
 	}
 
 	/**
@@ -1084,15 +1341,18 @@ class Blocker {
 	 * @param string                                                                                                $content  Content to match.
 	 * @param array<string, array{name: string, category: string, label: string, path?: string, location?: string}> $patterns Pattern mappings.
 	 * @since 0.0.1
-	 * @return array{name: string, category: string, label: string, path?: string, location?: string}|null Match result or null.
+	 * @return array{name: string, category: string, label: string, path?: string, location?: string, matched_pattern?: string, matched_in?: string}|null Match result or null.
 	 */
 	private function match_pattern( string $src, string $content, array $patterns ): ?array {
 		foreach ( $patterns as $pattern => $info ) {
-			$matched =
-				( ! empty( $src ) && strpos( $src, $pattern ) !== false ) ||
-				( ! empty( $content ) && strpos( $content, $pattern ) !== false );
+			$matched_in = '';
+			if ( ! empty( $src ) && stripos( $src, $pattern ) !== false ) {
+				$matched_in = 'src';
+			} elseif ( ! empty( $content ) && stripos( $content, $pattern ) !== false ) {
+				$matched_in = 'content';
+			}
 
-			if ( ! $matched ) {
+			if ( $matched_in === '' ) {
 				continue;
 			}
 
@@ -1108,10 +1368,38 @@ class Blocker {
 				}
 			}
 
+			// The pattern is the host an admin setting is keyed on. An inline match
+			// has no src to carry it, so hand it to the caller.
+			$info['matched_pattern'] = (string) $pattern;
+			$info['matched_in']      = $matched_in;
+
 			return $info;
 		}
 
 		return null;
+	}
+
+	/**
+	 * Candidate keys an admin setting may be keyed on, most specific first.
+	 *
+	 * A resource matched on inline content has no src, and one a performance
+	 * plugin inlined into a `data:` URI has a src no setting can appear in.
+	 *
+	 * @param string              $src          Resource URL, possibly empty.
+	 * @param array<string,mixed> $match_result Result from match_pattern().
+	 * @since x.x.x
+	 * @return array<int, string>
+	 */
+	private function resolution_keys( string $src, array $match_result ): array {
+		// A content match says nothing about the src, and that src may be a data:
+		// URI whose decoded body is what matched, so it is not a key here.
+		if ( ( $match_result['matched_in'] ?? '' ) === 'content' ) {
+			$src = '';
+		}
+
+		return array_values(
+			array_filter( [ $src, (string) ( $match_result['matched_pattern'] ?? '' ) ] )
+		);
 	}
 
 	/**
@@ -1147,7 +1435,10 @@ class Blocker {
 		$new_tag .= ' data-surecookie-original-type="' . esc_attr( $original_type ) . '"';
 
 		if ( ! empty( $src ) ) {
-			$new_tag .= ' data-surecookie-src="' . esc_url( $src ) . '"';
+			// esc_url() drops data: URIs, and a script inlined into one still has to
+			// survive here or consent could never restore it.
+			$safe_src = stripos( $src, 'data:' ) === 0 ? esc_attr( $src ) : esc_url( $src );
+			$new_tag .= ' data-surecookie-src="' . $safe_src . '"';
 		}
 
 		// Add remaining attributes.
@@ -1246,6 +1537,10 @@ class Blocker {
 		$original_width  = preg_match( '/(?:^|\s)width\s*=\s*["\']?(\d+)/i', $attributes, $w_match ) === 1 ? (int) $w_match[1] : 0;
 		$original_height = preg_match( '/(?:^|\s)height\s*=\s*["\']?(\d+)/i', $attributes, $h_match ) === 1 ? (int) $h_match[1] : 0;
 
+		// Resolve the optional placeholder image; the overlay renderer resolves the
+		// admin-editable copy and button label itself.
+		$image = $this->resolve_placeholder_image( $name, $mapped_category, $url );
+
 		// Fallback only; consentManager.matchPlaceholderSizes() then sets the
 		// exact height from the embed's real (often CSS-driven) rendered box.
 		if ( $original_height > 0 ) {
@@ -1254,8 +1549,15 @@ class Blocker {
 			$wrapper_style = 'width:100%;min-height:160px;';
 		}
 
-		// Outer placeholder wrapper.
-		$placeholder  = '<div class="surecookie-placeholder surecookie-placeholder-' . esc_attr( $name ) . '"';
+		// Outer placeholder wrapper. Carries the banner's root classes
+		// (surecookie-styles + surecookie-public-banner-wrapper) so it inherits the
+		// same box-sizing/font reset the banner uses and is insulated from the
+		// active theme's styles, exactly like the consent banner.
+		$wrapper_class = 'surecookie-styles surecookie-public-banner-wrapper surecookie-placeholder surecookie-placeholder-' . $name;
+		if ( $image !== '' ) {
+			$wrapper_class .= ' surecookie-placeholder-has-image';
+		}
+		$placeholder  = '<div class="' . esc_attr( $wrapper_class ) . '"';
 		$placeholder .= ' data-surecookie-name="' . esc_attr( $name ) . '"';
 		$placeholder .= ' data-surecookie-category="' . esc_attr( $mapped_category ) . '"';
 		if ( $original_width > 0 ) {
@@ -1267,38 +1569,7 @@ class Blocker {
 		$placeholder .= ' style="' . esc_attr( $wrapper_style ) . '"';
 		$placeholder .= '>';
 
-		// Placeholder overlay (text + Accept & Load button). Quarantined trackers
-		// (Pro Compliance Guard) are held until an admin reviews them and can never
-		// be released by visitor consent (see ConsentManager.isAllowed), so the
-		// "Accept & Load" button is omitted - it would be a dead control - and the
-		// copy stays neutral rather than implying consent would load the content.
-		$is_quarantined = $mapped_category === self::QUARANTINE_CATEGORY;
-		$placeholder   .= '<div class="surecookie-placeholder-content">';
-		$placeholder   .= '<p class="surecookie-placeholder-text">';
-		if ( $is_quarantined ) {
-			$placeholder .= esc_html__( 'This content is currently blocked.', 'surecookie' );
-		} else {
-			$placeholder .= sprintf(
-				/* translators: %s: Service name (e.g., YouTube, Google Maps) */
-				esc_html__( 'This content is blocked because it requires %s cookies.', 'surecookie' ),
-				esc_html( $label )
-			);
-		}
-		$placeholder .= '</p>';
-		if ( ! $is_quarantined ) {
-			// aria-label carries the service name so multiple blocked embeds on
-			// one page don't all expose the identical accessible name "Accept &
-			// Load" to screen readers.
-			$button_aria = sprintf(
-				/* translators: %s: Service name (e.g., YouTube, Google Maps) */
-				__( 'Accept and load %s content', 'surecookie' ),
-				$label
-			);
-			$placeholder .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $mapped_category ) . '" aria-label="' . esc_attr( $button_aria ) . '">';
-			$placeholder .= esc_html__( 'Accept & Load', 'surecookie' );
-			$placeholder .= '</button>';
-		}
-		$placeholder .= '</div>';
+		$placeholder .= $this->render_placeholder_overlay( $mapped_category, $label, $image );
 
 		// Hidden element (restored on consent).
 		$placeholder .= '<' . $tag;

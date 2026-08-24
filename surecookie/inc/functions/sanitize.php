@@ -98,7 +98,70 @@ class Sanitize {
 			return '';
 		}
 
-		return wp_kses_post( $value );
+		return self::normalize_rich_text_whitespace( wp_kses_post( $value ) );
+	}
+
+	/**
+	 * Normalize non-breaking spaces in rich-text text nodes without changing attributes.
+	 *
+	 * @param string $value Sanitized rich-text HTML.
+	 * @return string
+	 */
+	private static function normalize_rich_text_whitespace( string $value ): string {
+		$result = '';
+		$text   = '';
+		$in_tag = false;
+		$quote  = null;
+		$length = strlen( $value );
+
+		for ( $index = 0; $index < $length; $index++ ) {
+			$char = $value[ $index ];
+
+			if ( ! $in_tag ) {
+				if ( $char === '<' ) {
+					$result .= self::normalize_rich_text_segment( $text ) . $char;
+					$text    = '';
+					$in_tag  = true;
+				} else {
+					$text .= $char;
+				}
+				continue;
+			}
+
+			$result .= $char;
+			if ( $quote !== null ) {
+				if ( $char === $quote ) {
+					$quote = null;
+				}
+				continue;
+			}
+
+			if ( $char === '"' || $char === "'" ) {
+				$quote = $char;
+			} elseif ( $char === '>' ) {
+				$in_tag = false;
+			}
+		}
+
+		return $result . self::normalize_rich_text_segment( $text );
+	}
+
+	/**
+	 * Normalize NBSP variants inside one text segment.
+	 *
+	 * @param string $value Plain-text segment from sanitized rich text.
+	 * @return string
+	 */
+	private static function normalize_rich_text_segment( string $value ): string {
+		$value = str_replace( "\xC2\xA0", ' ', $value );
+
+		return preg_replace_callback(
+			'/&(?:nbsp|#0*160|#x0*a0);/i',
+			static function () {
+				return ' ';
+			},
+			$value
+		) ?? $value;
 	}
 
 	/**
@@ -126,7 +189,7 @@ class Sanitize {
 			$value = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		} while ( $value !== $prev );
 
-		return wp_kses_post( $value );
+		return self::normalize_rich_text_whitespace( wp_kses_post( $value ) );
 	}
 
 	/**
@@ -286,6 +349,46 @@ class Sanitize {
 		}
 		$sanitized = sanitize_hex_color( $value );
 		return is_string( $sanitized ) ? $sanitized : '';
+	}
+
+	/**
+	 * Sanitize a CSS color value: hex or a strict rgba() with 0-255 channels
+	 * and a 0-1 alpha. Anything else (named colors, calc(), var(), injection
+	 * attempts) returns an empty string, so consumers can fall back to
+	 * defaults without leaking unsafe values into inline styles.
+	 *
+	 * @since 1.4.0
+	 * @param mixed $value Color value to sanitize.
+	 * @return string Sanitized color ("#aabbcc" or "rgba(r, g, b, a)") or empty string.
+	 */
+	public static function css_color( $value ) {
+		$hex = self::hex_color( $value );
+		if ( $hex !== '' ) {
+			return $hex;
+		}
+
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+
+		if ( ! preg_match( '/^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0|1|1\.0+|0?\.\d{1,4})\s*\)$/i', trim( $value ), $matches ) ) {
+			return '';
+		}
+
+		$r = (int) $matches[1];
+		$g = (int) $matches[2];
+		$b = (int) $matches[3];
+		$a = (float) $matches[4];
+
+		if ( $r > 255 || $g > 255 || $b > 255 || $a > 1 ) {
+			return '';
+		}
+
+		$alpha = rtrim( rtrim( number_format( $a, 4, '.', '' ), '0' ), '.' );
+		$alpha = $alpha === '' ? '0' : $alpha;
+
+		// Canonical form keeps downstream comparisons and CSS emission stable.
+		return sprintf( 'rgba(%d, %d, %d, %s)', $r, $g, $b, $alpha );
 	}
 
 	/**

@@ -10,8 +10,8 @@
 
 namespace SureCookie\Inc\API;
 
-use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\SendJson;
+use SureCookie\Inc\Services\ScriptBlockingService;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_REST_Server;
 
@@ -60,23 +60,24 @@ class ScannedResources extends Base {
 	 * @return void
 	 */
 	public function get_scanned_resources( $request ): void {
-		$resources = Get::option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [], 'array' );
-
 		/**
 		 * Filter the scan-detected resources before they reach the scanner UI.
 		 * Modules annotate each resource here, e.g. Google Consent Mode flags
 		 * `gcmManaged` so the UI can disable the block toggle for scripts GCM
 		 * already lets through under consent-mode signaling.
 		 *
+		 * Applied inside ScriptBlockingService::get_scanned_resources_payload(),
+		 * which the script-blocking ability shares. The `{ scripts, iframes,
+		 * metadata }` shape below is what the admin table reads, so it is
+		 * returned unchanged; the ability flattens it separately.
+		 *
 		 * @since 1.2.0
 		 * @param array<string, mixed> $resources Scanned resources payload.
 		 */
-		$resources = apply_filters( 'surecookie_scanned_resources', $resources );
-
 		SendJson::success(
 			[
 				'message'   => __( 'Scanned resources retrieved successfully.', 'surecookie' ),
-				'resources' => $resources,
+				'resources' => ( new ScriptBlockingService() )->get_scanned_resources_payload(),
 			]
 		);
 	}

@@ -83,4 +83,30 @@ class Utils {
 
 		return hash_equals( $stored_token, $header_value );
 	}
+
+	/**
+	 * Whether this request is a scan looking at the site the way a consenting
+	 * visitor would see it.
+	 *
+	 * True for the remote scanner's bypass request and, via the filter, for an
+	 * assisted scan running in the admin's own browser. Both already stand the
+	 * blocker down so the real third-party tags run; this is what tells the rest
+	 * of the plugin that they should also be allowed to finish their work.
+	 *
+	 * @since 1.4.0
+	 * @return bool
+	 */
+	public static function is_scan_probe(): bool {
+		/**
+		 * Filter whether the current request is a scan probing the site.
+		 *
+		 * The assisted-scan collector answers true for its own requests. Return
+		 * false to keep a scan gated exactly as a first-time visitor would be,
+		 * accepting that anything consent withholds stays undetectable.
+		 *
+		 * @since 1.4.0
+		 * @param bool $is_probe Whether this request is a scan probe.
+		 */
+		return (bool) apply_filters( 'surecookie_is_scan_probe', self::is_scan_bypass_request() );
+	}
 }

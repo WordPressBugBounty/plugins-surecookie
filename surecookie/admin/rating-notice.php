@@ -2,8 +2,8 @@
 /**
  * Rating Notice handler for SureCookie plugin.
  *
- * Registers a WordPress admin notice asking for a wp.org review after the
- * user completes their first successful cookie scan that discovered cookies.
+ * Registers a WordPress admin notice asking for a wp.org review once the site
+ * has recorded enough visitor consents to have seen the plugin work.
  *
  * @package    SureCookie
  * @subpackage SureCookie\Admin
@@ -12,6 +12,7 @@
 
 namespace SureCookie\Admin;
 
+use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,8 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * Rating Notice.
  *
  * Displays a review-request notice via the BSF_Admin_Notices library once the
- * first successful cookie scan has completed. Mirrors the SureForms pattern
- * for voice/tone consistency across the Brainstorm Force suite.
+ * consent-log milestone is reached. Mirrors the SureForms pattern for
+ * voice/tone consistency across the Brainstorm Force suite.
  *
  * @since 1.0.0
  */
@@ -43,6 +44,20 @@ class Rating_Notice {
 	private const REVIEW_URL = 'https://wordpress.org/support/plugin/surecookie/reviews/?filter=5#new-post';
 
 	/**
+	 * Site flag set once the ask has been answered for good.
+	 *
+	 * @since 1.4.0
+	 */
+	private const RESOLVED_OPTION = 'surecookie_rating_notice_resolved';
+
+	/**
+	 * Consents the site must have logged before the ask appears.
+	 *
+	 * @since 1.4.0
+	 */
+	private const MIN_CONSENT_LOGS = 30;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -58,7 +73,8 @@ class Rating_Notice {
 	 * Short-circuits (in order) when:
 	 *  - the current user lacks {@see SURECOOKIE_CAPABILITY},
 	 *  - the `surecookie_show_rating_notice` filter returns false,
-	 *  - the first-successful-scan flag hasn't been set yet.
+	 *  - the ask was already answered on this site,
+	 *  - the site hasn't logged {@see MIN_CONSENT_LOGS} consents yet.
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -79,8 +95,13 @@ class Rating_Notice {
 			return;
 		}
 
-		$first_scan_ts = get_option( SURECOOKIE_FIRST_SUCCESSFUL_SCAN_OPTION, false );
-		if ( empty( $first_scan_ts ) ) {
+		// The library tracks dismissal per user, so a site-level flag stops a
+		// review the site already gave from re-prompting every other admin.
+		if ( ! empty( get_option( self::RESOLVED_OPTION, false ) ) ) {
+			return;
+		}
+
+		if ( $this->consent_log_count() < $this->min_consent_logs() ) {
 			return;
 		}
 
@@ -94,7 +115,9 @@ class Rating_Notice {
 				'type'                       => '',
 				'message'                    => $this->build_message(),
 				'repeat-notice-after'        => WEEK_IN_SECONDS,
-				'display-with-other-notices' => true,
+				// Yield to any other BSF notice already on screen: a review ask
+				// stacked under a compliance warning reads as noise.
+				'display-with-other-notices' => false,
 				'capability'                 => SURECOOKIE_CAPABILITY,
 				// Suppress WordPress core's native "×": it only snoozes (reading the wrapper's repeat interval) instead of dismissing permanently, and it
 				// escapes click tracking. The three CTA links are the intended exits.
@@ -175,6 +198,12 @@ class Rating_Notice {
 					$events->track( $event_map[ $button ], $button );
 				}
 
+				// Rating and "I already did" end the ask for the whole site;
+				// "Maybe later" leaves the library's one-week snooze to it.
+				if ( $button !== 'maybe_later' ) {
+					update_option( self::RESOLVED_OPTION, time(), false );
+				}
+
 				wp_send_json_success();
 			}
 		}
@@ -201,6 +230,38 @@ class Rating_Notice {
 	}
 
 	/**
+	 * Consents logged on this site to date.
+	 *
+	 * Reads the running counter rather than the log table so the gate stays a
+	 * single option read on every admin page load.
+	 *
+	 * @since 1.4.0
+	 * @return int
+	 */
+	private function consent_log_count(): int {
+		return (int) Settings::get( 'total_logs' );
+	}
+
+	/**
+	 * Consent-log milestone that unlocks the ask.
+	 *
+	 * @since 1.4.0
+	 * @return int
+	 */
+	private function min_consent_logs(): int {
+		/**
+		 * Filter the consent-log milestone that unlocks the review request.
+		 *
+		 * @since 1.4.0
+		 * @param int $threshold Consents required. Default 30.
+		 */
+		$threshold = (int) apply_filters( 'surecookie_rating_notice_min_consent_logs', self::MIN_CONSENT_LOGS );
+
+		// A zero or negative threshold would show the ask to every fresh install.
+		return max( 1, $threshold );
+	}
+
+	/**
 	 * Build the HTML markup for the notice body.
 	 *
 	 * Mirrors SureForms' `build_notice_markup` structure so styling inherits
@@ -217,6 +278,17 @@ class Rating_Notice {
 	private function build_message(): string {
 		$logo_url = SURECOOKIE_URL . 'assets/images/surecookie--brand-colored.svg';
 		$snooze   = (string) WEEK_IN_SECONDS;
+		$logged   = $this->consent_log_count();
+		$heading  = sprintf(
+			/* translators: %s: number of visitor consents recorded so far, e.g. "1,204". */
+			_n(
+				'Amazing! SureCookie has recorded %s visitor consent on your site - let\'s keep growing together!',
+				'Amazing! SureCookie has recorded %s visitor consents on your site - let\'s keep growing together!',
+				$logged,
+				'surecookie'
+			),
+			number_format_i18n( $logged )
+		);
 
 		ob_start();
 		?>
@@ -229,7 +301,7 @@ class Rating_Notice {
 		</div>
 		<div class="notice-content">
 			<div class="notice-heading">
-				<?php esc_html_e( 'Amazing! SureCookie discovered cookies on your site - let\'s keep growing together!', 'surecookie' ); ?>
+				<?php echo esc_html( $heading ); ?>
 			</div>
 			<?php esc_html_e( 'If SureCookie has been helpful, would you mind taking a moment to leave a 5-star review on WordPress.org?', 'surecookie' ); ?>
 			<br />

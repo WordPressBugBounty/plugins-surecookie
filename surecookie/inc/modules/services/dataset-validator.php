@@ -18,6 +18,7 @@ namespace SureCookie\Inc\Modules\Services;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Traits\IpManager;
+use SureCookie\Inc\Utils\Logger;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -38,9 +39,15 @@ class Dataset_Validator {
 	/**
 	 * Maximum number of services accepted from a service-cookies payload.
 	 *
+	 * A cap belongs here, but it is a guard against a malformed payload, not a
+	 * product limit: the catalog is expected to keep growing and was already at
+	 * 159. Passing it truncated the payload silently, in whatever order the JSON
+	 * happened to be in, so services would simply stop being blocked with no
+	 * signal anywhere.
+	 *
 	 * @since 1.2.5
 	 */
-	private const MAX_SERVICES = 200;
+	private const MAX_SERVICES = 1000;
 
 	/**
 	 * Maximum number of cookies accepted per service.
@@ -73,6 +80,7 @@ class Dataset_Validator {
 
 		foreach ( $raw as $slug => $service ) {
 			if ( $service_count >= self::MAX_SERVICES ) {
+				self::log_truncation( count( $raw ) );
 				break;
 			}
 
@@ -232,6 +240,30 @@ class Dataset_Validator {
 			'purpose'       => sanitize_textarea_field( (string) ( $cookie['purpose'] ?? '' ) ),
 			'description'   => sanitize_textarea_field( (string) ( $cookie['description'] ?? '' ) ),
 		];
+	}
+
+	/**
+	 * Say so when a payload is truncated, instead of dropping services silently.
+	 *
+	 * Silent truncation looks exactly like a service that was never in the
+	 * catalog: it stops being blocked and nothing anywhere says why.
+	 *
+	 * @since x.x.x
+	 * @param int $received How many services the payload carried.
+	 * @return void
+	 */
+	private static function log_truncation( int $received ): void {
+		$message = sprintf(
+			'SureCookie: services dataset truncated at %d of %d entries. Blocking patterns beyond the cap were dropped.',
+			self::MAX_SERVICES,
+			$received
+		);
+
+		// save_log() too: log() only writes in development mode, and dropping
+		// blocking patterns is precisely what a production site must be told.
+		$logger = Logger::get_instance();
+		$logger->log( $message, 'warning' );
+		$logger->save_log( $message );
 	}
 
 	/**
