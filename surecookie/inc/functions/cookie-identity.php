@@ -45,6 +45,22 @@ class Cookie_Identity {
 	public const FIRST_PARTY_FLAG = 'first_party';
 
 	/**
+	 * Whether a catalog name describes the SHAPE of a name instead of naming a cookie.
+	 *
+	 * `_ga_<container-id>`, `_dc_gtm_UA-*` and `_hjSessionUser_*` exist so an observed
+	 * cookie can be attributed to its service. Publishing one lists, on a legal
+	 * disclosure page, a cookie the site does not set. Shared because three paths
+	 * reach the catalog and each has to make the same call.
+	 *
+	 * @param string $name Catalog cookie name.
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	public static function is_pattern( string $name ): bool {
+		return strcspn( $name, '*<' ) < strlen( $name );
+	}
+
+	/**
 	 * Whether a domain is the catalog's first-party placeholder.
 	 *
 	 * Exact match on the normalised value, never str_contains: a real host like

@@ -60,7 +60,7 @@ class Init {
 	 * @since 1.4.0
 	 * @return array<string, mixed>
 	 */
-	public function localize_theme_palette( $data ): array {
+	public function localize_theme_palette( $data = null ): array {
 		$data = is_array( $data ) ? $data : [];
 
 		$data['themePalette'] = $this->get_palette();

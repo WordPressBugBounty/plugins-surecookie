@@ -84,11 +84,15 @@ class Actions {
 	 * Makes PHP the single source of truth for the SureCookie → WP Consent API
 	 * category mapping. JS reads `window.surecookiePublicSettings.wpConsentCategoryMap`.
 	 *
-	 * @param array<string, mixed> $data Frontend localized data.
-	 * @return array<string, mixed>
+	 * @param mixed $data Expected array<string, mixed> of frontend localized data.
+	 * @return mixed Data with the category map added, or $data untouched.
 	 * @since 0.0.1-beta.1
 	 */
-	public function add_category_map_to_frontend( array $data ): array {
+	public function add_category_map_to_frontend( $data = [] ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
 		$data['wpConsentCategoryMap'] = Consent_Handler::get_full_category_map();
 		return $data;
 	}

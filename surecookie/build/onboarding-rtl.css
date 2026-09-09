@@ -876,6 +876,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   display: contents;
 }.surecookie-styles .hidden {
   display: none;
+}.surecookie-styles .aspect-\[4\/3\] {
+  aspect-ratio: 4/3;
+}.surecookie-styles .aspect-\[9\/16\] {
+  aspect-ratio: 9/16;
 }.surecookie-styles .aspect-video {
   aspect-ratio: 16 / 9;
 }.surecookie-styles .size-1\.5 {
@@ -1173,6 +1177,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   width: 70px;
 }.surecookie-styles .w-\[80px\] {
   width: 80px;
+}.surecookie-styles .w-\[90\%\] {
+  width: 90%;
 }.surecookie-styles .w-\[90px\] {
   width: 90px;
 }.surecookie-styles .w-\[95px\] {
@@ -1221,8 +1227,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   min-width: fit-content;
 }.surecookie-styles .min-w-full {
   min-width: 100%;
-}.surecookie-styles .max-w-120 {
-  max-width: 30rem;
 }.surecookie-styles .max-w-28 {
   max-width: 7rem;
 }.surecookie-styles .max-w-2xl {
@@ -3541,16 +3545,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     margin-top: 2rem;
   }
 
-  .surecookie-styles .md\:block {
-    display: block;
-  }
-
   .surecookie-styles .md\:flex {
     display: flex;
   }
 
   .surecookie-styles .md\:hidden {
     display: none;
+  }
+
+  .surecookie-styles .md\:aspect-video {
+    aspect-ratio: 16 / 9;
   }
 
   .surecookie-styles .md\:w-1\/10 {
@@ -3595,6 +3599,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
   .surecookie-styles .md\:w-1\/9 {
     width: 11.1111111%;
+  }
+
+  .surecookie-styles .md\:w-64 {
+    width: 16rem;
   }
 
   .surecookie-styles .md\:w-fit {
@@ -3869,6 +3877,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
   .surecookie-styles .md\:justify-self-stretch {
     justify-self: stretch;
+  }
+
+  .surecookie-styles .md\:p-6 {
+    padding: 1.5rem;
   }
 }@media (min-width: 1024px) {
 

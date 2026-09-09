@@ -43,6 +43,34 @@ class CookieCategoryMemory {
 	public const MAX_ENTRIES = 1000;
 
 	/**
+	 * Correction fields an admin may pin, alongside the category.
+	 *
+	 * Name and domain are deliberately absent: they are the cookie's identity and
+	 * part of the key, so correcting them would orphan the entry.
+	 *
+	 * @since 1.5.0
+	 */
+	private const FIELDS = [ 'category', 'purpose', 'description', 'duration', 'provider' ];
+
+	/**
+	 * Entry sub-key holding what each pin displaced, so clearing a pin can put the
+	 * scanner's own wording back. Deliberately not in {@see self::FIELDS}: it is
+	 * never a correction, never replayed onto a row, and never accepted from a caller.
+	 *
+	 * @since 1.5.0
+	 */
+	private const ORIGINALS = '_scanned';
+
+	/**
+	 * Fields whose displaced value is worth keeping. Category is excluded: a move
+	 * is not a correction over scanner wording, and recording one would attach an
+	 * empty original to every remembered assignment.
+	 *
+	 * @since 1.5.0
+	 */
+	private const RESTORABLE = [ 'purpose', 'description', 'duration', 'provider' ];
+
+	/**
 	 * Max characters kept per key segment. Names and domains come from whatever a
 	 * third party set, so the cap bounds the option's size, not just its entry
 	 * count. Keys are only compared, never displayed.
@@ -65,11 +93,59 @@ class CookieCategoryMemory {
 	 * @return void
 	 */
 	public static function remember( array $cookies, string $category ): void {
-		if ( $category === '' || empty( $cookies ) ) {
-			return;
+		self::remember_corrections( $cookies, [ 'category' => $category ] );
+	}
+
+	/**
+	 * What the scanner reported for a field before an admin pinned over it.
+	 *
+	 * Returns null when nothing was displaced - either the field was never
+	 * corrected, or the pin has since been cleared and the original released.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $cookie Cookie row, as stored.
+	 * @param string               $field  One of self::FIELDS.
+	 * @return string|null
+	 */
+	public static function displaced_value( array $cookie, string $field ): ?string {
+		$remembered = self::all();
+		$key        = self::existing_key( $cookie, $remembered );
+
+		if ( $key === '' ) {
+			return null;
 		}
 
-		if ( ! in_array( $category, self::registered_categories(), true ) ) {
+		$originals = $remembered[ $key ][ self::ORIGINALS ] ?? null;
+
+		return is_array( $originals ) && array_key_exists( $field, $originals )
+			? (string) $originals[ $field ]
+			: null;
+	}
+
+	/**
+	 * Pin one or more corrections against each cookie's identity.
+	 *
+	 * Merges into any existing entry, so correcting a purpose does not discard a
+	 * category pinned earlier, and reuses that entry's key: a provider correction is
+	 * written back onto the row, so re-deriving the key would orphan the entry.
+	 *
+	 * @since 1.5.0
+	 * @param array<int, array<string, mixed>> $cookies     Cookies as stored.
+	 * @param array<string, string>            $corrections Field => value, from self::FIELDS.
+	 * @return void
+	 */
+	public static function remember_corrections( array $cookies, array $corrections ): void {
+		$corrections = array_intersect_key( $corrections, array_flip( self::FIELDS ) );
+
+		// Enforced here rather than at the call sites: a category that is not
+		// registered would orphan the cookie out of the manager and the banner,
+		// and every entry point must be held to that, not just remember().
+		if ( isset( $corrections['category'] )
+			&& ! in_array( $corrections['category'], self::registered_categories(), true ) ) {
+			unset( $corrections['category'] );
+		}
+
+		if ( empty( $cookies ) || empty( $corrections ) ) {
 			return;
 		}
 
@@ -81,20 +157,54 @@ class CookieCategoryMemory {
 				continue;
 			}
 
-			$key = self::key( $cookie );
+			$key = self::existing_key( $cookie, $remembered );
 			if ( $key === '' ) {
+				continue;
+			}
+
+			$existing  = $remembered[ $key ] ?? [];
+			$merged    = $existing;
+			$originals = is_array( $merged[ self::ORIGINALS ] ?? null ) ? $merged[ self::ORIGINALS ] : [];
+
+			foreach ( $corrections as $field => $value ) {
+				$value = is_string( $value ) ? trim( $value ) : '';
+
+				// An emptied field clears the pin and falls back to the scanned value.
+				if ( $value === '' ) {
+					unset( $merged[ $field ], $originals[ $field ] );
+					continue;
+				}
+
+				// What this correction displaced, kept once: clearing the pin later has
+				// nothing else to restore from, because the pin is also written over the
+				// scanned row so the change shows up before the next scan.
+				if ( in_array( $field, self::RESTORABLE, true )
+					&& ! array_key_exists( $field, $originals )
+					&& ! array_key_exists( $field, $existing ) ) {
+					$originals[ $field ] = (string) ( $cookie[ $field ] ?? '' );
+				}
+
+				$merged[ $field ] = $value;
+			}
+
+			unset( $merged[ self::ORIGINALS ] );
+			if ( ! empty( $originals ) ) {
+				$merged[ self::ORIGINALS ] = $originals;
+			}
+
+			if ( $merged === $existing ) {
 				continue;
 			}
 
 			// Unset first so the re-inserted key moves to the end of the map -
 			// PHP preserves insertion order, which is what bounds eviction.
-			$already_current = isset( $remembered[ $key ] ) && $remembered[ $key ] === $category;
 			unset( $remembered[ $key ] );
-			$remembered[ $key ] = $category;
 
-			if ( ! $already_current ) {
-				$dirty = true;
+			if ( ! empty( $merged ) ) {
+				$remembered[ $key ] = $merged;
 			}
+
+			$dirty = true;
 		}
 
 		if ( ! $dirty ) {
@@ -190,15 +300,36 @@ class CookieCategoryMemory {
 					continue;
 				}
 
-				$assigned = self::lookup( $cookie, $remembered, $fallback );
+				$entry = self::lookup_entry( $cookie, $remembered, $fallback );
 
-				if ( $assigned === '' || $assigned === $category ) {
+				if ( empty( $entry ) ) {
 					continue;
 				}
 
+				// Re-apply the admin's field corrections over what the scanner reported.
+				// Without this a scan silently reverts them: inherit_from_replaced() only
+				// blank-fills, so a non-blank incoming value always wins.
+				$corrected = false;
+				// Driven off FIELDS so a newly pinnable field cannot be stored and never replayed.
+				foreach ( array_diff( self::FIELDS, [ 'category' ] ) as $field ) {
+					if ( ! isset( $entry[ $field ] ) || ( $cookie[ $field ] ?? '' ) === $entry[ $field ] ) {
+						continue;
+					}
+
+					$cookie[ $field ] = $entry[ $field ];
+					$corrected        = true;
+				}
+
+				$assigned = is_string( $entry['category'] ?? null ) ? $entry['category'] : '';
+
 				// A remembered category the admin has since deleted would orphan
 				// the cookie out of the manager and banner - keep the scanner's bucket.
-				if ( ! in_array( $assigned, $registered, true ) ) {
+				$moves = $assigned !== '' && $assigned !== $category && in_array( $assigned, $registered, true );
+
+				if ( ! $moves ) {
+					if ( $corrected ) {
+						$result[ $category ][ $index ] = $cookie;
+					}
 					continue;
 				}
 
@@ -285,25 +416,36 @@ class CookieCategoryMemory {
 	 */
 	public static function forget_category( string $category ): void {
 		$remembered = self::all();
+		$dirty      = false;
 
-		if ( empty( $remembered ) || ! in_array( $category, $remembered, true ) ) {
+		foreach ( $remembered as $key => $entry ) {
+			if ( ( $entry['category'] ?? '' ) !== $category ) {
+				continue;
+			}
+
+			// Drop only the deleted category. A purpose or duration the admin pinned
+			// against the same cookie is unrelated and must survive.
+			unset( $remembered[ $key ]['category'] );
+
+			if ( empty( $remembered[ $key ] ) ) {
+				unset( $remembered[ $key ] );
+			}
+
+			$dirty = true;
+		}
+
+		if ( ! $dirty ) {
 			return;
 		}
 
-		Update::option(
-			SURECOOKIE_COOKIE_CATEGORY_MEMORY_OPTION,
-			array_filter(
-				$remembered,
-				static fn( string $assigned ): bool => $assigned !== $category
-			)
-		);
+		Update::option( SURECOOKIE_COOKIE_CATEGORY_MEMORY_OPTION, $remembered );
 	}
 
 	/**
 	 * All remembered assignments (composite key => category ID).
 	 *
 	 * @since 1.3.0
-	 * @return array<string, string>
+	 * @return array<string, array<string, string|array<string, string>>> Composite key => correction entry.
 	 */
 	public static function all(): array {
 		$remembered = Get::option( SURECOOKIE_COOKIE_CATEGORY_MEMORY_OPTION, [], 'array' );
@@ -314,9 +456,46 @@ class CookieCategoryMemory {
 
 		$assignments = [];
 
-		foreach ( $remembered as $key => $category ) {
-			if ( is_string( $key ) && $key !== '' && is_string( $category ) && $category !== '' ) {
-				$assignments[ $key ] = $category;
+		foreach ( $remembered as $key => $entry ) {
+			if ( ! is_string( $key ) || $key === '' ) {
+				continue;
+			}
+
+			// Entries written before corrections existed are a bare category string.
+			$entry = is_string( $entry ) ? [ 'category' => $entry ] : $entry;
+
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+
+			$clean = [];
+			foreach ( self::FIELDS as $field ) {
+				$value = $entry[ $field ] ?? '';
+				if ( is_string( $value ) && $value !== '' ) {
+					$clean[ $field ] = $value;
+				}
+			}
+
+			// Carried through the FIELDS rebuild above, which would otherwise drop it
+			// on every read - and this map is what the next write merges into, so a
+			// dropped original is a lost one. Empty strings are kept here: "the
+			// scanner reported nothing" is exactly what clearing has to restore.
+			$originals = $entry[ self::ORIGINALS ] ?? null;
+			if ( is_array( $originals ) ) {
+				$kept = [];
+				foreach ( self::RESTORABLE as $field ) {
+					if ( isset( $originals[ $field ] ) && is_string( $originals[ $field ] ) ) {
+						$kept[ $field ] = $originals[ $field ];
+					}
+				}
+
+				if ( ! empty( $kept ) ) {
+					$clean[ self::ORIGINALS ] = $kept;
+				}
+			}
+
+			if ( ! empty( $clean ) ) {
+				$assignments[ $key ] = $clean;
 			}
 		}
 
@@ -337,7 +516,9 @@ class CookieCategoryMemory {
 			return '';
 		}
 
-		return self::lookup( $cookie, $remembered, self::unambiguous_by_name_domain( $remembered ) );
+		$entry = self::lookup_entry( $cookie, $remembered, self::unambiguous_by_name_domain( $remembered ) );
+
+		return is_string( $entry['category'] ?? null ) ? $entry['category'] : '';
 	}
 
 	/**
@@ -362,27 +543,57 @@ class CookieCategoryMemory {
 	}
 
 	/**
-	 * Resolve a cookie against a prepared assignment map.
+	 * The key this cookie's corrections belong under.
+	 *
+	 * The provider is part of the key and is itself correctable, so a second correction
+	 * would otherwise land on a new key and orphan the first. An entry already held for
+	 * this name and domain keeps its key, on the same unambiguity rule reads use.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed>                                       $cookie     Cookie row as stored.
+	 * @param array<string, array<string, string|array<string, string>>> $remembered Entry map.
+	 * @return string
+	 */
+	private static function existing_key( array $cookie, array $remembered ): string {
+		$key = self::key( $cookie );
+
+		if ( $key === '' || isset( $remembered[ $key ] ) ) {
+			return $key;
+		}
+
+		$pair    = self::name_domain_key( $cookie );
+		$matches = array_filter(
+			array_keys( $remembered ),
+			static fn( string $held ): bool => implode( '|', array_slice( explode( '|', $held ), 0, 2 ) ) === $pair
+		);
+
+		return count( $matches ) === 1 ? (string) reset( $matches ) : $key;
+	}
+
+	/**
+	 * The remembered entry for a cookie, or an empty array.
 	 *
 	 * Exact identity first, then name+domain, but only when that pair resolves to a
-	 * single category - a cookie's provider can change between scans (an observed
-	 * row only picks one up once its service enters the catalog, and the
-	 * scan-history diff carries no provider at all).
+	 * single entry - a cookie's provider can change between scans (an observed row only
+	 * picks one up once its service enters the catalog, and the scan-history diff
+	 * carries no provider at all).
 	 *
-	 * @param array<string, mixed>  $cookie     Cookie row.
-	 * @param array<string, string> $remembered Assignment map.
-	 * @param array<string, string> $fallback   Unambiguous name+domain map.
-	 * @since 1.3.0
-	 * @return string Category ID, or an empty string.
+	 * @since 1.5.0
+	 * @param array<string, mixed>                                       $cookie     Cookie to look up.
+	 * @param array<string, array<string, string|array<string, string>>> $remembered Entry map.
+	 * @param array<string, array<string, string|array<string, string>>> $fallback   name|domain entries.
+	 * @return array<string, string|array<string, string>>
 	 */
-	private static function lookup( array $cookie, array $remembered, array $fallback ): string {
+	private static function lookup_entry( array $cookie, array $remembered, array $fallback ): array {
 		$key = self::key( $cookie );
 
 		if ( $key === '' ) {
-			return '';
+			return [];
 		}
 
-		return (string) ( $remembered[ $key ] ?? ( $fallback[ self::name_domain_key( $cookie ) ] ?? '' ) );
+		$entry = $remembered[ $key ] ?? ( $fallback[ self::name_domain_key( $cookie ) ] ?? [] );
+
+		return is_array( $entry ) ? $entry : [];
 	}
 
 	/**
@@ -393,25 +604,28 @@ class CookieCategoryMemory {
 	 * legitimately differ in category, so an ambiguous pair is dropped rather than
 	 * guessed - the exact composite key still matches it.
 	 *
-	 * @param array<string, string> $remembered Assignment map.
+	 * @param array<string, array<string, string|array<string, string>>> $remembered Correction entries.
 	 * @since 1.3.0
-	 * @return array<string, string> name|domain => category, unambiguous entries only.
+	 * @return array<string, array<string, string|array<string, string>>> name|domain => entry, unambiguous only.
 	 */
 	private static function unambiguous_by_name_domain( array $remembered ): array {
 		$grouped = [];
 
-		foreach ( $remembered as $key => $category ) {
+		foreach ( $remembered as $key => $entry ) {
 			// Drop the provider segment of `name|domain|provider`.
 			$pair = implode( '|', array_slice( explode( '|', $key ), 0, 2 ) );
 
-			$grouped[ $pair ][ $category ] = true;
+			// Compare whole entries, not just categories: two providers agreeing on a
+			// category but not on a purpose are still ambiguous.
+			ksort( $entry );
+			$grouped[ $pair ][ (string) wp_json_encode( $entry ) ] = $entry;
 		}
 
 		$unambiguous = [];
 
-		foreach ( $grouped as $pair => $categories ) {
-			if ( count( $categories ) === 1 ) {
-				$unambiguous[ $pair ] = (string) array_key_first( $categories );
+		foreach ( $grouped as $pair => $entries ) {
+			if ( count( $entries ) === 1 ) {
+				$unambiguous[ $pair ] = reset( $entries );
 			}
 		}
 

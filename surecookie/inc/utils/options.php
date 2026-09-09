@@ -221,6 +221,36 @@ class Options {
 					'type'    => 'int',
 					'default' => 0,
 				],
+				'privacy_policy_page_id'        => [
+					'type'    => 'int',
+					'default' => 0,
+				],
+				'privacy_jurisdictions'         => [
+					'type'    => 'array',
+					'default' => [],
+				],
+				// Controller identity, surfaced as "Business Details". The whole
+				// set lives under one nested key so the global namespace stays
+				// clean; `Settings::update` replaces it wholesale, so every
+				// writer must read-merge-write via Validator::sanitize_details().
+				'organization_details'          => [
+					'type'    => 'array',
+					'default' => [
+						'legal_entity_name'       => '',
+						// A list, not a multi-line string: Sanitize::array()
+						// runs sanitize_text_field on every leaf, which strips
+						// newlines, and the rich-text opt-out leaves nested
+						// leaves decoded-but-unsanitized on read.
+						'postal_address_lines'    => [],
+						'postal_code'             => '',
+						'country'                 => '',
+						'privacy_contact_email'   => '',
+						'grievance_officer_name'  => '',
+						'grievance_officer_email' => '',
+						'transfer_safeguard_text' => '',
+						'ccpa_sells_or_shares'    => '',
+					],
+				],
 				'custom_css'                    => [
 					'type'    => 'stylesheet',
 					'default' => '',

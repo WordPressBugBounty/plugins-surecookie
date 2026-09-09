@@ -125,6 +125,10 @@ class ConsentLog extends Base {
 			'country'       => [
 				'type' => 'string',
 			],
+			// ISO region name (US state, Indian state), from GeoLite2-City.
+			'region'        => [
+				'type' => 'string',
+			],
 			// Geo preset ID (which geo preset was active when consent was recorded).
 			'geo_preset_id' => [
 				'type' => 'string',
@@ -156,6 +160,8 @@ class ConsentLog extends Base {
 			'preferences longtext NOT NULL',
 			'action ENUM(\'accepted\', \'declined\', \'partially_accepted\') NOT NULL DEFAULT \'partially_accepted\'',
 			'country varchar(100) DEFAULT \'Unknown\'',
+			// ISO region name (US state, Indian state), from GeoLite2-City.
+			'region varchar(100) DEFAULT \'\'',
 			'geo_preset_id varchar(100) DEFAULT NULL',
 			// Consent Forwarding: is_forwarded/origin_site mark rows received
 			// from a partner site; forwarded_to is set on local origin rows
@@ -869,12 +875,16 @@ class ConsentLog extends Base {
 	 * @param string|null $geo_preset_id Geo preset ID active when consent was recorded.
 	 * @param bool        $is_forwarded  Whether this consent was forwarded from a partner site.
 	 * @param string|null $origin_site   Origin site URL when this is a forwarded consent.
+	 * @param string      $region        Region name for further processing.
+	 * @param bool|null   $stored        Out: whether this call actually wrote a row, as opposed to being swallowed as a same-second duplicate.
 	 * @since 0.0.1
 	 * @return int|false Row ID of the inserted or updated entry, or false on error.
 	 */
-	public static function upsert( $ip_address, $user_id, $session_id, $preferences, $action, $country, $timestamp = null, $geo_preset_id = null, bool $is_forwarded = false, ?string $origin_site = null ) {
+	public static function upsert( $ip_address, $user_id, $session_id, $preferences, $action, $country, $timestamp = null, $geo_preset_id = null, bool $is_forwarded = false, ?string $origin_site = null, string $region = '', &$stored = null ) {
 		global $wpdb;
 
+		// Per-call outcome: a listener re-entering upsert() reassigns the static.
+		$stored                   = false;
 		self::$last_upsert_stored = false;
 
 		/*
@@ -908,9 +918,9 @@ class ConsentLog extends Base {
 		$origin_sql     = $origin === null ? 'NULL' : '%s';
 		$origin_binding = $origin === null ? [] : [ $origin ];
 		$forwarded_flag = $is_forwarded ? 1 : 0;
+		$region         = sanitize_text_field( $region );
 
 		$log_id = false;
-		$stored = false;
 
 		// Only a self-generated timestamp may be nudged, and never more than twice -
 		// the recorded second then trails the real event by at most 2s, which beats
@@ -919,7 +929,7 @@ class ConsentLog extends Base {
 
 		for ( $attempt = 0; $attempt < $attempts; $attempt++ ) {
 			$values = array_merge(
-				[ $table_name, $ip_address, (int) $user_id, $session_id, $preferences, $action, $country, $timestamp ],
+				[ $table_name, $ip_address, (int) $user_id, $session_id, $preferences, $action, $country, $region, $timestamp ],
 				$preset_binding,
 				[ $forwarded_flag ],
 				$origin_binding
@@ -927,8 +937,8 @@ class ConsentLog extends Base {
 
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $preset_sql / $origin_sql are hardcoded switches between 'NULL' (literal) and '%s' (placeholder); not user-controlled.
 			$query = $wpdb->prepare(
-				'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, timestamp, geo_preset_id, is_forwarded, origin_site)
-				 VALUES (%s, %d, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ')
+				'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, region, timestamp, geo_preset_id, is_forwarded, origin_site)
+				 VALUES (%s, %d, %s, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ')
 				 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)',
 				$values
 			);
@@ -996,12 +1006,17 @@ class ConsentLog extends Base {
 					'preferences'   => $preferences,
 					'action'        => $action,
 					'country'       => $country,
+					'region'        => $region,
 					'timestamp'     => $timestamp,
 					'geo_preset_id' => $preset,
 					'is_forwarded'  => (bool) $forwarded_flag,
 					'origin_site'   => $origin,
 				]
 			);
+
+			// A listener that writes its own row (Pro's forwarding fallback) leaves
+			// the static describing that write, so restore this call's outcome.
+			self::$last_upsert_stored = $stored;
 		}
 
 		return $log_id;

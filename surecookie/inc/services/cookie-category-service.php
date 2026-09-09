@@ -66,46 +66,6 @@ class CookieCategoryService {
 	}
 
 	/**
-	 * Whether another category already carries this name.
-	 *
-	 * The id is a fresh UUID so it can never collide; the name is what the admin
-	 * sees, and duplicates split their cookies between identical-looking rows.
-	 *
-	 * @param array<string, mixed> $categories Existing categories keyed by id.
-	 * @param string               $name       Sanitized candidate name.
-	 * @param string               $ignore_id  Category being renamed, so it keeps its own name.
-	 * @since x.x.x
-	 * @return bool
-	 */
-	private function name_taken( array $categories, string $name, string $ignore_id = '' ): bool {
-		$needle = $this->fold( $name );
-
-		foreach ( $categories as $id => $category ) {
-			if ( (string) $id === $ignore_id || ! is_array( $category ) ) {
-				continue;
-			}
-
-			if ( $this->fold( (string) ( $category['name'] ?? '' ) ) === $needle ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Normalise a name for comparison. Trimmed here, not left to the sanitizer.
-	 *
-	 * @param string $value Name to fold.
-	 * @since x.x.x
-	 * @return string
-	 */
-	private function fold( string $value ): string {
-		$value = trim( $value );
-		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
-	}
-
-	/**
 	 * Create a new cookie category.
 	 *
 	 * @param array<string, mixed> $data Category data with keys: name (required), description, required.
@@ -176,8 +136,9 @@ class CookieCategoryService {
 
 		$categories = Settings::get( 'cookie_categories' );
 
-		// Check if category exists using associative array key.
-		if ( ! isset( $categories[ $category_id ] ) ) {
+		// Check if category exists using associative array key. Shape too: a scalar row
+		// would survive the lookup and then fatal on the field writes below.
+		if ( ! isset( $categories[ $category_id ] ) || ! is_array( $categories[ $category_id ] ) ) {
 			return [
 				'success' => false,
 				'message' => __( 'Category not found.', 'surecookie' ),
@@ -369,5 +330,45 @@ class CookieCategoryService {
 			'cookies_deleted' => $keep_cookies ? 0 : $cookie_count,
 			'target_category' => $keep_cookies && $cookie_count > 0 ? $target_category : '',
 		];
+	}
+
+	/**
+	 * Whether another category already carries this name.
+	 *
+	 * The id is a fresh UUID so it can never collide; the name is what the admin
+	 * sees, and duplicates split their cookies between identical-looking rows.
+	 *
+	 * @param array<string, mixed> $categories Existing categories keyed by id.
+	 * @param string               $name       Sanitized candidate name.
+	 * @param string               $ignore_id  Category being renamed, so it keeps its own name.
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	private function name_taken( array $categories, string $name, string $ignore_id = '' ): bool {
+		$needle = $this->fold( $name );
+
+		foreach ( $categories as $id => $category ) {
+			if ( (string) $id === $ignore_id || ! is_array( $category ) ) {
+				continue;
+			}
+
+			if ( $this->fold( (string) ( $category['name'] ?? '' ) ) === $needle ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Normalise a name for comparison. Trimmed here, not left to the sanitizer.
+	 *
+	 * @param string $value Name to fold.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function fold( string $value ): string {
+		$value = trim( $value );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
 	}
 }

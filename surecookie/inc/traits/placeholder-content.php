@@ -18,6 +18,7 @@ use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\Multilingual\Translation_Filter;
 use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
+use SureCookie\Inc\Modules\ScriptBlocking\Blocking_Surface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,6 +29,68 @@ defined( 'ABSPATH' ) || exit;
  */
 trait PlaceholderContent {
 	/**
+	 * Admin-editable placeholder description, with `{service}` replaced by the
+	 * vendor label. Returns rich text (sanitized on save); render with
+	 * wp_kses_post() so basic formatting survives.
+	 *
+	 * @since 1.4.0
+	 * @param string $label Vendor label.
+	 * @return string
+	 */
+	public static function placeholder_description( string $label ): string {
+		return str_replace( '{service}', $label, self::placeholder_description_template() );
+	}
+
+	/**
+	 * The placeholder description with its `{service}` token still in place.
+	 *
+	 * Split out so the client-side builder for runtime-blocked embeds renders the
+	 * same copy as the server-side one, from the same setting, rather than
+	 * carrying its own default.
+	 *
+	 * @since 1.4.0
+	 * @return string Rich text containing a `{service}` token.
+	 */
+	public static function placeholder_description_template(): string {
+		$template = (string) Settings::get( 'placeholder_description' );
+
+		// Translate the raw stored template BEFORE any manipulation: WPML /
+		// Polylang string translation is keyed off the exact value registered by
+		// String_Registration (the raw setting). The `{service}` token is expanded
+		// afterwards so translators keep it in their translations.
+		if ( $template !== '' ) {
+			$template = Translation_Filter::translate_string( $template, 'surecookie_placeholder_description', true );
+		}
+
+		$template = self::strip_empty_paragraphs( $template );
+
+		if ( $template !== '' ) {
+			return $template;
+		}
+
+		// Says what blocking prevents, not what the service stores: many blocked
+		// services (Bunny, asset CDNs) set no cookies at all.
+		/* translators: %s: Service name (e.g., YouTube, Google Maps) */
+		return sprintf( __( 'This content is blocked because it would connect to %s.', 'surecookie' ), '{service}' );
+	}
+
+	/**
+	 * Admin-editable "Accept & Load" button label.
+	 *
+	 * @since 1.4.0
+	 * @return string
+	 */
+	public static function placeholder_button_text(): string {
+		$text = (string) Settings::get( 'placeholder_button_text' );
+		if ( $text === '' ) {
+			return __( 'Accept & Load', 'surecookie' );
+		}
+
+		// WPML/Polylang translation of the admin-entered label (registered raw by
+		// String_Registration; a no-op sanitize when neither plugin is active).
+		return Translation_Filter::translate_string( $text, 'surecookie_placeholder_button_text' );
+	}
+	/**
 	 * The catalog's own category and label for a service, or null when the
 	 * catalog has never heard of it.
 	 *
@@ -36,7 +99,7 @@ trait PlaceholderContent {
 	 * disagree about the same service, with no admin setting able to reconcile
 	 * them. Read the catalog instead and keep any hardcoded value as a fallback.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $service Catalog service key.
 	 * @return array{category: string, label: string}|null
 	 */
@@ -45,6 +108,8 @@ trait PlaceholderContent {
 			return null;
 		}
 
+		// Reached from the output-buffer display handler: a callback opening its own
+		// buffer is an uncatchable fatal that discards the response (#1081).
 		$catalog = apply_filters( 'surecookie_known_scripts', [] );
 		if ( ! is_array( $catalog ) ) {
 			return null;
@@ -69,12 +134,14 @@ trait PlaceholderContent {
 	/**
 	 * Whether a category is never gated, matching the tag passes.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $category Resolved category.
 	 * @return bool
 	 */
 	protected function is_skippable_category( string $category ): bool {
-		return in_array( $category, (array) apply_filters( 'surecookie_skippable_categories', [ 'essential' ] ), true );
+		// Same display-handler constraint as surecookie_known_scripts above
+		// (#1081): the shared reader is pure string work and opens no buffer.
+		return Blocking_Surface::is_skippable_category( $category );
 	}
 
 	/**
@@ -157,52 +224,6 @@ trait PlaceholderContent {
 	}
 
 	/**
-	 * Admin-editable placeholder description, with `{service}` replaced by the
-	 * vendor label. Returns rich text (sanitized on save); render with
-	 * wp_kses_post() so basic formatting survives.
-	 *
-	 * @since 1.4.0
-	 * @param string $label Vendor label.
-	 * @return string
-	 */
-	public static function placeholder_description( string $label ): string {
-		return str_replace( '{service}', $label, self::placeholder_description_template() );
-	}
-
-	/**
-	 * The placeholder description with its `{service}` token still in place.
-	 *
-	 * Split out so the client-side builder for runtime-blocked embeds renders the
-	 * same copy as the server-side one, from the same setting, rather than
-	 * carrying its own default.
-	 *
-	 * @since 1.4.0
-	 * @return string Rich text containing a `{service}` token.
-	 */
-	public static function placeholder_description_template(): string {
-		$template = (string) Settings::get( 'placeholder_description' );
-
-		// Translate the raw stored template BEFORE any manipulation: WPML /
-		// Polylang string translation is keyed off the exact value registered by
-		// String_Registration (the raw setting). The `{service}` token is expanded
-		// afterwards so translators keep it in their translations.
-		if ( $template !== '' ) {
-			$template = Translation_Filter::translate_string( $template, 'surecookie_placeholder_description', true );
-		}
-
-		$template = self::strip_empty_paragraphs( $template );
-
-		if ( $template !== '' ) {
-			return $template;
-		}
-
-		// Says what blocking prevents, not what the service stores: many blocked
-		// services (Bunny, asset CDNs) set no cookies at all.
-		/* translators: %s: Service name (e.g., YouTube, Google Maps) */
-		return sprintf( __( 'This content is blocked because it would connect to %s.', 'surecookie' ), '{service}' );
-	}
-
-	/**
 	 * Drop empty paragraphs the rich-text editor leaves behind (`<p></p>`,
 	 * `<p><br></p>`, `<p>&nbsp;</p>`), which would otherwise render as blank
 	 * lines of dead space between the description and the Accept button.
@@ -279,7 +300,9 @@ trait PlaceholderContent {
 				__( 'Accept and load %s content', 'surecookie' ),
 				$label
 			);
-			$out .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $category ) . '" aria-label="' . esc_attr( $button_aria ) . '" style="' . esc_attr( 'background-color:' . $colors['primary'] . ';color:#ffffff;' ) . '">';
+			// White was hardcoded here, which fell under the WCAG minimum on every
+			// palette whose primary is light (issue #1063).
+			$out .= '<button type="button" class="surecookie-placeholder-button" data-surecookie-category="' . esc_attr( $category ) . '" aria-label="' . esc_attr( $button_aria ) . '" style="' . esc_attr( 'background-color:' . $colors['primary'] . ';color:' . $colors['primary_text'] . ';' ) . '">';
 			$out .= esc_html( self::placeholder_button_text() );
 			$out .= '</button>';
 		}
@@ -287,22 +310,5 @@ trait PlaceholderContent {
 		$out .= '</div>';
 
 		return $out;
-	}
-
-	/**
-	 * Admin-editable "Accept & Load" button label.
-	 *
-	 * @since 1.4.0
-	 * @return string
-	 */
-	public static function placeholder_button_text(): string {
-		$text = (string) Settings::get( 'placeholder_button_text' );
-		if ( $text === '' ) {
-			return __( 'Accept & Load', 'surecookie' );
-		}
-
-		// WPML/Polylang translation of the admin-entered label (registered raw by
-		// String_Registration; a no-op sanitize when neither plugin is active).
-		return Translation_Filter::translate_string( $text, 'surecookie_placeholder_button_text' );
 	}
 }

@@ -526,7 +526,7 @@
 #surecookie-public-root .surecookie-accept-btn,
 #surecookie-public-root .surecookie-accept-all-btn {
 	background-color: var(--surecookie-banner-primary-color, #2563eb);
-	color: #fff;
+	color: var(--surecookie-banner-primary-text-color, #fff);
 }
 
 /* Decline button uses the secondary palette role. Falls back to primary so
@@ -534,7 +534,7 @@
    their previous appearance. */
 #surecookie-public-root .surecookie-decline-btn {
 	background-color: var(--surecookie-banner-secondary-color, var(--surecookie-banner-primary-color, #2563eb));
-	color: #fff;
+	color: var(--surecookie-banner-secondary-text-color, #fff);
 }
 
 /* Button hover styles - accept/accept-all darken via primary-hover. */
@@ -1015,7 +1015,7 @@
 	transition: all 0.2s;
 	white-space: nowrap;
 	background-color: var(--surecookie-banner-primary-color);
-	color: #fff;
+	color: var(--surecookie-banner-primary-text-color, #fff);
 	text-transform: none;
 	letter-spacing: 0;
 }
@@ -1236,7 +1236,7 @@
 }
 .surecookie-placeholder.surecookie-placeholder button.surecookie-placeholder-button {
 	background-color: var(--surecookie-banner-primary-color, #2563eb);
-	color: #fff;
+	color: var(--surecookie-banner-primary-text-color, #fff);
 	border: none;
 	padding: 8px 16px;
 	border-radius: 4px;

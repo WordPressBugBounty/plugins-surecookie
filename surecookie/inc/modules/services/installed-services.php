@@ -249,7 +249,11 @@ class Installed_Services {
 			}
 
 			$name = (string) ( $cookie['name'] ?? '' );
-			if ( $name === '' ) {
+			// A catalog pattern is a matcher, not a cookie: minting one publishes a
+			// cookie the site does not set, on a legal disclosure page. Not recorded
+			// as skipped - `skipped` means "already on this site", and a pattern was
+			// never a candidate.
+			if ( $name === '' || Cookie_Identity::is_pattern( $name ) ) {
 				continue;
 			}
 
@@ -296,6 +300,45 @@ class Installed_Services {
 			'skipped'      => $skipped,
 			'cookie_count' => count( $entry['cookie_ids'] ),
 		];
+	}
+
+	/**
+	 * Delete pattern rows a previous install() published as cookies.
+	 *
+	 * Nothing else converges them: the rows are `custom`, so no scan reconciles
+	 * them away, and they stay on the public cookie policy indefinitely. Scoped to
+	 * rows a service owns (`service_slug`), so a cookie an admin added by hand is
+	 * never touched even if its name happens to hold a wildcard.
+	 *
+	 * @since 1.5.0
+	 * @return int Rows removed.
+	 */
+	public function prune_pattern_cookies(): int {
+		$custom  = (array) Settings::get( 'custom_cookies' );
+		$removed = 0;
+
+		foreach ( $custom as $id => $cookie ) {
+			if ( ! is_array( $cookie ) ) {
+				continue;
+			}
+
+			if ( (string) ( $cookie['service_slug'] ?? '' ) === '' ) {
+				continue;
+			}
+
+			if ( ! Cookie_Identity::is_pattern( (string) ( $cookie['name'] ?? '' ) ) ) {
+				continue;
+			}
+
+			unset( $custom[ $id ] );
+			++$removed;
+		}
+
+		if ( $removed > 0 ) {
+			Settings::update( 'custom_cookies', $custom );
+		}
+
+		return $removed;
 	}
 
 	/**
@@ -370,7 +413,7 @@ class Installed_Services {
 	 * @since 1.3.0
 	 * @return array<string, mixed>
 	 */
-	public function annotate_scanned_resources( $resources ) {
+	public function annotate_scanned_resources( $resources = [] ) {
 		if ( ! is_array( $resources ) ) {
 			return $resources;
 		}
@@ -405,15 +448,35 @@ class Installed_Services {
 		$patterns_by_kind = $matcher->get_service_patterns_by_kind( array_keys( $installed ) );
 		foreach ( $installed as $slug => $entry ) {
 			$service_patterns = $patterns_by_kind[ $slug ] ?? [];
-			foreach ( [ 'scripts', 'iframes' ] as $kind ) {
-				foreach ( (array) ( $service_patterns[ $kind ] ?? [] ) as $pattern ) {
+			foreach ( Pattern_Kinds::buckets() as $bucket ) {
+				// A stylesheet or media pattern still deserves a row - the admin
+				// needs to see it, and the row reports that it is not blocked.
+				// Scanners file those under scripts, so use the same bucket.
+				$kind = Pattern_Kinds::resource_kind( $bucket ) === 'iframe' ? 'iframes' : 'scripts';
+				// Grouped by host first, because one row stands for the whole
+				// service on that host. Emitting per pattern and deduping by host
+				// kept only the first, so an always-allow rule written from the row
+				// covered `instagram.com/p/` and left `/reel/` and `/embed` blocked.
+				$by_host = [];
+				foreach ( (array) ( $service_patterns[ $bucket ] ?? [] ) as $pattern ) {
 					$host = $this->pattern_host( (string) $pattern );
-					if ( $host === '' || isset( $existing_hosts[ $kind ][ $host ] ) ) {
+					if ( $host === '' ) {
 						continue;
 					}
+
+					$by_host[ $host ][] = (string) $pattern;
+				}
+
+				foreach ( $by_host as $host => $patterns ) {
+					if ( isset( $existing_hosts[ $kind ][ $host ] ) ) {
+						continue;
+					}
+
+					$patterns                         = array_values( array_unique( $patterns ) );
 					$resources[ $kind ][]             = [
 						'domain'            => $host,
-						'url'               => (string) $pattern,
+						'url'               => $patterns[0],
+						'patterns'          => $patterns,
 						'vendor'            => (string) ( $entry['label'] ?? $slug ),
 						'category'          => (string) ( $entry['category'] ?? 'uncategorized' ),
 						'source'            => 'service',

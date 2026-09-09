@@ -14,6 +14,7 @@
 namespace SureCookie\Inc\Modules\Services;
 
 use SureCookie\Inc\API\Base;
+use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Services\KnownServicesService;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_REST_Response;
@@ -90,26 +91,31 @@ class Api extends Base {
 				continue;
 			}
 
-			$scripts = array_values( (array) ( $service['patterns']['scripts'] ?? [] ) );
-			$iframes = array_values( (array) ( $service['patterns']['iframes'] ?? [] ) );
-			$cookies = array_values( (array) ( $service['cookies'] ?? [] ) );
+			// Patterns are matchers, not cookies: install() will not add them, so the
+			// library card must not count or list them either, or it promises seven
+			// cookies for Google Analytics and adds five.
+			$cookies = array_values(
+				array_filter(
+					(array) ( $service['cookies'] ?? [] ),
+					static fn( $cookie ): bool => is_array( $cookie )
+						&& ! Cookie_Identity::is_pattern( (string) ( $cookie['name'] ?? '' ) )
+				)
+			);
+			$summary = Services_Source::pattern_summary( $service );
 
-			$services[] = [
-				'slug'        => $slug,
-				'label'       => (string) ( $service['label'] ?? $slug ),
-				'description' => (string) ( $service['description'] ?? '' ),
-				'category'    => (string) ( $service['category'] ?? 'uncategorized' ),
-				'pro'         => ! empty( $service['pro'] ),
-				'cookieCount' => count( $cookies ),
-				'scriptCount' => count( $scripts ),
-				'iframeCount' => count( $iframes ),
-				'blockable'   => $scripts !== [] || $iframes !== [],
-				'cookies'     => $cookies,
-				'resources'   => [
-					'scripts' => $scripts,
-					'iframes' => $iframes,
+			$services[] = array_merge(
+				[
+					'slug'        => $slug,
+					'label'       => (string) ( $service['label'] ?? $slug ),
+					'description' => (string) ( $service['description'] ?? '' ),
+					'category'    => (string) ( $service['category'] ?? 'uncategorized' ),
+					'pro'         => ! empty( $service['pro'] ),
+					'cookieCount' => count( $cookies ),
+					'cookies'     => $cookies,
+					'resources'   => Services_Source::pattern_lists( $service ),
 				],
-			];
+				$summary
+			);
 		}
 
 		return new WP_REST_Response(

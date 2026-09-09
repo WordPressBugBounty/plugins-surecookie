@@ -58,7 +58,7 @@ class Dataset_Validator {
 
 	/**
 	 * Validate a unified services dataset (service slug => {label, category,
-	 * gcm_compatible?, patterns:{scripts,iframes}, cookies:[...]}).
+	 * gcm_compatible?, patterns keyed by Pattern_Kinds bucket, cookies:[...]}).
 	 *
 	 * Coercive (drop-bad-keep-good): the `_meta` key is dropped, non-slug keys are
 	 * skipped, the service-level `category` is coerced to a valid consent key
@@ -92,8 +92,13 @@ class Dataset_Validator {
 				continue;
 			}
 
-			$scripts = self::clean_pattern_list( $service['patterns']['scripts'] ?? [] );
-			$iframes = self::clean_pattern_list( $service['patterns']['iframes'] ?? [] );
+			$patterns    = [];
+			$has_pattern = false;
+
+			foreach ( Pattern_Kinds::buckets() as $bucket ) {
+				$patterns[ $bucket ] = self::clean_pattern_list( $service['patterns'][ $bucket ] ?? [] );
+				$has_pattern         = $has_pattern || $patterns[ $bucket ] !== [];
+			}
 
 			$clean_cookies = [];
 			$cookie_count  = 0;
@@ -110,7 +115,7 @@ class Dataset_Validator {
 			}
 
 			// A service with neither patterns nor cookies contributes nothing.
-			if ( $scripts === [] && $iframes === [] && empty( $clean_cookies ) ) {
+			if ( ! $has_pattern && empty( $clean_cookies ) ) {
 				continue;
 			}
 
@@ -128,10 +133,7 @@ class Dataset_Validator {
 				// treats a service as free rather than surprise-locking it.
 				'pro'            => ! empty( $service['pro'] ),
 				'gcm_compatible' => ! empty( $service['gcm_compatible'] ),
-				'patterns'       => [
-					'scripts' => $scripts,
-					'iframes' => $iframes,
-				],
+				'patterns'       => $patterns,
 				'cookies'        => $clean_cookies,
 			];
 
@@ -248,7 +250,7 @@ class Dataset_Validator {
 	 * Silent truncation looks exactly like a service that was never in the
 	 * catalog: it stops being blocked and nothing anywhere says why.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param int $received How many services the payload carried.
 	 * @return void
 	 */

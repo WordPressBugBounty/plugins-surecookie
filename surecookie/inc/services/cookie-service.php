@@ -63,8 +63,15 @@ class CookieService {
 
 		$custom_category_cookies = Get::formatted_custom_cookies();
 
-		foreach ( $cookie_categories as $category_data ) {
-			$category_id = $category_data['id'];
+		foreach ( $cookie_categories as $category_key => $category_data ) {
+			// Array-typed settings guarantee only the outer array; a scalar row is a
+			// TypeError on ['id']. The map key is the category id, so it stands in.
+			if ( ! is_array( $category_data ) ) {
+				continue;
+			}
+
+			$category_id = Sanitize::scalar( $category_data['id'] ?? '' );
+			$category_id = $category_id !== '' ? $category_id : (string) $category_key;
 
 			$category_based_cookies      = $scanned_cookies[ $category_id ] ?? [];
 			$custom_cookies_for_category = $custom_category_cookies[ $category_id ] ?? [];
@@ -72,8 +79,8 @@ class CookieService {
 
 			$final_cookies_dataset[] = [
 				'id'          => $category_id,
-				'name'        => $category_data['name'],
-				'description' => $category_data['description'],
+				'name'        => Sanitize::scalar( $category_data['name'] ?? '' ),
+				'description' => Sanitize::scalar( $category_data['description'] ?? '' ),
 				'cookies'     => $all_cookies,
 				'count'       => count( $all_cookies ),
 			];
@@ -213,7 +220,8 @@ class CookieService {
 
 		$custom_cookies = (array) Settings::get( 'custom_cookies' );
 
-		if ( ! isset( $custom_cookies[ $cookie_id ] ) ) {
+		// A malformed row is reported as missing: writing into a scalar is a TypeError.
+		if ( ! isset( $custom_cookies[ $cookie_id ] ) || ! is_array( $custom_cookies[ $cookie_id ] ) ) {
 			return [
 				'success' => false,
 				'message' => __( 'Cookie not found.', 'surecookie' ),
@@ -311,10 +319,38 @@ class CookieService {
 	 * @since 0.0.0-alpha.1
 	 */
 	public function update_scanned_cookie_category( string $cookie_name, string $current_category, string $new_category, string $domain = '' ): array {
+		return $this->update_scanned_cookie( $cookie_name, $current_category, [ 'category' => $new_category ], $domain );
+	}
+
+	/**
+	 * Apply an admin's corrections to one scanned cookie.
+	 *
+	 * Patches the stored row so the change shows at once, and pins it so the next
+	 * scan does not revert it. Both halves are needed: `inherit_from_replaced()`
+	 * only blank-fills, so a non-blank incoming scan value would otherwise win.
+	 *
+	 * @since 1.5.0
+	 * @param string                $cookie_name      Cookie to correct.
+	 * @param string                $current_category Bucket it currently sits in.
+	 * @param array<string, string> $changes          Any of category, purpose, duration, provider.
+	 * @param string                $domain           Tells two same-named cookies apart.
+	 * @return array{success: bool, message: string, cookie_name?: string, old_category?: string, new_category?: string}
+	 */
+	public function update_scanned_cookie( string $cookie_name, string $current_category, array $changes, string $domain = '' ): array {
 		$cookie_name      = sanitize_text_field( $cookie_name );
 		$current_category = sanitize_text_field( $current_category );
-		$new_category     = sanitize_text_field( $new_category );
 		$domain           = Sanitize::cookie_domain( $domain );
+
+		$changes = $this->sanitize_scanned_changes( $changes );
+
+		if ( $changes === null ) {
+			return [
+				'success' => false,
+				'message' => __( 'Duration must be a whole number of days.', 'surecookie' ),
+			];
+		}
+
+		$new_category = (string) ( $changes['category'] ?? '' );
 
 		// Validate required fields.
 		if ( empty( $cookie_name ) ) {
@@ -331,15 +367,31 @@ class CookieService {
 			];
 		}
 
-		if ( empty( $new_category ) ) {
+		if ( array_key_exists( 'category', $changes ) && $new_category === '' ) {
 			return [
 				'success' => false,
 				'message' => __( 'New category is required.', 'surecookie' ),
 			];
 		}
 
-		// No change needed if categories are the same.
-		if ( $current_category === $new_category ) {
+		if ( empty( $changes ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'Nothing to update.', 'surecookie' ),
+			];
+		}
+
+		$moves = $new_category !== '' && $new_category !== $current_category;
+
+		if ( $moves && ! in_array( $new_category, array_column( (array) Settings::get( 'cookie_categories' ), 'id' ), true ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'The selected category no longer exists. Please reload and try again.', 'surecookie' ),
+			];
+		}
+
+		// A category-only call that changes nothing still succeeds, as it always has.
+		if ( ! $moves && array_keys( $changes ) === [ 'category' ] ) {
 			return [
 				'success' => true,
 				'message' => __( 'Cookie is already in the selected category.', 'surecookie' ),
@@ -364,27 +416,70 @@ class CookieService {
 			];
 		}
 
-		$moved = $this->move_scanned_cookie( $scanned_cookies, $cookie_name, $current_category, $new_category, $domain );
+		$index = $this->find_scanned_cookie( $scanned_cookies[ $current_category ], $cookie_name, $domain );
 
-		if ( $moved === null ) {
+		if ( $index === null ) {
 			return [
 				'success' => false,
 				'message' => __( 'Cookie not found in the specified category.', 'surecookie' ),
 			];
 		}
 
+		$identity = $scanned_cookies[ $current_category ][ $index ];
+
+		// A caller that echoes the row back unchanged is not correcting anything, and
+		// pinning those values would freeze the scanner's own guesses for good.
+		$pins = array_filter(
+			$changes,
+			static fn( $value, string $field ): bool => (string) $value !== (string) ( $identity[ $field ] ?? '' ),
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		// The policy table prefers a catalog description over the purpose, so a corrected
+		// purpose has to land on both or it never reaches the page it exists to correct.
+		if ( array_key_exists( 'purpose', $pins ) ) {
+			$pins['description'] = $pins['purpose'];
+		}
+
+		// Read before remember_corrections() releases them: clearing a pin drops the
+		// value it displaced, and that value is what the row has to fall back to.
+		$restore = [];
+		foreach ( [ 'purpose', 'description', 'duration', 'provider' ] as $field ) {
+			if ( array_key_exists( $field, $pins ) && trim( (string) $pins[ $field ] ) === '' ) {
+				$restore[ $field ] = CookieCategoryMemory::displaced_value( $identity, $field ) ?? '';
+			}
+		}
+
+		CookieCategoryMemory::remember_corrections( [ $identity ], $pins );
+
+		foreach ( [ 'purpose', 'description', 'duration', 'provider' ] as $field ) {
+			if ( ! array_key_exists( $field, $pins ) ) {
+				continue;
+			}
+
+			// Clearing a correction restores what the scanner reported, not an empty
+			// cell: the pin is written over the row so the edit shows up immediately,
+			// so blanking it would drop the value off the public cookie policy until
+			// some later scan happened to run.
+			$scanned_cookies[ $current_category ][ $index ][ $field ] =
+				$restore[ $field ] ?? $pins[ $field ];
+		}
+
+		if ( $moves ) {
+			$this->move_scanned_cookie( $scanned_cookies, $cookie_name, $current_category, $new_category, $domain );
+		}
+
 		// Save updated scanned cookies.
 		Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $scanned_cookies );
 
-		// Remember the choice so the next scan does not revert it.
-		CookieCategoryMemory::remember( [ $moved ], $new_category );
-
 		return [
 			'success'      => true,
-			'message'      => __( 'Cookie category updated successfully.', 'surecookie' ),
+			'message'      => $moves
+				? __( 'Cookie category updated successfully.', 'surecookie' )
+				: __( 'Cookie updated successfully.', 'surecookie' ),
 			'cookie_name'  => $cookie_name,
 			'old_category' => $current_category,
-			'new_category' => $new_category,
+			'new_category' => $moves ? $new_category : $current_category,
 		];
 	}
 
@@ -491,7 +586,9 @@ class CookieService {
 			$dirty          = false;
 
 			foreach ( array_keys( $custom_ids ) as $cookie_id ) {
-				if ( ! isset( $custom_cookies[ $cookie_id ] ) ) {
+				// Shape, not just presence: the ?? read below is safe on a scalar row but
+				// the assignment that follows it is a TypeError.
+				if ( ! isset( $custom_cookies[ $cookie_id ] ) || ! is_array( $custom_cookies[ $cookie_id ] ) ) {
 					$failed++;
 					continue;
 				}
@@ -559,6 +656,100 @@ class CookieService {
 	}
 
 	/**
+	 * Remove a scanned cookie from the stored set.
+	 *
+	 * Deliberately not remembered. A cookie that is genuinely gone stays gone, because
+	 * the scanner cannot see it; one that is still live simply returns on the next scan.
+	 * That is what makes this safe to offer at all: delete cannot be used to hide a live
+	 * tracker from a cookie policy, so it needs no suppression list and must not grow one.
+	 *
+	 * @since 1.5.0
+	 * @param string $cookie_name Cookie to remove.
+	 * @param string $category    Bucket it sits in.
+	 * @param string $domain      Tells two same-named cookies apart.
+	 * @return array{success: bool, message: string, cookie_name?: string, category?: string}
+	 */
+	public function delete_scanned_cookie( string $cookie_name, string $category, string $domain = '' ): array {
+		$cookie_name = sanitize_text_field( $cookie_name );
+		$category    = sanitize_text_field( $category );
+		$domain      = Sanitize::cookie_domain( $domain );
+
+		if ( empty( $cookie_name ) || empty( $category ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'Cookie name and category are required.', 'surecookie' ),
+			];
+		}
+
+		$scanned_cookies = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+
+		if ( ! is_array( $scanned_cookies ) || ! isset( $scanned_cookies[ $category ] ) || ! is_array( $scanned_cookies[ $category ] ) ) {
+			return [
+				'success' => false,
+				'message' => __( 'Category not found in scanned cookies.', 'surecookie' ),
+			];
+		}
+
+		$index = $this->find_scanned_cookie( $scanned_cookies[ $category ], $cookie_name, $domain, true );
+
+		if ( $index === null ) {
+			return [
+				'success' => false,
+				'message' => __( 'Cookie not found in the specified category.', 'surecookie' ),
+			];
+		}
+
+		array_splice( $scanned_cookies[ $category ], $index, 1 );
+
+		Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $scanned_cookies );
+
+		return [
+			'success'     => true,
+			'message'     => __( 'Cookie removed.', 'surecookie' ),
+			'cookie_name' => $cookie_name,
+			'category'    => $category,
+		];
+	}
+
+	/**
+	 * Keep only the fields an admin may correct, sanitized.
+	 *
+	 * An explicitly empty value is kept, not dropped: it is how a correction is
+	 * cleared so the scanned value shows again.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $changes Raw input.
+	 * @return array<string, string>|null Sanitized values, or null when one is invalid.
+	 */
+	private function sanitize_scanned_changes( array $changes ): ?array {
+		$clean = [];
+
+		foreach ( [ 'category', 'provider' ] as $field ) {
+			if ( array_key_exists( $field, $changes ) ) {
+				$clean[ $field ] = sanitize_text_field( (string) $changes[ $field ] );
+			}
+		}
+
+		if ( array_key_exists( 'purpose', $changes ) ) {
+			$clean['purpose'] = Sanitize::textarea( (string) $changes['purpose'] );
+		}
+
+		if ( array_key_exists( 'duration', $changes ) ) {
+			// A day count, matching the custom-cookie field. Empty clears the pin, and
+			// anything else is refused rather than absint()'d into a silent clear.
+			$duration = trim( (string) $changes['duration'] );
+
+			if ( $duration !== '' && ! ctype_digit( $duration ) ) {
+				return null;
+			}
+
+			$clean['duration'] = $duration === '' ? '' : (string) absint( $duration );
+		}
+
+		return $clean;
+	}
+
+	/**
 	 * Move one scanned cookie between category groups, in memory.
 	 *
 	 * Shared by the single-item update and the bulk update so the splice/append
@@ -620,28 +811,33 @@ class CookieService {
 	 * @param array<int, array<string, mixed>> $cookies Cookies in one category.
 	 * @param string                           $name    Cookie name.
 	 * @param string                           $domain  Domain to prefer, or an empty string.
+	 * @param bool                             $strict  Refuse an ambiguous match, for destructive callers.
 	 * @return int|null Index of the match, or null when there is none.
 	 * @since 1.3.0
 	 */
-	private function find_scanned_cookie( array $cookies, string $name, string $domain ): ?int {
-		$normalize     = static fn( string $value ): string => strtolower( ltrim( trim( $value ), '.' ) );
-		$wanted        = $normalize( $domain );
-		$name_fallback = null;
+	private function find_scanned_cookie( array $cookies, string $name, string $domain, bool $strict = false ): ?int {
+		$normalize = static fn( string $value ): string => strtolower( ltrim( trim( $value ), '.' ) );
+		$wanted    = $normalize( $domain );
+		$namesakes = [];
 
 		foreach ( $cookies as $index => $cookie ) {
 			if ( ! is_array( $cookie ) || ( $cookie['name'] ?? null ) !== $name ) {
 				continue;
 			}
 
-			if ( $wanted !== '' && $normalize( (string) ( $cookie['domain'] ?? '' ) ) === $wanted ) {
+			if ( $normalize( (string) ( $cookie['domain'] ?? '' ) ) === $wanted ) {
 				return (int) $index;
 			}
 
-			if ( $name_fallback === null ) {
-				$name_fallback = (int) $index;
-			}
+			$namesakes[] = (int) $index;
 		}
 
-		return $name_fallback;
+		// A move tolerates a stale domain from an out-of-date screen. A delete must not:
+		// a supplied domain has to match, and without one only a sole namesake is unambiguous.
+		if ( $strict && ( $wanted !== '' || count( $namesakes ) > 1 ) ) {
+			return null;
+		}
+
+		return $namesakes[0] ?? null;
 	}
 }

@@ -11,6 +11,7 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
+use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,6 +36,13 @@ class Scan_Scripts {
 	private static ?array $cached_resources = null;
 
 	/**
+	 * Host-grouped pattern index, keyed by a hash of the pattern set.
+	 *
+	 * @var array<string, array<string, array<int, string>>>
+	 */
+	private static array $host_index_cache = [];
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.0-alpha.2
@@ -52,11 +60,15 @@ class Scan_Scripts {
 	/**
 	 * Merge scan-detected resources into the known scripts dataset.
 	 *
-	 * @param array<string, array<string, mixed>> $scripts Known scripts by category.
+	 * @param mixed $scripts Expected array<string, array<string, mixed>> of known scripts by category.
 	 * @since 0.0.0-alpha.2
-	 * @return array<string, array<string, mixed>> Merged scripts.
+	 * @return mixed Merged scripts, or $scripts untouched.
 	 */
-	public function merge_scan_detected_resources( array $scripts ): array {
+	public function merge_scan_detected_resources( $scripts = [] ) {
+		if ( ! is_array( $scripts ) ) {
+			return $scripts;
+		}
+
 		$resources = $this->get_scanned_resources();
 
 		if ( empty( $resources ) ) {
@@ -87,6 +99,7 @@ class Scan_Scripts {
 	 */
 	public static function clear_cache(): void {
 		self::$cached_resources = null;
+		self::$host_index_cache = [];
 		Resource_Categories::clear_cache();
 	}
 
@@ -95,15 +108,24 @@ class Scan_Scripts {
 	 * script-scoped (or legacy bare-domain) exclusion.
 	 *
 	 * @since 1.3.0
-	 * @param bool   $skip     Whether the resource is already marked to skip.
-	 * @param string $src      The script src.
-	 * @param string $name     Matched service key.
-	 * @param string $category Matched service category.
-	 * @param string $pattern  Pattern that matched, for resources with no src.
+	 * Untyped by design: this is a public filter, so the incoming values are
+	 * whatever the previous callback returned. A boolean filter answers yes or
+	 * no, so unusable input is coerced rather than passed through.
+	 *
+	 * @param mixed $skip     Expected bool, whether the resource is already marked to skip.
+	 * @param mixed $src      Expected string, the script src.
+	 * @param mixed $name     Expected string, matched service key.
+	 * @param mixed $category Expected string, matched service category.
+	 * @param mixed $pattern  Expected string, pattern that matched, for resources with no src.
 	 * @return bool
 	 */
-	public function should_skip_excluded_script( bool $skip, string $src, string $name = '', string $category = '', string $pattern = '' ): bool {
-		return $this->should_skip_excluded_resource( $skip, $src, 'script', $pattern );
+	public function should_skip_excluded_script( $skip = false, $src = '', $name = '', $category = '', $pattern = '' ): bool {
+		return $this->should_skip_excluded_resource(
+			(bool) $skip,
+			is_string( $src ) ? $src : '',
+			'script',
+			is_string( $pattern ) ? $pattern : ''
+		);
 	}
 
 	/**
@@ -111,15 +133,22 @@ class Scan_Scripts {
 	 * iframe-scoped (or legacy bare-domain) exclusion.
 	 *
 	 * @since 1.3.0
-	 * @param bool   $skip     Whether the resource is already marked to skip.
-	 * @param string $src      The iframe src.
-	 * @param string $name     Matched service key.
-	 * @param string $category Matched service category.
-	 * @param string $pattern  Pattern that matched, for resources with no src.
+	 * Untyped by design: see should_skip_excluded_script().
+	 *
+	 * @param mixed $skip     Expected bool, whether the resource is already marked to skip.
+	 * @param mixed $src      Expected string, the iframe src.
+	 * @param mixed $name     Expected string, matched service key.
+	 * @param mixed $category Expected string, matched service category.
+	 * @param mixed $pattern  Expected string, pattern that matched, for resources with no src.
 	 * @return bool
 	 */
-	public function should_skip_excluded_iframe( bool $skip, string $src, string $name = '', string $category = '', string $pattern = '' ): bool {
-		return $this->should_skip_excluded_resource( $skip, $src, 'iframe', $pattern );
+	public function should_skip_excluded_iframe( $skip = false, $src = '', $name = '', $category = '', $pattern = '' ): bool {
+		return $this->should_skip_excluded_resource(
+			(bool) $skip,
+			is_string( $src ) ? $src : '',
+			'iframe',
+			is_string( $pattern ) ? $pattern : ''
+		);
 	}
 
 	/**
@@ -174,6 +203,15 @@ class Scan_Scripts {
 			return;
 		}
 
+		// Or if the catalog already covers the URL this row was recorded from.
+		// A row is keyed on the bare host, which is broader than a pattern like
+		// `google.com/recaptcha`, so the exact-key check above misses and the
+		// host row then shadows the specific pattern it duplicates: the browser
+		// guard has no way to let the narrower rule win (issue #1116).
+		if ( self::catalog_covers_observed_url( $resource, $existing_patterns ) ) {
+			return;
+		}
+
 		// Ensure the category exists.
 		if ( ! isset( $scripts[ $category ] ) ) {
 			$scripts[ $category ] = [];
@@ -197,6 +235,128 @@ class Scan_Scripts {
 	}
 
 	/**
+	 * Whether a catalog pattern already covers the URL this row was seen at.
+	 *
+	 * Matched against the observed URL, never the bare host. Skipping every row
+	 * whose host the catalog merely knows would stop blocking the paths it does
+	 * not name - `facebook.com/<anything else>` while the catalog names only
+	 * `facebook.com/tr` - and that is pre-consent tracking, the one direction
+	 * this feature must not fail in.
+	 *
+	 * Patterns are indexed by host so a row tests two or three candidates
+	 * instead of the whole catalog. Measured on the shipped catalog, the naive
+	 * form cost 21.8ms per page because the filter runs several times per
+	 * request; this is 0.7ms.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $resource          Scanned resource row.
+	 * @param array<string, bool>  $existing_patterns Known-scripts pattern index.
+	 * @return bool
+	 */
+	private static function catalog_covers_observed_url( array $resource, array $existing_patterns ): bool {
+		// Iframe rows store the observed src, script rows the url.
+		$url = trim( (string) ( $resource['url'] ?? $resource['src'] ?? '' ) );
+
+		// Nothing observed to compare against, so the row still carries meaning.
+		if ( $url === '' ) {
+			return false;
+		}
+
+		foreach ( self::candidate_patterns( $existing_patterns, $url ) as $pattern ) {
+			if ( Entry_Match::matches( $pattern, $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Catalog patterns worth testing against one URL: those claiming its host or
+	 * a parent of it, plus the host-less ones, which can match any path.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, bool> $existing_patterns Known-scripts pattern index.
+	 * @param string              $url               Observed resource URL.
+	 * @return array<int, string>
+	 */
+	private static function candidate_patterns( array $existing_patterns, string $url ): array {
+		$index = self::patterns_by_host( $existing_patterns );
+		$host  = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+		$candidates = $index[''] ?? [];
+
+		while ( $host !== '' ) {
+			if ( ! empty( $index[ $host ] ) ) {
+				$candidates = array_merge( $candidates, $index[ $host ] );
+			}
+
+			$dot = strpos( $host, '.' );
+			if ( $dot === false ) {
+				break;
+			}
+
+			$host = substr( $host, $dot + 1 );
+		}
+
+		return $candidates;
+	}
+
+	/**
+	 * Group patterns by the host they claim, memoized for the request.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, bool> $existing_patterns Known-scripts pattern index.
+	 * @return array<string, array<int, string>>
+	 */
+	private static function patterns_by_host( array $existing_patterns ): array {
+		$key = md5( (string) wp_json_encode( array_keys( $existing_patterns ) ) );
+
+		if ( isset( self::$host_index_cache[ $key ] ) ) {
+			return self::$host_index_cache[ $key ];
+		}
+
+		$index = [ '' => [] ];
+
+		foreach ( array_keys( $existing_patterns ) as $pattern ) {
+			$pattern                                   = (string) $pattern;
+			$index[ self::pattern_host( $pattern ) ][] = $pattern;
+		}
+
+		self::$host_index_cache[ $key ] = $index;
+
+		return $index;
+	}
+
+	/**
+	 * The host a pattern claims, or an empty string when it claims none.
+	 *
+	 * Mirrors how {@see Entry_Match} decides the same thing: a query or fragment
+	 * is an exact-URL claim, and a first segment without a dot is a path, not a
+	 * host.
+	 *
+	 * @since 1.5.0
+	 * @param string $pattern Catalog blocking pattern.
+	 * @return string
+	 */
+	private static function pattern_host( string $pattern ): string {
+		if ( strpbrk( $pattern, '?#' ) !== false || strpos( $pattern, '.' ) === false ) {
+			return '';
+		}
+
+		$first = strstr( $pattern, '/', true );
+		$first = $first === false ? $pattern : $first;
+
+		if ( strpos( $first, '.' ) === false ) {
+			return '';
+		}
+
+		$url = strpos( $pattern, '//' ) === 0 ? 'https:' . $pattern : 'https://' . ltrim( $pattern, '/' );
+
+		return strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	}
+
+	/**
 	 * Build an index of existing patterns for fast duplicate checks.
 	 *
 	 * @param array<string, array<string, mixed>> $scripts Known scripts by category.
@@ -212,11 +372,13 @@ class Scan_Scripts {
 			}
 
 			foreach ( $services as $service ) {
-				foreach ( $service['scripts'] ?? [] as $pattern ) {
-					$index[ $pattern ] = true;
-				}
-				foreach ( $service['iframes'] ?? [] as $pattern ) {
-					$index[ $pattern ] = true;
+				// Every bucket, including the ones no pass reads: re-adding a
+				// known stylesheet host as a scan-detected script pattern would
+				// put it back in front of the passes that cannot match it.
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					foreach ( $service[ $bucket ] ?? [] as $pattern ) {
+						$index[ $pattern ] = true;
+					}
 				}
 			}
 		}

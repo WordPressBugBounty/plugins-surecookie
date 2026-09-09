@@ -65,6 +65,7 @@ class Actions {
 		 * @since 0.0.1-alpha.1
 		 * @param array<int, class-string<Base>> $abilities Ability class names.
 		 */
-		return apply_filters( 'surecookie_abilities_api_abilities', $abilities );
+		$filtered = apply_filters( 'surecookie_abilities_api_abilities', $abilities );
+		return is_array( $filtered ) ? $filtered : $abilities;
 	}
 }

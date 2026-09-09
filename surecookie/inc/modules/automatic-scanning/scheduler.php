@@ -74,7 +74,7 @@ class Scheduler {
 	 * @since 1.2.0
 	 * @return array<string, array{interval:int, display:string}>
 	 */
-	public function register_schedules( $schedules ) {
+	public function register_schedules( $schedules = [] ) {
 		if ( ! is_array( $schedules ) ) {
 			$schedules = [];
 		}
@@ -176,7 +176,7 @@ class Scheduler {
 	 * @since 1.2.0
 	 * @return mixed
 	 */
-	public function gate_frequency( $value ) {
+	public function gate_frequency( $value = null ) {
 		if ( is_array( $value ) && isset( $value['auto_scan_frequency'] ) ) {
 			$allowed = self::allowed_frequencies();
 

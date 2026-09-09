@@ -105,7 +105,7 @@ class Init {
 	 * @since 1.4.0
 	 * @return array<string, array<string, string>>
 	 */
-	public function add_astra_palette( $palettes ): array {
+	public function add_astra_palette( $palettes = null ): array {
 		$palettes = is_array( $palettes ) ? $palettes : [];
 
 		$colors = $this->get_astra_palette_colors();

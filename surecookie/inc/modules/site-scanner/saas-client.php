@@ -150,7 +150,7 @@ class SaasClient {
 	 * Handshake kept alive after a failed verification so Retry can re-run step 2
 	 * against the same token; step 1 would mint a new one and void the TXT record.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	public const PENDING_HANDSHAKE_TRANSIENT = 'surecookie_pending_handshake';
 
@@ -158,7 +158,7 @@ class SaasClient {
 	 * Handshake TTL - DNS can take a day. The nonce alone grants nothing, since
 	 * completing still requires proving domain control.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	public const PENDING_HANDSHAKE_TTL = DAY_IN_SECONDS;
 
@@ -288,10 +288,17 @@ class SaasClient {
 	/**
 	 * Add custom cron interval for polling.
 	 *
-	 * @param array<string, array<string, mixed>> $schedules Existing cron schedules.
-	 * @return array<string, array<string, mixed>>
+	 * Untyped by design: cron_schedules is heavily filtered, and a third-party
+	 * callback that forgets to return hands us null on every cron spawn.
+	 *
+	 * @param mixed $schedules Expected array<string, array<string, mixed>> of cron schedules.
+	 * @return mixed Schedules with ours added, or $schedules untouched.
 	 */
-	public function add_cron_interval( array $schedules ): array {
+	public function add_cron_interval( $schedules = [] ) {
+		if ( ! is_array( $schedules ) ) {
+			return $schedules;
+		}
+
 		$schedules['surecookie_poll_interval'] = [
 			'interval' => self::POLL_INTERVAL,
 			'display'  => __( 'Every 1 Minute (SureCookie Polling)', 'surecookie' ),
@@ -1308,6 +1315,35 @@ class SaasClient {
 	}
 
 	/**
+	 * Re-run step 2 after the user has published the DNS record.
+	 *
+	 * @since 1.5.0
+	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
+	 */
+	public function retry_registration(): array {
+		if ( $this->get_api_key() !== '' ) {
+			return [ 'success' => true ];
+		}
+
+		// Same lock register_site() runs behind: two Retry clicks inside the window
+		// would otherwise both complete the handshake and mint a second key.
+		if ( get_transient( self::REGISTERING_LOCK_TRANSIENT ) !== false ) {
+			return [
+				'success' => false,
+				'code'    => 'registration_in_progress',
+				'message' => __( 'A verification attempt is already running. Please try again in a moment.', 'surecookie' ),
+			];
+		}
+		set_transient( self::REGISTERING_LOCK_TRANSIENT, 1, self::REGISTERING_LOCK_TTL );
+
+		try {
+			return $this->run_pending_handshake();
+		} finally {
+			delete_transient( self::REGISTERING_LOCK_TRANSIENT );
+		}
+	}
+
+	/**
 	 * Queue the first-party loopback fallback to run once in the background.
 	 *
 	 * @since 1.3.0
@@ -1631,7 +1667,7 @@ class SaasClient {
 	 * @param string $wp_site_id         Site id issued by step 1.
 	 * @param string $install_nonce      Nonce the pending registration was opened with.
 	 * @param string $verification_token Token the REST handler should serve.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array{success: true, data: array<string, mixed>}|array{success: false, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null} Success with `data`, or a failure describing why.
 	 */
 	private function complete_registration( string $wp_site_id, string $install_nonce, string $verification_token ): array {
@@ -1709,7 +1745,7 @@ class SaasClient {
 	 * @param array<string, mixed> $data          Decoded response body.
 	 * @param string               $wp_site_id    Site id issued by step 1.
 	 * @param string               $install_nonce Nonce the pending registration was opened with.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array{success: false, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
 	 */
 	private function describe_completion_failure( int $status, array $data, string $wp_site_id, string $install_nonce ): array {
@@ -1794,7 +1830,7 @@ class SaasClient {
 	 * Pull the raw token out of the TXT value the SaaS hands back.
 	 *
 	 * @param string $value TXT record value, `surecookie-verification=<token>`.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return string
 	 */
 	private function token_from_dns_value( string $value ): string {
@@ -1805,38 +1841,9 @@ class SaasClient {
 	}
 
 	/**
-	 * Re-run step 2 after the user has published the DNS record.
-	 *
-	 * @since x.x.x
-	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
-	 */
-	public function retry_registration(): array {
-		if ( $this->get_api_key() !== '' ) {
-			return [ 'success' => true ];
-		}
-
-		// Same lock register_site() runs behind: two Retry clicks inside the window
-		// would otherwise both complete the handshake and mint a second key.
-		if ( get_transient( self::REGISTERING_LOCK_TRANSIENT ) !== false ) {
-			return [
-				'success' => false,
-				'code'    => 'registration_in_progress',
-				'message' => __( 'A verification attempt is already running. Please try again in a moment.', 'surecookie' ),
-			];
-		}
-		set_transient( self::REGISTERING_LOCK_TRANSIENT, 1, self::REGISTERING_LOCK_TTL );
-
-		try {
-			return $this->run_pending_handshake();
-		} finally {
-			delete_transient( self::REGISTERING_LOCK_TRANSIENT );
-		}
-	}
-
-	/**
 	 * Complete a handshake that is already pending, using the stored token.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array{success: bool, message?: string, code?: string, diagnosis?: string, dns_verification?: array<string, string>|null, verify_url?: string|null}
 	 */
 	private function run_pending_handshake(): array {
@@ -1874,7 +1881,7 @@ class SaasClient {
 	 *
 	 * @param array<string, mixed> $step2_data Successful step 2 body.
 	 * @param string               $domain     Registered domain.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array{success: bool}
 	 */
 	private function finalize_registration( array $step2_data, string $domain ): array {

@@ -61,9 +61,30 @@ class CookieManagement extends Base {
 				case 'recategorize_scanned':
 					$cookie_name      = sanitize_text_field( $input['cookie_name'] ?? '' );
 					$current_category = sanitize_text_field( $input['current_category'] ?? '' );
-					$new_category     = sanitize_text_field( $input['new_category'] ?? '' );
 					$domain           = sanitize_text_field( $input['domain'] ?? '' );
-					return $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category, $domain );
+
+					// Mirrors the REST route: only what was actually supplied, or an
+					// absent field would clear a correction nobody asked to clear.
+					$changes = [];
+					foreach ( [
+						'new_category' => 'category',
+						'purpose'      => 'purpose',
+						'duration'     => 'duration',
+						'provider'     => 'provider',
+					] as $key => $field ) {
+						if ( array_key_exists( $key, $input ) ) {
+							$changes[ $field ] = (string) $input[ $key ];
+						}
+					}
+
+					return $service->update_scanned_cookie( $cookie_name, $current_category, $changes, $domain );
+
+				case 'delete_scanned':
+					return $service->delete_scanned_cookie(
+						sanitize_text_field( $input['cookie_name'] ?? '' ),
+						sanitize_text_field( $input['category'] ?? '' ),
+						sanitize_text_field( $input['domain'] ?? '' )
+					);
 
 				case 'bulk_recategorize':
 					return $service->bulk_update_cookie_category(
@@ -103,7 +124,7 @@ class CookieManagement extends Base {
 	 * {@inheritDoc}
 	 */
 	protected function get_description(): string {
-		return __( 'Manage cookies detected and defined by SureCookie. Actions: "list_scanned" returns all cookies found by the site scanner with their name, category, provider, and description. "list_custom" returns manually defined cookies. "create_custom" adds a new custom cookie definition (requires name and category). "update_custom" modifies an existing custom cookie by cookie_id. "delete_custom" permanently removes a custom cookie definition by cookie_id — this cannot be undone. "recategorize_scanned" moves a scanned cookie from one category to another. "bulk_recategorize" moves up to 100 cookies, custom and scanned together, into one category in a single write — prefer it over repeated "recategorize_scanned" calls when triaging scan results, since each single move rewrites the whole cookie store. Use surecookie/cookie-categories with action "list" to discover valid category IDs before creating or recategorizing cookies.', 'surecookie' );
+		return __( 'Manage cookies detected and defined by SureCookie. Actions: "list_scanned" returns all cookies found by the site scanner with their name, category, provider, and description. "list_custom" returns manually defined cookies. "create_custom" adds a new custom cookie definition (requires name and category). "update_custom" modifies an existing custom cookie by cookie_id. "delete_custom" permanently removes a custom cookie definition by cookie_id — this cannot be undone. "recategorize_scanned" moves a scanned cookie from one category to another, and can also correct the purpose, duration or provider the scanner reported. "delete_scanned" removes a scanned cookie from the stored set, which is how a stale entry is cleared from the public cookie policy; a cookie that is still present on the site simply reappears on the next scan. "bulk_recategorize" moves up to 100 cookies, custom and scanned together, into one category in a single write — prefer it over repeated "recategorize_scanned" calls when triaging scan results, since each single move rewrites the whole cookie store. Use surecookie/cookie-categories with action "list" to discover valid category IDs before creating or recategorizing cookies.', 'surecookie' );
 	}
 
 	/**
@@ -116,7 +137,7 @@ class CookieManagement extends Base {
 			'destructiveHint' => true,
 			'idempotentHint'  => false,
 			'openWorldHint'   => false,
-			'instructions'    => 'DESTRUCTIVE — the "delete_custom" action permanently removes a custom cookie definition and cannot be undone. Always ask the user to confirm before deleting and show them the cookie name and ID. For "create_custom", call "list_custom" first to avoid creating duplicate cookie definitions. For "recategorize_scanned", call "list_scanned" first to verify the cookie exists in the specified current category. The "list_scanned" and "list_custom" actions are safe to call at any time.',
+			'instructions'    => 'DESTRUCTIVE — "delete_custom" permanently removes a custom cookie definition and cannot be undone. "delete_scanned" removes a scanned cookie from the stored set; it is not permanent in the same way, since a cookie still present on the site returns on the next scan, but it does change what the public cookie policy discloses. Always ask the user to confirm before deleting and show them the cookie name and ID. For "create_custom", call "list_custom" first to avoid creating duplicate cookie definitions. For "recategorize_scanned", call "list_scanned" first to verify the cookie exists in the specified current category. The "list_scanned" and "list_custom" actions are safe to call at any time.',
 		];
 	}
 
@@ -136,6 +157,7 @@ class CookieManagement extends Base {
 						'update_custom',
 						'delete_custom',
 						'recategorize_scanned',
+						'delete_scanned',
 						'bulk_recategorize',
 					],
 					'description' => __( 'The cookie management action to perform.', 'surecookie' ),

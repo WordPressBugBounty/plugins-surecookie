@@ -17,7 +17,9 @@ use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\WpConsentApi\Consent_Handler;
 use SureCookie\Inc\Modules\AssistedScan\Utils as AssistedScanUtils;
+use SureCookie\Inc\Modules\BusinessDetails\Shortcode as Business_Shortcodes;
 use SureCookie\Inc\Modules\Nudges\Utils;
+use SureCookie\Inc\Modules\PrivacyPolicy\Countries;
 use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
@@ -67,11 +69,12 @@ class LocalizeData {
 			'preferences_modal_branding'     => [ '', 'preferences_modal_branding' ],
 			'resource_blocking_docs'         => [ 'docs/resource-blocking/', 'resource_blocking_docs' ],
 			'scan_cookies_learn_more'        => [ 'docs/', 'scan_cookies_learn_more' ],
-			'auth_drawer_learn_more'         => [ 'docs/', 'auth_drawer_learn_more' ],
 			'scanning_logs_support'          => [ 'support/', 'scanning_logs_support' ],
 			'deactivation_survey_support'    => [ 'contact/', 'deactivation_survey_support' ],
 			'usage_optin'                    => [ 'share-usage-data/', 'usage_optin' ],
 			'scan_booster'                   => [ 'pricing/', 'plugin_limit_banner' ],
+			'docs_compliance_check'          => [ 'docs/', 'docs_compliance_check' ],
+			'docs_data_requests'             => [ 'docs/handling-data-requests/', 'docs_data_requests' ],
 
 			// Pro upgrade CTAs - all point at /pricing/, attributed by `utm_content`.
 			'pricing_submenu_link_upgrade'   => [ 'pricing/', 'pricing_submenu_link_upgrade' ],
@@ -88,6 +91,10 @@ class LocalizeData {
 			'pricing_geo_rules_banner'       => [ 'pricing/', 'pricing_geo_rules_banner' ],
 			'pricing_hide_banner_pages'      => [ 'pricing/', 'pricing_hide_banner_pages' ],
 			'pricing_learn_upgrade'          => [ 'pricing/', 'pricing_learn_upgrade' ],
+			'pricing_compliance_check'       => [ 'pricing/', 'pricing_compliance_check' ],
+			'pricing_data_requests'          => [ 'pricing/', 'pricing_data_requests' ],
+			'coming_soon_iab_tcf'            => [ 'pricing/', 'coming_soon_iab_tcf' ],
+			'coming_soon_additional_consent' => [ 'pricing/', 'coming_soon_additional_consent' ],
 		];
 
 		$links = [];
@@ -104,7 +111,8 @@ class LocalizeData {
 		 *
 		 * @param array<string, string> $links Map of edge identifier => UTM-tagged URL.
 		 */
-		return apply_filters( 'surecookie_website_links', $links );
+		$filtered = apply_filters( 'surecookie_website_links', $links );
+		return is_array( $filtered ) ? $filtered : $links;
 	}
 
 	/**
@@ -116,7 +124,7 @@ class LocalizeData {
 	 * inherits the icon without its own map.
 	 *
 	 * @return array<string, string> Route path => UTM-tagged doc URL.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	public static function get_page_doc_links(): array {
 		$pages = [
@@ -125,10 +133,16 @@ class LocalizeData {
 			'/cookie-manager/auto-scan'               => 'docs/automatic-scheduled-scanning/',
 			'/cookie-manager/known-services'          => 'docs/using-known-services/',
 			'/cookie-manager/create'                  => 'docs/cookie-manager/',
-			'/cookie-manager/cookie-policy'           => 'docs/how-to-generate-cookie-policy-page/',
 			'/cookie-manager/scripts-and-embeds'      => 'docs/resource-script-blocking/',
 			'/cookie-manager/geo-rules'               => 'docs/how-to-set-up-geographic-targeting/',
 			'/cookie-manager/consent-sharing'         => 'docs/consent-forwarding-multisite-network/',
+
+			// Compliance. No entry for the Compliance Check screen until its
+			// article is published: omission is what hides the header icon
+			// rather than pointing it at a page that does not exist.
+			'/compliance/cookie-policy'               => 'docs/how-to-generate-cookie-policy-page/',
+			'/compliance/privacy-policy'              => 'docs/generating-a-privacy-policy-page/',
+			'/compliance/business-details'            => 'docs/setting-up-your-business-details/',
 
 			// Settings > Banner.
 			'/banner/content'                         => 'docs/customizing-banner-content/',
@@ -170,11 +184,12 @@ class LocalizeData {
 		 * Filter the per-page doc links before they are exposed to JS, so pro/addons
 		 * can point their own admin routes at an article.
 		 *
-		 * @since x.x.x
+		 * @since 1.5.0
 		 *
 		 * @param array<string, string> $links Map of route path => UTM-tagged doc URL.
 		 */
-		return apply_filters( 'surecookie_page_doc_links', $links );
+		$filtered = apply_filters( 'surecookie_page_doc_links', $links );
+		return is_array( $filtered ) ? $filtered : $links;
 	}
 
 	/**
@@ -209,61 +224,71 @@ class LocalizeData {
 		$has_consent_logs_gate_passed = $total_consent_logs >= 10;
 		$should_show_upgrade_notice   = $has_install_age_gate_passed || $has_consent_logs_gate_passed;
 
-		return apply_filters(
-			'surecookie_localized_admin_data',
-			[
-				// AJAX & REST API.
-				'ajaxurl'                    => admin_url( 'admin-ajax.php' ),
-				'adminUrl'                   => admin_url(),
-				'nonce'                      => wp_create_nonce( 'wp_rest' ),
+		$defaults = [
+			// AJAX & REST API.
+			'ajaxurl'                    => admin_url( 'admin-ajax.php' ),
+			'adminUrl'                   => admin_url(),
+			'nonce'                      => wp_create_nonce( 'wp_rest' ),
 
-				// Plugin data.
-				'promotionalPlugins'         => $promotional_plugins,
-				'promotionalShuffleId'       => $shuffle_id,
-				'cookieCategories'           => Settings::get( 'cookie_categories' ),
-				'colorPalettes'              => Get::color_palette_codes(),
-				'nudges'                     => Utils::get_instance()->get_nudges(),
-				'site_activity'              => [
-					'active'      => $recent_consent_logs >= $active_threshold,
-					'recent_logs' => $recent_consent_logs,
-					'threshold'   => $active_threshold,
-					'window_days' => ConsentLog::active_site_window_days(),
-				],
-				'is_pro_active'              => Helper::is_pro_active(),
-				'is_pro_installed'           => Helper::is_pro_installed(),
-				'website_links'              => self::get_website_links(),
-				'page_doc_links'             => self::get_page_doc_links(),
-				'core_version'               => SURECOOKIE_VERSION,
-				'eu_countries'               => Get::eu_countries(),
-				'navMenus'                   => Get::nav_menus(),
+			// Plugin data.
+			'promotionalPlugins'         => $promotional_plugins,
+			'promotionalShuffleId'       => $shuffle_id,
+			'cookieCategories'           => Settings::get( 'cookie_categories' ),
+			'colorPalettes'              => Get::color_palette_codes(),
+			'nudges'                     => Utils::get_instance()->get_nudges(),
+			'site_activity'              => [
+				'active'      => $recent_consent_logs >= $active_threshold,
+				'recent_logs' => $recent_consent_logs,
+				'threshold'   => $active_threshold,
+				'window_days' => ConsentLog::active_site_window_days(),
+			],
+			'is_pro_active'              => Helper::is_pro_active(),
+			'is_pro_installed'           => Helper::is_pro_installed(),
+			'website_links'              => self::get_website_links(),
+			'page_doc_links'             => self::get_page_doc_links(),
+			'core_version'               => SURECOOKIE_VERSION,
+			'eu_countries'               => Get::eu_countries(),
+			'navMenus'                   => Get::nav_menus(),
 
-				// Timezone data.
-				'siteTimezone'               => wp_timezone_string(),
-				'gmtOffset'                  => (float) get_option( 'gmt_offset' ),
+			// Timezone data.
+			'siteTimezone'               => wp_timezone_string(),
+			'gmtOffset'                  => (float) get_option( 'gmt_offset' ),
 
-				// Common data. Kept for back-compat with existing consumers; now UTM-tagged via the marketing-link helper.
-				'defaults'                   => self::get_translatable_defaults(),
-				'helpLink'                   => Helper::get_marketing_link( 'docs/', 'help_center' ),
-				'whatsNewLink'               => Helper::get_marketing_link( 'whats-new/', 'whats_new' ),
-				'termsConditionsURL'         => Helper::get_marketing_link( 'terms-and-conditions/', 'admin_terms_conditions' ),
-				'maxScanPages'               => SiteScannerUtils::get_max_scan_pages(),
+			// Common data. Kept for back-compat with existing consumers; now UTM-tagged via the marketing-link helper.
+			'defaults'                   => self::get_translatable_defaults(),
+			'helpLink'                   => Helper::get_marketing_link( 'docs/', 'help_center' ),
+			'whatsNewLink'               => Helper::get_marketing_link( 'whats-new/', 'whats_new' ),
+			'termsConditionsURL'         => Helper::get_marketing_link( 'terms-and-conditions/', 'admin_terms_conditions' ),
+			'maxScanPages'               => SiteScannerUtils::get_max_scan_pages(),
 
-				// Assisted Scan: a browser-collected fallback for sites our scanner cannot reach.
-				'assistedScanEnabled'        => AssistedScanUtils::is_enabled(),
-				'assistedMaxScanPages'       => AssistedScanUtils::get_max_pages(),
+			// Assisted Scan: a browser-collected fallback for sites our scanner cannot reach.
+			'assistedScanEnabled'        => AssistedScanUtils::is_enabled(),
+			'assistedMaxScanPages'       => AssistedScanUtils::get_max_pages(),
 
-				// Cron related data.
-				'isCronAvailable'            => (bool) $cron_status,
-				'cronType'                   => $cron_status ? $cron_status : 'unavailable',
-				'is_local_site'              => SaasClient::is_local_site(),
-				'show_upgrade_notice'        => $should_show_upgrade_notice,
+			// Cron related data.
+			'isCronAvailable'            => (bool) $cron_status,
+			'cronType'                   => $cron_status ? $cron_status : 'unavailable',
+			'is_local_site'              => SaasClient::is_local_site(),
+			'show_upgrade_notice'        => $should_show_upgrade_notice,
 
-				// Admin & user data.
-				'wp_dashboard_url'           => admin_url( 'admin.php' ),
-				'onboarding_complete_status' => get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ? 'yes' : 'no',
-				'can_manage_settings'        => current_user_can( SURECOOKIE_CAPABILITY ),
-			]
-		);
+			// Admin & user data.
+			'wp_dashboard_url'           => admin_url( 'admin.php' ),
+			'onboarding_complete_status' => get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ? 'yes' : 'no',
+			'can_manage_settings'        => current_user_can( SURECOOKIE_CAPABILITY ),
+			// Core maps this to manage_network on multisite, where
+			// SURECOOKIE_CAPABILITY does not reach, so the UI hides the
+			// "use as WordPress privacy page" action instead of failing it.
+			'can_manage_privacy_options' => current_user_can( 'manage_privacy_options' ),
+			'business_shortcodes'        => Business_Shortcodes::for_admin(),
+			'countries'                  => Countries::options(),
+			// False hides the consent-log IP and Country columns, which hold only
+			// a redaction marker on a site that opted out of IP capture.
+			'consent_log_ip_enabled'     => Helper::consent_log_ip_enabled(),
+		];
+
+		$filtered = apply_filters( 'surecookie_localized_admin_data', $defaults );
+
+		return is_array( $filtered ) ? $filtered : $defaults;
 	}
 
 	/**
@@ -307,40 +332,6 @@ class LocalizeData {
 		// wp_localize_script() html_entity_decode()s every top-level scalar, so
 		// pre-empt it here - this payload reaches every anonymous visitor.
 		return Sanitize::rich_text_keys_after_decode( $data );
-	}
-
-	/**
-	 * Pieces the frontend needs to render a consent placeholder for an embed the
-	 * DOM guard blocked at runtime.
-	 *
-	 * A server-blocked embed gets its placeholder rendered in PHP, where all of
-	 * this is already in scope. One blocked in the browser has no server-rendered
-	 * wrapper, so the same copy, palette and vendor names have to travel with the
-	 * page. Empty when blocking is off, since nothing can be parked then.
-	 *
-	 * @since 1.4.0
-	 * @return array<string, mixed>
-	 */
-	private static function get_placeholder_data(): array {
-		if ( ! Blocking_Utils::is_blocking_enabled() ) {
-			return [];
-		}
-
-		return [
-			// Carries the `{service}` token; the frontend substitutes the vendor.
-			// Sanitized here, not in the browser, so the value that crosses into
-			// innerHTML has already been through the same filter the PHP builder
-			// applies at render.
-			'description' => wp_kses_post( Blocker::placeholder_description_template() ),
-			'button'      => Blocker::placeholder_button_text(),
-			'blocked'     => __( 'This content is currently blocked.', 'surecookie' ),
-			/* translators: %s: Service name (e.g., YouTube, Google Maps) */
-			'accept_aria' => __( 'Accept and load %s content', 'surecookie' ),
-			'colors'      => Get::banner_display_colors(),
-			// Service key => vendor label, so a parked element can name who it is
-			// waiting on. The element only carries the key.
-			'labels'      => Get::blocking_service_labels(),
-		];
 	}
 
 	/**
@@ -428,6 +419,9 @@ class LocalizeData {
 			'isCronAvailable'    => (bool) $cron_status,
 			'cronType'           => $cron_status ? $cron_status : 'unavailable',
 			'is_local_site'      => SaasClient::is_local_site(),
+			// The Finish step offers the Cookie Preferences menu link, so the
+			// menu list has to be on this screen's blob, not the admin one.
+			'navMenus'           => Get::nav_menus(),
 			'websiteLeadDetails' => [
 				'firstName' => sanitize_text_field( $current_user->first_name ?? '' ),
 				'lastName'  => sanitize_text_field( $current_user->last_name ?? '' ),
@@ -482,6 +476,40 @@ class LocalizeData {
 			$object_name,
 			apply_filters( 'surecookie_onboarding_localize_data', self::get_onboarding_data() )
 		);
+	}
+
+	/**
+	 * Pieces the frontend needs to render a consent placeholder for an embed the
+	 * DOM guard blocked at runtime.
+	 *
+	 * A server-blocked embed gets its placeholder rendered in PHP, where all of
+	 * this is already in scope. One blocked in the browser has no server-rendered
+	 * wrapper, so the same copy, palette and vendor names have to travel with the
+	 * page. Empty when blocking is off, since nothing can be parked then.
+	 *
+	 * @since 1.4.0
+	 * @return array<string, mixed>
+	 */
+	private static function get_placeholder_data(): array {
+		if ( ! Blocking_Utils::is_blocking_enabled() ) {
+			return [];
+		}
+
+		return [
+			// Carries the `{service}` token; the frontend substitutes the vendor.
+			// Sanitized here, not in the browser, so the value that crosses into
+			// innerHTML has already been through the same filter the PHP builder
+			// applies at render.
+			'description' => wp_kses_post( Blocker::placeholder_description_template() ),
+			'button'      => Blocker::placeholder_button_text(),
+			'blocked'     => __( 'This content is currently blocked.', 'surecookie' ),
+			/* translators: %s: Service name (e.g., YouTube, Google Maps) */
+			'accept_aria' => __( 'Accept and load %s content', 'surecookie' ),
+			'colors'      => Get::banner_display_colors(),
+			// Service key => vendor label, so a parked element can name who it is
+			// waiting on. The element only carries the key.
+			'labels'      => Get::blocking_service_labels(),
+		];
 	}
 
 	/**

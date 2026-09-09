@@ -87,12 +87,19 @@ class Sync {
 	 *    seeding, reconcile, first-scan flags, scan-completed diff) defers to the final
 	 *    non-partial call - else a five-page walk fires five diffs and five digest emails.
 	 *
-	 * @param array<string, mixed> $data The scan results.
+	 * Untyped by design: this is an action boundary, so a third-party caller can
+	 * emit it with anything. Nothing to return, so an unusable payload is ignored.
+	 *
+	 * @param mixed $data Expected array<string, mixed> of scan results.
 	 * @since 0.0.1
 	 * @since 1.3.0 Added the `source` and `partial` keys.
 	 * @return void
 	 */
-	public function process_saas_results( array $data ): void {
+	public function process_saas_results( $data = [] ): void {
+		if ( ! is_array( $data ) ) {
+			return;
+		}
+
 		$source     = isset( $data['source'] ) ? sanitize_key( (string) $data['source'] ) : 'saas';
 		$is_cloud   = $source === 'saas';
 		$is_partial = ! empty( $data['partial'] );
@@ -521,6 +528,30 @@ class Sync {
 	}
 
 	/**
+	 * The cookie's lifetime in days, taken from the scan's own clock.
+	 *
+	 * Derived here rather than at render time: `expires_at` is the instant observed
+	 * during the scan, so re-deriving it later counts down and a stale row eventually
+	 * reads 0. A session cookie has no expiry at all, hence the empty string and the
+	 * separately carried bucket.
+	 *
+	 * @param array<string, mixed> $cookie Raw cookie data from API.
+	 * @since 1.5.0
+	 * @return string Day count, or an empty string.
+	 */
+	private function scan_duration( array $cookie ): string {
+		$expires_at = strtotime( (string) ( $cookie['expires_at'] ?? '' ) );
+
+		if ( $expires_at === false ) {
+			return '';
+		}
+
+		$days = (int) ceil( ( $expires_at - time() ) / DAY_IN_SECONDS );
+
+		return $days > 0 ? (string) $days : '';
+	}
+
+	/**
 	 * Transform cookie data to minimal required format.
 	 *
 	 * @param array<string, mixed> $cookie Raw cookie data from API.
@@ -534,25 +565,27 @@ class Sync {
 
 		$transformed = [
 			// Cookie properties.
-			'name'         => $cookie['name'] ?? '',
-			'value'        => $cookie['value'] ?? '',
-			'domain'       => $cookie['domain'] ?? '',
-			'path'         => $cookie['path'] ?? '/',
-			'expires'      => $cookie['expires_at'] ?? null,
-			'httpOnly'     => ! empty( $cookie['http_only'] ),
-			'secure'       => ! empty( $cookie['secure'] ),
-			'sameSite'     => $cookie['same_site'] ?? 'lax',
-			'category'     => $category,
+			'name'          => $cookie['name'] ?? '',
+			'value'         => $cookie['value'] ?? '',
+			'domain'        => $cookie['domain'] ?? '',
+			'path'          => $cookie['path'] ?? '/',
+			'expires'       => $cookie['expires_at'] ?? null,
+			'duration'      => $this->scan_duration( $cookie ),
+			'expiry_bucket' => sanitize_key( (string) ( $cookie['expiry_bucket'] ?? '' ) ),
+			'httpOnly'      => ! empty( $cookie['http_only'] ),
+			'secure'        => ! empty( $cookie['secure'] ),
+			'sameSite'      => $cookie['same_site'] ?? 'lax',
+			'category'      => $category,
 
 			// Cookie policy display fields.
 			// Scan API exposes the vendor as 'owner' ('vendor' kept for back-compat), never
 			// 'provider'; read those first, fall back to the setter domain ('set_via').
-			'provider'     => $this->resolve_cookie_provider( $cookie ),
-			'description'  => $cookie['description'] ?? '',
-			'purpose'      => $cookie['purpose'] ?? '',
+			'provider'      => $this->resolve_cookie_provider( $cookie ),
+			'description'   => $cookie['description'] ?? '',
+			'purpose'       => $cookie['purpose'] ?? '',
 
 			// Unique identifier for deduplication.
-			'signature_id' => $signature_id,
+			'signature_id'  => $signature_id,
 		];
 
 		// Which scanner observed this cookie. Carried only when the scan declares it, so a
@@ -860,7 +893,17 @@ class Sync {
 	 * @return array<string, mixed>
 	 */
 	private static function inherit_from_replaced( array $incoming, array $existing ): array {
-		foreach ( [ 'provider', 'purpose', 'description', 'expires' ] as $field ) {
+		// 'duration' carries the catalog's authored day count, which no scan reports.
+		// Omitting it dropped that value whenever a scan replaced the row, while
+		// First_Party_Repair::CURATED_FIELDS had always carried it. A session-scoped
+		// observation is a retraction, so it must not inherit a day count back.
+		$fields = [ 'provider', 'purpose', 'description', 'expires', 'duration', 'expiry_bucket' ];
+
+		if ( ( $incoming['expiry_bucket'] ?? '' ) === 'session' ) {
+			$fields = array_diff( $fields, [ 'duration' ] );
+		}
+
+		foreach ( $fields as $field ) {
 			if ( self::is_blank_field( $incoming[ $field ] ?? null ) && ! self::is_blank_field( $existing[ $field ] ?? null ) ) {
 				$incoming[ $field ] = $existing[ $field ];
 			}

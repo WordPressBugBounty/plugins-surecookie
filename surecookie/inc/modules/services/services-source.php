@@ -82,7 +82,7 @@ class Services_Source {
 
 	/**
 	 * Resolve the unified catalog: slug => {label, category, gcm_compatible?,
-	 * patterns:{scripts,iframes}, cookies:[...]}. `_meta` is stripped.
+	 * patterns keyed by Pattern_Kinds bucket, cookies:[...]}. `_meta` is stripped.
 	 *
 	 * First-party placeholder domains are resolved here, on the way out of the
 	 * caches, so every consumer (Known Services REST, install(), declared-cookie
@@ -104,8 +104,8 @@ class Services_Source {
 
 	/**
 	 * Project the catalog into the blocking view consumed by Known_Scripts /
-	 * Blocker: category => slug => {label, scripts[], iframes[], gcm_compatible?}.
-	 * Only services with at least one pattern are emitted.
+	 * Blocker: category => slug => {label, one array per Pattern_Kinds bucket,
+	 * gcm_compatible?}. Only services with at least one pattern are emitted.
 	 *
 	 * @since 1.3.0
 	 * @return array<string, array<string, array<string, mixed>>>
@@ -211,6 +211,57 @@ class Services_Source {
 	}
 
 	/**
+	 * One catalog entry's patterns, counted the way the admin may state them.
+	 *
+	 * `blockable` is true only when a pass can act on something the service
+	 * declares. A font or image host is a real pattern and still belongs in the
+	 * listing, but calling it blocked would promise gating the engine cannot do,
+	 * so it is counted separately as `unblockableCount`.
+	 *
+	 * @param array<string, mixed> $service Catalog entry.
+	 * @since 1.5.0
+	 * @return array{scriptCount: int, iframeCount: int, styleCount: int, unblockableCount: int, blockable: bool}
+	 */
+	public static function pattern_summary( array $service ): array {
+		$resources   = self::pattern_lists( $service );
+		$blockable   = 0;
+		$unblockable = 0;
+
+		foreach ( array_keys( Pattern_Kinds::enforced() ) as $bucket ) {
+			$blockable += count( $resources[ $bucket ] );
+		}
+
+		foreach ( array_keys( Pattern_Kinds::unenforced() ) as $bucket ) {
+			$unblockable += count( $resources[ $bucket ] );
+		}
+
+		return [
+			'scriptCount'      => count( $resources['scripts'] ),
+			'iframeCount'      => count( $resources['iframes'] ),
+			'styleCount'       => count( $resources['styles'] ),
+			'unblockableCount' => $unblockable,
+			'blockable'        => $blockable > 0,
+		];
+	}
+
+	/**
+	 * One catalog entry's patterns, by bucket, with every bucket present.
+	 *
+	 * @param array<string, mixed> $service Catalog entry.
+	 * @since 1.5.0
+	 * @return array<string, array<int, string>>
+	 */
+	public static function pattern_lists( array $service ): array {
+		$resources = [];
+
+		foreach ( Pattern_Kinds::buckets() as $bucket ) {
+			$resources[ $bucket ] = array_values( (array) ( $service['patterns'][ $bucket ] ?? [] ) );
+		}
+
+		return $resources;
+	}
+
+	/**
 	 * Load the catalog as authored, from the transient, the file cache or the
 	 * bundled floor.
 	 *
@@ -283,8 +334,12 @@ class Services_Source {
 
 	/**
 	 * Project a unified catalog into the blocking view (category => slug =>
-	 * {label, scripts[], iframes[], gcm_compatible?}); services without patterns
-	 * are omitted.
+	 * {label, one array per Pattern_Kinds bucket, gcm_compatible?}); services
+	 * without patterns are omitted.
+	 *
+	 * Every bucket is emitted, including the ones no pass reads: a consumer that
+	 * only cares what gets rewritten filters on `Pattern_Kinds::enforced()`,
+	 * while the admin surfaces need the rest to say what is NOT blocked.
 	 *
 	 * @param array<string, array<string, mixed>> $catalog Unified catalog.
 	 * @since 1.3.0
@@ -298,20 +353,19 @@ class Services_Source {
 				continue;
 			}
 
-			$scripts = array_values( (array) ( $service['patterns']['scripts'] ?? [] ) );
-			$iframes = array_values( (array) ( $service['patterns']['iframes'] ?? [] ) );
+			$entry = [ 'label' => (string) ( $service['label'] ?? $slug ) ];
+			$empty = true;
 
-			if ( $scripts === [] && $iframes === [] ) {
+			foreach ( Pattern_Kinds::buckets() as $bucket ) {
+				$entry[ $bucket ] = array_values( (array) ( $service['patterns'][ $bucket ] ?? [] ) );
+				$empty            = $empty && $entry[ $bucket ] === [];
+			}
+
+			if ( $empty ) {
 				continue;
 			}
 
 			$category = is_string( $service['category'] ?? null ) ? $service['category'] : 'uncategorized';
-
-			$entry = [
-				'label'   => (string) ( $service['label'] ?? $slug ),
-				'scripts' => $scripts,
-				'iframes' => $iframes,
-			];
 
 			if ( isset( $service['gcm_compatible'] ) ) {
 				$entry['gcm_compatible'] = (bool) $service['gcm_compatible'];
@@ -344,16 +398,82 @@ class Services_Source {
 		foreach ( $override as $slug => $entry ) {
 			if ( is_array( $entry ) && isset( $base[ $slug ] ) && ! empty( $base[ $slug ]['patterns'] ) ) {
 				$patterns = is_array( $entry['patterns'] ?? null ) ? $entry['patterns'] : [];
+				$declared = false;
 
-				if ( empty( $patterns['scripts'] ) && empty( $patterns['iframes'] ) ) {
-					$entry['patterns'] = $base[ $slug ]['patterns'];
+				// Only the ENFORCED buckets count, as they did before `styles`
+				// and `media` existed. A remote row carrying nothing but a
+				// media classification is still an incomplete row, and letting
+				// it satisfy this guard would drop the floor's blocking
+				// patterns for that service entirely.
+				foreach ( array_keys( Pattern_Kinds::enforced() ) as $bucket ) {
+					$declared = $declared || ! empty( $patterns[ $bucket ] );
 				}
+
+				$entry['patterns'] = $declared
+					? self::reclassify_patterns( $patterns, (array) $base[ $slug ]['patterns'] )
+					: $base[ $slug ]['patterns'];
 			}
 
 			$base[ $slug ] = $entry;
 		}
 
 		return $base;
+	}
+
+	/**
+	 * Move a remote pattern into the bucket the bundled floor files it under.
+	 *
+	 * The remote catalog still publishes every pattern as a script, so a
+	 * stylesheet or image host would come back as one and the admin would again
+	 * report it as blocked by a pass that cannot see a `<link>` or an `<img>`.
+	 * The remote stays free to add and retire patterns; only where it repeats a
+	 * pattern this plugin has already classified does the floor win.
+	 *
+	 * A pattern is moved only when the floor files it in exactly ONE bucket and
+	 * the remote put it somewhere else. Nine bundled services deliberately
+	 * declare the same host under both `scripts` and `iframes` (reCAPTCHA,
+	 * Wistia, Stripe and the video players): with a single-valued home the
+	 * later bucket won and every remote copy was routed to it, emptying the
+	 * other array. Pooling means blocking survived that, but the counts the
+	 * admin screens read did not.
+	 *
+	 * @param array<string, mixed> $remote  Remote patterns, by bucket.
+	 * @param array<string, mixed> $bundled Bundled patterns, by bucket.
+	 * @since 1.5.0
+	 * @return array<string, array<int, string>>
+	 */
+	private static function reclassify_patterns( array $remote, array $bundled ): array {
+		$home = [];
+
+		foreach ( Pattern_Kinds::buckets() as $bucket ) {
+			foreach ( (array) ( $bundled[ $bucket ] ?? [] ) as $pattern ) {
+				$home[ strtolower( trim( (string) $pattern ) ) ][ $bucket ] = true;
+			}
+		}
+
+		$merged = array_fill_keys( Pattern_Kinds::buckets(), [] );
+
+		foreach ( Pattern_Kinds::buckets() as $bucket ) {
+			foreach ( (array) ( $remote[ $bucket ] ?? [] ) as $pattern ) {
+				$pattern = (string) $pattern;
+				$buckets = $home[ strtolower( trim( $pattern ) ) ] ?? [];
+
+				// Unknown to the floor, or filed there under this same bucket:
+				// leave it where the remote put it. Only an unambiguous
+				// disagreement relocates, so a floor entry that spans buckets
+				// never collapses the remote's placement into one of them.
+				$target = count( $buckets ) === 1 && ! isset( $buckets[ $bucket ] )
+					? (string) array_key_first( $buckets )
+					: $bucket;
+
+				$merged[ $target ][] = $pattern;
+			}
+		}
+
+		return array_map(
+			static fn( array $patterns ): array => array_values( array_unique( $patterns ) ),
+			$merged
+		);
 	}
 
 	/**

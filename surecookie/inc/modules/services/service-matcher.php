@@ -108,10 +108,13 @@ class Service_Matcher {
 	}
 
 	/**
-	 * Collect the script + iframe URL patterns for the requested services from the
-	 * catalog blocking view, so matching keys off the same patterns the blocker
-	 * uses. Reads the catalog view directly (not the surecookie_known_scripts
-	 * filter) so it excludes the scan-merged synthetic rows and needs no provider.
+	 * Collect every URL pattern for the requested services from the catalog
+	 * blocking view, so matching keys off the same patterns the blocker uses.
+	 * Reads the catalog view directly (not the surecookie_known_scripts filter)
+	 * so it excludes the scan-merged synthetic rows and needs no provider.
+	 *
+	 * Buckets no pass acts on are included: a font host still identifies its
+	 * service, which is what the admin badge and the declared cookies need.
 	 *
 	 * @param array<int, string> $service_slugs Slugs to look up. Empty = every service.
 	 * @since 1.3.0
@@ -133,10 +136,14 @@ class Service_Matcher {
 					continue;
 				}
 
-				$service_patterns = array_merge(
-					is_array( $definition['scripts'] ?? null ) ? $definition['scripts'] : [],
-					is_array( $definition['iframes'] ?? null ) ? $definition['iframes'] : []
-				);
+				$service_patterns = [];
+
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					$service_patterns = array_merge(
+						$service_patterns,
+						is_array( $definition[ $bucket ] ?? null ) ? $definition[ $bucket ] : []
+					);
+				}
 
 				$patterns[ $slug ] = array_map(
 					static fn( $pattern ): string => strtolower( (string) $pattern ),
@@ -149,14 +156,14 @@ class Service_Matcher {
 	}
 
 	/**
-	 * Same as get_service_patterns() but keeps the script vs iframe kind, so
-	 * callers that place a pattern in the right bucket (e.g. the Detected
-	 * Resources overlay) use the catalog's authoritative type instead of
-	 * guessing it from the URL.
+	 * Same as get_service_patterns() but keeps each pattern in its catalog
+	 * bucket, so callers that place a pattern (e.g. the Detected Resources
+	 * overlay) use the catalog's authoritative delivery kind instead of guessing
+	 * it from the URL.
 	 *
 	 * @param array<int, string> $service_slugs Slugs to look up. Empty = every service.
 	 * @since 1.3.0
-	 * @return array<string, array{scripts: array<int, string>, iframes: array<int, string>}>
+	 * @return array<string, array<string, array<int, string>>> Patterns by slug, then by Pattern_Kinds bucket.
 	 */
 	public function get_service_patterns_by_kind( array $service_slugs = [] ): array {
 		/** @var array<string, array<string, mixed>> $all_scripts */
@@ -178,10 +185,11 @@ class Service_Matcher {
 					continue;
 				}
 
-				$patterns[ $slug ] = [
-					'scripts' => $lower( $definition['scripts'] ?? [] ),
-					'iframes' => $lower( $definition['iframes'] ?? [] ),
-				];
+				$patterns[ $slug ] = [];
+
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					$patterns[ $slug ][ $bucket ] = $lower( $definition[ $bucket ] ?? [] );
+				}
 			}
 		}
 

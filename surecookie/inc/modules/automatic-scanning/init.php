@@ -47,7 +47,7 @@ class Init {
 	 * @since 1.2.0
 	 * @return array<int, string>
 	 */
-	public function register_api_controller( $controllers ) {
+	public function register_api_controller( $controllers = [] ) {
 		if ( is_array( $controllers ) ) {
 			$controllers[] = Api::class;
 		}

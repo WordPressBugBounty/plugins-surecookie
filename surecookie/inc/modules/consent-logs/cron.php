@@ -55,7 +55,10 @@ class Cron {
 	 */
 	public function __construct() {
 		add_action( self::CLEANUP_CONSENT_LOGS, [ $this, 'cleanup_old_logs' ] );
-		add_action( 'init', [ $this, 'schedule_cleanup' ] );
+
+		// Modules boot from `init` priority 999, so an `init` callback here would
+		// never fire. Schedule directly - schedule_cleanup() is idempotent.
+		$this->schedule_cleanup();
 
 		// Reschedule when settings change.
 		add_action( 'update_option_' . SURECOOKIE_SETTINGS_OPTION, [ $this, 'maybe_reschedule_on_settings_change' ], 10, 2 );
@@ -103,7 +106,7 @@ class Cron {
 	 * @since 0.0.1
 	 * @return void
 	 */
-	public function maybe_reschedule_on_settings_change( $old_value, $new_value ): void {
+	public function maybe_reschedule_on_settings_change( $old_value = null, $new_value = null ): void {
 		$old_retention = $old_value['consent_log_retention'] ?? 'never';
 		$new_retention = $new_value['consent_log_retention'] ?? 'never';
 

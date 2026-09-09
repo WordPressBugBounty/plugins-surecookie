@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -36,6 +36,7 @@ SureCookie follows a simple WordPress cookie consent workflow:
 5. Show the cookie consent banner and preference modal to visitors.
 6. Store consent logs locally in WordPress for review and export.
 7. Generate or connect a cookie policy page that reflects your cookie setup.
+8. Generate a privacy policy draft whose cookie and consent sections stay in step with your settings.
 
 This makes SureCookie more than a WordPress cookie banner. Many cookie plugins focus only on the visitor-facing notice, while SureCookie focuses on what happens before and after it: cookie detection, script blocking, consent records, and policy support.
 
@@ -44,6 +45,8 @@ This makes SureCookie more than a WordPress cookie banner. Many cookie plugins f
 The WordPress.org version of SureCookie includes the core consent workflow:
 
 * Cookie consent banner: Show a clean banner or notice for visitors.
+* Privacy policy generator: Build a privacy policy draft from your cookie and consent settings, with the factual sections kept current by shortcodes.
+* Business details: Enter your legal entity, address and privacy contact once, then reuse them anywhere with shortcodes such as [surecookie_company_name].
 * Preference modal: Let visitors review and manage cookie categories.
 * Accept, Accept All, Decline, and Preferences buttons: Control the button text and order.
 * Real browser cookie scanner: Scan selected pages using a browser-based scanning service.
@@ -476,6 +479,34 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.5.0 - 09-September-2026 =
+- New: A new "Compliance" section gathers your legal pages and business details in one place. Cookie Policy moves here from Tracking Manager (old links still work), Tracking Manager's "Cookies" group is now a single "All Cookies" item, and Consent Logs and Data Requests sit below Settings.
+- New: A privacy policy generator under Compliance > Legal Pages builds a draft from your cookie and consent settings, including disclosures only SureCookie can make about what a consent record holds. Nothing is published for you, and the screen tracks what is still left to review. The generated page stays current because each section is a shortcode that follows your settings, so you can also reorder sections or drop them into a policy you wrote yourself. ( https://surecookie.com/docs/generating-a-privacy-policy-page/ )
+- New: "Business Details" holds your legal entity name, address, country, privacy contact and the privacy laws your site is subject to. Your privacy policy, cookie policy and Business Details shortcodes all read from it, and a settings export now carries it to another site. ( https://surecookie.com/docs/setting-up-your-business-details/ )
+- New: Shortcodes such as [surecookie_company_name] and [surecookie_contact_email] put your business details anywhere shortcodes work, including page builders. The full list with copy buttons is on the Business Details screen. Anything you have not filled in shows as a marker to administrators only, never to visitors.
+- New: SureCookie contributes suggested text to WordPress's own Privacy Policy Guide under Tools > Privacy, and can be set as your site's privacy policy page. Setting it swaps the /privacy-policy/ address over, and SureCookie asks first because that changes a public URL.
+- New: "Compliance Check" is the first screen under Compliance. It introduces the upcoming checker, which will load your live site and report what fires before a visitor consents, and lets you connect your site so the check can run.
+- New: You can now correct a scanned cookie's purpose, duration and provider, not just its category. Open it from SureCookie > All Cookies and edit. Your wording survives later scans; clear a field to go back to what the scanner reported.
+- New: A scanned cookie can now be deleted. Previously a cookie from a plugin or service you had removed stayed on your cookie policy with no way to clear it. If it is still being set, it reappears on the next scan.
+- New: Consent records can be kept with no IP address at all, for sites that would rather hold no personal identifier. Add the surecookie_skip_consent_logs_ips filter and records keep the date, categories and session, but no IP or country is stored, and no address is sent to work out a country. Off by default. If you also use Pro's Geographic Rules for selected regions, a country is still resolved on page views so the right rules apply, and your privacy policy says so. ( https://surecookie.com/docs/recording-consent-without-storing-visitor-ip-addresses/ )
+- New: Geographic rules can now target individual US states, so a rule can apply to California for CCPA rather than to the whole country. Consent records and the PDF certificate show the state as well. Geographic rules need SureCookie Pro.
+- Fix: Geographic rules had no effect on sites behind a CDN or load balancer. SureCookie read the address of the CDN rather than the visitor, so every visitor resolved as "location unknown" and the fallback rule was applied to the whole site: the banner appeared in countries you had excluded, and script blocking ran for those visitors too. The visitor's real address is now used whenever the request genuinely arrives from a recognised proxy, and a request that reaches your server directly still cannot claim an address of its own.
+- Fix: The first automatic scan treated everything it found as new, so with Compliance Guard on (the default) it blocked every third-party resource at once, including support widgets and payment scripts, in a state no visitor's consent could release. A first scan now records what your site already loads and blocks nothing.
+- Fix: Turning the cookie banner off also turned off "Block Scripts Until Consent", and turning the banner back on did not restore it, so the banner returned while nothing was being blocked. Toggling the banner now leaves that setting alone. If you have ever switched your banner off and on, please check SureCookie > Tracking Manager and re-enable "Block Scripts Until Consent" if it is off.
+- Fix: An "Always allowed" rule could allow far more than you chose, or nothing at all. It applied to every service on the same web address, so allowing Google reCAPTCHA also allowed Google Ads and Google Maps before consent; a broader scanner entry could override a specific address; and an address typed the way it really looks was ignored by the browser-side guard. Rules now apply only to the service you picked, recognise the common ways of writing an address, and bind tightly to the folder and port you name. Name the service's address rather than one exact file, so the rule also covers scripts a page builder or form plugin adds after the page has loaded. Rules you saved earlier keep working as they did until you next save that row.
+- Fix: Blocked resources could still load before consent. A blocked host is now held back whether the page loads it as a script, an iframe, an embed or an object, which closes gaps for Google Maps drawn with the JavaScript API, the YouTube and Vimeo players and Tag Manager's no-JavaScript fallback. A blocked Presto Player video is also no longer present as markup until you accept, so another plugin can no longer unwrap it and let it reach YouTube.
+- Fix: Google Fonts loaded before consent on every site, even with the service listed as blocked. Web fonts and stylesheets arrive on a different kind of tag than scripts and embeds, and that tag was never held back, so the visitor's IP address still reached Google. Stylesheets and fonts are now held until consent, along with the preload and prefetch hints that fetch them early.
+- Fix: The WP Consent API bridge never ran, on any site, for the whole life of the feature. Other plugins that read consent through that standard were told nothing until a visitor clicked the banner, and the opt-out side had never run at all. It now runs on every request. A follow-on fix stops the four "Cannot modify header information" warnings this produced in your log on each WP-Cron run.
+- Fix: Front-end page builders such as Beaver Builder, Bricks, Divi, Elementor and WPBakery are editable again. The banner no longer takes over the Escape and Tab keys for the whole page, and script blocking pauses inside the builder's own editing screen. It still applies everywhere else, including for logged-in editors browsing the site normally, so what you see matches what visitors get.
+- Fix: Your cookie policy could list internal name patterns such as `_ga_<container-id>` as though they were cookies your site sets. They are no longer listed, and existing ones clear on your next scan.
+- Fix: The Purpose and Duration columns on your cookie policy were wrong. Purpose showed a dash for every scanned cookie, session cookies showed a dash instead of "Session", the duration counted down over time so an older cookie could read 0, and a duration that came from our service catalog could be lost on the next scan. All four now read correctly.
+- Fix: The cookie banner could vanish entirely on sites using an HTML optimizer that strips empty elements, taking the blocked-content placeholders and the whole consent mechanism with it, silently. The banner now creates its own container when the one SureCookie prints is missing.
+- Fix: Banner button text is now always readable. It was fixed to white, which fell below the WCAG minimum contrast on the four dark palettes and on light custom colors. Text color is now chosen from the button's own background across the banner, the preference modal and blocked-content placeholders.
+- Fix: Sites using a regional language variant (Swiss or Austrian German, Belgian French, Mexican Spanish and similar) now get the bundled translation of their base language instead of English. A real regional translation still takes priority.
+- Fix: The Cookie Scanner said "Resets in 24 hours" in English, and said it even when your daily scan limit had already reset, which read as a fresh lockout. It now shows a real countdown in your language, and nothing at all once the limit has reset.
+- Fix: One unusable value no longer breaks a whole screen or a whole save. An incomplete cookie, category or blocking rule could stop the Cookie Manager or Cookie Scanner loading, break the cookie policy for every visitor, hide your saved Google Consent Mode regional rules, or make a rule match nothing while the tracker it named kept loading. A settings save or import with one bad value now completes, tells you which settings were skipped, and the Scripts and Embeds list shows the rules the blocker really enforces.
+- Fix: Scan requests and messages are now accurate. Starting a scan with an invalid page list quietly scanned your previous selection and used part of your allowance, and most failures blamed a slow page whatever had really happened. Invalid requests are refused, messages match the real cause, and they say when retrying will not help.
+
 = 1.4.0 - 24-August-2026 =
 - New: A "Data Requests" screen where visitor GDPR and CCPA requests arrive and are tracked against their response deadline. Answering them is a SureCookie Pro feature; the free screen explains the workflow. ( https://surecookie.com/docs/handling-data-requests/ )
 - New: Import / Export for settings, cookie categories and custom cookies, so you can copy a configuration between sites or keep a backup. ( https://surecookie.com/docs/importing-and-exporting-surecookie-settings/ )
@@ -598,4 +629,4 @@ Initial public release of SureCookie.
 - Fix: Deactivation conflict with other plugins resolved on network setup level.
 - Compatibility - Synced up Resource blocked scripts with Google consent mode scripts, so that the toggle is not shown for Google scripts managed by Consent Mode.
 
-Older releases, including the 1.0.x and pre-release builds, are listed in the [full SureCookie changelog](https://surecookie.com/changelog/).
+For older releases, see the full SureCookie changelog [here](https://surecookie.com/changelog/).

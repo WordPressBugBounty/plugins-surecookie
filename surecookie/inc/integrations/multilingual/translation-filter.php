@@ -43,11 +43,15 @@ class Translation_Filter {
 	/**
 	 * Apply translations to frontend localized data.
 	 *
-	 * @param array<string, mixed> $data Frontend localized data.
-	 * @return array<string, mixed> Translated data.
+	 * @param mixed $data Expected array<string, mixed> of frontend localized data.
+	 * @return mixed Translated data, or $data untouched.
 	 * @since 0.0.1-beta.1
 	 */
-	public function translate_frontend_data( array $data ): array {
+	public function translate_frontend_data( $data = [] ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
 		if ( ! Init::is_polylang_active() && ! Init::is_wpml_active() ) {
 			return $data;
 		}
@@ -62,11 +66,15 @@ class Translation_Filter {
 	 * Translates category labels (camelCase key) and the `defaults`
 	 * placeholder map surfaced to the banner-content editor.
 	 *
-	 * @param array<string, mixed> $data Admin localized data.
-	 * @return array<string, mixed> Translated data.
+	 * @param mixed $data Expected array<string, mixed> of admin localized data.
+	 * @return mixed Translated data, or $data untouched.
 	 * @since 1.0.0
 	 */
-	public function translate_admin_data( array $data ): array {
+	public function translate_admin_data( $data = [] ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
 		if ( ! Init::is_polylang_active() && ! Init::is_wpml_active() ) {
 			return $data;
 		}

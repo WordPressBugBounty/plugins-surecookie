@@ -23,7 +23,7 @@ trait IpManager {
 	/**
 	 * Static cache for country data to avoid duplicate API calls
 	 *
-	 * @var array<string, array{code: string, name: string}>|null
+	 * @var array<string, array{code: string, name: string, region: string, region_name: string}>|null
 	 */
 	private static ?array $country_cache = null;
 
@@ -52,6 +52,37 @@ trait IpManager {
 	}
 
 	/**
+	 * Get the ISO 3166-2 subdivision (US state) from an IP address.
+	 *
+	 * Empty when the agent has not been updated to return regions, when the
+	 * country has no subdivisions, or when the IP is unresolvable. Callers must
+	 * treat empty as "unknown" and fall back to the country rule.
+	 *
+	 * @param string $ip The IP address to resolve.
+	 * @since 1.5.0
+	 * @return string Subdivision code such as 'CA', or an empty string.
+	 */
+	public static function get_region_from_ip( string $ip ): string {
+		$data = self::get_country_data( $ip );
+		return is_string( $data['region'] ?? null ) ? $data['region'] : '';
+	}
+
+	/**
+	 * Get the region display name (state) from an IP address.
+	 *
+	 * Empty under the same conditions as the code: older agent, no
+	 * subdivision, unresolvable IP.
+	 *
+	 * @param string $ip The IP address to resolve.
+	 * @since 1.5.0
+	 * @return string Region name such as 'California', or an empty string.
+	 */
+	public static function get_region_name_from_ip( string $ip ): string {
+		$data = self::get_country_data( $ip );
+		return is_string( $data['region_name'] ?? null ) ? $data['region_name'] : '';
+	}
+
+	/**
 	 * Anonymize an IP via WordPress core's privacy function.
 	 *
 	 * Zeros the last IPv4 octet or last 64 IPv6 bits, handles dual-stack, and
@@ -63,6 +94,40 @@ trait IpManager {
 	 */
 	public static function anonymize_ip( string $ip ): string {
 		return wp_privacy_anonymize_ip( $ip );
+	}
+
+	/**
+	 * Resolve the visitor-side pair to record against a consent decision.
+	 *
+	 * The one place that decides whether an IP is processed at all, so the log
+	 * table, CSV and PDF export, consent forwarding and the personal-data
+	 * exporter all read a consistent value with no branch of their own. "Origin"
+	 * here is the visitor, unrelated to the `origin_site` forwarding column.
+	 *
+	 * The gate is checked before anything is derived from the address, so an
+	 * opted-out site issues no geolocation request.
+	 *
+	 * @param string $ip The raw client IP.
+	 * @since 1.5.0
+	 * @return array{ip: string, country: string, region: string} Anonymized IP, country and region name, or the redaction marker for all three.
+	 */
+	public static function consent_log_origin( string $ip ): array {
+		if ( ! Helper::consent_log_ip_enabled() ) {
+			return [
+				'ip'      => Helper::REDACTED,
+				'country' => Helper::REDACTED,
+				'region'  => Helper::REDACTED,
+			];
+		}
+
+		return [
+			// Country first: it needs the raw address, which anonymizing destroys.
+			'country' => self::get_country_name_from_ip( $ip ),
+			// Region is derived from the same address, so it belongs behind the
+			// same gate; both read the one cached lookup.
+			'region'  => self::get_region_name_from_ip( $ip ),
+			'ip'      => self::anonymize_ip( $ip ),
+		];
 	}
 
 	/**
@@ -126,10 +191,10 @@ trait IpManager {
 	}
 
 	/**
-	 * Get country data from IP address - returns both code and name with caching
+	 * Get country data from IP address - returns code, name and region with caching
 	 *
 	 * @param string $ip The IP address to get country for.
-	 * @return array{code: string, name: string} Country data array with code and name.
+	 * @return array{code: string, name: string, region: string, region_name: string} Country and subdivision data; the region pair is empty when unresolved.
 	 * @since 0.0.1
 	 */
 	private static function get_country_data( string $ip ): array {
@@ -139,7 +204,9 @@ trait IpManager {
 		}
 
 		// Check persistent geo cache (single transient array - only 2 rows in wp_options, capped at 500 entries).
-		$geo_cache = get_transient( 'surecookie_geo_cache' );
+		// Key is versioned: entries written before region support carry no region
+		// and would read as "region unknown" until they expire.
+		$geo_cache = get_transient( 'surecookie_geo_cache_v2' );
 		if ( ! is_array( $geo_cache ) ) {
 			$geo_cache = [];
 		}
@@ -155,8 +222,10 @@ trait IpManager {
 		// Return Localhost for local IPs.
 		if ( self::is_local_ip( $ip ) ) {
 			$data                       = [
-				'code' => 'Localhost',
-				'name' => 'Localhost',
+				'code'        => 'Localhost',
+				'name'        => 'Localhost',
+				'region'      => '',
+				'region_name' => '',
 			];
 			self::$country_cache[ $ip ] = $data;
 			return $data;
@@ -165,11 +234,30 @@ trait IpManager {
 		// Return special codes for private IPs.
 		if ( self::is_private_ip( $ip ) ) {
 			$data                       = [
-				'code' => 'XX',
-				'name' => 'Private Network',
+				'code'        => 'XX',
+				'name'        => 'Private Network',
+				'region'      => '',
+				'region_name' => '',
 			];
 			self::$country_cache[ $ip ] = $data;
 			return $data;
+		}
+
+		// Never translated: Pro matches this against Manager::UNRESOLVABLE_CODES.
+		// Carries the region keys so every return path has the same four.
+		$unknown = [
+			'code'        => 'Unknown',
+			'name'        => 'Unknown',
+			'region'      => '',
+			'region_name' => '',
+		];
+
+		// A cache miss must never become an unbounded wait. This runs on page
+		// render (Pro's geo gating) and inside the consent write, so a slow or
+		// unreachable API otherwise holds one PHP worker per visitor.
+		if ( self::geo_api_unavailable() ) {
+			self::$country_cache[ $ip ] = $unknown;
+			return $unknown;
 		}
 
 		// Raw IP for geolocation accuracy (anonymized .0 may not resolve); sent
@@ -177,39 +265,50 @@ trait IpManager {
 		$api_url = Helper::get_agent_app_url() . 'api/geolocation/country';
 		$url     = add_query_arg( 'ip', $ip, $api_url );
 
-		// Make GET request.
-		$response = wp_remote_get( $url, [ 'timeout' => 5 ] );
+		/**
+		 * Filter: seconds to wait for the geolocation API.
+		 *
+		 * Deliberately short: the request sits on the visitor's page render and
+		 * on the consent write, so whatever you raise this to is added TTFB.
+		 *
+		 * @since 1.5.0
+		 * @param int $timeout Timeout in seconds. Default 2.
+		 */
+		$timeout = apply_filters( 'surecookie_geolocation_timeout', 2 );
+		$timeout = is_numeric( $timeout ) ? (int) $timeout : 2;
 
-		// Handle request errors.
-		if ( is_wp_error( $response ) ) {
-			$data                       = [
-				'code' => 'Unknown',
-				'name' => 'Unknown',
-			];
-			self::$country_cache[ $ip ] = $data;
-			return $data;
+		$response = wp_remote_get( $url, [ 'timeout' => max( 1, $timeout ) ] );
+
+		// Only a readable geolocation payload counts as the API being up. A
+		// transport error, a non-200 and a 200 carrying an interstitial or an
+		// error envelope are the same event: no country, and one more strike.
+		$response_data = self::parse_geo_payload( $response );
+		self::record_geo_outcome( $response_data !== null );
+
+		if ( $response_data === null ) {
+			self::$country_cache[ $ip ] = $unknown;
+			return $unknown;
 		}
 
-		$response_code = wp_remote_retrieve_response_code( $response );
-		if ( $response_code !== 200 ) {
-			$data                       = [
-				'code' => 'Unknown',
-				'name' => 'Unknown',
-			];
-			self::$country_cache[ $ip ] = $data;
-			return $data;
-		}
-
-		// Parse response data.
-		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		// Extract country code and name with proper fallbacks.
-		$country_code = $response_data['country_code'] ?? 'Unknown';
+		// The parse guarantees country_code; the name can still be absent.
+		$country_code = $response_data['country_code'];
 		$country_name = $response_data['country_name'] ?? $country_code;
 
+		// An unresolved country arrives as '' from the current agent and as
+		// 'unknown' from older builds and their cached payloads; collapse every
+		// variant onto the one 'Unknown' sentinel so no consumer ever compares
+		// against the wrong casing (surecookie-saas#223). Never translate it:
+		// Pro matches it against Manager::UNRESOLVABLE_CODES.
+		if ( ! is_string( $country_code ) || $country_code === '' || strtolower( $country_code ) === 'unknown' ) {
+			$country_code = 'Unknown';
+			$country_name = 'Unknown';
+		}
+
 		$data = [
-			'code' => $country_code,
-			'name' => $country_name,
+			'code'        => $country_code,
+			'name'        => $country_name,
+			'region'      => is_string( $response_data['region_code'] ?? null ) ? $response_data['region_code'] : '',
+			'region_name' => is_string( $response_data['region_name'] ?? null ) ? $response_data['region_name'] : '',
 		];
 
 		// Cache in memory for this request.
@@ -220,9 +319,94 @@ trait IpManager {
 		if ( count( $geo_cache ) > 500 ) {
 			$geo_cache = array_slice( $geo_cache, -250, null, true );
 		}
-		set_transient( 'surecookie_geo_cache', $geo_cache, DAY_IN_SECONDS );
+		set_transient( 'surecookie_geo_cache_v2', $geo_cache, DAY_IN_SECONDS );
 
 		return $data;
+	}
+
+	/**
+	 * Decode a geolocation response, or null when the provider did not answer
+	 * with a geolocation payload at all.
+	 *
+	 * The discriminator is the PRESENCE of `country_code`, never its value: an
+	 * IP the provider cannot place comes back as `''` (or `'unknown'` from older
+	 * builds), which is an answer and must keep the breaker closed.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed>|\WP_Error $response Raw wp_remote_get() result.
+	 * @return array<string, mixed>|null
+	 */
+	private static function parse_geo_payload( $response ): ?array {
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+			return null;
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		return is_array( $data ) && array_key_exists( 'country_code', $data ) ? $data : null;
+	}
+
+	/**
+	 * Transient holding geolocation circuit-breaker state.
+	 *
+	 * A method not a constant because trait constants need PHP 8.2 and we
+	 * support 7.4, same as local_proxy_ranges().
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private static function geo_breaker_key(): string {
+		return 'surecookie_geo_breaker';
+	}
+
+	/**
+	 * Whether the geolocation API is inside a failure cooldown.
+	 *
+	 * Caching failures per IP cannot bound an outage - visitors are unique, so
+	 * every one still pays a lookup. Tripping site-wide is what caps the cost at
+	 * one probe per window instead of one per visitor.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	private static function geo_api_unavailable(): bool {
+		$state = get_transient( self::geo_breaker_key() );
+
+		return is_array( $state ) && (int) ( $state['until'] ?? 0 ) > time();
+	}
+
+	/**
+	 * Record a geolocation request outcome, opening the circuit after three
+	 * failures inside one cooldown window.
+	 *
+	 * The transient expiry is the accumulation window, so sparse failures lapse
+	 * before they can add up and only a sustained outage trips it. Twice the
+	 * cooldown because the state must outlive the pause it schedules, or the
+	 * half-open probe finds a clean slate and a dead API leaks three fresh
+	 * calls every window.
+	 *
+	 * @since 1.5.0
+	 * @param bool $succeeded Whether the request returned a usable response.
+	 * @return void
+	 */
+	private static function record_geo_outcome( bool $succeeded ): void {
+		if ( $succeeded ) {
+			delete_transient( self::geo_breaker_key() );
+			return;
+		}
+
+		$state    = get_transient( self::geo_breaker_key() );
+		$failures = is_array( $state ) ? (int) ( $state['failures'] ?? 0 ) + 1 : 1;
+		$cooldown = 5 * MINUTE_IN_SECONDS;
+
+		set_transient(
+			self::geo_breaker_key(),
+			[
+				'failures' => $failures,
+				'until'    => $failures >= 3 ? time() + $cooldown : 0,
+			],
+			$cooldown * 2
+		);
 	}
 
 	/**
@@ -293,16 +477,15 @@ trait IpManager {
 		}
 
 		/**
-		 * Filter: Enable trusting proxy headers (X-Forwarded-For, CF-Connecting-IP, etc.).
+		 * Filter: trust proxy headers (X-Forwarded-For) for the client IP.
 		 *
-		 * Enable only behind a trusted reverse proxy or CDN. Not sufficient alone:
-		 * the request must also arrive from the trusted-proxy set (see
-		 * `surecookie_trusted_proxy_ips`, covering loopback, private ranges, Cloudflare).
+		 * On by default: the peer gate below is the spoofing guard, not this flag.
+		 * Off, every CDN-fronted site geolocated its CDN and fell back site-wide.
 		 *
-		 * @param bool $trust Whether to trust proxy headers. Default false.
+		 * @param bool $trust Default true.
 		 * @since 0.0.1
 		 */
-		$trust_proxy = (bool) apply_filters( 'surecookie_trust_proxy_headers', false );
+		$trust_proxy = (bool) apply_filters( 'surecookie_trust_proxy_headers', true );
 
 		if ( ! $trust_proxy ) {
 			return $remote_addr;

@@ -50,7 +50,7 @@ class Init {
 	 * @return array<string, mixed> Localization variables.
 	 * @since 1.1.0
 	 */
-	public function add_admin_localization_vars( $variables ) {
+	public function add_admin_localization_vars( $variables = [] ) {
 		return array_merge(
 			$variables,
 			[

@@ -69,6 +69,22 @@ class DiffEngine {
 	}
 
 	/**
+	 * A change set with nothing in it, in the shape {@see self::diff()} returns.
+	 * Used for the first recorded scan, which has nothing to compare against.
+	 *
+	 * @since 1.5.0
+	 * @return array{added: array<int, array<string, string>>, removed: array<int, array<string, string>>, recategorized: array<int, array<string, string>>, domains_added: array<int, string>}
+	 */
+	public static function empty_diff(): array {
+		return [
+			'added'         => [],
+			'removed'       => [],
+			'recategorized' => [],
+			'domains_added' => [],
+		];
+	}
+
+	/**
 	 * Compute the change set between a previous and a current snapshot.
 	 *
 	 * @param array<string, mixed> $previous Previous scan snapshot.

@@ -13,6 +13,7 @@ namespace SureCookie\Inc\Modules\CookiePolicy;
 use SureCookie\Inc\API\Base;
 use SureCookie\Inc\Functions\SendJson;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\PrivacyPolicy\Validator;
 use SureCookie\Inc\Traits\GetInstance;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -282,20 +283,41 @@ class Api extends Base {
 		];
 
 		// --- Contact Us ---
-		$sections[] = [
-			'type'  => 'heading',
-			'level' => 2,
-			'text'  => __( 'Contact Us', 'surecookie' ),
-		];
-		$sections[] = [
-			'type' => 'paragraph',
-			'text' => __( 'If you have any questions or concerns about this Cookie Policy or our use of cookies, please contact us at:', 'surecookie' ),
-		];
-		$sections[] = [
-			'type' => 'paragraph',
-			'text' => __( '[Your Company Name], [Your Address], [your-email@example.com]', 'surecookie' ),
-		];
+		// Emitted only when there is something real to print. Generation runs
+		// once and never rewrites the page, so a contact block built from empty
+		// Business Details would be a permanently blank section on a live page.
+		if ( self::has_contact_details() ) {
+			$sections[] = [
+				'type'  => 'heading',
+				'level' => 2,
+				'text'  => __( 'Contact Us', 'surecookie' ),
+			];
+			$sections[] = [
+				'type' => 'paragraph',
+				'text' => __( 'If you have any questions or concerns about this Cookie Policy or our use of cookies, please contact us at:', 'surecookie' ),
+			];
+			// Shortcodes rather than literal placeholders, so the page follows
+			// Business Details instead of freezing whatever was true on the day
+			// it was generated.
+			$sections[] = [
+				'type' => 'paragraph',
+				'text' => '[surecookie_company_name], [surecookie_address], [surecookie_contact_email]',
+			];
+		}
 
 		return $sections;
+	}
+
+	/**
+	 * Whether Business Details carry enough to print a contact block.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	private static function has_contact_details(): bool {
+		$details = Validator::details();
+
+		return trim( (string) ( $details['legal_entity_name'] ?? '' ) ) !== ''
+			&& is_email( trim( (string) ( $details['privacy_contact_email'] ?? '' ) ) );
 	}
 }

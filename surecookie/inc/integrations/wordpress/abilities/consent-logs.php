@@ -66,6 +66,7 @@ class ConsentLogs extends Base {
 						'action'        => (string) ( $row['action'] ?? '' ),
 						'timestamp'     => (string) ( $row['timestamp'] ?? '' ),
 						'country'       => (string) ( $row['country'] ?? '' ),
+						'region'        => (string) ( $row['region'] ?? '' ),
 						'user_id'       => ( $row['user_id'] ?? null ) === null ? 0 : (int) $row['user_id'],
 						'geo_preset_id' => (string) ( $row['geo_preset_id'] ?? '' ),
 						'is_forwarded'  => (bool) ( $row['is_forwarded'] ?? false ),
@@ -202,6 +203,10 @@ class ConsentLogs extends Base {
 							'action'        => [ 'type' => 'string' ],
 							'timestamp'     => [ 'type' => 'string' ],
 							'country'       => [ 'type' => 'string' ],
+							'region'        => [
+								'type'        => 'string',
+								'description' => __( 'State or region name resolved from the visitor IP. Empty when unknown.', 'surecookie' ),
+							],
 							'user_id'       => [
 								'type'        => 'integer',
 								'description' => __( 'WordPress user ID, or 0 when the visitor was logged out.', 'surecookie' ),

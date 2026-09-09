@@ -21,6 +21,7 @@ namespace SureCookie\Core;
 
 use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Database\Init as DB_Init;
+use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
 use SureCookie\Inc\Modules\Services\First_Party_Repair;
@@ -110,7 +111,7 @@ class Maintenance {
 	 *
 	 * @since 1.3.0
 	 */
-	private const SCHEMA_PROBE_COLUMN = 'is_forwarded';
+	private const SCHEMA_PROBE_COLUMN = 'region';
 
 	/**
 	 * Unique index the atomic consent-log upsert depends on.
@@ -452,7 +453,88 @@ class Maintenance {
 			'cookie_category_memory'     => [ self::class, 'backfill_cookie_category_memory' ],
 			'first_party_cookie_domains' => [ self::class, 'repair_first_party_cookie_domains' ],
 			'full_width_banner_default'  => [ self::class, 'preserve_full_width_banner_default' ],
+			'scanned_cookie_durations'   => [ self::class, 'backfill_scanned_cookie_durations' ],
+			'installed_pattern_cookies'  => [ self::class, 'prune_installed_pattern_cookies' ],
 		];
+	}
+
+	/**
+	 * Freeze each stored cookie's lifetime into a day count, once.
+	 *
+	 * Rows written before 1.5.0 carry only the absolute `expires`, so the policy
+	 * table re-derived the figure on every render and it shrank toward zero as the
+	 * expiry approached. The scan path now writes `duration` and `expiry_bucket`
+	 * up front, but nothing rewrites the rows already on disk, and automatic
+	 * scanning is off by default - without this an existing site keeps publishing a
+	 * decaying retention period, and session cookies keep reading as a dash.
+	 *
+	 * Idempotent: rows that already carry a duration or a bucket are skipped, so a
+	 * second pass writes nothing.
+	 *
+	 * @since 1.5.0
+	 * @throws \RuntimeException When the back-filled option cannot be written.
+	 * @return void
+	 */
+	private static function backfill_scanned_cookie_durations(): void {
+		$stored = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+
+		if ( empty( $stored ) ) {
+			return;
+		}
+
+		$dirty = false;
+
+		foreach ( $stored as $category => $cookies ) {
+			if ( ! is_array( $cookies ) ) {
+				continue;
+			}
+
+			foreach ( $cookies as $index => $cookie ) {
+				if ( ! is_array( $cookie ) ) {
+					continue;
+				}
+
+				if ( (string) ( $cookie['duration'] ?? '' ) !== ''
+					|| (string) ( $cookie['expiry_bucket'] ?? '' ) !== '' ) {
+					continue;
+				}
+
+				$expires = $cookie['expires'] ?? null;
+
+				// No expiry at all is how a session cookie reaches storage on this path,
+				// and it is also how an incomplete row looks. Both belong in the same
+				// bucket: the policy renders "Session" rather than an empty cell.
+				if ( empty( $expires ) ) {
+					$stored[ $category ][ $index ]['expiry_bucket'] = 'session';
+					$dirty = true;
+					continue;
+				}
+
+				$timestamp = is_numeric( $expires ) ? (int) $expires : strtotime( (string) $expires );
+
+				if ( $timestamp === false || $timestamp <= 0 ) {
+					continue;
+				}
+
+				$days = (int) ceil( ( $timestamp - time() ) / DAY_IN_SECONDS );
+
+				if ( $days > 0 ) {
+					$stored[ $category ][ $index ]['duration'] = (string) $days;
+				} else {
+					$stored[ $category ][ $index ]['expiry_bucket'] = 'session';
+				}
+
+				$dirty = true;
+			}
+		}
+
+		if ( ! $dirty ) {
+			return;
+		}
+
+		if ( ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
+			throw new \RuntimeException( 'Could not write back-filled cookie durations.' );
+		}
 	}
 
 	/**
@@ -864,6 +946,21 @@ class Maintenance {
 	 */
 	private static function repair_first_party_cookie_domains(): void {
 		First_Party_Repair::run();
+	}
+
+	/**
+	 * Delete catalog pattern names a Known Service install published as cookies.
+	 *
+	 * `_ga_<container-id>` and `_gac_gb_<container-id>` are matchers, not cookies.
+	 * install() minted them anyway, and being `custom` rows no scan reconciles them
+	 * away, so they sat on the public cookie policy. Idempotent by convergence: a
+	 * second pass finds none.
+	 *
+	 * @since 1.5.0
+	 * @return void
+	 */
+	private static function prune_installed_pattern_cookies(): void {
+		Installed_Services::get_instance()->prune_pattern_cookies();
 	}
 
 	/**

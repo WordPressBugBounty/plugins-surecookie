@@ -102,69 +102,6 @@ class Sanitize {
 	}
 
 	/**
-	 * Normalize non-breaking spaces in rich-text text nodes without changing attributes.
-	 *
-	 * @param string $value Sanitized rich-text HTML.
-	 * @return string
-	 */
-	private static function normalize_rich_text_whitespace( string $value ): string {
-		$result = '';
-		$text   = '';
-		$in_tag = false;
-		$quote  = null;
-		$length = strlen( $value );
-
-		for ( $index = 0; $index < $length; $index++ ) {
-			$char = $value[ $index ];
-
-			if ( ! $in_tag ) {
-				if ( $char === '<' ) {
-					$result .= self::normalize_rich_text_segment( $text ) . $char;
-					$text    = '';
-					$in_tag  = true;
-				} else {
-					$text .= $char;
-				}
-				continue;
-			}
-
-			$result .= $char;
-			if ( $quote !== null ) {
-				if ( $char === $quote ) {
-					$quote = null;
-				}
-				continue;
-			}
-
-			if ( $char === '"' || $char === "'" ) {
-				$quote = $char;
-			} elseif ( $char === '>' ) {
-				$in_tag = false;
-			}
-		}
-
-		return $result . self::normalize_rich_text_segment( $text );
-	}
-
-	/**
-	 * Normalize NBSP variants inside one text segment.
-	 *
-	 * @param string $value Plain-text segment from sanitized rich text.
-	 * @return string
-	 */
-	private static function normalize_rich_text_segment( string $value ): string {
-		$value = str_replace( "\xC2\xA0", ' ', $value );
-
-		return preg_replace_callback(
-			'/&(?:nbsp|#0*160|#x0*a0);/i',
-			static function () {
-				return ' ';
-			},
-			$value
-		) ?? $value;
-	}
-
-	/**
 	 * Re-sanitize rich text after an HTML-entity decode has re-armed it.
 	 *
 	 * Kses only inspects markup between a literal `<` and `>`, so
@@ -281,6 +218,21 @@ class Sanitize {
 	 */
 	public static function boolean( $value ) {
 		return (bool) $value;
+	}
+
+	/**
+	 * Read an untrusted leaf as a string, refusing non-scalars.
+	 *
+	 * Casting an array leaf yields the literal "Array", which then becomes live
+	 * data; '' lets the caller's own empty check drop it instead.
+	 *
+	 * @param mixed $value Leaf value.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	public static function scalar( $value ): string {
+		return is_scalar( $value ) ? (string) $value : '';
 	}
 
 	/**
@@ -406,10 +358,78 @@ class Sanitize {
 		$sanitized_settings = Get::option( SURECOOKIE_SETTINGS_OPTION, [], 'array' );
 
 		foreach ( $data as $key => $value ) {
+			// Same rule as the REST patch: a wrong-shaped array value is dropped, never coerced to [].
+			if ( ! Settings::accepts_value( $key, $value ) ) {
+				continue;
+			}
+
 			$sanitized_settings[ $key ] = Settings::get_cleaned_value( $key, $value );
 		}
 
 		return $sanitized_settings;
+	}
+
+	/**
+	 * Normalize non-breaking spaces in rich-text text nodes without changing attributes.
+	 *
+	 * @param string $value Sanitized rich-text HTML.
+	 * @return string
+	 */
+	private static function normalize_rich_text_whitespace( string $value ): string {
+		$result = '';
+		$text   = '';
+		$in_tag = false;
+		$quote  = null;
+		$length = strlen( $value );
+
+		for ( $index = 0; $index < $length; $index++ ) {
+			$char = $value[ $index ];
+
+			if ( ! $in_tag ) {
+				if ( $char === '<' ) {
+					$result .= self::normalize_rich_text_segment( $text ) . $char;
+					$text    = '';
+					$in_tag  = true;
+				} else {
+					$text .= $char;
+				}
+				continue;
+			}
+
+			$result .= $char;
+			if ( $quote !== null ) {
+				if ( $char === $quote ) {
+					$quote = null;
+				}
+				continue;
+			}
+
+			if ( $char === '"' || $char === "'" ) {
+				$quote = $char;
+			} elseif ( $char === '>' ) {
+				$in_tag = false;
+			}
+		}
+
+		return $result . self::normalize_rich_text_segment( $text );
+	}
+
+	/**
+	 * Normalize NBSP variants inside one text segment.
+	 *
+	 * @param string $value Plain-text segment from sanitized rich text.
+	 * @return string
+	 */
+	private static function normalize_rich_text_segment( string $value ): string {
+		$value = str_replace( "\xC2\xA0", ' ', $value );
+
+		return preg_replace_callback(
+			'/&(?:nbsp|#0*160|#x0*a0);/i',
+			static function () {
+				return ' ';
+			},
+			$value
+		) ?? $value;
 	}
 
 	/**
@@ -429,7 +449,10 @@ class Sanitize {
 
 		$response = [];
 		foreach ( $data_array as $key => $data ) {
-			if ( Validate::array( $data ) ) {
+			// is_array, not Validate::array: the latter returns the array, so an empty
+			// one is falsy and the branch below would flatten it to '', turning a blank
+			// row into a scalar that consumers then index into.
+			if ( is_array( $data ) ) {
 				$response[ $key ] = self::sanitize_array_recursive( $data, $rich_keys );
 			} elseif ( is_string( $data ) && in_array( $key, $rich_keys, true ) ) {
 				$response[ $key ] = wp_kses_post( $data );

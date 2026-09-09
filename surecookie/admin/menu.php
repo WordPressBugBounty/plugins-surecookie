@@ -83,6 +83,8 @@ class Menu {
 				58
 			);
 
+			// Wanted Settings submenu to be second item no need to follow
+			// (getNavLinks() in src/admin/components/AdminToolbar/constants.js) order.
 			$submenus = [
 				[
 					'id'         => SURECOOKIE_PREFIX,
@@ -91,6 +93,11 @@ class Menu {
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/cookie-manager/scan',
 					'page_title' => __( 'Tracking Manager', 'surecookie' ),
+				],
+				[
+					'id'         => SURECOOKIE_PREFIX . '#/compliance/check',
+					'page_title' => __( 'Compliance', 'surecookie' ),
+					'menu_title' => $this->with_new_badge( __( 'Compliance', 'surecookie' ) ),
 				],
 				[
 					'id'         => SURECOOKIE_PREFIX . '#/analytics',
@@ -162,7 +169,7 @@ class Menu {
 	 * @param string $hook The current admin page.
 	 * @return void
 	 */
-	public function enqueue_admin_assets( $hook ): void {
+	public function enqueue_admin_assets( $hook = '' ): void {
 		$this->enqueue_admin_menu_icon_style();
 
 		if ( ! in_array( $hook, self::PLUGIN_SCREEN_HOOKS, true ) ) {
@@ -239,7 +246,7 @@ class Menu {
 	 * @param string $hook The current admin page.
 	 * @return void
 	 */
-	public function dequeue_conflicting_styles( $hook ): void {
+	public function dequeue_conflicting_styles( $hook = '' ): void {
 		if ( ! in_array( $hook, self::PLUGIN_SCREEN_HOOKS, true ) ) {
 			return;
 		}
@@ -299,7 +306,7 @@ class Menu {
 	 * @param array<string, string> $links Existing action links.
 	 * @return array<string, string> Modified action links.
 	 */
-	public function plugin_action_links( $links ): array {
+	public function plugin_action_links( $links = [] ): array {
 		$admin_url = admin_url( 'admin.php' );
 
 		$new_links = [
@@ -441,6 +448,25 @@ class Menu {
 	}
 
 	/**
+	 * Wrap a submenu label in the shared "NEW" pill.
+	 *
+	 * Extracted so a feature with nothing to count does not have to grow its own
+	 * count branch just to reuse the pill markup and the `.surecookie-new-badge`
+	 * rule already printed by get_admin_menu_dot_css().
+	 *
+	 * @since 1.5.0
+	 * @param string $label Submenu label.
+	 * @return string
+	 */
+	private function with_new_badge( string $label ): string {
+		return sprintf(
+			'%1$s <span class="surecookie-new-badge">%2$s</span>',
+			$label,
+			esc_html__( 'NEW', 'surecookie' )
+		);
+	}
+
+	/**
 	 * Build the Data Requests submenu title.
 	 *
 	 * Mirrors the Consent Logs badge: an attention count when requests are
@@ -455,11 +481,7 @@ class Menu {
 		$label = __( 'Data Requests', 'surecookie' );
 
 		if ( $open_count <= 0 ) {
-			return sprintf(
-				'%1$s <span class="surecookie-new-badge">%2$s</span>',
-				$label,
-				esc_html__( 'NEW', 'surecookie' )
-			);
+			return $this->with_new_badge( $label );
 		}
 
 		return sprintf(
@@ -496,6 +518,10 @@ class Menu {
 	/**
 	 * Build the submenu group-separator stylesheet.
 	 *
+	 * A rule is drawn after every item and suppressed for the ones listed here, so
+	 * this list is a second hand-kept expression of the submenu order: the bands it
+	 * leaves are configuration, then the two record screens, then Learn.
+	 *
 	 * @since 1.1.0
 	 * @return string
 	 */
@@ -513,6 +539,7 @@ class Menu {
 			}
 			#toplevel_page_surecookie li:not(:last-child) a[href="admin.php?page=surecookie"]:after,
 			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/analytics"]:after,
+			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/cookie-manager/scan"]:after,
 			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/learn"]:after,
 			#toplevel_page_surecookie li:not(:last-child) a[href^="admin.php?page=surecookie#/banner/content"]:after {
 				content: none;

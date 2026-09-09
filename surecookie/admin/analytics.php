@@ -8,12 +8,14 @@
 
 namespace SureCookie\Admin;
 
+use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\AssistedScan\Telemetry as AssistedScanTelemetry;
 use SureCookie\Inc\Modules\Auth\Controller as AuthController;
+use SureCookie\Inc\Modules\AutomaticScanning\Scheduler;
+use SureCookie\Inc\Modules\ScriptBlocking\Matched_Resources as MatchedResources;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
-use SureCookie\Inc\Modules\SiteScanner\Utils as ScannerUtils;
 use SureCookie\Inc\Traits\GetInstance;
 
 defined( 'ABSPATH' ) || exit;
@@ -36,7 +38,7 @@ class Analytics {
 	 *
 	 * @since 1.2.0
 	 */
-	private const ANALYTICS_EVENTS_VERSION = 2;
+	private const ANALYTICS_EVENTS_VERSION = 3;
 
 	/**
 	 * Events reshaped in each schema version, keyed by the version that introduced
@@ -48,23 +50,21 @@ class Analytics {
 	 */
 	private const RESHAPED_EVENTS_BY_VERSION = [
 		2 => [ 'banner_configured' ],
+		3 => [ 'onboarding_completed', 'account_connected' ],
 	];
 
 	/**
 	 * Public-content volume bands keyed by their exclusive upper bound. The first
 	 * bound a count falls under wins, so a site reports one band and never the
-	 * wider ones above it; 1000 and up falls through to `greater_than_1000`.
+	 * wider ones above it; 1000 and up falls through to `over_1000`.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	private const CONTENT_VOLUME_BUCKETS = [
-		10   => 'less_than_10',
-		50   => 'less_than_50',
-		100  => 'less_than_100',
-		150  => 'less_than_150',
-		200  => 'less_than_200',
-		500  => 'less_than_500',
-		1000 => 'less_than_1000',
+		10   => 'under_10',
+		50   => 'under_50',
+		200  => 'under_200',
+		1000 => 'under_1000',
 	];
 
 	/**
@@ -175,7 +175,11 @@ class Analytics {
 
 		// One-time re-emit of reshaped events for the installed base (runs before
 		// the throttle gate so it can bust the transient and re-queue this load).
-		$this->maybe_migrate_events_schema();
+		// Behind the same opt-in gate as detection: it writes three options, and a
+		// site that declined tracking must not be written to at all.
+		if ( $this->is_tracking_enabled() ) {
+			$this->maybe_migrate_events_schema();
+		}
 
 		// State-based events, throttled once per day. Deferred to `admin_init` (not inline on
 		// `plugins_loaded`) so add-ons registering a `surecookie_detect_state_events` listener
@@ -216,7 +220,7 @@ class Analytics {
 	 * @return array<string, mixed> Modified stats data.
 	 * @since 0.0.1-beta.1
 	 */
-	public function add_analytics_data( $stats_data ) {
+	public function add_analytics_data( $stats_data = [] ) {
 		$events = self::events();
 
 		$stats_data['plugin_data']['surecookie'] = [
@@ -251,9 +255,44 @@ class Analytics {
 	 * @return void
 	 */
 	public function maybe_detect_state_events(): void {
+		if ( ! $this->is_tracking_enabled() ) {
+			// Declined sites must not accumulate a queue: the shared BSF payload carries our
+			// events whenever ANY registered product is opted in, so a stale queue would ship.
+			// Guarded on existence so an opted-out site is not written to on every admin load.
+			if ( get_option( 'surecookie_usage_events_pending', false ) !== false ) {
+				delete_option( 'surecookie_usage_events_pending' );
+			}
+			return;
+		}
+
 		if ( get_transient( 'surecookie_state_events_checked' ) === false ) {
 			$this->detect_state_events();
 		}
+	}
+
+	/**
+	 * Whether this site opted in to SureCookie usage tracking.
+	 *
+	 * Mirrors BSF_Analytics::is_tracking_enabled() but for SureCookie alone. The library's
+	 * own check passes when ANY registered BSF product is opted in, which is why detection
+	 * cannot rely on it: our events ride the shared payload and would ship from a site that
+	 * declined us while opting in to another plugin.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	private function is_tracking_enabled(): bool {
+		if ( ! apply_filters( 'bsf_usage_tracking_enabled', true ) ) {
+			return false;
+		}
+
+		// Our own settings REST writer stores this per blog, while the BSF library
+		// mirrors a network-level opt-in into sitemeta; on multisite the two never
+		// meet, so honour either rather than dropping one signal.
+		$opted_in = get_option( 'surecookie_usage_optin', false ) === 'yes'
+			|| get_site_option( 'surecookie_usage_optin', false ) === 'yes';
+
+		return (bool) apply_filters( 'surecookie_tracking_enabled', $opted_in );
 	}
 
 	/**
@@ -318,7 +357,18 @@ class Analytics {
 		// Class is available - set throttle transient so we don't re-run for 24h.
 		set_transient( 'surecookie_state_events_checked', 1, DAY_IN_SECONDS );
 
-		// ── 1. plugin_activated ──────────────────────────────────────────
+		/*
+		 * Milestones below answer only WHEN something first happened; current configuration
+		 * lives on the `feature_config` snapshot and never here (see admin/CLAUDE.md). They
+		 * carry no version or count properties: a one-time event freezes them at first fire,
+		 * so they would report a years-old version, and raw numbers explode the breakdown.
+		 *
+		 * Adding or removing an event here means updating the expected-events list in the
+		 * instrumentation-health card (Metabase dashboard 140, Features tab), or that card
+		 * silently stops reporting the event as missing.
+		 */
+
+		// ── plugin_activated ─────────────────────────────────────────────
 		$install_time = get_option( 'surecookie_usage_installed_time', 0 );
 		if ( ! $install_time ) {
 			update_option( 'surecookie_usage_installed_time', time(), false );
@@ -329,20 +379,11 @@ class Analytics {
 			? sanitize_text_field( $bsf_referrers['surecookie'] )
 			: 'self';
 
-		// Emit a fixed flag as the event_value, carry the version in properties['version'].
-		// Keeps the KPI breakdown one row per event, not one per release (@since 1.2.4).
-		$events->track(
-			'plugin_activated',
-			'activated',
-			[
-				'version' => SURECOOKIE_VERSION,
-				'source'  => $source,
-			]
-		);
+		$events->track( 'plugin_activated', 'activated', [ 'source' => $source ] );
 
-		// ── 2. plugin_updated ────────────────────────────────────────────
-		// Use the version captured on `plugins_loaded` (before Maintenance::init updates
-		// `surecookie_saved_version` on `admin_init`), preserving the pre-upgrade version.
+		// ── plugin_updated ───────────────────────────────────────────────
+		// Uses the version captured on `plugins_loaded`, before Maintenance::init updates
+		// `surecookie_saved_version` on `admin_init`, so the pre-upgrade value survives.
 		$saved_version = $this->pre_upgrade_version;
 		if ( $saved_version !== SURECOOKIE_VERSION && ! empty( $saved_version ) ) {
 			$events->flush_pushed( [ 'plugin_updated' ] );
@@ -356,325 +397,84 @@ class Analytics {
 			);
 		}
 
-		// ── user_active_version (recurring version heartbeat) ────────────
-		// Reports the version each ACTIVE site is on. $force re-queues it every cycle so the
-		// latest version wins and it survives the one-time dedup (like plugin_updated). The
-		// one event whose value stays the version by design - the KPI breakdown then shows
-		// active installs per release (@since 1.2.4).
+		// ── user_active_version ──────────────────────────────────────────
+		// The one event whose value is a version by design: $force re-queues it every cycle,
+		// so it reports what each active site runs today rather than at first fire.
 		$events->track( 'user_active_version', SURECOOKIE_VERSION, [], true );
 
-		// ── 3. onboarding_completed ──────────────────────────────────────
+		// ── onboarding_completed ─────────────────────────────────────────
+		// `source` names the screen that recorded it, separating the completion paths.
 		if ( get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ) {
-			$events->track( 'onboarding_completed', 'completed', [ 'version' => SURECOOKIE_VERSION ] );
-		}
-
-		// ── 4. onboarding_skipped ────────────────────────────────────────
-		// Fires when onboarding has not been completed after 3+ days since install.
-		$days_since_install = $this->get_days_since_install();
-		if ( ! get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) && $days_since_install >= 3 ) {
 			$events->track(
-				'onboarding_skipped',
-				'skipped',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-				]
-			);
-		}
-
-		// ── 5. banner_configured ─────────────────────────────────────────
-		// Fires when admin settings have been saved at least once. Carries the compliance
-		// law (always set; default GDPR) to capture the GDPR/CCPA/LGPD distribution here.
-		if ( get_option( SURECOOKIE_SETTINGS_OPTION ) !== false ) {
-			$compliance_law = Settings::get( 'compliance_law' );
-			$law_name       = is_array( $compliance_law ) ? ( $compliance_law['name'] ?? '' ) : '';
-			$events->track(
-				'banner_configured',
-				'configured',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-					'compliance_law'     => (string) $law_name,
-				]
-			);
-		}
-
-		// ── 6. script_blocking_disabled ──────────────────────────────────
-		// `blocking_enabled` defaults to true, so an "enabled" event fires for nearly every
-		// site. The meaningful signal is the rare cohort that turns blocking OFF.
-		if ( ! (bool) Settings::get( 'blocking_enabled' ) ) {
-			$events->track( 'script_blocking_disabled', 'disabled' );
-		}
-
-		// ── 7. first_scan_started ────────────────────────────────────────
-		if ( get_option( 'surecookie_first_scan_started_flag', false ) ) {
-			$pages_count = (int) get_option( 'surecookie_first_scan_pages_count', 0 );
-			$events->track(
-				'first_scan_started',
-				'started',
-				[
-					'version'     => SURECOOKIE_VERSION,
-					'pages_count' => (string) $pages_count,
-				]
-			);
-		}
-
-		// ── 8. first_scan_completed (ACTIVATION EVENT) ───────────────────
-		if ( get_option( 'surecookie_first_scan_completed_flag', false ) ) {
-			$pages_scanned = (int) get_option( 'surecookie_first_scan_pages_scanned', 0 );
-			$events->track(
-				'first_scan_completed',
+				'onboarding_completed',
 				'completed',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-					'pages_scanned'      => (string) $pages_scanned,
-				]
+				[ 'source' => (string) get_option( 'surecookie_onboarding_completed_source', 'unknown' ) ]
 			);
 		}
 
-		// ── 9. first_consent_recorded ────────────────────────────────────
-		// Fires when the first real visitor consent is stored in the database.
-		$first_consent = Settings::get( 'total_logs' );
-		if ( $first_consent > 0 ) {
-			$events->track(
-				'first_consent_recorded',
-				'recorded',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-				]
-			);
+		// ── onboarding_skipped ───────────────────────────────────────────
+		// Not completed 3+ days after install. Whether the wizard was ever opened is
+		// `onboarding_state` on the snapshot, which stays current as people come back to it.
+		if ( ! get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) && $this->get_days_since_install() >= 3 ) {
+			$events->track( 'onboarding_skipped', 'skipped' );
 		}
 
-		// ── 10. consent_logging_enabled ──────────────────────────────────
-		if ( (bool) Settings::get( 'consent_logging_enabled' ) ) {
-			$events->track( 'consent_logging_enabled', 'enabled' );
+		// ── banner_configured ────────────────────────────────────────────
+		// Admin settings saved at least once.
+		if ( get_option( SURECOOKIE_SETTINGS_OPTION ) !== false ) {
+			$events->track( 'banner_configured', 'configured' );
 		}
 
-		// ── 11. first_custom_cookie_added ────────────────────────────────
-		// Fires when the user has manually added at least one custom cookie.
+		// ── first_scan_started / first_scan_completed ────────────────────
+		if ( get_option( 'surecookie_first_scan_started_flag', false ) ) {
+			$events->track( 'first_scan_started', 'started' );
+		}
+
+		if ( get_option( 'surecookie_first_scan_completed_flag', false ) ) {
+			$events->track( 'first_scan_completed', 'completed' );
+		}
+
+		// ── first_consent_recorded ───────────────────────────────────────
+		// The "ever" counterpart to the snapshot's `consent_activity`, which only sees the
+		// retention window and so cannot distinguish "never" from "pruned".
+		if ( Settings::get( 'total_logs' ) > 0 ) {
+			$events->track( 'first_consent_recorded', 'recorded' );
+		}
+
+		// ── first_custom_cookie_added ────────────────────────────────────
 		$custom_cookies = Settings::get( 'custom_cookies' );
 		if ( ! empty( $custom_cookies ) && is_array( $custom_cookies ) ) {
-			$events->track(
-				'first_custom_cookie_added',
-				'added',
-				[ 'count' => (string) count( $custom_cookies ) ]
-			);
+			$events->track( 'first_custom_cookie_added', 'added' );
 		}
 
-		// ── 12. upgrade_banner_dismissed ─────────────────────────────────
-		// Fires once the user dismissed the pro upgrade nudge at least once. Key off the
-		// count: the nudge's `display` flag stays true until the 2nd dismissal.
-		$nudges = get_option( SURECOOKIE_NUDGES, [] );
-		if ( ! empty( $nudges['upgrade_banner']['count'] ) ) {
-			$events->track(
-				'upgrade_banner_dismissed',
-				'dismissed',
-				[ 'count' => (string) $nudges['upgrade_banner']['count'] ]
-			);
-		}
-
-		// ── 13. consent_log_report_nudge_dismissed ───────────────────────
-		// Symmetric to the upgrade nudge - the second registered nudge type.
-		if ( ! empty( $nudges['consent_log_report']['count'] ) ) {
-			$events->track(
-				'consent_log_report_nudge_dismissed',
-				'dismissed',
-				[ 'count' => (string) $nudges['consent_log_report']['count'] ]
-			);
-		}
-
-		// ── 14. google_consent_mode_enabled ──────────────────────────────
-		if ( (bool) Settings::get( 'gcm_enabled' ) ) {
-			$events->track( 'google_consent_mode_enabled', 'enabled' );
-		}
-
-		// ── 15. account_connected ────────────────────────────────────────
-		// Fires once the site has linked its SureCookie SaaS account (required for
-		// cloud scanning). `tier` segments this near-universal event by plan.
-		if ( AuthController::get_instance()->get_account_ref() !== null ) {
-			$events->track(
-				'account_connected',
-				'connected',
-				[ 'tier' => (string) ScannerUtils::get_plan() ]
-			);
-		}
-
-		// ── 16. auto_scanning_enabled ────────────────────────────────────
-		if ( (bool) Settings::get( 'auto_scan_enabled' ) ) {
-			$events->track(
-				'auto_scanning_enabled',
-				'enabled',
-				[ 'frequency' => (string) Settings::get( 'auto_scan_frequency' ) ]
-			);
-		}
-
-		// ── 17. first_auto_scan_started ──────────────────────────────────
-		// Fires once the scheduler has actually run an automatic scan (the
-		// realized-value milestone - vs auto_scanning_enabled, which is intent).
+		// ── first_auto_scan_started ──────────────────────────────────────
+		// The scheduler actually ran, as opposed to auto-scanning merely being switched on
+		// (which is `auto_scan_state` on the snapshot).
 		if ( get_option( 'surecookie_first_auto_scan_started_flag', false ) ) {
-			$events->track(
-				'first_auto_scan_started',
-				'started',
-				[
-					'version'   => SURECOOKIE_VERSION,
-					'frequency' => (string) get_option( 'surecookie_first_auto_scan_frequency', '' ),
-				]
-			);
+			$events->track( 'first_auto_scan_started', 'started' );
 		}
 
-		// ── 18. mcp_server_enabled ───────────────────────────────────────
-		if ( (bool) Settings::get( 'enable_mcp' ) ) {
-			$events->track( 'mcp_server_enabled', 'enabled' );
-		}
-
-		// ── 19. opt_out_model_enabled ────────────────────────────────────
-		if ( Settings::get( 'consent_model' ) === 'opt-out' ) {
-			$events->track( 'opt_out_model_enabled', 'opt-out' );
-		}
-
-		// ── 20. cookie_policy_page_configured ────────────────────────────
-		// Emit a fixed 'configured' flag, never the page ID. The value only needs to signal
-		// a policy page is assigned; the raw ID made every site a distinct event_value,
-		// flooding the KPI breakdown with one row per ID (@since 1.2.4).
+		// ── cookie_policy_page_configured ────────────────────────────────
 		if ( (int) Settings::get( 'cookie_policy_page_id' ) > 0 ) {
 			$events->track( 'cookie_policy_page_configured', 'configured' );
 		}
 
-		// ── 21. custom_css_applied ───────────────────────────────────────
-		if ( trim( (string) Settings::get( 'custom_css' ) ) !== '' ) {
-			$events->track( 'custom_css_applied', 'applied' );
+		// ── account_connected ────────────────────────────────────────────
+		// Keyed on get_auth_status() - the definition the UI and REST route use - because a
+		// Pro-licensed site is connected everywhere yet never stores an account_ref.
+		if ( AuthController::get_instance()->get_auth_status() ) {
+			$events->track( 'account_connected', 'connected' );
 		}
 
-		// ── 22. reconsent_button_configured ──────────────────────────────
-		// Keyed off the assigned menu - the button label is always defaulted.
-		if ( (string) Settings::get( 'reconsent_menu_id' ) !== '' ) {
-			$events->track( 'reconsent_button_configured', 'configured' );
+		// ── feature_config (recurring state snapshot) ────────────────────
+		// Isolated: a third-party filter on Settings::get() must not take the milestones
+		// already queued above, or the Pro hook below, down with it.
+		try {
+			$snapshot = $this->build_config_snapshot();
+			$events->track( 'feature_config', $this->resolve_lifecycle_stage( $snapshot ), $snapshot, true );
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
-
-		// ── 23. banner_customized ────────────────────────────────────────
-		// Fires when the banner's visual configuration diverges from defaults.
-		$banner_signals = [];
-		if ( (string) Settings::get( 'banner_logo' ) !== '' ) {
-			$banner_signals[] = 'logo';
-		}
-		if ( Settings::get( 'banner_animation' ) !== 'fade' ) {
-			$banner_signals[] = 'animation';
-		}
-		if ( (bool) Settings::get( 'banner_overlay_enabled' ) ) {
-			$banner_signals[] = 'overlay';
-		}
-		// Compared against the schema default (not a literal) so a default
-		// change never silently breaks the signal. Legacy sites pinned to the
-		// old full-width look by the upgrade migration will report this
-		// signal - accurate, since they now diverge from the shipped default.
-		if ( Settings::get( 'notice_type' ) !== ( Settings::get_settings_defaults()['notice_type'] ?? '' ) ) {
-			$banner_signals[] = 'notice_type';
-		}
-		if ( ! empty( $banner_signals ) ) {
-			$events->track(
-				'banner_customized',
-				'customized',
-				[ 'signals' => implode( ',', $banner_signals ) ]
-			);
-		}
-
-		// ── 24. cloud_scan_blocked ───────────────────────────────────────
-		// The site's host served our scanner a challenge instead of the page. Across the
-		// installed base this measures how badly scanner reachability needs fixing - and
-		// it's why Assisted Scan exists, so it's tracked whether or not the fallback was used.
-		if ( get_option( SaasClient::BLOCKED_FLAG_OPTION, false ) ) {
-			$events->track(
-				'cloud_scan_blocked',
-				'blocked',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-				]
-			);
-		}
-
-		// ── 25. assisted_scan_started ────────────────────────────────────
-		// Reached for the browser-collected fallback at least once.
-		if ( get_option( AssistedScanTelemetry::STARTED_FLAG, false ) ) {
-			$events->track(
-				'assisted_scan_started',
-				'started',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-				]
-			);
-		}
-
-		// ── 26. assisted_scan_completed ──────────────────────────────────
-		// The recovery actually worked. `registered` separates the failure severities (an
-		// unregistered site could never scan; a registered one merely had a scan blocked).
-		// `adblock_suspected` flags known-incomplete results so they don't inflate success.
-		if ( get_option( AssistedScanTelemetry::COMPLETED_FLAG, false ) ) {
-			$stats = get_option( AssistedScanTelemetry::STATS_OPTION, [] );
-			$stats = is_array( $stats ) ? $stats : [];
-
-			$events->track(
-				'assisted_scan_completed',
-				'completed',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-					'pages_walked'       => (string) (int) ( $stats['pages'] ?? 0 ),
-					'cookies_found'      => (string) (int) ( $stats['cookies'] ?? 0 ),
-					'services_found'     => (string) (int) ( $stats['services'] ?? 0 ),
-					'adblock_suspected'  => empty( $stats['adblock_suspected'] ) ? 'no' : 'yes',
-					'registered'         => empty( $stats['registered'] ) ? 'no' : 'yes',
-				]
-			);
-		}
-
-		// ── 27. assisted_scan_abandoned ──────────────────────────────────
-		// A walk that stopped reporting and had to be closed out by the rescue pass, not
-		// finished by the browser. The cohort to watch if the walk asks too much of people.
-		if ( get_option( AssistedScanTelemetry::ABANDONED_FLAG, false ) ) {
-			$events->track(
-				'assisted_scan_abandoned',
-				'abandoned',
-				[ 'version' => SURECOOKIE_VERSION ]
-			);
-		}
-
-		// ── 28. known_services_installed ─────────────────────────────────
-		// At least one catalog service is actively managed, i.e. the admin declared a
-		// blocked embed's cookies rather than leaving the policy incomplete. `count`
-		// separates "tried one" from "curated the site", captured at first adoption.
-		$installed_services = get_option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [] );
-		$installed_slugs    = is_array( $installed_services ) && is_array( $installed_services['installed'] ?? null )
-			? $installed_services['installed']
-			: [];
-		if ( $installed_slugs !== [] ) {
-			$events->track(
-				'known_services_installed',
-				'installed',
-				[
-					'version'            => SURECOOKIE_VERSION,
-					'days_since_install' => (string) $days_since_install,
-					'count'              => (string) count( $installed_slugs ),
-				]
-			);
-		}
-
-		// ── 29. site_content_volume ──────────────────────────────────────
-		// Sizes the site's frontend-reachable content to scope the planned Complete
-		// Site Scan. Banded, not raw, so the breakdown stays one row per band;
-		// `count` keeps the exact figure in case the bands need redrawing.
-		$content_count = $this->get_public_content_count();
-		$events->track(
-			'site_content_volume',
-			$this->get_content_volume_bucket( $content_count ),
-			[
-				'version' => SURECOOKIE_VERSION,
-				'count'   => (string) $content_count,
-			]
-		);
 
 		/**
 		 * Fires after SureCookie has queued its own state-based events, letting
@@ -685,7 +485,426 @@ class Analytics {
 		 * @param \BSF_Analytics_Events $events             Shared event tracker.
 		 * @param int                   $days_since_install Days since plugin install.
 		 */
-		do_action( 'surecookie_detect_state_events', $events, $days_since_install );
+		do_action( 'surecookie_detect_state_events', $events, $this->get_days_since_install() );
+	}
+
+	// ============================================
+	// Configuration Snapshot
+	// ============================================
+
+	/**
+	 * Current configuration as a set of low-cardinality tokens.
+	 *
+	 * Every value is an enum: raw numbers are deliberately absent because a distinct
+	 * value per site turns any breakdown into one row per site. Read `version` alongside
+	 * every other property - on a mixed installed base it separates "this state is false"
+	 * from "the code reporting it is not on this build".
+	 *
+	 * @since 1.5.0
+	 * @return array<string, string>
+	 */
+	private function build_config_snapshot(): array {
+		$blocking_enabled = (bool) Settings::get( 'blocking_enabled' );
+		$scan_details     = (array) get_option( SURECOOKIE_SCANNED_DETAILS_OPTION, [] );
+
+		return [
+			'version'            => SURECOOKIE_VERSION,
+			'onboarding_state'   => $this->resolve_onboarding_state(),
+			'consent_gate'       => $this->resolve_consent_gate(),
+			'compliance_regime'  => $this->resolve_compliance_regime(),
+			'blocking_state'     => $this->resolve_blocking_state( $blocking_enabled, $scan_details ),
+			'blocking_overrides' => $this->resolve_blocking_overrides(),
+			'scan_state'         => $this->resolve_scan_state( $scan_details ),
+			'scan_recovery'      => $this->resolve_scan_recovery(),
+			'scan_freshness'     => $this->resolve_scan_freshness( $scan_details ),
+			'auto_scan_state'    => $this->resolve_auto_scan_state(),
+			'gcm_state'          => $this->resolve_gcm_state( $blocking_enabled ),
+			'consent_activity'   => $this->resolve_consent_activity(),
+			'content_volume'     => $this->get_content_volume_bucket( $this->get_public_content_count() ),
+			'policy_pages'       => $this->resolve_policy_pages(),
+			'reconsent_surface'  => $this->resolve_reconsent_surface(),
+			'cookie_declaration' => $this->resolve_cookie_declaration( $scan_details ),
+			'connection_state'   => $this->resolve_connection_state(),
+		];
+	}
+
+	/**
+	 * How far along the value journey this site is, derived from the snapshot.
+	 *
+	 * Carried as the event_value so the composite costs no property slot.
+	 *
+	 * @param array<string, string> $snapshot Snapshot properties.
+	 * @since 1.5.0
+	 * @return string One of dormant|configured|inventoried|protecting|proven.
+	 */
+	private function resolve_lifecycle_stage( array $snapshot ): string {
+		if ( in_array( $snapshot['consent_activity'], [ 'mostly_accepted', 'mostly_declined', 'mixed' ], true ) ) {
+			return 'proven';
+		}
+
+		if ( $snapshot['blocking_state'] === 'matching' ) {
+			return 'protecting';
+		}
+
+		if ( in_array( $snapshot['scan_state'], [ 'completed_empty', 'completed_with_cookies' ], true ) ) {
+			return 'inventoried';
+		}
+
+		return get_option( SURECOOKIE_SETTINGS_OPTION ) !== false ? 'configured' : 'dormant';
+	}
+
+	/**
+	 * Whether the wizard was never found, opened and left, or finished.
+	 *
+	 * `surecookie_onboarding_opened` only gained a writer in 1.5.0, so `never_opened`
+	 * overstates on older builds - read this split by `version`.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_onboarding_state(): string {
+		if ( get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ) {
+			return 'completed';
+		}
+
+		return (int) get_option( 'surecookie_onboarding_opened', 0 ) > 0 ? 'abandoned' : 'never_opened';
+	}
+
+	/**
+	 * Whether visitors are asked for consent, and under which model.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_consent_gate(): string {
+		if ( ! (bool) Settings::get( 'banner_enabled' ) ) {
+			return 'banner_off';
+		}
+
+		return Settings::get( 'consent_model' ) === 'opt-out' ? 'opt_out' : 'opt_in';
+	}
+
+	/**
+	 * Which privacy regime the banner is configured for.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_compliance_regime(): string {
+		$law  = Settings::get( 'compliance_law' );
+		$name = is_array( $law ) ? strtolower( (string) ( $law['name'] ?? '' ) ) : '';
+
+		if ( $name === '' ) {
+			return 'unset';
+		}
+
+		return in_array( $name, [ 'gdpr', 'ccpa', 'lgpd' ], true ) ? $name : 'other';
+	}
+
+	/**
+	 * Whether the blocker is actually gating anything on this site.
+	 *
+	 * `unknown` is load-bearing: Matched_Resources only ships in 1.5.0, so its option is
+	 * absent across the entire installed base and on every site yet to upgrade. Without
+	 * this value every healthy site would report `inert_with_trackers`.
+	 *
+	 * @param bool                 $blocking_enabled Whether blocking is switched on.
+	 * @param array<string, mixed> $scan_details     Latest scan record.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_blocking_state( bool $blocking_enabled, array $scan_details ): string {
+		if ( ! $blocking_enabled ) {
+			return 'off';
+		}
+
+		$matched = get_option( MatchedResources::OPTION, false );
+
+		if ( $matched === false ) {
+			return 'unknown';
+		}
+
+		if ( ! empty( $matched ) ) {
+			return 'matching';
+		}
+
+		$has_trackers = ! empty( get_option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [] ) )
+			|| (int) ( $scan_details['cookies_count'] ?? 0 ) > 0;
+
+		return $has_trackers ? 'inert_with_trackers' : 'nothing_to_block';
+	}
+
+	/**
+	 * Which direction the admin is overriding the blocker in.
+	 *
+	 * `releases` is "you broke my site", `additions` is "you miss things" - opposite
+	 * problems that a single "has overrides" flag would merge.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_blocking_overrides(): string {
+		$releases  = ! empty( Settings::get( 'excluded_scan_resources' ) );
+		$additions = ! empty( Settings::get( 'custom_blocked_scripts' ) );
+
+		if ( $releases && $additions ) {
+			return 'both';
+		}
+
+		if ( $releases ) {
+			return 'releases';
+		}
+
+		return $additions ? 'additions' : 'none';
+	}
+
+	/**
+	 * Where scanning stands, read from the LATEST scan rather than the first.
+	 *
+	 * The first-scan flags are write-once, so a site whose first scan succeeded and whose
+	 * every scan since has hung would otherwise report success forever.
+	 *
+	 * @param array<string, mixed> $scan_details Latest scan record.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_scan_state( array $scan_details ): string {
+		if ( get_option( SaasClient::BLOCKED_FLAG_OPTION, false ) ) {
+			return 'blocked_by_host';
+		}
+
+		if ( ! empty( $scan_details['date'] ) ) {
+			return (int) ( $scan_details['cookies_count'] ?? 0 ) > 0 ? 'completed_with_cookies' : 'completed_empty';
+		}
+
+		return get_option( 'surecookie_first_scan_started_flag', false ) ? 'started_never_completed' : 'never';
+	}
+
+	/**
+	 * Whether the browser-collected fallback rescued a blocked scan.
+	 *
+	 * The abandoned flag is a modifier on completion, not a failure: record_completed()
+	 * sets both when the rescue pass closed the walk out instead of the browser.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_scan_recovery(): string {
+		if ( get_option( AssistedScanTelemetry::COMPLETED_FLAG, false ) ) {
+			return get_option( AssistedScanTelemetry::ABANDONED_FLAG, false ) ? 'completed_by_rescue' : 'completed';
+		}
+
+		return get_option( AssistedScanTelemetry::STARTED_FLAG, false ) ? 'started' : 'none';
+	}
+
+	/**
+	 * How stale the published cookie inventory is.
+	 *
+	 * @param array<string, mixed> $scan_details Latest scan record.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_scan_freshness( array $scan_details ): string {
+		$date = isset( $scan_details['date'] ) ? strtotime( (string) $scan_details['date'] ) : false;
+
+		if ( $date === false ) {
+			return 'never';
+		}
+
+		// Sync writes this with current_time( 'mysql' ), i.e. site-local, so "now" has to be
+		// the same shape: both sides are site-local mysql strings put through the same parser,
+		// so the offset cancels. Using time() here skews the age by the site's UTC offset and
+		// can read negative for a scan that just finished.
+		$days = (int) floor( ( strtotime( current_time( 'mysql' ) ) - $date ) / DAY_IN_SECONDS );
+
+		if ( $days < 30 ) {
+			return 'under_30d';
+		}
+
+		return $days < 90 ? '30_90d' : 'over_90d';
+	}
+
+	/**
+	 * Whether automatic scanning is switched on but inert.
+	 *
+	 * `enabled_cron_disabled` is the DISABLE_WP_CRON class that reaches support as
+	 * "my scan is stuck queued forever".
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_auto_scan_state(): string {
+		if ( ! (bool) Settings::get( 'auto_scan_enabled' ) ) {
+			return 'off';
+		}
+
+		if ( Scheduler::next_run() > 0 ) {
+			return 'scheduled';
+		}
+
+		return defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? 'enabled_cron_disabled' : 'enabled_unscheduled';
+	}
+
+	/**
+	 * Whether Google Consent Mode is on while blocking is off.
+	 *
+	 * Its whitelist gate requires blocking, and the two toggles live on different
+	 * screens, so `on_blocking_off` is a silent no-op the admin cannot see.
+	 *
+	 * @param bool $blocking_enabled Whether blocking is switched on.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_gcm_state( bool $blocking_enabled ): string {
+		if ( ! (bool) Settings::get( 'gcm_enabled' ) ) {
+			return 'off';
+		}
+
+		return $blocking_enabled ? 'on' : 'on_blocking_off';
+	}
+
+	/**
+	 * Whether the banner obtains consent, and which way visitors run.
+	 *
+	 * Counts only the retention window, so `none_in_window` is not "never" - cross it
+	 * with the `first_consent_recorded` milestone.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_consent_activity(): string {
+		if ( ! (bool) Settings::get( 'consent_logging_enabled' ) ) {
+			return 'logging_off';
+		}
+
+		$counts = ConsentLog::count_all_actions( '', '' );
+		$total  = (int) ( $counts['total'] ?? 0 );
+
+		if ( $total <= 0 ) {
+			return 'none_in_window';
+		}
+
+		if ( (int) ( $counts['accepted'] ?? 0 ) / $total >= 0.6 ) {
+			return 'mostly_accepted';
+		}
+
+		return (int) ( $counts['declined'] ?? 0 ) / $total >= 0.6 ? 'mostly_declined' : 'mixed';
+	}
+
+	/**
+	 * Which legal pages the banner can point at.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_policy_pages(): string {
+		$cookie  = (int) Settings::get( 'cookie_policy_page_id' ) > 0;
+		$privacy = (int) Settings::get( 'privacy_policy_page_id' ) > 0
+			&& get_post_status( (int) Settings::get( 'privacy_policy_page_id' ) ) === 'publish';
+
+		if ( $cookie && $privacy ) {
+			return 'both';
+		}
+
+		if ( $cookie ) {
+			return 'cookie_only';
+		}
+
+		return $privacy ? 'privacy_only' : 'none';
+	}
+
+	/**
+	 * How visitors can reopen their choices - a GDPR obligation, so worth knowing
+	 * across the base and not only for the Pro floating widget.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_reconsent_surface(): string {
+		// Guarded rather than cast: a filter returning an array would raise a PHP warning,
+		// and a warning is not a Throwable, so the snapshot's catch would not contain it.
+		$menu_id   = Settings::get( 'reconsent_menu_id' );
+		$menu      = is_scalar( $menu_id ) && (string) $menu_id !== '';
+		$shortcode = $this->has_reconsent_shortcode();
+
+		if ( $menu && $shortcode ) {
+			return 'both';
+		}
+
+		if ( $menu ) {
+			return 'menu';
+		}
+
+		return $shortcode ? 'shortcode_or_block' : 'none';
+	}
+
+	/**
+	 * Whether any published content embeds the re-consent shortcode.
+	 *
+	 * A LIKE scan, so it is bounded to one row and runs at most once a day behind the
+	 * detection throttle; 93% of installs publish fewer than 50 entries.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	private function has_reconsent_shortcode(): bool {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_content LIKE %s LIMIT 1",
+				'%' . $wpdb->esc_like( 'surecookie_reconsent_button' ) . '%'
+			)
+		);
+	}
+
+	/**
+	 * Whether the cookie policy rests on catalog declarations or on scan output alone.
+	 *
+	 * @param array<string, mixed> $scan_details Latest scan record.
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_cookie_declaration( array $scan_details ): string {
+		$installed = get_option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [] );
+		$slugs     = is_array( $installed ) && is_array( $installed['installed'] ?? null ) ? $installed['installed'] : [];
+
+		if ( $slugs !== [] ) {
+			return 'catalog_declared';
+		}
+
+		return (int) ( $scan_details['cookies_count'] ?? 0 ) > 0 ? 'scanned_only' : 'none';
+	}
+
+	/**
+	 * Whether the site is attached to an account right now, and by which route.
+	 *
+	 * @since 1.5.0
+	 * @return string
+	 */
+	private function resolve_connection_state(): string {
+		$auth = AuthController::get_instance();
+
+		return $auth->get_auth_status() ? $this->resolve_connect_method( $auth ) : 'none';
+	}
+
+	/**
+	 * How this site became connected.
+	 *
+	 * `portal_legacy` is a real population, not a fallback: account_ref only
+	 * arrived in issue #469, and those installs cannot re-run the OAuth flow
+	 * because Api::get_auth_payload() short-circuits on get_auth_status().
+	 *
+	 * @since 1.5.0
+	 * @param AuthController $auth Auth controller.
+	 * @return string One of 'portal', 'portal_legacy', 'license'.
+	 */
+	private function resolve_connect_method( AuthController $auth ): string {
+		if ( $auth->get_account_ref() !== null ) {
+			return 'portal';
+		}
+
+		return empty( get_option( AuthController::SETTINGS_KEY, [] ) ) ? 'license' : 'portal_legacy';
 	}
 
 	// ============================================
@@ -748,7 +967,7 @@ class Analytics {
 	 * Mirrors core's sitemap definition - public and viewable, minus attachments -
 	 * so the total matches what a full-site crawl would have to visit.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return int Published public entries across posts, pages and public CPTs.
 	 */
 	private function get_public_content_count(): int {
@@ -768,8 +987,8 @@ class Analytics {
 	 * Resolve a content count to its volume band.
 	 *
 	 * @param int $count Published public entries.
-	 * @since x.x.x
-	 * @return string Band name, e.g. `less_than_50`.
+	 * @since 1.5.0
+	 * @return string Band name, e.g. `under_50`.
 	 */
 	private function get_content_volume_bucket( int $count ): string {
 		foreach ( self::CONTENT_VOLUME_BUCKETS as $upper_bound => $bucket ) {
@@ -778,7 +997,7 @@ class Analytics {
 			}
 		}
 
-		return 'greater_than_1000';
+		return 'over_1000';
 	}
 
 	/**

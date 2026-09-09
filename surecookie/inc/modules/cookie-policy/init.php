@@ -45,7 +45,7 @@ class Init {
 	 * @return array<string> Updated controllers.
 	 * @since 0.0.0-alpha.1
 	 */
-	public function register_api_controller( $controllers ) {
+	public function register_api_controller( $controllers = [] ) {
 		$controllers[] = '\SureCookie\Inc\Modules\CookiePolicy\Api';
 		return $controllers;
 	}

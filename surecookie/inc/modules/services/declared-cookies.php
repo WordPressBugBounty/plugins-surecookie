@@ -233,7 +233,7 @@ class Declared_Cookies {
 	 * carries no URL for any scan to collect.
 	 *
 	 * @param array<int, string> $services Catalog service slugs.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array<string, array<int, array<string, mixed>>> Declared cookies grouped by category id.
 	 */
 	public function build_for_services( array $services ): array {
@@ -256,7 +256,8 @@ class Declared_Cookies {
 			}
 
 			foreach ( $catalog[ $service ] as $definition ) {
-				if ( ! is_array( $definition ) || empty( $definition['name'] ) ) {
+				if ( ! is_array( $definition ) || empty( $definition['name'] )
+					|| Cookie_Identity::is_pattern( (string) $definition['name'] ) ) {
 					continue;
 				}
 
@@ -352,7 +353,8 @@ class Declared_Cookies {
 			}
 
 			foreach ( $cookies as $cookie ) {
-				if ( ! is_array( $cookie ) || empty( $cookie['name'] ) ) {
+				if ( ! is_array( $cookie ) || empty( $cookie['name'] )
+					|| Cookie_Identity::is_pattern( (string) $cookie['name'] ) ) {
 					continue;
 				}
 

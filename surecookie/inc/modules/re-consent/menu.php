@@ -48,13 +48,21 @@ class Menu {
 	/**
 	 * Inject a virtual menu item into the configured nav menu.
 	 *
-	 * @param array<int, \WP_Post|\stdClass> $items Array of menu item objects.
-	 * @param \WP_Term                       $menu  The menu object.
-	 * @param array<string, mixed>           $args  Array of wp_get_nav_menu_items() arguments.
-	 * @return array<int, \WP_Post|\stdClass> Modified menu items.
+	 * Untyped by design: this is a filter boundary, so an earlier callback can
+	 * hand us anything. Unusable input is returned untouched rather than
+	 * normalised, so another plugin's value is never silently discarded.
+	 *
+	 * @param mixed $items Expected array<int, \WP_Post|\stdClass> of menu item objects.
+	 * @param mixed $menu  Expected \WP_Term. Optional, so a short caller cannot fatal.
+	 * @param mixed $args  Expected array<string, mixed> of wp_get_nav_menu_items() arguments.
+	 * @return mixed Modified menu items, or $items untouched.
 	 * @since 0.0.1
 	 */
-	public function add_virtual_menu_item( array $items, $menu, array $args ): array {
+	public function add_virtual_menu_item( $items = null, $menu = null, $args = [] ) {
+		if ( ! is_array( $items ) || ! isset( $menu->term_id ) ) {
+			return $items;
+		}
+
 		$configured_menu_id = $this->get_configured_menu_id();
 
 		if ( ! $configured_menu_id || (int) $menu->term_id !== $configured_menu_id ) {
@@ -66,8 +74,8 @@ class Menu {
 		 *
 		 * Return false to completely prevent the menu item from being injected.
 		 *
-		 * @param bool     $show  Whether to show the menu item. Default true.
-		 * @param \WP_Term $menu  The menu object.
+		 * @param bool   $show  Whether to show the menu item. Default true.
+		 * @param object $menu  The menu object, expected \WP_Term.
 		 * @param array    $items Current menu items.
 		 *
 		 * @since 0.0.1
@@ -104,15 +112,20 @@ class Menu {
 	/**
 	 * Modify link attributes for the re-consent menu item.
 	 *
-	 * @param array<string, string> $atts      The HTML attributes applied to the menu item's anchor element.
-	 * @param \WP_Post              $menu_item The current menu item object (decorated by wp_setup_nav_menu_item).
-	 * @param \stdClass             $args      An object of wp_nav_menu() arguments.
-	 * @param int                   $depth     Depth of menu item.
-	 * @return array<string, string> Modified attributes.
+	 * Untyped by design: see add_virtual_menu_item(). Every parameter is
+	 * optional because custom nav walkers copied from pre-4.4 core emit this
+	 * filter with three arguments, which a required $depth would turn into an
+	 * ArgumentCountError.
+	 *
+	 * @param mixed $atts      Expected array<string, string> of anchor attributes.
+	 * @param mixed $menu_item Expected \WP_Post, decorated by wp_setup_nav_menu_item().
+	 * @param mixed $args      Expected \stdClass of wp_nav_menu() arguments.
+	 * @param mixed $depth     Expected int depth of the menu item.
+	 * @return mixed Modified attributes, or $atts untouched.
 	 * @since 0.0.1
 	 */
-	public function modify_link_attributes( array $atts, $menu_item, $args, $depth ): array {
-		if ( (int) ( $menu_item->db_id ?? 0 ) !== self::VIRTUAL_ITEM_ID ) {
+	public function modify_link_attributes( $atts = null, $menu_item = null, $args = null, $depth = 0 ) {
+		if ( ! is_array( $atts ) || (int) ( $menu_item->db_id ?? 0 ) !== self::VIRTUAL_ITEM_ID ) {
 			return $atts;
 		}
 

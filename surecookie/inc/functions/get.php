@@ -214,27 +214,40 @@ class Get {
 	public static function formatted_custom_cookies() {
 		$custom_cookies = Settings::get( 'custom_cookies' );
 
-		if ( empty( $custom_cookies ) ) {
+		if ( ! is_array( $custom_cookies ) || empty( $custom_cookies ) ) {
 			return [];
 		}
 
 		$formatted_cookies = [];
 
 		foreach ( $custom_cookies as $_custom_cookie ) {
-			$formatted_cookies[ $_custom_cookie['category'] ] [] = [
-				'name'        => $_custom_cookie['name'],
-				'description' => $_custom_cookie['description'],
-				'domain'      => $_custom_cookie['domain'],
+			if ( ! is_array( $_custom_cookie ) ) {
+				continue;
+			}
+
+			// Array-typed settings guarantee neither the row nor the leaf: an array leaf
+			// is an illegal array key, so resolve through Sanitize::scalar() first.
+			$category = Sanitize::scalar( $_custom_cookie['category'] ?? '' );
+			$name     = Sanitize::scalar( $_custom_cookie['name'] ?? '' );
+
+			if ( $category === '' || $name === '' ) {
+				continue;
+			}
+
+			$formatted_cookies[ $category ] [] = [
+				'name'        => $name,
+				'description' => Sanitize::scalar( $_custom_cookie['description'] ?? '' ),
+				'domain'      => Sanitize::scalar( $_custom_cookie['domain'] ?? '' ),
 				'value'       => $_custom_cookie['value'] ?? '',
 				'path'        => $_custom_cookie['path'] ?? '/',
-				'expires'     => $_custom_cookie['expires'],
+				'expires'     => Sanitize::scalar( $_custom_cookie['expires'] ?? '' ),
 				// Custom cookies are authored with an explicit lifetime in days;
 				// carry it through so consumers show the day count instead of re-deriving it from the absolute 'expires' timestamp.
-				'duration'    => $_custom_cookie['duration'] ?? '',
+				'duration'    => Sanitize::scalar( $_custom_cookie['duration'] ?? '' ),
 				'secure'      => $_custom_cookie['secure'] ?? false,
 				'httpOnly'    => $_custom_cookie['httpOnly'] ?? false,
-				'provider'    => $_custom_cookie['provider'] ?? '',
-				'purpose'     => $_custom_cookie['purpose'] ?? '',
+				'provider'    => Sanitize::scalar( $_custom_cookie['provider'] ?? '' ),
+				'purpose'     => Sanitize::scalar( $_custom_cookie['purpose'] ?? '' ),
 			];
 		}
 
@@ -347,56 +360,57 @@ class Get {
 	 * @return array<string> Array of country codes.
 	 */
 	public static function eu_countries(): array {
-		return apply_filters(
-			'surecookie_eu_countries',
-			[
-				'AL',
-				'AD',
-				'AT',
-				'BY',
-				'BE',
-				'BA',
-				'BG',
-				'HR',
-				'CY',
-				'CZ',
-				'DK',
-				'EE',
-				'FI',
-				'FR',
-				'DE',
-				'GR',
-				'HU',
-				'IS',
-				'IE',
-				'IT',
-				'LV',
-				'LI',
-				'LT',
-				'LU',
-				'MK',
-				'MT',
-				'MD',
-				'MC',
-				'ME',
-				'NL',
-				'NO',
-				'PL',
-				'PT',
-				'RO',
-				'RU',
-				'SM',
-				'RS',
-				'SK',
-				'SI',
-				'ES',
-				'SE',
-				'CH',
-				'UA',
-				'GB',
-				'VA',
-			]
-		);
+		$defaults = [
+			'AL',
+			'AD',
+			'AT',
+			'BY',
+			'BE',
+			'BA',
+			'BG',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HU',
+			'IS',
+			'IE',
+			'IT',
+			'LV',
+			'LI',
+			'LT',
+			'LU',
+			'MK',
+			'MT',
+			'MD',
+			'MC',
+			'ME',
+			'NL',
+			'NO',
+			'PL',
+			'PT',
+			'RO',
+			'RU',
+			'SM',
+			'RS',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'UA',
+			'GB',
+			'VA',
+		];
+
+		$filtered = apply_filters( 'surecookie_eu_countries', $defaults );
+
+		return is_array( $filtered ) ? $filtered : $defaults;
 	}
 
 	/**
@@ -430,7 +444,7 @@ class Get {
 	 * blocker gated it reaches All Cookies AND the public cookie policy. Read
 	 * the option directly where you intend to write it back.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array<string, mixed> Cookies grouped by category id.
 	 */
 	public static function scanned_cookies_for_display(): array {
@@ -441,7 +455,7 @@ class Get {
 		 * to what is displayed without those rows being written back to the
 		 * option by a read-modify-write caller.
 		 *
-		 * @since x.x.x
+		 * @since 1.5.0
 		 * @param array<string, mixed> $cookies Cookies grouped by category id.
 		 */
 		$cookies = apply_filters(
@@ -505,7 +519,8 @@ class Get {
 		$usage      = [];
 
 		foreach ( is_array( $categories ) ? $categories : [] as $key => $category ) {
-			$id = is_array( $category ) && ! empty( $category['id'] ) ? (string) $category['id'] : (string) $key;
+			$id = is_array( $category ) ? Sanitize::scalar( $category['id'] ?? '' ) : '';
+			$id = $id !== '' ? $id : (string) $key;
 			if ( $id !== '' ) {
 				$usage[ $id ] = [
 					'cookies'  => 0,
@@ -552,7 +567,7 @@ class Get {
 		// options registry, so Settings::get() returns null rather than [].
 		$rules = Settings::get( 'custom_blocked_scripts' );
 		foreach ( is_array( $rules ) ? $rules : [] as $rule ) {
-			$category_id = is_array( $rule ) ? sanitize_key( (string) ( $rule['category'] ?? '' ) ) : '';
+			$category_id = is_array( $rule ) ? sanitize_key( Sanitize::scalar( $rule['category'] ?? '' ) ) : '';
 			$category_id = $category_id !== '' ? $category_id : 'uncategorized';
 			if ( isset( $usage[ $category_id ] ) ) {
 				++$usage[ $category_id ]['scripts'];
@@ -564,7 +579,7 @@ class Get {
 		// are the admin saying "not on this site" and are ignored.
 		$registry = self::option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [], 'array' );
 		foreach ( is_array( $registry['installed'] ?? null ) ? $registry['installed'] : [] as $entry ) {
-			$category_id = is_array( $entry ) ? sanitize_key( (string) ( $entry['category'] ?? '' ) ) : '';
+			$category_id = is_array( $entry ) ? sanitize_key( Sanitize::scalar( $entry['category'] ?? '' ) ) : '';
 			$category_id = $category_id !== '' ? $category_id : 'uncategorized';
 			if ( isset( $usage[ $category_id ] ) ) {
 				++$usage[ $category_id ]['services'];
@@ -608,7 +623,8 @@ class Get {
 		$categories = Settings::get( 'cookie_categories' );
 		foreach ( is_array( $categories ) ? $categories : [] as $key => $category ) {
 			if ( is_array( $category ) && ! empty( $category['required'] ) ) {
-				$in_use[] = ! empty( $category['id'] ) ? (string) $category['id'] : (string) $key;
+				$id       = Sanitize::scalar( $category['id'] ?? '' );
+				$in_use[] = $id !== '' ? $id : (string) $key;
 			}
 		}
 
@@ -684,12 +700,20 @@ class Get {
 		// secondary never visually collapses accept and decline together.
 		$secondary_fallback = $palette_data['textColor'] ?? '#374151';
 
+		$primary_background   = $palette_data['acceptButton'] ?? '#1463FF';
+		$secondary_background = $palette_data['declineButton'] ?? $secondary_fallback;
+
 		$css_variables = [
-			'--surecookie-banner-primary-color'       => $palette_data['acceptButton'] ?? '#1463FF',
-			'--surecookie-banner-primary-hover-color' => $palette_data['acceptButtonHover'] ?? '#3B82F6',
-			'--surecookie-banner-secondary-color'     => $palette_data['declineButton'] ?? $secondary_fallback,
-			'--surecookie-banner-text-color'          => $palette_data['textColor'] ?? '#374151',
-			'--surecookie-banner-background-color'    => $palette_data['bgColor'] ?? '#FFFFFF',
+			'--surecookie-banner-primary-color'        => $primary_background,
+			'--surecookie-banner-primary-hover-color'  => $palette_data['acceptButtonHover'] ?? '#3B82F6',
+			'--surecookie-banner-secondary-color'      => $secondary_background,
+			'--surecookie-banner-text-color'           => $palette_data['textColor'] ?? '#374151',
+			'--surecookie-banner-background-color'     => $palette_data['bgColor'] ?? '#FFFFFF',
+			// Computed, not stored: filled-button labels take whichever of
+			// white/near-black actually contrasts their background, so the
+			// dark palettes and any Pro custom color stay readable (#1063).
+			'--surecookie-banner-primary-text-color'   => self::button_label_color( (string) $primary_background ),
+			'--surecookie-banner-secondary-text-color' => self::button_label_color( (string) $secondary_background ),
 		];
 
 		$css_output = ':root {';
@@ -759,7 +783,7 @@ class Get {
 	 * or light-on-light. Emitting literal hex inline avoids any CSS-var mismatch.
 	 *
 	 * @since 1.4.0
-	 * @return array{background: string, text: string, primary: string}
+	 * @return array{background: string, text: string, primary: string, primary_text: string}
 	 */
 	public static function banner_display_colors(): array {
 		$palette_codes = self::color_palette_codes();
@@ -787,9 +811,12 @@ class Get {
 		}
 
 		return [
-			'background' => $background,
-			'text'       => self::readable_text_color( $background ),
-			'primary'    => $primary,
+			'background'   => $background,
+			'text'         => self::readable_text_color( $background ),
+			'primary'      => $primary,
+			// Both placeholder builders, PHP and JS, read this rather than each
+			// deciding for themselves - the JS one had white hardcoded (#1063).
+			'primary_text' => self::button_label_color( $primary ),
 		];
 	}
 
@@ -864,6 +891,105 @@ class Get {
 	}
 
 	/**
+	 * Get privacy-policy style.
+	 *
+	 * @since 1.5.0
+	 * @return string CSS file name depending on RTL or LTR.
+	 */
+	public static function privacy_policy_style_css() {
+		$privacy_policy_style_file = 'privacy-policy.css';
+		if ( Get::is_rtl() && file_exists( SURECOOKIE_DIR . 'assets/css/privacy-policy-rtl.css' ) ) {
+			$privacy_policy_style_file = 'privacy-policy-rtl.css';
+		}
+		return $privacy_policy_style_file;
+	}
+
+	/**
+	 * Get the SureCookie-managed policy page for a setting, drafts included.
+	 *
+	 * Deliberately reports `status` instead of gating on `publish` the way
+	 * cookie_policy_page_details() does: the privacy policy is generated as a
+	 * draft on purpose, so a publish-only helper would report the page we just
+	 * created as missing. Callers that need a public link check the status.
+	 *
+	 * `status` is an empty string when the setting points at nothing, and
+	 * 'trash' when the page was thrown away, which is what the screens use to
+	 * offer a replacement.
+	 *
+	 * @since 1.5.0
+	 * @param string $setting_key Setting holding the page ID.
+	 * @return array{id: int, url: string, title: string, status: string, edit_url: string}
+	 */
+	public static function managed_policy_page_details( string $setting_key ): array {
+		$data = [
+			'id'       => 0,
+			'url'      => '',
+			'title'    => '',
+			'status'   => '',
+			'edit_url' => '',
+		];
+
+		$page_id = self::resolve_translated_policy_page_id( absint( Settings::get( $setting_key ) ) );
+
+		if ( $page_id <= 0 ) {
+			return $data;
+		}
+
+		$page = get_post( $page_id );
+
+		if ( ! $page instanceof \WP_Post ) {
+			return $data;
+		}
+
+		$data['id']       = $page->ID;
+		$data['status']   = $page->post_status;
+		$data['title']    = sanitize_text_field( get_the_title( $page ) );
+		$data['edit_url'] = (string) get_edit_post_link( $page->ID, 'raw' );
+
+		$permalink = get_permalink( $page );
+
+		if ( ! $permalink ) {
+			return $data;
+		}
+
+		$parsed_url = wp_parse_url( $permalink );
+		$home_url   = wp_parse_url( home_url() );
+
+		// Same-host guard, mirroring cookie_policy_page_details(): a permalink
+		// pointing off-site is never something we hand to a visitor.
+		if ( ! empty( $parsed_url['host'] ) && isset( $home_url['host'] ) && strtolower( $parsed_url['host'] ) === strtolower( $home_url['host'] ) ) {
+			$data['url'] = esc_url( $permalink );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get privacy policy page details (URL and title), published pages only.
+	 *
+	 * Shaped like cookie_policy_page_details() so token and shortcode callers
+	 * can treat the two policy pages the same way.
+	 *
+	 * @since 1.5.0
+	 * @return array<string, string> Associative array with 'url' and 'title' keys.
+	 */
+	public static function privacy_policy_page_details(): array {
+		$page = self::managed_policy_page_details( 'privacy_policy_page_id' );
+
+		if ( $page['status'] !== 'publish' || $page['url'] === '' ) {
+			return [
+				'url'   => '',
+				'title' => '',
+			];
+		}
+
+		return [
+			'url'   => $page['url'],
+			'title' => $page['title'],
+		];
+	}
+
+	/**
 	 * Get cookie policy page details (URL and title).
 	 *
 	 * @since 0.0.1
@@ -896,6 +1022,77 @@ class Get {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Button label color (white or near-black), whichever has the higher WCAG
+	 * contrast against the button background.
+	 *
+	 * A brightness threshold is not enough here (issue #1063): mid-tone
+	 * buttons like dark-blue's #0285FF read as "dark", yet white text on them
+	 * only reaches 3.6:1 while near-black reaches 4.9:1. Comparing the two
+	 * actual contrast ratios always picks the side that can pass. White for
+	 * unparseable input, matching the stylesheet's previous hardcoded label.
+	 *
+	 * @since 1.5.0
+	 * @param string $background Button background color.
+	 * @return string '#111827' or '#ffffff'.
+	 */
+	public static function button_label_color( string $background ): string {
+		$luminance = self::relative_luminance( $background );
+
+		if ( $luminance === null ) {
+			return '#ffffff';
+		}
+
+		$dark_luminance = (float) self::relative_luminance( '#111827' );
+
+		$against_white = 1.05 / ( $luminance + 0.05 );
+		$against_dark  = ( $luminance + 0.05 ) / ( $dark_luminance + 0.05 );
+
+		return $against_white >= $against_dark ? '#ffffff' : '#111827';
+	}
+
+	/**
+	 * WCAG 2.1 relative luminance of a CSS color.
+	 *
+	 * Accepts hex (3 or 6 digits) and rgb()/rgba() - Pro's custom palette may
+	 * store rgba. Alpha is ignored: the backdrop is unknowable, so the solid
+	 * channels are the best available estimate.
+	 *
+	 * @since 1.5.0
+	 * @param string $color Color value.
+	 * @return float|null Luminance 0..1, or null when unparseable.
+	 */
+	private static function relative_luminance( string $color ): ?float {
+		$color = trim( $color );
+		$rgb   = null;
+
+		if ( preg_match( '/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i', $color, $m ) ) {
+			$rgb = [ min( 255, (int) $m[1] ), min( 255, (int) $m[2] ), min( 255, (int) $m[3] ) ];
+		} else {
+			$hex = ltrim( $color, '#' );
+
+			if ( strlen( $hex ) === 3 ) {
+				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+			}
+
+			if ( preg_match( '/^[0-9a-fA-F]{6}$/', $hex ) ) {
+				$rgb = [ (int) hexdec( substr( $hex, 0, 2 ) ), (int) hexdec( substr( $hex, 2, 2 ) ), (int) hexdec( substr( $hex, 4, 2 ) ) ];
+			}
+		}
+
+		if ( $rgb === null ) {
+			return null;
+		}
+
+		$channels = [];
+		foreach ( $rgb as $value ) {
+			$channel    = $value / 255;
+			$channels[] = $channel <= 0.03928 ? $channel / 12.92 : ( ( $channel + 0.055 ) / 1.055 ) ** 2.4;
+		}
+
+		return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
 	}
 
 	/**

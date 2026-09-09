@@ -5,12 +5,13 @@
  * Description: Real cookie consent for WordPress. Browser-based scanning, smart categorization, strict script blocking, and consent logs stored in your database.
  * Author: SureCookie
  * Author URI: https://surecookie.com/
- * Version: 1.4.0
+ * Version: 1.5.0
  * License: GPL-2.0-or-later
  * Text Domain: surecookie
+ * Domain Path: /languages
  * Requires at least: 6.7
  * Requires PHP: 7.4
- * Tested up to: 7.0
+ * Tested up to: 7.1
  *
  * @package surecookie
  */
@@ -26,10 +27,10 @@ define( 'SURECOOKIE_FILE', __FILE__ );
 define( 'SURECOOKIE_BASE', plugin_basename( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_DIR', plugin_dir_path( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_URL', plugins_url( '/', SURECOOKIE_FILE ) );
-define( 'SURECOOKIE_VERSION', '1.4.0' );
+define( 'SURECOOKIE_VERSION', '1.5.0' );
 
 /**
- * Define the necessary core constants.
+ * Define the necessary core constants..
  */
 define( 'SURECOOKIE_PREFIX', 'surecookie' );
 define( 'SURECOOKIE_CAPABILITY', 'manage_options' );
@@ -57,7 +58,7 @@ define( 'SURECOOKIE_NUDGES', 'surecookie_nudges' );
  * The loader compares this against the stored option and re-runs dbDelta
  * automatically so column additions take effect without a plugin reactivation.
  */
-define( 'SURECOOKIE_DB_VERSION', '1.2.1' );
+define( 'SURECOOKIE_DB_VERSION', '1.2.2' );
 
 /**
  * Load the plugin.

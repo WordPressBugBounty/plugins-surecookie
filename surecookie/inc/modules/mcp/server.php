@@ -74,7 +74,7 @@ class Server {
 	 * @return void
 	 * @since 1.1.0
 	 */
-	public function register_mcp_server( $adapter ): void {
+	public function register_mcp_server( $adapter = null ): void {
 		if ( ! self::is_enabled() ) {
 			return;
 		}

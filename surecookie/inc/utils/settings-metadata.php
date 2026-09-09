@@ -241,6 +241,19 @@ class Settings_Metadata {
 				'description' => __( 'Post ID of the cookie policy page linked from the banner. 0 means none is linked.', 'surecookie' ),
 				'hazard'      => __( 'Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page.', 'surecookie' ),
 			],
+			'privacy_policy_page_id'       => [
+				'description' => __( 'Post ID of the SureCookie-managed privacy policy page. 0 means none is linked.', 'surecookie' ),
+				'hazard'      => __( 'This is not WordPress\'s own wp_page_for_privacy_policy option. Writing it does not change the page WordPress links from the footer or the login screen; use the "Use as WordPress Privacy Policy page" action for that.', 'surecookie' ),
+			],
+			'privacy_jurisdictions'        => [
+				'description' => __( 'Privacy regimes whose sections appear in the generated privacy policy. Empty means none.', 'surecookie' ),
+				'enum'        => [ 'gdpr', 'uk_gdpr', 'cpra', 'dpdp', 'coppa' ],
+				'hazard'      => __( 'A legal declaration, not a display toggle. Enabling a regime the site is not subject to publishes commitments it may not be able to meet.', 'surecookie' ),
+			],
+			'organization_details'         => [
+				'description' => __( 'Controller identity shown as "Business Details": legal entity name, postal address lines, postal code, country, privacy contact email, grievance officer, transfer safeguard text and the CCPA sale/share declaration.', 'surecookie' ),
+				'hazard'      => __( 'Stored as one nested value, so a partial write replaces every sibling field. Read, merge, then write. Clearing the entity name, address, country or contact email blocks publishing the generated policy and escalates the in-product notice on an already published one.', 'surecookie' ),
+			],
 			'reconsent_menu_id'            => [
 				'description' => __( 'Term ID of the nav menu that receives the virtual "Cookie Preferences" item, as a numeric string. Empty string injects nothing.', 'surecookie' ),
 			],

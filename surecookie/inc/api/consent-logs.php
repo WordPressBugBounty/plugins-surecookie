@@ -505,6 +505,7 @@ class ConsentLogs extends Base {
 					'logs'  => array_map(
 						static function ( $log ) {
 							$log['country']      = $log['country'] ?? '';
+							$log['region']       = $log['region'] ?? '';
 							$log['is_forwarded'] = (int) ( $log['is_forwarded'] ?? 0 );
 							$log['origin_site']  = Sanitize::text( $log['origin_site'] ?? '' );
 							$forwarded_to        = json_decode( (string) ( $log['forwarded_to'] ?? '' ), true );
@@ -643,10 +644,15 @@ class ConsentLogs extends Base {
 			$action_type = 'partially_accepted';
 		}
 
+		// Under opt-out (CCPA), 'accepted' records the visitor accepting the
+		// defaults; the Accept All gate below protects the opt-in button only,
+		// and applying it here silently dropped every CCPA acceptance log.
+		$consent_model = (string) apply_filters( 'surecookie_active_consent_model', (string) Settings::get( 'consent_model' ) );
+
 		// Reject an 'accepted' log when Accept All is disabled for this site or region.
 		// The filter lets Pro apply per-region stricter-wins (global AND region); the
 		// default value is the global setting alone.
-		if ( $action_type === 'accepted' ) {
+		if ( $action_type === 'accepted' && $consent_model !== 'opt-out' ) {
 			$accept_all_allowed = (bool) Settings::get( 'accept_all_enabled' );
 			/**
 			 * Filter whether the Accept All action is permitted for the current request.
@@ -675,22 +681,28 @@ class ConsentLogs extends Base {
 			}
 		}
 
-		// Get country name from raw IP for geolocation accuracy, then anonymize before storage.
-		$country    = self::get_country_name_from_ip( $raw_ip );
-		$ip_address = self::anonymize_ip( $raw_ip );
+		// Single owner of whether an IP is recorded at all, and of the geolocation
+		// call that resolves the country and region; see
+		// `surecookie_skip_consent_logs_ips`. Region is derived from the same
+		// address, so resolving it separately would leak a lookup past the gate.
+		$origin     = self::consent_log_origin( $raw_ip );
+		$ip_address = $origin['ip'];
+		$country    = $origin['country'];
+		$region     = $origin['region'];
 
 		// Record which geo preset governed this consent, resolved server-side by
 		// Pro's geo module (empty on the free / no-geo path). Kept out of the
 		// client POST so the proof-of-consent record can't be spoofed.
 		$geo_preset_id = (string) apply_filters( 'surecookie_active_geo_preset_id', '' );
 
-		$result = DBConsentLog::upsert( $ip_address, $user_id, $session_id, $preferences, $action_type, $country, null, $geo_preset_id );
+		$stored = false;
+		$result = DBConsentLog::upsert( $ip_address, $user_id, $session_id, $preferences, $action_type, $country, null, $geo_preset_id, false, null, $region, $stored );
 
 		if ( $result ) {
 			// Gather consent log counts for analytics. A same-second duplicate
 			// resolves to the existing row without writing, so counting it would
 			// drift the total away from the table it is meant to describe.
-			if ( DBConsentLog::last_upsert_stored() ) {
+			if ( $stored ) {
 				$existing_count = Settings::get( 'total_logs' );
 				$new_count      = $existing_count + 1;
 				Settings::update( 'total_logs', $new_count );
@@ -758,6 +770,7 @@ class ConsentLogs extends Base {
 					'ip_address'    => Sanitize::text( $entry['ip_address'] ?? '' ),
 					'timestamp'     => Sanitize::text( $entry['timestamp'] ?? '' ),
 					'country'       => Sanitize::text( $entry['country'] ?? '' ),
+					'region'        => Sanitize::text( $entry['region'] ?? '' ),
 					'action'        => Sanitize::text( $entry['action'] ?? '' ),
 					'preferences'   => is_array( $preferences ) ? $preferences : [],
 					'session_id'    => Sanitize::text( $entry['session_id'] ?? '' ),

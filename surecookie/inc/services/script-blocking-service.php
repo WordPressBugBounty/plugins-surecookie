@@ -17,7 +17,9 @@
 namespace SureCookie\Inc\Services;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\ScriptBlocking\Blocking_Surface;
 use SureCookie\Inc\Modules\ScriptBlocking\Resource_Categories;
 use SureCookie\Inc\Modules\ScriptBlocking\Scan_Scripts;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as BlockingUtils;
@@ -77,51 +79,7 @@ class ScriptBlockingService {
 		/** This filter is documented in inc/api/scanned-resources.php */
 		$resources = apply_filters( 'surecookie_scanned_resources', $resources );
 
-		return is_array( $resources ) ? $this->annotate_gated_category( $resources ) : [];
-	}
-
-	/**
-	 * Add `gated_category` to every scanned resource.
-	 *
-	 * The stored row keeps whatever the scanner guessed, but the blocker drops a
-	 * scan row whose domain is already a catalog pattern and gates it under the
-	 * catalog's category instead. Without this the table reported the scanner's
-	 * guess, so a domain the catalog now treats as essential still displayed as
-	 * Marketing while loading before consent. `category` is left untouched: it is
-	 * the scanner's provenance, and `list_resources()` reports it as such.
-	 *
-	 * @since x.x.x
-	 * @param array<string, mixed> $resources Scanned resources payload.
-	 * @return array<string, mixed>
-	 */
-	private function annotate_gated_category( array $resources ): array {
-		foreach ( [
-			'scripts' => 'script',
-			'iframes' => 'iframe',
-		] as $bucket => $kind ) {
-			if ( ! is_array( $resources[ $bucket ] ?? null ) ) {
-				continue;
-			}
-
-			foreach ( $resources[ $bucket ] as $i => $resource ) {
-				if ( ! is_array( $resource ) ) {
-					continue;
-				}
-
-				$domain = trim( (string) ( $resource['domain'] ?? '' ) );
-				if ( $domain === '' ) {
-					continue;
-				}
-
-				$resources[ $bucket ][ $i ]['gated_category'] = Resource_Categories::catalog_category(
-					$domain,
-					(string) ( $resource['category'] ?? '' ),
-					$kind
-				);
-			}
-		}
-
-		return $resources;
+		return is_array( $resources ) ? $this->annotate_rows( $resources ) : [];
 	}
 
 	/**
@@ -169,6 +127,9 @@ class ScriptBlockingService {
 					'type'               => $kind,
 					'domain'             => $domain,
 					'url'                => (string) ( $resource['url'] ?? '' ),
+					// Every catalog pattern this row stands for. A service can have
+					// several on one host and the row covers all of them.
+					'patterns'           => array_values( array_filter( array_map( 'strval', (array) ( $resource['patterns'] ?? [] ) ) ) ),
 					'vendor'             => $vendor,
 					// Scanner rows carry no `source`; only service-injected rows do.
 					'source'             => (string) ( $resource['source'] ?? 'scan' ),
@@ -183,6 +144,9 @@ class ScriptBlockingService {
 					// they can legitimately be missing on an early CLI call.
 					'gcm_managed'        => ! empty( $resource['gcmManaged'] ),
 					'service_slug'       => (string) ( $resource['service_slug'] ?? '' ),
+					// A row is not proof of blocking; say when no pass reaches it.
+					'unenforced_reason'  => (string) ( $resource['unenforced_reason'] ?? '' ),
+					'enforced'           => ( $resource['unenforced_reason'] ?? '' ) === '',
 				];
 			}
 		}
@@ -309,7 +273,7 @@ class ScriptBlockingService {
 			array_filter(
 				$excluded,
 				static function ( $entry ) use ( $key, $domain ): bool {
-					$entry = trim( (string) $entry );
+					$entry = trim( Sanitize::scalar( $entry ) );
 					return $entry !== $key && $entry !== $domain;
 				}
 			)
@@ -350,17 +314,17 @@ class ScriptBlockingService {
 				continue;
 			}
 
-			$value = strtolower( trim( (string) ( $entry['value'] ?? '' ) ) );
+			$value = strtolower( trim( Sanitize::scalar( $entry['value'] ?? '' ) ) );
 
 			if ( $value === '' ) {
 				continue;
 			}
 
-			$entry_category = sanitize_key( (string) ( $entry['category'] ?? '' ) );
+			$entry_category = sanitize_key( Sanitize::scalar( $entry['category'] ?? '' ) );
 			$entry_category = $entry_category !== '' ? $entry_category : 'uncategorized';
-			$entry_type     = (string) ( $entry['type'] ?? '' );
+			$entry_type     = Sanitize::scalar( $entry['type'] ?? '' );
 			$entry_type     = in_array( $entry_type, [ 'script', 'iframe' ], true ) ? $entry_type : 'any';
-			$entry_location = (string) ( $entry['location'] ?? '' );
+			$entry_location = Sanitize::scalar( $entry['location'] ?? '' );
 
 			if ( $category !== '' && $entry_category !== $category ) {
 				continue;
@@ -372,12 +336,12 @@ class ScriptBlockingService {
 
 			$rules[] = [
 				'value'       => $value,
-				'name'        => trim( (string) ( $entry['name'] ?? '' ) ),
+				'name'        => trim( Sanitize::scalar( $entry['name'] ?? '' ) ),
 				'category'    => $entry_category,
 				'type'        => $entry_type,
 				'location'    => in_array( $entry_location, [ 'head', 'body', 'footer' ], true ) ? $entry_location : 'any',
-				'path'        => strtolower( trim( (string) ( $entry['path'] ?? '' ) ) ),
-				'keywords'    => $this->split_keywords( (string) ( $entry['keywords'] ?? '' ) ),
+				'path'        => strtolower( trim( Sanitize::scalar( $entry['path'] ?? '' ) ) ),
+				'keywords'    => $this->split_keywords( Sanitize::scalar( $entry['keywords'] ?? '' ) ),
 				// Matches the key Custom_Scripts builds for the blocking dataset.
 				'service_key' => 'custom-' . md5( $value ),
 			];
@@ -394,7 +358,7 @@ class ScriptBlockingService {
 	 * @since 1.4.0
 	 */
 	public function create_rule( array $rule ): array {
-		$value = strtolower( trim( (string) ( $rule['value'] ?? '' ) ) );
+		$value = strtolower( trim( Sanitize::scalar( $rule['value'] ?? '' ) ) );
 		$guard = $this->reject_over_broad( $value );
 
 		if ( $guard !== null ) {
@@ -410,7 +374,7 @@ class ScriptBlockingService {
 		$stored = array_values( $this->raw_array( self::SETTING_RULES ) );
 
 		foreach ( $stored as $entry ) {
-			if ( is_array( $entry ) && strtolower( trim( (string) ( $entry['value'] ?? '' ) ) ) === $value ) {
+			if ( is_array( $entry ) && strtolower( trim( Sanitize::scalar( $entry['value'] ?? '' ) ) ) === $value ) {
 				return $this->failure( __( 'A rule for that pattern already exists. Use "update_rule" instead.', 'surecookie' ) );
 			}
 		}
@@ -541,6 +505,62 @@ class ScriptBlockingService {
 	}
 
 	/**
+	 * Add `gated_category` and `unenforced_reason` to every scanned resource.
+	 *
+	 * The stored row keeps whatever the scanner guessed, but the blocker drops a
+	 * scan row whose domain is already a catalog pattern and gates it under the
+	 * catalog's category instead. Without this the table reported the scanner's
+	 * guess, so a domain the catalog now treats as essential still displayed as
+	 * Marketing while loading before consent. `category` is left untouched: it is
+	 * the scanner's provenance, and `list_resources()` reports it as such.
+	 *
+	 * `unenforced_reason` says whether the blocker will gate the row at all. A
+	 * row is not evidence of blocking: scanners file a stylesheet and an image
+	 * alike as a script, and no pass rewrites an `<img>`.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $resources Scanned resources payload.
+	 * @return array<string, mixed>
+	 */
+	private function annotate_rows( array $resources ): array {
+		foreach ( [
+			'scripts' => 'script',
+			'iframes' => 'iframe',
+		] as $bucket => $kind ) {
+			if ( ! is_array( $resources[ $bucket ] ?? null ) ) {
+				continue;
+			}
+
+			foreach ( $resources[ $bucket ] as $i => $resource ) {
+				if ( ! is_array( $resource ) ) {
+					continue;
+				}
+
+				$domain = trim( (string) ( $resource['domain'] ?? '' ) );
+				if ( $domain === '' ) {
+					continue;
+				}
+
+				$gated = Resource_Categories::catalog_category(
+					$domain,
+					(string) ( $resource['category'] ?? '' ),
+					$kind
+				);
+
+				$resources[ $bucket ][ $i ]['gated_category']    = $gated;
+				$resources[ $bucket ][ $i ]['unenforced_reason'] = Blocking_Surface::unenforced_reason(
+					$domain,
+					// The override is what actually gates, and the screen shows
+					// its own unsaved edits on top of this.
+					Resource_Categories::resolve( $domain, $gated, $kind )
+				);
+			}
+		}
+
+		return $resources;
+	}
+
+	/**
 	 * Build the stored row shape from input.
 	 *
 	 * `keywords` is stored as a comma string, which is what the normalizer
@@ -585,7 +605,7 @@ class ScriptBlockingService {
 	 */
 	private function find_rule_index( array $stored, string $value ): ?int {
 		foreach ( $stored as $index => $entry ) {
-			if ( is_array( $entry ) && strtolower( trim( (string) ( $entry['value'] ?? '' ) ) ) === $value ) {
+			if ( is_array( $entry ) && strtolower( trim( Sanitize::scalar( $entry['value'] ?? '' ) ) ) === $value ) {
 				return (int) $index;
 			}
 		}

@@ -100,9 +100,8 @@ class KnownServicesService {
 				continue;
 			}
 
-			$scripts = array_values( (array) ( $service['patterns']['scripts'] ?? [] ) );
-			$iframes = array_values( (array) ( $service['patterns']['iframes'] ?? [] ) );
 			$cookies = array_values( (array) ( $service['cookies'] ?? [] ) );
+			$summary = Services_Source::pattern_summary( $service );
 			$is_pro  = ! empty( $service['pro'] );
 
 			if ( isset( $installed[ $slug ] ) ) {
@@ -113,19 +112,19 @@ class KnownServicesService {
 				$state = 'available';
 			}
 
-			$services[] = [
-				'slug'        => $slug,
-				'label'       => (string) ( $service['label'] ?? $slug ),
-				'description' => (string) ( $service['description'] ?? '' ),
-				'category'    => (string) ( $service['category'] ?? 'uncategorized' ),
-				'pro'         => $is_pro,
-				'locked'      => $is_pro && ! $pro_ready,
-				'state'       => $state,
-				'cookieCount' => count( $cookies ),
-				'scriptCount' => count( $scripts ),
-				'iframeCount' => count( $iframes ),
-				'blockable'   => $scripts !== [] || $iframes !== [],
-			];
+			$services[] = array_merge(
+				[
+					'slug'        => $slug,
+					'label'       => (string) ( $service['label'] ?? $slug ),
+					'description' => (string) ( $service['description'] ?? '' ),
+					'category'    => (string) ( $service['category'] ?? 'uncategorized' ),
+					'pro'         => $is_pro,
+					'locked'      => $is_pro && ! $pro_ready,
+					'state'       => $state,
+					'cookieCount' => count( $cookies ),
+				],
+				$summary
+			);
 		}
 
 		return [

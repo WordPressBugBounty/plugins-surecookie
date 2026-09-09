@@ -14,7 +14,7 @@
  * actually served.
  *
  * @package SureCookie\Inc\Modules\ScriptBlocking
- * @since x.x.x
+ * @since 1.5.0
  */
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Matched_Resources
  *
- * @since x.x.x
+ * @since 1.5.0
  */
 class Matched_Resources {
 	use GetInstance;
@@ -64,7 +64,7 @@ class Matched_Resources {
 	/**
 	 * Constructor.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	private function __construct() {
 		add_filter( 'surecookie_scanned_resources', [ $this, 'merge_into_payload' ] );
@@ -78,7 +78,7 @@ class Matched_Resources {
 	 * Called on every match, not only on the ones that end up parked, so a
 	 * resource an admin has already excluded still has a row to switch back.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $kind     Resource kind ('script'|'iframe').
 	 * @param string $subject  Resource URL, or the pattern that matched.
 	 * @param string $service  Matched service key.
@@ -120,11 +120,11 @@ class Matched_Resources {
 	/**
 	 * Add a row for every matched pattern the scan does not already cover.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param mixed $resources Scanned-resources payload.
 	 * @return mixed
 	 */
-	public function merge_into_payload( $resources ) {
+	public function merge_into_payload( $resources = null ) {
 		if ( ! is_array( $resources ) ) {
 			return $resources;
 		}
@@ -174,11 +174,11 @@ class Matched_Resources {
 	 * missing from All Cookies and from the public cookie policy even though the
 	 * site demonstrably loads that service once a visitor consents.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param mixed $cookies Cookies grouped by category id.
 	 * @return mixed
 	 */
-	public function merge_declared_cookies( $cookies ) {
+	public function merge_declared_cookies( $cookies = null ) {
 		if ( ! is_array( $cookies ) ) {
 			return $cookies;
 		}
@@ -220,34 +220,12 @@ class Matched_Resources {
 	}
 
 	/**
-	 * Distinct catalog service keys recorded on this site.
-	 *
-	 * @since x.x.x
-	 * @return array<int, string>
-	 */
-	private function matched_services(): array {
-		$services = [];
-
-		foreach ( $this->stored() as $patterns ) {
-			foreach ( $patterns as $entry ) {
-				$service = (string) ( $entry['service'] ?? '' );
-				// Scan-detected rows carry their own cookies already.
-				if ( $service !== '' && strncmp( $service, 'scan_', 5 ) !== 0 ) {
-					$services[ $service ] = true;
-				}
-			}
-		}
-
-		return array_keys( $services );
-	}
-
-	/**
 	 * Persist anything new this request saw.
 	 *
 	 * Writes only when a pattern is genuinely new, so a settled site stops
 	 * touching the option entirely after the first few page views.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return void
 	 */
 	public function flush(): void {
@@ -279,19 +257,41 @@ class Matched_Resources {
 	}
 
 	/**
+	 * Distinct catalog service keys recorded on this site.
+	 *
+	 * @since 1.5.0
+	 * @return array<int, string>
+	 */
+	private function matched_services(): array {
+		$services = [];
+
+		foreach ( $this->stored() as $patterns ) {
+			foreach ( $patterns as $entry ) {
+				$service = (string) ( $entry['service'] ?? '' );
+				// Scan-detected rows carry their own cookies already.
+				if ( $service !== '' && strncmp( $service, 'scan_', 5 ) !== 0 ) {
+					$services[ $service ] = true;
+				}
+			}
+		}
+
+		return array_keys( $services );
+	}
+
+	/**
 	 * Whether a host belongs to this site.
 	 *
 	 * Presto's self-hosted and audio providers resolve to a local file, and a
 	 * first-party host recorded as a resource can be always-loaded by an admin,
 	 * which would exempt every same-host resource on the site.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $host Lowercased host.
 	 * @return bool
 	 */
 	private function is_first_party( string $host ): bool {
-		$site = self::without_www( strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
-		$host = self::without_www( $host );
+		$site = Blocker::without_www( strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
+		$host = Blocker::without_www( $host );
 
 		if ( $site === '' ) {
 			return false;
@@ -301,24 +301,13 @@ class Matched_Resources {
 	}
 
 	/**
-	 * Drop a leading `www.` so the site host and a resource host compare alike.
-	 *
-	 * @since x.x.x
-	 * @param string $host Lowercased host.
-	 * @return string
-	 */
-	private static function without_www( string $host ): string {
-		return strncmp( $host, 'www.', 4 ) === 0 ? substr( $host, 4 ) : $host;
-	}
-
-	/**
 	 * Host of a resource URL, or of a bare pattern.
 	 *
 	 * Recording the host rather than the catalog pattern keeps the row honest:
 	 * it names what this site actually contacted, which is also the value the
 	 * admin UI writes an exclusion or override against.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $subject Resource URL, or a bare blocking pattern.
 	 * @return string Lowercased host, or '' when there is none to record.
 	 */
@@ -342,7 +331,7 @@ class Matched_Resources {
 	/**
 	 * The stored set, normalised to both kinds.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return array<string, array<string, array<string, string>>>
 	 */
 	private function stored(): array {

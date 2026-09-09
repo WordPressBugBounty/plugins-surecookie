@@ -11,6 +11,7 @@ namespace SureCookie;
 use SureCookie\Admin\Analytics;
 use SureCookie\Admin\Menu;
 use SureCookie\Admin\Onboarding;
+use SureCookie\Admin\Post_States;
 use SureCookie\Admin\Rating_Notice;
 use SureCookie\Admin\Sync;
 use SureCookie\Core\Frontend as Frontend_App;
@@ -260,6 +261,7 @@ class SureCookie_Loader {
 		if ( is_admin() ) {
 			/* Admin menu */
 			Menu::get_instance();
+			Post_States::get_instance();
 			Onboarding::get_instance();
 			Rating_Notice::get_instance();
 		} else {
@@ -286,6 +288,11 @@ class SureCookie_Loader {
 	 * @return void
 	 */
 	public function load_textdomain(): void {
+		// Registered before the catalog loads so the very first lookup can
+		// already fall back from a regional locale (de_CH) to the shipped
+		// base-language file (de_DE) - for free and Pro alike (issue #1034).
+		\SureCookie\Inc\Utils\Locale_Fallback::register();
+
 		load_plugin_textdomain( 'surecookie', false, dirname( SURECOOKIE_BASE ) . '/languages/' );
 	}
 

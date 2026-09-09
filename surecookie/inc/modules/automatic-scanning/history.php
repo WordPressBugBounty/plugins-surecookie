@@ -58,12 +58,15 @@ class History {
 			$option = [];
 		}
 
-		// The previous scan's snapshot is the diff baseline.
-		$previous_snapshot = isset( $option['reported_snapshot'] ) && is_array( $option['reported_snapshot'] ) ? $option['reported_snapshot'] : [];
+		// A MISSING snapshot is not an empty one: diffing against it made every
+		// cookie and domain "new", so a first scan had Pro's guard force-block the
+		// site. A first scan baselines instead.
+		$is_baseline       = ! isset( $option['reported_snapshot'] ) || ! is_array( $option['reported_snapshot'] );
+		$previous_snapshot = $is_baseline ? [] : $option['reported_snapshot'];
 
 		$domains  = isset( $context['domains'] ) && is_array( $context['domains'] ) ? $context['domains'] : [];
 		$snapshot = DiffEngine::build_snapshot( $cookies_by_category, $domains );
-		$diff     = DiffEngine::diff( $previous_snapshot, $snapshot );
+		$diff     = $is_baseline ? DiffEngine::empty_diff() : DiffEngine::diff( $previous_snapshot, $snapshot );
 
 		// The snapshots hold the scanner's own classification, so a cookie whose
 		// category the admin has pinned can still show up as recategorized even
@@ -96,6 +99,7 @@ class History {
 			[
 				'reported_snapshot' => $snapshot,
 				'changes'           => $diff,
+				'is_baseline'       => $is_baseline,
 				'trigger_type'      => $is_auto ? 'auto' : 'manual',
 				'changed_at'        => (string) ( $context['scanned_at'] ?? current_time( 'mysql' ) ),
 			]
@@ -144,6 +148,8 @@ class History {
 			'removed_count'       => isset( $changes['removed'] ) && is_array( $changes['removed'] ) ? count( $changes['removed'] ) : 0,
 			'recategorized_count' => isset( $changes['recategorized'] ) && is_array( $changes['recategorized'] ) ? count( $changes['recategorized'] ) : 0,
 			'new_domains'         => isset( $changes['domains_added'] ) && is_array( $changes['domains_added'] ) ? $changes['domains_added'] : [],
+			// A baseline reports no changes, so the UI must not read 0 as "found nothing".
+			'is_baseline'         => ! empty( $option['is_baseline'] ),
 			'changes'             => $changes,
 		];
 	}

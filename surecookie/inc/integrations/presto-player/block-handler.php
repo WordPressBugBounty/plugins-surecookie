@@ -99,14 +99,12 @@ class Block_Handler {
 	];
 
 	/**
-	 * True while rendering a block nested inside a Presto popup. Popups render
-	 * their player through the WP Interactivity API in a `wp_footer` template,
-	 * which the placeholder/restore mechanism can't safely wrap - so we leave
-	 * popup videos to Presto (they stay inert in that template until opened).
-	 *
-	 * @var bool
+	 * Context key marking a block as rendering inside a Presto popup. Popups
+	 * render their player through the WP Interactivity API in a `wp_footer`
+	 * template, which the placeholder/restore mechanism can't safely wrap - so
+	 * we leave popup videos to Presto (they stay inert there until opened).
 	 */
-	private $in_popup = false;
+	private const POPUP_CONTEXT = 'surecookie/inPrestoPopup';
 
 	/**
 	 * Constructor.
@@ -114,26 +112,42 @@ class Block_Handler {
 	 * @since 1.2.4
 	 */
 	private function __construct() {
-		add_filter( 'render_block', [ $this, 'wrap_block' ], 10, 2 );
+		add_filter( 'render_block', [ $this, 'wrap_block' ], 10, 3 );
 		add_filter( 'render_block_context', [ $this, 'flag_popup_descendant' ], 10, 3 );
 	}
 
 	/**
-	 * Flag whether the block about to render is a direct child of a popup, using
-	 * the parent block passed to `render_block_context`.
+	 * Mark a block as rendering inside a Presto popup.
+	 *
+	 * Carried in the block's own context rather than on the handler, so it
+	 * belongs to one block instead of to whichever block filtered last. Core
+	 * merges a changed context into `available_context`, which every descendant
+	 * inherits, so re-reading the parent's flag walks the whole subtree and not
+	 * just the direct children the old boolean covered.
 	 *
 	 * @since 1.2.4
+	 * @since 1.5.0 Context key instead of shared instance state.
 	 * @param array<string, mixed> $context      Block context.
 	 * @param array<string, mixed> $parsed_block The block about to render.
 	 * @param \WP_Block|null       $parent_block The parent block, if any.
 	 * @return array<string, mixed>
 	 */
-	public function flag_popup_descendant( $context, $parsed_block, $parent_block ): array {
-		// Only skip the footer player (popup-media child); the popup trigger is
-		// gated normally so blocking it stops the popup from ever opening.
-		$this->in_popup = $parent_block instanceof \WP_Block
-			&& $parent_block->name === 'presto-player/popup-media';
-		return is_array( $context ) ? $context : [];
+	public function flag_popup_descendant( $context = [], $parsed_block = [], $parent_block = null ): array {
+		unset( $parsed_block );
+		$context = is_array( $context ) ? $context : [];
+
+		if ( ! $parent_block instanceof \WP_Block ) {
+			return $context;
+		}
+
+		// Only the footer player (popup-media's subtree) is skipped; the popup
+		// trigger is gated normally, since blocking it stops the popup opening.
+		$inherited = is_array( $parent_block->context ) && ! empty( $parent_block->context[ self::POPUP_CONTEXT ] );
+		if ( $inherited || $parent_block->name === 'presto-player/popup-media' ) {
+			$context[ self::POPUP_CONTEXT ] = true;
+		}
+
+		return $context;
 	}
 
 	/**
@@ -147,9 +161,10 @@ class Block_Handler {
 	 * @since 1.2.4
 	 * @param string               $block_content The rendered block markup.
 	 * @param array<string, mixed> $block         The block array (`blockName`, `attrs`, ...).
+	 * @param mixed                $instance      The rendering `WP_Block`, when core passes one.
 	 * @return string
 	 */
-	public function wrap_block( $block_content, $block ): string {
+	public function wrap_block( $block_content = '', $block = [], $instance = null ): string {
 		// Cast once - render_block can pass non-string $block_content for some
 		// dynamic blocks; the method return type requires string.
 		$block_content = (string) $block_content;
@@ -162,7 +177,8 @@ class Block_Handler {
 
 		// Inside a popup: leave it to Presto (its Interactivity footer template
 		// keeps the player inert until the popup is opened anyway).
-		if ( $this->in_popup ) {
+		if ( $instance instanceof \WP_Block && is_array( $instance->context )
+			&& ! empty( $instance->context[ self::POPUP_CONTEXT ] ) ) {
 			return $block_content;
 		}
 
@@ -239,8 +255,8 @@ class Block_Handler {
 	}
 
 	/**
-	 * Build the placeholder wrapper. Visible overlay + inert `<template>`
-	 * carrying the original Presto markup for client-side restoration.
+	 * Build the placeholder wrapper. Visible overlay + the original Presto
+	 * markup, escaped into an attribute for client-side restoration.
 	 *
 	 * @since 1.2.4
 	 * @param array{service: string, category: string, label: string} $provider      Resolved provider info.
@@ -280,6 +296,14 @@ class Block_Handler {
 		$out  = '<div class="' . esc_attr( $wrapper_class ) . '"';
 		$out .= ' data-surecookie-name="' . esc_attr( $service ) . '"';
 		$out .= ' data-surecookie-category="' . esc_attr( $category ) . '"';
+		// An attribute, not a <template>: a pass that re-serialises this region
+		// without the template content model lifts the template's children out,
+		// leaving the real <presto-player> loose and live behind the overlay.
+		// htmlspecialchars, not esc_attr, so the value double-encodes and one
+		// decode returns the source text rather than promoting `&lt;script&gt;`.
+		// ENT_SUBSTITUTE is not optional: without it one invalid byte encodes to
+		// '' and the player is lost, since the payload has no second carrier.
+		$out .= ' data-surecookie-restore="' . htmlspecialchars( $block_content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) . '"';
 		if ( $wrapper_style !== '' ) {
 			$out .= ' style="' . esc_attr( $wrapper_style ) . '"';
 		}
@@ -288,11 +312,6 @@ class Block_Handler {
 		// Presto keeps its own media-aware copy; everything else about the overlay
 		// is the shared one, so the two builders can't drift apart.
 		$out .= $this->render_placeholder_overlay( $category, $provider['label'], $image, $this->placeholder_text( $provider['label'] ) );
-
-		// Inert template - custom elements inside don't upgrade until cloned.
-		// consentManager.js clones the content into the placeholder's position
-		// on accept; Presto's runtime then upgrades the new <presto-player>.
-		$out .= '<template class="surecookie-presto-restore">' . $block_content . '</template>';
 
 		$out .= '</div>';
 
@@ -309,7 +328,7 @@ class Block_Handler {
 	 * @param array{service: string, category: string, label: string} $provider   Resolved provider.
 	 * @param string                                                  $block_name Presto block name.
 	 * @param array<string, mixed>                                    $attributes Block attributes.
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return string
 	 */
 	private function resolve_provider_category( array $provider, string $block_name, array $attributes ): string {

@@ -47,7 +47,8 @@ class Utils {
 	 * @return string Plan type
 	 */
 	public static function get_plan(): string {
-		return apply_filters( 'surecookie_plan_type', 'free' );
+		$filtered = apply_filters( 'surecookie_plan_type', 'free' );
+		return is_string( $filtered ) ? $filtered : 'free';
 	}
 
 	/**

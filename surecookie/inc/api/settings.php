@@ -197,8 +197,9 @@ class Settings extends Base {
 	 */
 	public function update_admin_settings( $request ): void {
 		$data = $request->get_param( 'data' );
-		if ( empty( $data ) ) {
+		if ( ! is_array( $data ) || empty( $data ) ) {
 			SendJson::error( [ 'message' => __( 'No data found', 'surecookie' ) ] );
+			return;
 		}
 
 		$previous_top_level = FunctionsSettings::get( 'top_level_menu_enabled' );
@@ -338,12 +339,30 @@ class Settings extends Base {
 				],
 				400
 			);
+			return;
 		}
 
 		$allowed_keys      = $this->get_transferable_settings_keys();
 		$allowed_key_map   = array_fill_keys( $allowed_keys, true );
 		$filtered_settings = array_intersect_key( $imported_settings, $allowed_key_map );
 		$skipped_keys      = array_values( array_diff( array_keys( $imported_settings ), $allowed_keys ) );
+
+		// Recognized keys whose value cannot be stored. Reported apart from `ignored`
+		// (unrecognized fields) because the outcome differs and the user needs to know
+		// which: a merge keeps the stored value, a replace has already defaulted it.
+		$invalid_keys      = [];
+		$filtered_settings = array_filter(
+			$filtered_settings,
+			static function ( $value, $key ) use ( &$invalid_keys ) {
+				if ( FunctionsSettings::accepts_value( (string) $key, $value ) ) {
+					return true;
+				}
+
+				$invalid_keys[] = (string) $key;
+				return false;
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
 
 		// Standalone options this install knows how to apply (sanitized at
 		// the boundary below); unknown option names are ignored.
@@ -353,6 +372,10 @@ class Settings extends Base {
 
 		$file_sections = isset( $payload['sections'] ) && is_array( $payload['sections'] ) ? $payload['sections'] : [];
 		$summary       = $this->summarize_import( $imported_settings, array_keys( $filtered_settings ), $file_sections );
+
+		// summarize_import() buckets everything unapplied as unrecognized; these were
+		// recognized, so they belong in their own bucket.
+		$summary['ignored'] = array_values( array_diff( $summary['ignored'], $invalid_keys ) );
 
 		// Nothing this install can apply. If the file carries Pro sections, guide
 		// the user to upgrade instead of failing; otherwise the file is unusable.
@@ -365,6 +388,7 @@ class Settings extends Base {
 						'applied_sections' => [],
 						'skipped_pro'      => $summary['skipped_pro'],
 						'ignored'          => $summary['ignored'],
+						'invalid'          => $invalid_keys,
 						'upgrade_required' => true,
 						'replaced'         => $replace,
 					]
@@ -410,6 +434,7 @@ class Settings extends Base {
 			'applied_sections' => $summary['applied_sections'],
 			'skipped_pro'      => $summary['skipped_pro'],
 			'ignored'          => $summary['ignored'],
+			'invalid'          => $invalid_keys,
 			'upgrade_required' => ! empty( $summary['skipped_pro'] ),
 			'skipped'          => $skipped_keys,
 			'replaced'         => $replace,
@@ -506,7 +531,14 @@ class Settings extends Base {
 		$sanitized_settings = [];
 
 		foreach ( $data as $key => $value ) {
-			$sanitized_settings[ $key ] = FunctionsSettings::get_cleaned_value( (string) $key, $value );
+			$key = (string) $key;
+
+			// Wrong shape for an array key: drop it so the merge keeps the stored value instead of wiping it to [].
+			if ( ! FunctionsSettings::accepts_value( $key, $value ) ) {
+				continue;
+			}
+
+			$sanitized_settings[ $key ] = FunctionsSettings::get_cleaned_value( $key, $value );
 		}
 
 		return $sanitized_settings;
@@ -590,7 +622,8 @@ class Settings extends Base {
 		 *
 		 * @param array<string, mixed> $payload Export payload.
 		 */
-		return apply_filters( 'surecookie_settings_export_payload', $payload );
+		$filtered = apply_filters( 'surecookie_settings_export_payload', $payload );
+		return is_array( $filtered ) ? $filtered : $payload;
 	}
 
 	/**
@@ -999,6 +1032,7 @@ class Settings extends Base {
 			'consent_renewed_at',
 			'cookie_policy_page_id',
 			'preview_enabled',
+			'privacy_policy_page_id',
 			'reconsent_menu_id',
 			'scan_pages',
 			'show_preview',

@@ -17,7 +17,9 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Modules\Services\Services_Source;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,6 +52,13 @@ final class Resource_Categories {
 	 * @var array<string, array<string, string>>|null
 	 */
 	private static ?array $catalog_categories = null;
+
+	/**
+	 * Cached pattern => [ catalog bucket => true ] index.
+	 *
+	 * @var array<string, array<string, bool>>|null
+	 */
+	private static ?array $catalog_buckets = null;
 
 	/**
 	 * Split a scoped key into [ kind, domain ].
@@ -105,7 +114,7 @@ final class Resource_Categories {
 		}
 
 		foreach ( self::excluded_entries() as $entry ) {
-			[ $entry_kind, $entry_domain ] = self::parse_scoped_key( (string) $entry );
+			[ $entry_kind, $entry_domain ] = self::parse_scoped_key( Sanitize::scalar( $entry ) );
 			if ( $entry_domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
 				continue;
 			}
@@ -135,7 +144,7 @@ final class Resource_Categories {
 		}
 
 		foreach ( self::excluded_entries() as $entry ) {
-			[ $entry_kind, $domain ] = self::parse_scoped_key( (string) $entry );
+			[ $entry_kind, $domain ] = self::parse_scoped_key( Sanitize::scalar( $entry ) );
 			if ( $domain === '' || ( $entry_kind !== 'any' && $entry_kind !== $kind ) ) {
 				continue;
 			}
@@ -150,7 +159,7 @@ final class Resource_Categories {
 	/**
 	 * Whether any candidate key matches an exclusion entry of the same kind.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param array<int, string> $keys Candidate keys, most specific first.
 	 * @param string             $kind Resource kind ('script'|'iframe').
 	 * @return bool
@@ -166,71 +175,19 @@ final class Resource_Categories {
 	}
 
 	/**
-	 * Whether one stored entry matches a resource, on host boundaries.
+	 * Whether one stored entry matches a resource.
 	 *
-	 * A domain-shaped entry matches the host exactly or as a parent domain, so
-	 * `google.com` never matches `evilgoogle.com` or `google.com.attacker.test`.
-	 * Anything that is not domain-shaped - a keyword such as `fbq`, a path
-	 * fragment, a pasted URL - keeps the substring behaviour it was saved under,
-	 * and a dotted value may still name a file, so `analytics.js` keeps working.
+	 * The rules live in {@see Entry_Match}, which Pro's whitelist calls too, so
+	 * the two settings answer identically by construction rather than by a
+	 * docblock asking two copies to stay in step.
 	 *
-	 * Shared with Pro's whitelist so the two settings cannot drift apart.
-	 *
-	 * @since x.x.x
-	 * @param string $entry   Stored entry (exclusion or whitelist value).
+	 * @since 1.5.0
+	 * @param string $entry   Stored exclusion value.
 	 * @param string $subject Resource URL, or a bare blocking pattern.
 	 * @return bool
 	 */
 	public static function entry_matches( string $entry, string $subject ): bool {
-		$needle = strtolower( trim( $entry ) );
-		if ( $needle === '' || $subject === '' ) {
-			return false;
-		}
-
-		// Not domain-shaped, so it was never a host claim to begin with.
-		if ( strpbrk( $needle, '/?#' ) !== false || strpos( $needle, '.' ) === false ) {
-			return stripos( $subject, $needle ) !== false;
-		}
-
-		[ $host, $path ] = self::subject_parts( $subject );
-
-		if ( $host !== '' && ( $host === $needle || substr( $host, - ( strlen( $needle ) + 1 ) ) === '.' . $needle ) ) {
-			return true;
-		}
-
-		// Path but never the query: a dotted entry may name a file (`analytics.js`),
-		// while matching the query released `cdn.tracker.test/t.js?site=example.com`
-		// for an `example.com` entry - one party freed by another party's URL.
-		return $path !== '' && stripos( $path, $needle ) !== false;
-	}
-
-	/**
-	 * Split a resource into [ host, path ]. The query is dropped: it carries
-	 * other parties' URLs, which must never satisfy an entry.
-	 *
-	 * Callers hand us either a real src or a bare catalog pattern, so give a
-	 * scheme-less value one before parsing - without it wp_parse_url reads the
-	 * whole host as a path and the boundary check above can never fire.
-	 *
-	 * @since x.x.x
-	 * @param string $subject Resource URL, or a bare blocking pattern.
-	 * @return array{0: string, 1: string}
-	 */
-	private static function subject_parts( string $subject ): array {
-		$subject = trim( $subject );
-
-		if ( strpos( $subject, '//' ) === 0 ) {
-			$url = 'https:' . $subject;           // Protocol-relative.
-		} elseif ( strpos( $subject, '://' ) !== false || strpos( $subject, '/' ) === 0 ) {
-			$url = $subject;                      // Absolute URL, or root-relative with no host.
-		} else {
-			$url = 'https://' . $subject;         // Bare host, optionally with a path.
-		}
-
-		$parts = wp_parse_url( $url );
-		$parts = is_array( $parts ) ? $parts : [];
-		$host  = strtolower( (string) ( $parts['host'] ?? '' ) );
-		return [ $host, (string) ( $parts['path'] ?? '' ) ];
+		return Entry_Match::matches( $entry, $subject );
 	}
 
 	/**
@@ -249,8 +206,14 @@ final class Resource_Categories {
 		$stored          = Settings::get( 'resource_category_overrides' );
 		if ( is_array( $stored ) ) {
 			foreach ( $stored as $domain => $category ) {
-				$domain   = trim( (string) $domain );
-				$category = trim( (string) $category );
+				// Integer keys mean a list-shaped store; find_override() matches keys as
+				// substrings, so '0' would recategorize every URL containing a zero.
+				if ( ! is_string( $domain ) ) {
+					continue;
+				}
+
+				$domain   = trim( $domain );
+				$category = trim( Sanitize::scalar( $category ) );
 				if ( $domain !== '' && $category !== '' ) {
 					self::$overrides[ $domain ] = $category;
 				}
@@ -284,7 +247,7 @@ final class Resource_Categories {
 	 * Separate from resolve() so a caller can tell "no entry matched" from "an
 	 * entry matched and named the category we already had".
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $key  Resource URL, or a bare domain.
 	 * @param string $kind Resource kind ('script'|'iframe').
 	 * @return string|null
@@ -317,7 +280,7 @@ final class Resource_Categories {
 	 * Ordered so a src-keyed override still beats the broader pattern that matched
 	 * it: `google.com/recaptcha` must win over a bare `google.com` rule.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param array<int, string> $keys     Candidate keys, most specific first.
 	 * @param string             $category Category resolved from the pattern match.
 	 * @param string             $kind     Resource kind ('script'|'iframe').
@@ -361,7 +324,7 @@ final class Resource_Categories {
 	 * already had the saved override folded in would make an unsaved change
 	 * invisible, so the two halves stay separate.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @param string $domain Scan-detected resource domain.
 	 * @param string $stored Category recorded on the scan row.
 	 * @param string $kind   Resource kind ('script'|'iframe').
@@ -383,12 +346,31 @@ final class Resource_Categories {
 		self::$excluded           = null;
 		self::$overrides          = null;
 		self::$catalog_categories = null;
+		self::$catalog_buckets    = null;
+	}
+
+	/**
+	 * The catalog buckets a pattern is declared in, as [ bucket => true ].
+	 *
+	 * Empty when the catalog does not know the pattern. Lets a caller tell a
+	 * pattern the blocker can act on from one it only ever sees on a `<link>`
+	 * or an `<img>`, which no pass rewrites.
+	 *
+	 * @since 1.5.0
+	 * @param string $pattern Catalog pattern, normally a scan row's domain.
+	 * @return array<string, bool>
+	 */
+	public static function catalog_buckets( string $pattern ): array {
+		self::catalog_categories();
+
+		return self::$catalog_buckets[ trim( $pattern ) ] ?? [];
 	}
 
 	/**
 	 * Catalog blocking patterns indexed as [ kind => [ pattern => category ] ],
 	 * plus an 'any' bucket mirroring the kind-blind duplicate check in
-	 * `Scan_Scripts::build_existing_pattern_index()`.
+	 * `Scan_Scripts::build_existing_pattern_index()`. Builds the pattern =>
+	 * bucket index in the same walk, so both share one cache.
 	 *
 	 * @since 1.4.0
 	 * @return array<string, array<string, string>>
@@ -398,26 +380,26 @@ final class Resource_Categories {
 			return self::$catalog_categories;
 		}
 
-		$index = [
+		$index   = [
 			'script' => [],
 			'iframe' => [],
 			'any'    => [],
 		];
+		$buckets = [];
 
 		foreach ( Services_Source::get_instance()->get_blocking_view() as $category => $services ) {
 			if ( ! is_array( $services ) ) {
 				continue;
 			}
 			foreach ( $services as $service ) {
-				foreach ( [
-					'scripts' => 'script',
-					'iframes' => 'iframe',
-				] as $bucket => $kind ) {
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					$kind = Pattern_Kinds::resource_kind( $bucket );
 					foreach ( (array) ( $service[ $bucket ] ?? [] ) as $pattern ) {
 						$pattern = trim( (string) $pattern );
 						if ( $pattern !== '' ) {
-							$index[ $kind ][ $pattern ] = (string) $category;
-							$index['any'][ $pattern ]   = (string) $category;
+							$index[ $kind ][ $pattern ]     = (string) $category;
+							$index['any'][ $pattern ]       = (string) $category;
+							$buckets[ $pattern ][ $bucket ] = true;
 						}
 					}
 				}
@@ -425,6 +407,7 @@ final class Resource_Categories {
 		}
 
 		self::$catalog_categories = $index;
+		self::$catalog_buckets    = $buckets;
 
 		return $index;
 	}

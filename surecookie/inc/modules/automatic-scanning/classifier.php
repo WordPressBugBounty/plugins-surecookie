@@ -120,6 +120,7 @@ class Classifier {
 		 * @param array{category:string, confidence:int, matched_rule:string} $result Rule-based result.
 		 * @param array<string, mixed>                                        $cookie The cookie being classified.
 		 */
-		return apply_filters( 'surecookie_auto_scan_classify', $result, $cookie );
+		$filtered = apply_filters( 'surecookie_auto_scan_classify', $result, $cookie );
+		return is_array( $filtered ) ? $filtered : $result;
 	}
 }

@@ -12,6 +12,7 @@
 namespace SureCookie\Inc\Modules\ReConsent;
 
 use SureCookie\Inc\Traits\GetInstance;
+use SureCookie\Inc\Traits\Shortcode as Shortcode_Trait;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -24,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Shortcode {
 	use GetInstance;
+	use Shortcode_Trait;
 
 	/**
 	 * Constructor.
@@ -31,7 +33,7 @@ class Shortcode {
 	 * @since 0.0.1
 	 */
 	private function __construct() {
-		add_shortcode( 'surecookie_reconsent_button', [ $this, 'render' ] );
+		$this->register_shortcodes( [ 'surecookie_reconsent_button' => 'button' ] );
 	}
 
 	/**
@@ -41,7 +43,7 @@ class Shortcode {
 	 * @return string Rendered HTML.
 	 * @since 0.0.1
 	 */
-	public function render( $atts ): string {
+	public function render_button( $atts ): string {
 		$atts = shortcode_atts(
 			[
 				'label' => '',

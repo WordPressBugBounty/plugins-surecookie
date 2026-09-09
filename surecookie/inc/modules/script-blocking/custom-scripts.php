@@ -15,6 +15,7 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -54,14 +55,16 @@ class Custom_Scripts {
 	/**
 	 * Merge the admin's custom blocked scripts into the known-scripts dataset.
 	 *
-	 * Each entry becomes a service under its chosen category, with its URL
-	 * pattern registered for both script and iframe matching.
+	 * Each entry becomes a service under its chosen category. A rule the admin
+	 * typed as script-only or iframe-only, or one carrying keywords, is marked
+	 * `tag_scoped` so the blocker takes its arrays literally instead of pooling
+	 * them across both passes.
 	 *
 	 * @param mixed $scripts Known scripts grouped by category.
 	 * @since 1.3.0
 	 * @return mixed
 	 */
-	public function merge_custom_blocked_scripts( $scripts ) {
+	public function merge_custom_blocked_scripts( $scripts = null ) {
 		if ( ! is_array( $scripts ) ) {
 			return $scripts;
 		}
@@ -84,6 +87,13 @@ class Custom_Scripts {
 			}
 			if ( $entry['type'] !== 'script' ) {
 				$service['iframes'] = [ $entry['value'] ];
+			}
+			if ( $entry['type'] !== 'any' || $entry['keywords'] !== [] ) {
+				// Keep the blocker from pooling these patterns across kinds the
+				// way it pools a catalog host: the admin picked a resource type,
+				// or the rule carries keywords, which are inline-JS identifiers
+				// and would match an unrelated first-party URL as a substring.
+				$service['tag_scoped'] = true;
 			}
 			if ( $entry['location'] !== 'any' ) {
 				// Region hint (head|body|footer): the blocker only matches the
@@ -127,25 +137,25 @@ class Custom_Scripts {
 				continue;
 			}
 
-			$value = strtolower( trim( (string) ( $entry['value'] ?? '' ) ) );
+			$value = strtolower( trim( Sanitize::scalar( $entry['value'] ?? '' ) ) );
 			if ( $value === '' ) {
 				continue;
 			}
 
-			$category = sanitize_key( (string) ( $entry['category'] ?? '' ) );
-			$type     = (string) ( $entry['type'] ?? '' );
-			$location = (string) ( $entry['location'] ?? '' );
-			$path     = strtolower( trim( (string) ( $entry['path'] ?? '' ) ) );
+			$category = sanitize_key( Sanitize::scalar( $entry['category'] ?? '' ) );
+			$type     = Sanitize::scalar( $entry['type'] ?? '' );
+			$location = Sanitize::scalar( $entry['location'] ?? '' );
+			$path     = strtolower( trim( Sanitize::scalar( $entry['path'] ?? '' ) ) );
 
 			// Comma-separated dependent-JS keywords, normalized to a clean list.
 			$keywords = array_values(
 				array_filter(
-					array_map( 'trim', explode( ',', (string) ( $entry['keywords'] ?? '' ) ) )
+					array_map( 'trim', explode( ',', Sanitize::scalar( $entry['keywords'] ?? '' ) ) )
 				)
 			);
 
 			$out[] = [
-				'name'     => trim( (string) ( $entry['name'] ?? '' ) ),
+				'name'     => trim( Sanitize::scalar( $entry['name'] ?? '' ) ),
 				'value'    => $value,
 				'category' => $category !== '' ? $category : 'uncategorized',
 				'type'     => in_array( $type, [ 'script', 'iframe' ], true ) ? $type : 'any',

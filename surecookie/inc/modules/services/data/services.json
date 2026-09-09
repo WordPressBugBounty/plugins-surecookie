@@ -240,10 +240,11 @@
         "category": "functional",
         "pro": true,
         "patterns": {
-            "scripts": [
+            "scripts": [],
+            "iframes": [],
+            "styles": [
                 "fonts.bunny.net"
-            ],
-            "iframes": []
+            ]
         },
         "cookies": []
     },
@@ -1001,11 +1002,12 @@
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
-            "scripts": [
+            "scripts": [],
+            "iframes": [],
+            "styles": [
                 "fonts.googleapis.com",
                 "fonts.gstatic.com"
-            ],
-            "iframes": []
+            ]
         },
         "cookies": []
     },
@@ -1028,7 +1030,9 @@
         "category": "marketing",
         "pro": false,
         "patterns": {
-            "scripts": [],
+            "scripts": [
+                "maps.googleapis.com"
+            ],
             "iframes": [
                 "google.com/maps/embed",
                 "maps.google.com/maps"
@@ -1078,7 +1082,9 @@
             "scripts": [
                 "googletagmanager.com/gtm.js"
             ],
-            "iframes": []
+            "iframes": [
+                "googletagmanager.com/ns.html"
+            ]
         },
         "cookies": [
             {
@@ -2417,7 +2423,9 @@
             ],
             "iframes": [
                 "js.stripe.com",
-                "m.stripe.network"
+                "m.stripe.network",
+                "m.stripe.com",
+                "hooks.stripe.com"
             ]
         },
         "cookies": []
@@ -2690,7 +2698,9 @@
         "category": "marketing",
         "pro": false,
         "patterns": {
-            "scripts": [],
+            "scripts": [
+                "player.vimeo.com/api/player.js"
+            ],
             "iframes": [
                 "player.vimeo.com/video/",
                 "vimeo.com/video/"
@@ -2814,7 +2824,10 @@
         "category": "marketing",
         "pro": false,
         "patterns": {
-            "scripts": [],
+            "scripts": [
+                "youtube.com/iframe_api",
+                "youtube.com/s/player/"
+            ],
             "iframes": [
                 "youtube.com/embed/",
                 "youtube-nocookie.com/embed/",

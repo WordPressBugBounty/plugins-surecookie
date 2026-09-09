@@ -95,7 +95,7 @@ class Actions {
 	 * @return array<string>
 	 * @since 0.0.0-alpha.1
 	 */
-	public function add_gcm_frontend_options( $frontend_keys ) {
+	public function add_gcm_frontend_options( $frontend_keys = [] ) {
 		return array_merge( $frontend_keys, self::GCM_SETTING_KEYS );
 	}
 

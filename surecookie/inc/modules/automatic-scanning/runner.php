@@ -186,7 +186,7 @@ class Runner {
 	 * @since 1.2.0
 	 * @return array<int, string>
 	 */
-	public function apply_scope( $urls ) {
+	public function apply_scope( $urls = [] ) {
 		if ( ! $this->is_auto_run ) {
 			return $urls;
 		}

@@ -58,6 +58,12 @@ class Cookies extends Base {
 	protected const UPDATE_SCANNED_COOKIE_CATEGORY = '/cookies/scanned-cookie/category';
 
 	/**
+	 * Route Delete Scanned Cookie. Addressed by name, domain and category: a scanned
+	 * row has no generated id.
+	 */
+	protected const DELETE_SCANNED_COOKIE = '/cookies/scanned-cookie';
+
+	/**
 	 * Route: assign multiple cookies (custom and/or scanned) to one category.
 	 *
 	 * @since 1.3.0
@@ -217,14 +223,54 @@ class Cookies extends Base {
 						'required' => true,
 						'type'     => 'string',
 					],
+					// Optional since corrections arrived: a call may change a field
+					// without moving the cookie between categories.
 					'new_category'     => [
-						'required' => true,
+						'required' => false,
 						'type'     => 'string',
 					],
 					// Optional: tells two same-named cookies apart when both sit
 					// in the source category. Older clients that omit it keep the
 					// previous name-only match.
 					'domain'           => [
+						'required' => false,
+						'type'     => 'string',
+					],
+					// Corrections to what the scanner reported. Name and domain are
+					// absent deliberately: they are the cookie's identity.
+					'purpose'          => [
+						'required' => false,
+						'type'     => 'string',
+					],
+					'duration'         => [
+						'required' => false,
+						'type'     => 'string',
+					],
+					'provider'         => [
+						'required' => false,
+						'type'     => 'string',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->get_api_namespace(),
+			self::DELETE_SCANNED_COOKIE,
+			[
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => [ $this, 'delete_scanned_cookie' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					'cookie_name' => [
+						'required' => true,
+						'type'     => 'string',
+					],
+					'category'    => [
+						'required' => true,
+						'type'     => 'string',
+					],
+					'domain'      => [
 						'required' => false,
 						'type'     => 'string',
 					],
@@ -348,6 +394,30 @@ class Cookies extends Base {
 	}
 
 	/**
+	 * Remove a scanned cookie.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full data about the request.
+	 * @since 1.5.0
+	 * @return void
+	 */
+	public function delete_scanned_cookie( $request ): void {
+		try {
+			$cookie_name = sanitize_text_field( (string) $request->get_param( 'cookie_name' ) );
+			$category    = sanitize_text_field( (string) $request->get_param( 'category' ) );
+			$domain      = sanitize_text_field( (string) $request->get_param( 'domain' ) );
+
+			$service = new CookieService();
+			$result  = $service->delete_scanned_cookie( $cookie_name, $category, $domain );
+
+			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
+		} catch ( \Exception $e ) {
+			SendJson::error(
+				[ 'message' => __( 'Failed to remove cookie: ', 'surecookie' ) . $e->getMessage() ]
+			);
+		}
+	}
+
+	/**
 	 * Update category of a scanned cookie.
 	 *
 	 * Moves a cookie from one category to another in the scanned cookies option.
@@ -360,11 +430,26 @@ class Cookies extends Base {
 		try {
 			$cookie_name      = sanitize_text_field( $request->get_param( 'cookie_name' ) );
 			$current_category = sanitize_text_field( $request->get_param( 'current_category' ) );
-			$new_category     = sanitize_text_field( $request->get_param( 'new_category' ) );
 			$domain           = sanitize_text_field( (string) $request->get_param( 'domain' ) );
 
+			// Only the fields the client actually sent. Defaulting an absent one to ''
+			// would clear a correction the caller never mentioned.
+			$fields  = [
+				'new_category' => 'category',
+				'purpose'      => 'purpose',
+				'duration'     => 'duration',
+				'provider'     => 'provider',
+			];
+			$changes = [];
+
+			foreach ( $fields as $param => $field ) {
+				if ( $request->get_param( $param ) !== null ) {
+					$changes[ $field ] = (string) $request->get_param( $param );
+				}
+			}
+
 			$service = new CookieService();
-			$result  = $service->update_scanned_cookie_category( $cookie_name, $current_category, $new_category, $domain );
+			$result  = $service->update_scanned_cookie( $cookie_name, $current_category, $changes, $domain );
 
 			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
 		} catch ( \Exception $e ) {

@@ -10,6 +10,7 @@
 namespace SureCookie\Admin;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Utils\LocalizeData;
 
@@ -56,7 +57,7 @@ class Onboarding {
 
 		add_submenu_page(
 			'surecookie-hidden',
-			__( 'Onboarding', 'surecookie' ),
+			__( 'SureCookie Setup', 'surecookie' ),
 			'',
 			SURECOOKIE_CAPABILITY,
 			'surecookie-onboarding',
@@ -75,6 +76,12 @@ class Onboarding {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'surecookie' ) );
 		}
 
+		// Stamped once, so analytics can separate a site that never opened the
+		// wizard from one that opened it and stopped (@since 1.5.0).
+		if ( (int) get_option( 'surecookie_onboarding_opened', 0 ) === 0 ) {
+			Update::option( 'surecookie_onboarding_opened', time() );
+		}
+
 		?>
 		<div id="surecookie-admin-root" class="surecookie-styles"></div>
 		<?php
@@ -87,7 +94,7 @@ class Onboarding {
 	 * @param string $hook The current admin page.
 	 * @return void
 	 */
-	public function enqueue_onboarding_assets( $hook ): void {
+	public function enqueue_onboarding_assets( $hook = '' ): void {
 		$allowed_hooks = [
 			'admin_page_surecookie-onboarding',
 		];

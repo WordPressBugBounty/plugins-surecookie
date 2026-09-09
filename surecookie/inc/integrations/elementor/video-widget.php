@@ -82,7 +82,7 @@ class Video_Widget {
 	 * @param string $buffer Page HTML.
 	 * @return string
 	 */
-	public function gate_video_widgets( $buffer ): string {
+	public function gate_video_widgets( $buffer = '' ): string {
 		$buffer = (string) $buffer;
 
 		// Cheap bail-out: most pages carry no video widget at all, and the regex

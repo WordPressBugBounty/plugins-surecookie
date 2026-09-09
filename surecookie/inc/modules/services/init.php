@@ -61,7 +61,7 @@ class Init {
 	 * @return array<string, array<string, mixed>> The category => slug => definition view.
 	 * @since 1.3.0
 	 */
-	public function provide_blocking_view( $scripts ) {
+	public function provide_blocking_view( $scripts = [] ) {
 		$view = Services_Source::get_instance()->get_blocking_view();
 
 		// The catalog is the authoritative base; anything already present merges under it.
@@ -77,7 +77,7 @@ class Init {
 	 * @return array<string> Updated controllers.
 	 * @since 1.3.0
 	 */
-	public function register_api_controllers( $controllers ) {
+	public function register_api_controllers( $controllers = [] ) {
 		$controllers[] = '\SureCookie\Inc\Modules\Services\Api';
 		return $controllers;
 	}

@@ -93,7 +93,8 @@ class Known_Scripts {
 		 * @since 0.0.1
 		 * @param array<string, array<string, mixed>> $scripts Known scripts grouped by category.
 		 */
-		return apply_filters( 'surecookie_known_scripts', $this->scripts );
+		$filtered = apply_filters( 'surecookie_known_scripts', $this->scripts );
+		return is_array( $filtered ) ? $filtered : $this->scripts;
 	}
 
 	/**

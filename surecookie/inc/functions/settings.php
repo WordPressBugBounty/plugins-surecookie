@@ -153,8 +153,31 @@ class Settings {
 			return true;
 		}
 
+		if ( ! self::accepts_value( $key, $value ) ) {
+			return false;
+		}
+
 		$setting_db[ $key ] = self::get_cleaned_value( $key, $value );
 		return Update::option( SURECOOKIE_SETTINGS_OPTION, $setting_db );
+	}
+
+	/**
+	 * Whether a value matches its key's declared shape.
+	 *
+	 * A mismatch is silent data loss, not an error: get_cleaned_value() coerces, so
+	 * an array-typed key collapses to [] and a scalar-typed one to '' or absint()'s
+	 * 1. Patch loops skip the key instead, leaving the stored value in place.
+	 *
+	 * @param string $key   Key.
+	 * @param mixed  $value Value.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	public static function accepts_value( $key, $value ): bool {
+		return Options::get_option_type( $key ) === 'array'
+			? is_array( $value )
+			: ( is_scalar( $value ) || $value === null );
 	}
 
 	/**
@@ -174,7 +197,8 @@ class Settings {
 			case 'int':
 				return Sanitize::integer( $value );
 			case 'array':
-				return Sanitize::array( $value );
+				// Sanitize::array() hard-hints array; writers that must not lose the stored value drop the key before calling.
+				return Sanitize::array( is_array( $value ) ? $value : [] );
 			case 'stylesheet':
 				return Sanitize::stylesheet( $value );
 			case 'hex_color':

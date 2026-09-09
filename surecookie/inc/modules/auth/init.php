@@ -68,7 +68,7 @@ class Init {
 	 * @param array<string, mixed> $variables Localization variables.
 	 * @return array<string, mixed> Localization variables.
 	 */
-	public function add_admin_localization_vars( $variables ) {
+	public function add_admin_localization_vars( $variables = [] ) {
 		$controller = Controller::get_instance();
 		return array_merge(
 			$variables,
@@ -86,7 +86,7 @@ class Init {
 	 * @param array<string, mixed> $variables Localization variables.
 	 * @return array<string, mixed> Localization variables.
 	 */
-	public function add_onboarding_localization_vars( $variables ) {
+	public function add_onboarding_localization_vars( $variables = [] ) {
 		return array_merge(
 			$variables,
 			[
@@ -102,7 +102,7 @@ class Init {
 	 * @param array<string> $controllers Existing controllers.
 	 * @return array<string> Updated controllers.
 	 */
-	public function register_api_controller( $controllers ) {
+	public function register_api_controller( $controllers = [] ) {
 		$controllers[] = '\SureCookie\Inc\Modules\Auth\Api';
 		return $controllers;
 	}

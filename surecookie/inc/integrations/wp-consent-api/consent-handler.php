@@ -49,15 +49,15 @@ class Consent_Handler {
 	 * @since 0.0.1-beta.1
 	 */
 	private function __construct() {
-		// Set default consent state on page load from the existing cookie.
-		// Priority 15 on 'init' - runs after WP Consent API has loaded.
-		add_action( 'init', [ $this, 'sync_consent_state' ], 15 );
+		// `wp_loaded`, not `init`: the hub that builds this class is itself on
+		// `init` priority 999, so an `init` callback here would never fire.
+		add_action( 'wp_loaded', [ $this, 'sync_consent_state' ] );
 	}
 
 	/**
 	 * Read the SureCookie consent cookie and push state to WP Consent API.
 	 *
-	 * This runs on every page load so that other plugins calling
+	 * Runs on every request so that other plugins calling
 	 * wp_has_consent('marketing') get the correct answer based on
 	 * the user's SureCookie preferences.
 	 *
@@ -65,10 +65,6 @@ class Consent_Handler {
 	 * @since 0.0.1-beta.1
 	 */
 	public function sync_consent_state(): void {
-		if ( ! function_exists( 'wp_set_consent' ) ) {
-			return;
-		}
-
 		$category_map      = self::get_full_category_map();
 		$preferences       = ConsentState::preferences();
 		$essential_wp_type = $category_map['essential'] ?? null;
@@ -87,7 +83,7 @@ class Consent_Handler {
 				$value = $essential_wp_type !== null && $wp_type === $essential_wp_type
 					? 'allow'
 					: $default_value;
-				wp_set_consent( $wp_type, $value );
+				self::set_consent( $wp_type, $value );
 			}
 			return;
 		}
@@ -108,7 +104,7 @@ class Consent_Handler {
 			$value = $surecookie_cat === 'essential'
 				? 'allow'
 				: ( ! empty( $preferences[ $surecookie_cat ] ) ? 'allow' : 'deny' );
-			wp_set_consent( $wp_type, $value );
+			self::set_consent( $wp_type, $value );
 		}
 	}
 
@@ -189,6 +185,46 @@ class Consent_Handler {
 		}
 
 		return $map;
+	}
+
+	/**
+	 * Write one WP Consent API consent type.
+	 *
+	 * `wp_set_consent()` only calls setcookie() while `wp_has_consent()` only
+	 * reads `$_COOKIE`, so the superglobal is mirrored too or the answer stays
+	 * one request behind. Values the browser already sent are skipped, keeping
+	 * Set-Cookie off responses a page cache would otherwise refuse to store.
+	 *
+	 * The mirror and the cookie are deliberately separate: the mirror is always
+	 * safe, while setcookie() needs headers. Core sends them in `wp-cron.php`
+	 * before WordPress loads, so an unguarded write warns on every cron spawn.
+	 *
+	 * @param string $wp_type WP Consent API consent type.
+	 * @param string $value   'allow' or 'deny'.
+	 * @return void
+	 * @since 1.5.0
+	 */
+	private static function set_consent( string $wp_type, string $value ): void {
+		if ( ! function_exists( 'wp_set_consent' ) ) {
+			return;
+		}
+
+		$prefix = apply_filters( 'wp_consent_cookie_prefix', 'wp_consent' );
+		$cookie = ( is_string( $prefix ) ? $prefix : 'wp_consent' ) . '_' . $wp_type;
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Compared against our own literal to skip a redundant Set-Cookie; the value is never used as data.
+		if ( ( $_COOKIE[ $cookie ] ?? null ) === $value ) {
+			return;
+		}
+
+		$_COOKIE[ $cookie ] = $value;
+
+		// Unqualified on purpose: the test harness shadows it in this namespace.
+		if ( headers_sent() ) {
+			return;
+		}
+
+		wp_set_consent( $wp_type, $value );
 	}
 
 }

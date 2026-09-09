@@ -12,9 +12,11 @@
 namespace SureCookie\Inc\Modules\CookiePolicy;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\Multilingual\Translation_Filter;
 use SureCookie\Inc\Traits\GetInstance;
+use SureCookie\Inc\Traits\Shortcode as Shortcode_Trait;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -27,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Shortcode {
 	use GetInstance;
+	use Shortcode_Trait;
 
 	/**
 	 * Constructor.
@@ -34,7 +37,7 @@ class Shortcode {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function __construct() {
-		add_shortcode( 'surecookie_cookie_policy_content', [ $this, 'render' ] );
+		$this->register_shortcodes( [ 'surecookie_cookie_policy_content' => 'content' ] );
 	}
 
 	/**
@@ -47,7 +50,7 @@ class Shortcode {
 	 * @return string Rendered HTML.
 	 * @since 0.0.0-alpha.1
 	 */
-	public function render( $atts ): string {
+	public function render_content( $atts ): string {
 		$atts = shortcode_atts(
 			[
 				'show_timestamp' => 'true',
@@ -216,15 +219,17 @@ class Shortcode {
 		$html .= '<tbody>';
 
 		foreach ( $cookies as $cookie ) {
-			$name     = esc_html( $cookie['name'] ?? '' );
-			$purpose  = esc_html( $cookie['description'] ?? $cookie['purpose'] ?? '' );
-			$duration = esc_html( self::format_duration( $cookie ) );
-			$domain   = esc_html( self::format_domain( $cookie ) );
+			$name = esc_html( $cookie['name'] ?? '' );
+			// The scan writer always sets 'description', usually to '', so prefer non-empty over non-null.
+			$described = (string) ( $cookie['description'] ?? '' );
+			$purpose   = esc_html( $described !== '' ? $described : (string) ( $cookie['purpose'] ?? '' ) );
+			$duration  = esc_html( self::format_duration( $cookie ) );
+			$domain    = esc_html( self::format_domain( $cookie ) );
 
 			$html .= '<tr>';
 			$html .= '<td data-label="' . esc_attr( $label_name ) . '">' . ( ! empty( $name ) ? $name : '-' ) . '</td>';
 			$html .= '<td data-label="' . esc_attr( $label_purpose ) . '">' . ( ! empty( $purpose ) ? $purpose : '-' ) . '</td>';
-			$html .= '<td data-label="' . esc_attr( $label_duration ) . '">' . ( ! empty( $duration ) ? $duration : '-' ) . '</td>';
+			$html .= '<td data-label="' . esc_attr( $label_duration ) . '">' . ( $duration !== '' ? $duration : '-' ) . '</td>';
 			$html .= '<td data-label="' . esc_attr( $label_domain ) . '">' . ( ! empty( $domain ) ? $domain : '-' ) . '</td>';
 			$html .= '</tr>';
 		}
@@ -342,11 +347,12 @@ class Shortcode {
 		$groups = [];
 
 		foreach ( $cookies as $cookie ) {
-			$provider = $cookie['provider'] ?? '';
+			// Resolved here, not trusted from the producer: this is the sink that
+			// uses the leaf as an array key, and an array one is a fatal.
+			$provider = Sanitize::scalar( $cookie['provider'] ?? '' );
 
 			if ( empty( $provider ) ) {
-				$domain   = $cookie['domain'] ?? '';
-				$provider = ltrim( $domain, '.' );
+				$provider = ltrim( Sanitize::scalar( $cookie['domain'] ?? '' ), '.' );
 			}
 
 			if ( empty( $provider ) ) {
@@ -395,14 +401,29 @@ class Shortcode {
 	 * @since 0.0.0-alpha.1
 	 */
 	private static function format_duration( array $cookie ): string {
-		if ( ! empty( $cookie['duration'] ) ) {
-			return (string) $cookie['duration'];
+		$session = __( 'Session', 'surecookie' );
+
+		// Checked before any day count: a row the scanner marked as session-scoped is
+		// session-scoped whatever number a catalog pinned alongside it.
+		if ( ( $cookie['expiry_bucket'] ?? '' ) === 'session' ) {
+			return $session;
 		}
 
-		// Scanned cookies carry an absolute expiry timestamp rather than a day count. Returning it verbatim printed a raw ISO-8601 string into the
-		// public policy table, so derive the remaining days to match the day count that custom cookies store in 'duration'.
+		$duration = (string) ( $cookie['duration'] ?? '' );
+
+		if ( $duration !== '' ) {
+			// A sub-day lifetime floors to zero days - true of catalog entries such as
+			// DoubleClick's test_cookie. "0" reads as an error to a visitor, and it is
+			// the same figure the old decaying count produced, so neither may ship.
+			return is_numeric( $duration ) && (float) $duration <= 0 ? $session : $duration;
+		}
+
+		// Rows stored before the day count was derived at scan time still carry only the
+		// absolute expiry, which must not reach the table as a raw ISO-8601 string.
 		if ( ! empty( $cookie['expires'] ) ) {
-			return self::expires_to_days( $cookie['expires'] );
+			$days = self::expires_to_days( $cookie['expires'] );
+
+			return $days === '0' ? $session : $days;
 		}
 
 		return '';

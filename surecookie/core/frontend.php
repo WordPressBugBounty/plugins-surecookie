@@ -10,6 +10,7 @@
 namespace SureCookie\Core;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Functions\Validate;
@@ -59,7 +60,9 @@ class Frontend {
 	 * @return void
 	 */
 	public function add_public_root(): void {
-		if ( $this->root_printed ) {
+		// No mount point where nothing mounts, or a builder canvas keeps a stray
+		// div for a bundle we deliberately did not enqueue.
+		if ( $this->root_printed || ! $this->should_enqueue_public_assets() ) {
 			return;
 		}
 
@@ -158,6 +161,12 @@ class Frontend {
 	 */
 	public function should_enqueue_public_assets(): bool {
 		if ( is_admin() ) {
+			return false;
+		}
+
+		// A builder canvas is not a visitor view: blocking already stands aside
+		// there, so mounting the banner over it only breaks the editor.
+		if ( Helper::is_builder_edit_render() ) {
 			return false;
 		}
 

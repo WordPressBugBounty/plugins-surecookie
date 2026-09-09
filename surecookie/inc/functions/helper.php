@@ -20,6 +20,90 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Helper {
 	/**
+	 * Recorded in place of a value a site has opted not to collect.
+	 *
+	 * Non-empty on purpose: `ConsentLog::upsert()` rejects an empty IP or country
+	 * and would drop the whole proof-of-consent row rather than the field.
+	 *
+	 * @since 1.5.0
+	 */
+	public const REDACTED = '-';
+
+	/**
+	 * Query vars a frontend builder sets on its own edit render.
+	 *
+	 * @since 1.5.0
+	 */
+	private const BUILDER_QUERY_VARS = [ 'elementor-preview', 'fl_builder', 'et_fb', 'bricks', 'vc_editable' ];
+
+	/**
+	 * Whether this request is a frontend builder's own edit render.
+	 *
+	 * The capability is the credential: a query var alone would let any visitor
+	 * turn blocking off and hide the banner. Blocking and asset enqueueing both
+	 * read this, so the two cannot drift into a canvas whose scripts are already
+	 * unblocked but which still gets a consent banner mounted over it.
+	 *
+	 * @since 1.5.0
+	 * @return bool
+	 */
+	public static function is_builder_edit_render(): bool {
+		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence-only gate; the capability above is the credential.
+		$query = wp_unslash( $_GET );
+
+		/**
+		 * Filter: query vars that mark a frontend builder's own edit render.
+		 *
+		 * No list of builders stays complete, so a site on one we do not ship can
+		 * name its own rather than turning blocking off site-wide.
+		 *
+		 * @since 1.5.0
+		 * @param array<int, string> $query_vars Builder query vars.
+		 */
+		$query_vars = apply_filters( 'surecookie_builder_query_vars', self::BUILDER_QUERY_VARS );
+		$query_vars = is_array( $query_vars ) ? array_filter( $query_vars, 'is_string' ) : self::BUILDER_QUERY_VARS;
+
+		foreach ( $query_vars as $query_var ) {
+			if ( isset( $query[ $query_var ] ) ) {
+				return true;
+			}
+		}
+
+		// Core's preview needs the id or nonce too, or a bare `?preview=1` would
+		// turn blocking off site-wide.
+		return isset( $query['preview'] ) && ( isset( $query['preview_id'] ) || isset( $query['preview_nonce'] ) );
+	}
+
+	/**
+	 * Whether visitor IP addresses may be used for consent records.
+	 *
+	 * Off makes the consent-log path IP-free end to end: nothing is derived from
+	 * the address, so no geolocation request leaves the site and both stored
+	 * fields become `self::REDACTED`. Pro's Geographic Targeting resolves a
+	 * country for a different purpose, is disclosed separately, and is untouched.
+	 *
+	 * @since 1.5.0
+	 * @return bool False once a site opts out via `surecookie_skip_consent_logs_ips`.
+	 */
+	public static function consent_log_ip_enabled(): bool {
+		/**
+		 * Filter: skip the visitor IP in consent records entirely.
+		 *
+		 * True stores no IP and no country, and sends no IP to the geolocation
+		 * service. The consent record itself is still written, so Article 7(1)
+		 * proof of consent survives.
+		 *
+		 * @param bool $skip Whether to omit the IP. Default false.
+		 * @since 1.5.0
+		 */
+		return ! apply_filters( 'surecookie_skip_consent_logs_ips', false );
+	}
+
+	/**
 	 * Check if development mode is enabled.
 	 *
 	 * @since 0.0.1

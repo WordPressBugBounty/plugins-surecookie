@@ -63,7 +63,7 @@ class Api extends Base {
 	/**
 	 * Re-run domain verification after the user publishes the DNS record.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	protected const VERIFY_RETRY = '/site-scanner/verify-retry';
 
@@ -82,6 +82,17 @@ class Api extends Base {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'start_scan' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					'pages' => [
+						'type'              => 'array',
+						// Not rest_validate_request_arg(): its rest_is_array() runs a scalar
+						// through wp_parse_list() first, so "foo" would pass as [ "foo" ]. No
+						// `default` either, or an omitted `pages` would wipe the stored selection.
+						'validate_callback' => static function ( $value ) {
+							return is_array( $value );
+						},
+					],
+				],
 			]
 		);
 
@@ -259,12 +270,13 @@ class Api extends Base {
 	 */
 	public function start_scan( $request ): void {
 		try {
-			$data = [
-				'scan_pages' => $request->get_param( 'pages' ),
-			];
+			$pages = $request->get_param( 'pages' );
 
-			$sanitized_settings = Sanitize::settings( $data );
-			Update::option( SURECOOKIE_SETTINGS_OPTION, $sanitized_settings );
+			// Persist only when a selection was supplied; absent reuses the stored one.
+			// Never hand Sanitize::settings() a non-array: its [] return would erase the option.
+			if ( is_array( $pages ) ) {
+				Update::option( SURECOOKIE_SETTINGS_OPTION, Sanitize::settings( [ 'scan_pages' => $pages ] ) );
+			}
 
 			// Check if scan is already in progress.
 			$saas_client = SaasClient::get_instance();
@@ -338,11 +350,10 @@ class Api extends Base {
 		}
 	}
 
-
 	/**
 	 * Re-run step 2 of registration against the token already issued.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.0
 	 * @return void
 	 */
 	public function retry_verification(): void {

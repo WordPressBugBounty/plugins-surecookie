@@ -41,6 +41,22 @@ function surecookie_should_delete_data() {
  */
 
 /**
+ * Hand the decision to a sibling plugin's uninstall running in the same request.
+ *
+ * WordPress includes every selected plugin's uninstall.php in one pass, and the
+ * list table orders "SureCookie" before "SureCookie Pro", so by the time
+ * Pro reads the preference this file has already deleted surecookie_settings and
+ * Pro would read an absent option as "no" and keep its data - including the DSAR
+ * tables, which hold requester names and email addresses. A short transient
+ * carries the answer across without leaving a row behind if Pro is never deleted.
+ *
+ * @return void
+ */
+function surecookie_publish_uninstall_decision(): void {
+	set_transient( 'surecookie_uninstall_delete_data', 1, 5 * MINUTE_IN_SECONDS );
+}
+
+/**
  * All known option keys created by SureCookie.
  *
  * Sync with: SURECOOKIE_* constants in surecookie.php + runtime option keys.
@@ -68,6 +84,10 @@ function surecookie_get_option_keys() {
 		'surecookie_usage_optin',
 		'surecookie_usage_installed_time',
 		'surecookie_tracked_version',
+		// Onboarding funnel signals: arrival stamp + the screen that recorded
+		// completion (Admin\Onboarding, Inc\Api\Onboarding).
+		'surecookie_onboarding_opened',
+		'surecookie_onboarding_completed_source',
 		'surecookie_first_scan_started_flag',
 		'surecookie_first_scan_pages_count',
 		'surecookie_first_scan_completed_flag',
@@ -150,6 +170,9 @@ function surecookie_delete_transients(): void {
 	// after upgrading from an older version still clears any lingering row.
 	delete_transient( 'surecookie_known_scripts' );
 	delete_transient( 'surecookie_geo_cache' );
+	delete_transient( 'surecookie_geo_cache_v2' );
+	// Geolocation circuit-breaker state (IpManager::geo_breaker_key()).
+	delete_transient( 'surecookie_geo_breaker' );
 	delete_transient( 'surecookie_state_events_checked' );
 	// Issue #473 - scanner registration / verification transients.
 	delete_transient( 'surecookie_registering_site' );
@@ -231,11 +254,189 @@ function surecookie_delete_cache_files(): void {
 }
 
 /**
+ * Resolve the [surecookie_*] tags worth keeping as text, from the raw settings.
+ *
+ * Mirrors Business_Shortcodes::registry() plus the two privacy-policy tags that
+ * name the controller. Like the option keys above, this has to be kept in sync
+ * by hand, because this file runs with no autoloader and cannot call into the
+ * plugin.
+ *
+ * @param array<string, mixed> $settings Raw surecookie_settings value.
+ * @return array<string, string> Shortcode => resolved value.
+ */
+function surecookie_uninstall_shortcode_map( array $settings ): array {
+	$details = isset( $settings['organization_details'] ) && is_array( $settings['organization_details'] )
+		? $settings['organization_details']
+		: [];
+
+	$detail = static function ( string $key ) use ( $details ): string {
+		return isset( $details[ $key ] ) && is_string( $details[ $key ] ) ? trim( $details[ $key ] ) : '';
+	};
+
+	$countries = [];
+	$table     = __DIR__ . '/inc/data/countries.php';
+
+	if ( file_exists( $table ) ) {
+		$loaded    = require $table;
+		$countries = is_array( $loaded ) ? $loaded : [];
+	}
+
+	$country = $countries[ strtoupper( $detail( 'country' ) ) ] ?? '';
+
+	$lines = isset( $details['postal_address_lines'] ) && is_array( $details['postal_address_lines'] )
+		? array_values( array_filter( array_map( 'trim', array_filter( $details['postal_address_lines'], 'is_string' ) ) ) )
+		: [];
+
+	$tail = trim( $detail( 'postal_code' ) . ' ' . $country );
+
+	if ( $tail !== '' ) {
+		$lines[] = $tail;
+	}
+
+	$page_url = static function ( string $key ) use ( $settings ): string {
+		$page_id = absint( $settings[ $key ] ?? 0 );
+
+		if ( $page_id <= 0 || get_post_status( $page_id ) !== 'publish' ) {
+			return '';
+		}
+
+		$permalink = get_permalink( $page_id );
+
+		return is_string( $permalink ) ? $permalink : '';
+	};
+
+	$map = [
+		'[surecookie_company_name]'       => $detail( 'legal_entity_name' ),
+		'[surecookie_contact_email]'      => $detail( 'privacy_contact_email' ),
+		'[surecookie_address]'            => implode( ', ', $lines ),
+		'[surecookie_postal_code]'        => $detail( 'postal_code' ),
+		'[surecookie_country]'            => $country,
+		'[surecookie_grievance_officer]'  => $detail( 'grievance_officer_name' ),
+		'[surecookie_grievance_email]'    => $detail( 'grievance_officer_email' ),
+		'[surecookie_cookie_policy_url]'  => $page_url( 'cookie_policy_page_id' ),
+		'[surecookie_privacy_policy_url]' => $page_url( 'privacy_policy_page_id' ),
+	];
+
+	/*
+	 * The generated privacy policy carries none of the tags above and names the
+	 * controller only through these two, so they resolve to text rather than
+	 * being stripped. Plain text, because the generator's wp:shortcode wrapper
+	 * stays; an unresolvable one is left out for the strip pass to remove.
+	 */
+	$identity = array_filter( array_merge( [ $detail( 'legal_entity_name' ) ], $lines ) );
+	$contact  = array_filter(
+		[
+			$detail( 'privacy_contact_email' ),
+			trim( $detail( 'grievance_officer_name' ) . ' ' . $detail( 'grievance_officer_email' ) ),
+		]
+	);
+
+	if ( ! empty( $identity ) ) {
+		$map['[surecookie_privacy_identity]'] = esc_html( implode( ', ', $identity ) );
+	}
+
+	if ( ! empty( $contact ) ) {
+		$map['[surecookie_privacy_contact]'] = esc_html( implode( ', ', $contact ) );
+	}
+
+	return $map;
+}
+
+/**
+ * Drop every [surecookie_*] tag nothing owns any more, block wrapper and all.
+ *
+ * Matched on the prefix rather than an enumerated list, so a tag added in a
+ * later release is covered without anyone editing this file. Pro shares the
+ * prefix and may outlive free, so registration is what decides: a tag another
+ * plugin still registers keeps rendering and has to survive.
+ *
+ * @param string $content Post content.
+ * @return string
+ */
+function surecookie_uninstall_strip_shortcodes( string $content ): string {
+	$strip = static function ( $matches ) {
+		return shortcode_exists( $matches['tag'] ) ? $matches[0] : '';
+	};
+
+	$content = (string) preg_replace_callback(
+		'#<!--\s*wp:shortcode\s*-->\s*\[(?P<tag>surecookie_[^\]\s]*)[^\]]*\]\s*<!--\s*/wp:shortcode\s*-->\s*#',
+		$strip,
+		$content
+	);
+
+	return (string) preg_replace_callback( '/\[(?P<tag>surecookie_[^\]\s]*)[^\]]*\]/', $strip, $content );
+}
+
+/**
+ * Bake shortcode values into the policy pages before the settings go away.
+ *
+ * Once this plugin is deleted a tag nothing registers renders as literal text
+ * on whatever page used it. On a live legal page that is worse than a blank, so
+ * the last thing we do is write the current values in and leave the document
+ * standing. Everything a value cannot stand in for is removed instead, wrapper
+ * block and all, unless another plugin still registers it.
+ *
+ * Called outside surecookie_should_delete_data(): the pages outlive the plugin
+ * whichever way that preference is set, and it defaults to keeping data.
+ *
+ * Bounded work: at most three pages, one pass each.
+ *
+ * @return void
+ */
+function surecookie_preserve_policy_pages(): void {
+	$settings = get_option( 'surecookie_settings', [] );
+
+	if ( ! is_array( $settings ) ) {
+		return;
+	}
+
+	$page_ids = [
+		absint( $settings['cookie_policy_page_id'] ?? 0 ),
+		absint( $settings['privacy_policy_page_id'] ?? 0 ),
+		absint( get_option( 'wp_page_for_privacy_policy' ) ),
+	];
+
+	$page_ids = array_unique( array_filter( $page_ids ) );
+
+	if ( empty( $page_ids ) ) {
+		return;
+	}
+
+	$map = surecookie_uninstall_shortcode_map( $settings );
+
+	foreach ( $page_ids as $page_id ) {
+		$content = get_post_field( 'post_content', $page_id );
+
+		if ( ! is_string( $content ) || strpos( $content, '[surecookie_' ) === false ) {
+			continue;
+		}
+
+		$frozen = surecookie_uninstall_strip_shortcodes(
+			str_replace( array_keys( $map ), array_values( $map ), $content )
+		);
+
+		if ( $frozen === $content ) {
+			continue;
+		}
+
+		// get_post_field hands back unslashed content and wp_insert_post unslashes
+		// again, so an unslashed value silently eats every backslash on the page.
+		wp_update_post(
+			[
+				'ID'           => $page_id,
+				'post_content' => wp_slash( $frozen ),
+			]
+		);
+	}
+}
+
+/**
  * Run all cleanup for a single site.
  *
  * @return void
  */
 function surecookie_uninstall_site(): void {
+	surecookie_publish_uninstall_decision();
 	surecookie_delete_options();
 	surecookie_delete_transients();
 	surecookie_unschedule_crons();
@@ -261,6 +462,8 @@ if ( is_multisite() ) {
 
 		foreach ( $blog_ids as $site_id ) {
 			switch_to_blog( (int) $site_id );
+			// Before the settings are removed, so the values still resolve.
+			surecookie_preserve_policy_pages();
 			if ( surecookie_should_delete_data() ) {
 				surecookie_uninstall_site();
 			} else {
@@ -279,6 +482,10 @@ if ( is_multisite() ) {
 			delete_network_option( null, 'surecookie_db_version' );
 		}
 	}
-} elseif ( surecookie_should_delete_data() ) {
-	surecookie_uninstall_site();
+} else {
+	surecookie_preserve_policy_pages();
+
+	if ( surecookie_should_delete_data() ) {
+		surecookie_uninstall_site();
+	}
 }

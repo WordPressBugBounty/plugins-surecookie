@@ -269,6 +269,7 @@ class Cron {
 		 * @since 0.0.1
 		 * @param array<int, string> $urls Array of page URLs.
 		 */
-		return apply_filters( 'surecookie_scanner_page_urls_to_scan', $urls );
+		$filtered = apply_filters( 'surecookie_scanner_page_urls_to_scan', $urls );
+		return is_array( $filtered ) ? $filtered : $urls;
 	}
 }

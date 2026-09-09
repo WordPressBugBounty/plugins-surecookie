@@ -15,6 +15,7 @@ namespace SureCookie\Inc\Modules\GoogleConsentMode;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as ScriptBlockingUtils;
 use SureCookie\Inc\Modules\Services\Known_Scripts;
+use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,7 +68,7 @@ class Whitelist_Handler {
 	 * @return bool True to skip blocking, false to block.
 	 * @since 0.0.0-alpha.1
 	 */
-	public function maybe_whitelist_script( $skip, $src, $name, $category ) {
+	public function maybe_whitelist_script( $skip = false, $src = '', $name = '', $category = '' ) {
 		// If already marked to skip, don't override.
 		if ( $skip ) {
 			return $skip;
@@ -105,7 +106,7 @@ class Whitelist_Handler {
 	 * @return bool True to skip blocking, false to block.
 	 * @since 0.0.0-alpha.1
 	 */
-	public function maybe_whitelist_iframe( $skip, $src, $name, $category ) {
+	public function maybe_whitelist_iframe( $skip = false, $src = '', $name = '', $category = '' ) {
 		// If already marked to skip, don't override.
 		if ( $skip ) {
 			return $skip;
@@ -146,7 +147,7 @@ class Whitelist_Handler {
 	 * @return bool True to skip blocking, false to block.
 	 * @since 0.0.1-beta.2
 	 */
-	public function maybe_whitelist_embed( $skip, $src, $name, $category ) {
+	public function maybe_whitelist_embed( $skip = false, $src = '', $name = '', $category = '' ) {
 		if ( $skip ) {
 			return $skip;
 		}
@@ -185,7 +186,7 @@ class Whitelist_Handler {
 	 * @return bool True to skip blocking, false to block.
 	 * @since 0.0.1-beta.2
 	 */
-	public function maybe_whitelist_object( $skip, $data, $name, $category ) {
+	public function maybe_whitelist_object( $skip = false, $data = '', $name = '', $category = '' ) {
 		if ( $skip ) {
 			return $skip;
 		}
@@ -223,7 +224,7 @@ class Whitelist_Handler {
 	 * @param mixed $resources Scanned resources payload ({ scripts: [], iframes: [] }).
 	 * @return mixed
 	 */
-	public function annotate_scanned_resources( $resources ) {
+	public function annotate_scanned_resources( $resources = null ) {
 		if ( ! is_array( $resources ) ) {
 			return $resources;
 		}
@@ -284,8 +285,27 @@ class Whitelist_Handler {
 	 * @return bool
 	 * @since 1.2.0
 	 */
-	public function filter_is_gcm_managed( $managed, $src ) {
+	public function filter_is_gcm_managed( $managed = false, $src = '' ) {
 		return $this->is_gcm_managed( (string) $src );
+	}
+
+	/**
+	 * `surecookie_guard_skip_pattern` callback: leave a GCM-whitelisted pattern
+	 * out of the browser guard's map, so both layers make the same decision.
+	 *
+	 * @param mixed $skip    Whether the pattern is already being omitted.
+	 * @param mixed $pattern Blocking pattern.
+	 * @param mixed $kind    Resource kind ('script'|'iframe'), unused: a
+	 *                       whitelisted host is released on every tag.
+	 * @return mixed
+	 * @since 1.5.0
+	 */
+	public function maybe_skip_guard_pattern( $skip = false, $pattern = '', $kind = '' ) {
+		if ( $skip || ! is_string( $pattern ) || $pattern === '' || ! $this->should_whitelist() ) {
+			return $skip;
+		}
+
+		return $this->is_google_service( $pattern, '' ) ? true : $skip;
 	}
 
 	/**
@@ -318,7 +338,8 @@ class Whitelist_Handler {
 		 * @since 1.3.0
 		 * @param array{services: array<string>, patterns: array<string>} $data Services + URL patterns exempt from blocking.
 		 */
-		return apply_filters( 'surecookie_gcm_whitelisted_scripts', $data );
+		$filtered = apply_filters( 'surecookie_gcm_whitelisted_scripts', $data );
+		return is_array( $filtered ) ? $filtered : $data;
 	}
 
 	/**
@@ -328,7 +349,7 @@ class Whitelist_Handler {
 	 * @since 1.3.0
 	 * @return mixed
 	 */
-	public function add_whitelist_to_admin_data( $data ) {
+	public function add_whitelist_to_admin_data( $data = null ) {
 		if ( is_array( $data ) ) {
 			$data['gcmWhitelistedScripts'] = $this->get_whitelisted_scripts();
 		}
@@ -348,6 +369,11 @@ class Whitelist_Handler {
 		add_filter( 'surecookie_skip_iframe', [ $this, 'maybe_whitelist_iframe' ], 10, 4 );
 		add_filter( 'surecookie_skip_embed', [ $this, 'maybe_whitelist_embed' ], 10, 4 );
 		add_filter( 'surecookie_skip_object', [ $this, 'maybe_whitelist_object' ], 10, 4 );
+
+		// The browser guard has its own always-allow channel, and a release the
+		// tag passes make has to be mirrored there or the guard parks the very
+		// tags GCM injects. Priority 10 leaves Pro's quarantine veto (20) last.
+		add_filter( 'surecookie_guard_skip_pattern', [ $this, 'maybe_skip_guard_pattern' ], 10, 3 );
 
 		// Flag scan-detected resources that GCM manages, for the scanner UI.
 		add_filter( 'surecookie_scanned_resources', [ $this, 'annotate_scanned_resources' ] );
@@ -478,16 +504,15 @@ class Whitelist_Handler {
 				// Add service name to whitelist.
 				$this->whitelist_cache['services'][] = $service_key;
 
-				// Add script patterns.
-				if ( ! empty( $service['scripts'] ) && is_array( $service['scripts'] ) ) {
-					foreach ( $service['scripts'] as $pattern ) {
-						$this->whitelist_cache['patterns'][] = $pattern;
+				// Every bucket, as Service_Matcher reads them: naming
+				// `scripts`/`iframes` literally dropped Google Fonts outright
+				// when its patterns moved to `styles`.
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					if ( ! is_array( $service[ $bucket ] ?? null ) ) {
+						continue;
 					}
-				}
 
-				// Add iframe patterns.
-				if ( ! empty( $service['iframes'] ) && is_array( $service['iframes'] ) ) {
-					foreach ( $service['iframes'] as $pattern ) {
+					foreach ( $service[ $bucket ] as $pattern ) {
 						$this->whitelist_cache['patterns'][] = $pattern;
 					}
 				}

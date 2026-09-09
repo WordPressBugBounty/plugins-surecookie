@@ -23,6 +23,7 @@
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -66,7 +67,7 @@ class Dom_Guard {
 		}
 
 		$patterns = $this->build_patterns();
-		if ( empty( $patterns['s'] ) && empty( $patterns['i'] ) ) {
+		if ( empty( $patterns['s'] ) && empty( $patterns['i'] ) && empty( $patterns['y'] ) ) {
 			return $buffer;
 		}
 
@@ -81,11 +82,28 @@ class Dom_Guard {
 			return $buffer;
 		}
 
+		// Pooling makes the two maps all but identical, and this tag is inlined
+		// into every page, so the wire carries what they share once and leaves
+		// `p`/`f` for the entries that genuinely differ per kind.
+		$shared = array_filter(
+			$patterns['s'],
+			static fn( $entry, $pattern ) => ( $patterns['i'][ $pattern ] ?? null ) === $entry,
+			ARRAY_FILTER_USE_BOTH
+		);
+
 		$config = wp_json_encode(
 			[
-				'p' => $patterns['s'],
-				'f' => $patterns['i'],
-				'e' => array_values( (array) apply_filters( 'surecookie_skippable_categories', [ 'essential' ] ) ),
+				'a' => $shared,
+				'p' => array_diff_key( $patterns['s'], $shared ),
+				'f' => array_diff_key( $patterns['i'], $shared ),
+				// The link map is `styles` over the pooled script/iframe set, so
+				// only the styles bucket and the tag_scoped exclusions have to
+				// ship: the guard rebuilds the rest from a/p/f. Sending the whole
+				// link map would put every pattern twice into a payload that
+				// rides every page.
+				'y' => $patterns['y'],
+				't' => array_keys( $patterns['t'] ),
+				'e' => Blocking_Surface::skippable_categories(),
 				'm' => (string) Settings::get( 'consent_model' ),
 				'r' => (int) Settings::get( 'consent_renewed_at' ),
 				// Core prefixes plus the host they belong to, so the guard spares
@@ -118,8 +136,14 @@ class Dom_Guard {
 	}
 
 	/**
-	 * Flatten the blocking catalog into `pattern => [ category, service ]`, kept
-	 * in separate script and iframe maps.
+	 * Flatten the blocking catalog into `pattern => [ category, service ]`, one
+	 * map per element type.
+	 *
+	 * Pools a service's `scripts` and `iframes` patterns exactly as the tag
+	 * passes do, so the two layers agree: a pattern names a third-party host, and
+	 * a vendor shipping both an embed and a JS API is the same connection either
+	 * way. Own kind wins a collision, so pooling only adds coverage. A producer
+	 * that meant its arrays literally sets `tag_scoped`.
 	 *
 	 * Reads the same `surecookie_known_scripts` view the tag passes block from,
 	 * and applies the same per-resource decisions on top: a resource the admin
@@ -130,25 +154,116 @@ class Dom_Guard {
 	 * guard would immediately park again.
 	 *
 	 * @since 1.4.0
-	 * @return array{s: array<string, array{0: string, 1: string}>, i: array<string, array{0: string, 1: string}>}
+	 * @return array{s: array<string, array{0: string, 1: string}>, i: array<string, array{0: string, 1: string}>, y: array<string, array{0: string, 1: string}>, t: array<string, bool>}
 	 */
 	private function build_patterns(): array {
-		$patterns = [
-			's' => [],
-			'i' => [],
-		];
-
 		$catalog = apply_filters( 'surecookie_known_scripts', [] );
+
 		if ( ! is_array( $catalog ) ) {
-			return $patterns;
+			return [
+				's' => [],
+				'i' => [],
+				'y' => [],
+				't' => [],
+			];
 		}
 
-		// Catalog key => the kind Resource_Categories scopes its entries by, and
-		// the map the guard consults for that element type.
-		$kinds = [
-			'scripts' => [ 'script', 's' ],
-			'iframes' => [ 'iframe', 'i' ],
+		return [
+			's' => $this->flatten_for( $catalog, 'script', 'scripts' ),
+			'i' => $this->flatten_for( $catalog, 'iframe', 'iframes' ),
+			// Scoped as a script: a stylesheet row carries the script kind, so
+			// its exclusion and override are keyed that way. Own bucket, so
+			// un-pooled - a `<link rel=stylesheet>` IS where a styles pattern
+			// is observed. Mirrors Blocker::get_link_patterns().
+			'y' => $this->flatten_patterns( $catalog, 'script', 'styles', false ),
+			// A tag_scoped rule means its arrays literally, so it must not reach
+			// the link map at all; the guard drops these from the pooled set.
+			't' => $this->tag_scoped_patterns( $catalog ),
 		];
+	}
+
+	/**
+	 * Build one element type's map, mirroring `Blocker::build_patterns()`: the
+	 * own bucket wins, the pooled one only fills patterns it did not declare.
+	 * The two have to agree down to the service name, or the guard parks under a
+	 * label the server pass never used.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $catalog Known-scripts view.
+	 * @param string               $kind    Resource kind Resource_Categories scopes by ('script'|'iframe').
+	 * @param string               $own     Catalog key this element type declares under.
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	/**
+	 * Patterns whose producer meant its arrays literally, as a set.
+	 *
+	 * The link map pools scripts and iframes cross-kind, and a `tag_scoped`
+	 * rule opts out of pooling - so an admin rule scoped to "Script" must not
+	 * gate a `<link>`. The server drops these in `flatten_patterns()`; the
+	 * guard rebuilds the pooled set from a/p/f and so needs them by name.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $catalog Known-scripts view.
+	 * @return array<string, bool>
+	 */
+	private function tag_scoped_patterns( array $catalog ): array {
+		$scoped = [];
+
+		foreach ( $catalog as $services ) {
+			if ( ! is_array( $services ) ) {
+				continue;
+			}
+
+			foreach ( $services as $service ) {
+				if ( ! is_array( $service ) || empty( $service['tag_scoped'] ) ) {
+					continue;
+				}
+
+				foreach ( Pattern_Kinds::buckets() as $bucket ) {
+					foreach ( (array) ( $service[ $bucket ] ?? [] ) as $pattern ) {
+						$pattern = (string) $pattern;
+						if ( $pattern !== '' ) {
+							$scoped[ $pattern ] = true;
+						}
+					}
+				}
+			}
+		}
+
+		return $scoped;
+	}
+
+	/**
+	 * Build one element type's map: the own bucket wins, the pooled one only
+	 * fills patterns it did not declare.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $catalog Known-scripts view.
+	 * @param string               $kind    Resource kind Resource_Categories scopes by ('script'|'iframe').
+	 * @param string               $own     Catalog key this element type declares under.
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	private function flatten_for( array $catalog, string $kind, string $own ): array {
+		$cross = $own === 'scripts' ? 'iframes' : 'scripts';
+
+		return $this->flatten_patterns( $catalog, $kind, $own, false )
+			+ $this->flatten_patterns( $catalog, $kind, $cross, true );
+	}
+
+	/**
+	 * Collect one bucket of the catalog into `pattern => [ category, service ]`,
+	 * with the admin's per-resource decisions for `$kind` already applied.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $catalog    Known-scripts view.
+	 * @param string               $kind       Resource kind ('script'|'iframe').
+	 * @param string               $bucket     Catalog key to read ('scripts'|'iframes').
+	 * @param bool                 $cross_kind Whether this is the pooled pass, which a
+	 *                                         `tag_scoped` producer opts out of.
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	private function flatten_patterns( array $catalog, string $kind, string $bucket, bool $cross_kind ): array {
+		$patterns = [];
 
 		foreach ( $catalog as $category => $services ) {
 			if ( ! is_array( $services ) ) {
@@ -156,7 +271,7 @@ class Dom_Guard {
 			}
 
 			foreach ( $services as $service_key => $service ) {
-				if ( ! is_array( $service ) ) {
+				if ( ! is_array( $service ) || ! is_array( $service[ $bucket ] ?? null ) ) {
 					continue;
 				}
 
@@ -167,42 +282,48 @@ class Dom_Guard {
 					continue;
 				}
 
-				foreach ( $kinds as $catalog_key => $kind ) {
-					if ( empty( $service[ $catalog_key ] ) || ! is_array( $service[ $catalog_key ] ) ) {
+				// `tag_scoped` means the producer meant its arrays literally -
+				// the admin's script/iframe rule type is what sets it.
+				if ( $cross_kind && ! empty( $service['tag_scoped'] ) ) {
+					continue;
+				}
+
+				foreach ( $service[ $bucket ] as $pattern ) {
+					$pattern = (string) $pattern;
+					if ( $pattern === '' || Resource_Categories::matches_excluded_src( $pattern, $kind ) ) {
 						continue;
 					}
 
-					foreach ( $service[ $catalog_key ] as $pattern ) {
-						$pattern = (string) $pattern;
-						if ( $pattern === '' || Resource_Categories::matches_excluded_src( $pattern, $kind[0] ) ) {
-							continue;
-						}
-
-						/**
-						 * Filter: leave a pattern out of the browser guard's map.
-						 *
-						 * The guard exists to catch what the server pass cannot see,
-						 * so anything the server is going to let through has to be
-						 * dropped here too or the two layers disagree - which is how
-						 * an always-allowed resource ended up loading in the page and
-						 * still being intercepted in the browser. Pro uses this for
-						 * its whitelist; the free exclusion is handled above.
-						 *
-						 * @since x.x.x
-						 * @param bool   $skip    Whether to omit this pattern.
-						 * @param string $pattern Blocking pattern.
-						 * @param string $kind    Resource kind ('script'|'iframe').
-						 */
-						if ( apply_filters( 'surecookie_guard_skip_pattern', false, $pattern, $kind[0] ) ) {
-							continue;
-						}
-
-						// The pattern carries the host the override keys match on.
-						$patterns[ $kind[1] ][ $pattern ] = [
-							Resource_Categories::resolve( $pattern, (string) $category, $kind[0] ),
-							(string) $service_key,
-						];
+					/**
+					 * Filter: leave a pattern out of the browser guard's map.
+					 *
+					 * The guard exists to catch what the server pass cannot see,
+					 * so anything the server is going to let through has to be
+					 * dropped here too or the two layers disagree - which is how
+					 * an always-allowed resource ended up loading in the page and
+					 * still being intercepted in the browser. Pro uses this for
+					 * its whitelist; the free exclusion is handled above.
+					 *
+					 * The subject here is the catalog PATTERN, not a URL, so an
+					 * entry narrower than the pattern cannot drop it: that one
+					 * resource keeps its browser-side placeholder rather than the
+					 * whole service being released, which is the safe direction.
+					 * Closing that gap needs per-URL evaluation in the guard.
+					 *
+					 * @since 1.5.0
+					 * @param bool   $skip    Whether to omit this pattern.
+					 * @param string $pattern Blocking pattern.
+					 * @param string $kind    Resource kind ('script'|'iframe').
+					 */
+					if ( apply_filters( 'surecookie_guard_skip_pattern', false, $pattern, $kind ) ) {
+						continue;
 					}
+
+					// The pattern carries the host the override keys match on.
+					$patterns[ $pattern ] = [
+						Resource_Categories::resolve( $pattern, (string) $category, $kind ),
+						(string) $service_key,
+					];
 				}
 			}
 		}

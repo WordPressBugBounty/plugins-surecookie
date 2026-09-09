@@ -195,7 +195,7 @@ class SiteHealth extends Base {
 	 * Pre-consent Consent Mode state, as granted/denied booleans per category.
 	 *
 	 * @return array<string, bool>
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	private function gcm_default_consent(): array {
 		$stored = Settings::get( 'gcm_default_consent' );
@@ -213,7 +213,7 @@ class SiteHealth extends Base {
 	 * Configured per-region Consent Mode overrides.
 	 *
 	 * @return array<int, mixed>
-	 * @since x.x.x
+	 * @since 1.5.0
 	 */
 	private function gcm_region_defaults(): array {
 		$stored = Settings::get( 'gcm_region_defaults' );

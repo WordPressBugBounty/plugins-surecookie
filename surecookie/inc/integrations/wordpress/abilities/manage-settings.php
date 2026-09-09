@@ -249,6 +249,7 @@ class ManageSettings extends Base {
 		$valid_keys     = array_keys( $configurations );
 		$updated_keys   = [];
 		$denied_keys    = [];
+		$invalid_keys   = [];
 		$delegated_keys = [];
 		$delegated      = self::delegated_keys();
 
@@ -277,7 +278,14 @@ class ManageSettings extends Base {
 				continue;
 			}
 
-			Settings::update( $key, $value );
+			// Settings::update() refuses a value whose shape contradicts the key's
+			// declared type. Reporting it as updated would tell the agent a write
+			// happened that did not.
+			if ( ! Settings::update( $key, $value ) ) {
+				$invalid_keys[] = $key;
+				continue;
+			}
+
 			$updated_keys[] = $key;
 		}
 
@@ -300,6 +308,18 @@ class ManageSettings extends Base {
 				return [
 					'success'  => false,
 					'message'  => $delegated_notice,
+					'settings' => [],
+				];
+			}
+
+			if ( ! empty( $invalid_keys ) ) {
+				return [
+					'success'  => false,
+					'message'  => sprintf(
+						/* translators: %s: comma-separated setting keys */
+						__( 'No settings were updated. These keys were given a value of the wrong type: %s.', 'surecookie' ),
+						implode( ', ', $invalid_keys )
+					),
 					'settings' => [],
 				];
 			}
@@ -334,6 +354,14 @@ class ManageSettings extends Base {
 				/* translators: %s: comma-separated setting keys */
 				__( 'Skipped (permission denied): %s.', 'surecookie' ),
 				implode( ', ', $denied_keys )
+			);
+		}
+
+		if ( ! empty( $invalid_keys ) ) {
+			$message .= ' ' . sprintf(
+				/* translators: %s: comma-separated setting keys */
+				__( 'Skipped (wrong value type): %s.', 'surecookie' ),
+				implode( ', ', $invalid_keys )
 			);
 		}
 

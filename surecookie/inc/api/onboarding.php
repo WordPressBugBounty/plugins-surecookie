@@ -42,6 +42,13 @@ class Onboarding extends Base {
 	private const BSF_METRICS_URL = 'https://metrics.brainstormforce.com/wp-json/bsf-metrics-server/v1/subscribe';
 
 	/**
+	 * Screens allowed to report that they recorded completion.
+	 *
+	 * @since 1.5.0
+	 */
+	private const COMPLETION_SOURCES = [ 'finish', 'user_details_next', 'user_details_skip', 'unknown' ];
+
+	/**
 	 * Register API routes.
 	 *
 	 * @since 0.0.1
@@ -56,11 +63,13 @@ class Onboarding extends Base {
 				'callback'            => [ $this, 'save_onboarding_data' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
 				'args'                => [
+					// Optional: WordPress never populates first_name at install,
+					// and the webhook only needs the email address.
 					'first_name' => [
-						'required'          => true,
+						'required'          => false,
 						'type'              => 'string',
+						'default'           => '',
 						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => [ $this, 'validate_params' ],
 					],
 					'last_name'  => [
 						'required'          => false,
@@ -91,6 +100,17 @@ class Onboarding extends Base {
 				'methods'             => 'POST',
 				'callback'            => [ $this, 'mark_onboarding_complete' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					// Optional on purpose: a cached bundle posts no body, and a
+					// required arg would reject those completions outright.
+					'source' => [
+						'required'          => false,
+						'type'              => 'string',
+						'default'           => 'unknown',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => static fn( $value ): bool => in_array( $value, self::COMPLETION_SOURCES, true ),
+					],
+				],
 			]
 		);
 	}
@@ -156,6 +176,10 @@ class Onboarding extends Base {
 		}
 
 		Update::option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, true );
+
+		// First write only, guaranteed by the early return above, so the value
+		// attributes the completion to the screen that actually recorded it.
+		Update::option( 'surecookie_onboarding_completed_source', (string) $request->get_param( 'source' ) );
 
 		SendJson::success(
 			[

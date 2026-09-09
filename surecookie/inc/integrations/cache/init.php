@@ -75,6 +75,19 @@ class Init {
 	private const DEPENDENCY_ATTRIBUTES = 'data-no-optimize="1" data-no-defer="1" data-no-delay="1" data-cfasync="false"';
 
 	/**
+	 * The same opt-outs as ATTRIBUTES, keyed for `wp_inline_script_attributes`.
+	 *
+	 * @since 1.5.0
+	 */
+	private const INLINE_ATTRIBUTES = [
+		'data-no-optimize' => '1',
+		'data-no-defer'    => '1',
+		'data-no-delay'    => '1',
+		'data-no-minify'   => '1',
+		'data-cfasync'     => 'false',
+	];
+
+	/**
 	 * Exclusion filters taking an array of URL path fragments.
 	 *
 	 * @since 1.4.0
@@ -220,6 +233,7 @@ class Init {
 		$this->paths = (array) apply_filters( 'surecookie_cache_asset_paths', self::PATHS );
 
 		add_filter( 'script_loader_tag', [ $this, 'mark_script' ], 20, 2 );
+		add_filter( 'wp_inline_script_attributes', [ $this, 'mark_inline_script' ], 20 );
 		add_filter( 'style_loader_tag', [ $this, 'mark_style' ], 20, 2 );
 		add_filter( 'rest_post_dispatch', [ $this, 'no_store_rest' ], 10, 3 );
 
@@ -239,7 +253,7 @@ class Init {
 	 * @since 1.4.0
 	 * @return mixed
 	 */
-	public function mark_script( $tag, $handle ) {
+	public function mark_script( $tag = null, $handle = null ) {
 		if ( ! is_string( $tag ) ) {
 			return $tag;
 		}
@@ -262,6 +276,60 @@ class Init {
 	}
 
 	/**
+	 * Arm our inline scripts like the tags they belong to.
+	 *
+	 * `script_loader_tag` never sees these; core prints localized data through
+	 * `wp_get_inline_script_tag()`. Arming the bundle alone is worse than arming
+	 * neither: Rocket Loader then defers the settings the banner reads once at mount.
+	 *
+	 * @param mixed $attributes Inline script attributes.
+	 * @since 1.5.0
+	 * @return mixed
+	 */
+	public function mark_inline_script( $attributes = null ) {
+		if ( ! is_array( $attributes ) ) {
+			return $attributes;
+		}
+
+		$handle = $this->inline_owner( $attributes['id'] ?? '' );
+
+		// '' means "not one of ours", so it must never be looked up: one falsy
+		// entry anywhere in the graph would otherwise match every inline script on
+		// the page, core's and every third party's, and silently opt them all out.
+		if ( '' === $handle ) {
+			return $attributes;
+		}
+
+		if ( in_array( $handle, $this->handles, true ) ) {
+			return array_merge( $attributes, self::INLINE_ATTRIBUTES );
+		}
+
+		if ( in_array( $handle, $this->dependency_handles(), true ) ) {
+			return array_merge( $attributes, array_diff_key( self::INLINE_ATTRIBUTES, [ 'data-no-minify' => '' ] ) );
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Handle an inline script id belongs to, or '' when it is not one of ours.
+	 *
+	 * @param mixed $id Inline script id, e.g. `surecookie-public-js-extra`.
+	 * @return string
+	 */
+	private function inline_owner( $id ): string {
+		$id = (string) $id;
+
+		foreach ( [ '-js-extra', '-js-before', '-js-after' ] as $suffix ) {
+			if ( str_ends_with( $id, $suffix ) ) {
+				return substr( $id, 0, - strlen( $suffix ) );
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Keep the banner stylesheet out of combine/UCSS passes.
 	 *
 	 * @param mixed $tag    Style tag HTML.
@@ -269,7 +337,7 @@ class Init {
 	 * @since 1.4.0
 	 * @return mixed
 	 */
-	public function mark_style( $tag, $handle ) {
+	public function mark_style( $tag = null, $handle = null ) {
 		if ( ! is_string( $tag ) || ! in_array( $handle, $this->handles, true ) ) {
 			return $tag;
 		}
@@ -290,7 +358,7 @@ class Init {
 	 * @since 1.4.0
 	 * @return mixed
 	 */
-	public function no_store_rest( $result, $server, $request ) {
+	public function no_store_rest( $result = null, $server = null, $request = null ) {
 		if ( ! is_object( $result ) || ! method_exists( $result, 'header' ) ) {
 			return $result;
 		}
@@ -468,11 +536,31 @@ class Init {
 	 * @return string
 	 */
 	private function add_attributes( string $tag, string $needle, string $attributes = self::ATTRIBUTES, string $marker = 'data-no-optimize' ): string {
-		if ( strpos( $tag, $marker ) !== false ) {
-			return $tag;
-		}
+		$opener = rtrim( $needle );
 
-		return str_replace( $needle, $needle . $attributes . ' ', $tag );
+		// Match whole elements, not bare opening tags. One `script_loader_tag`
+		// value carries the element and its localized payloads in either order, so
+		// a payload already marked by mark_inline_script() must not veto the
+		// element beside it. Stepping over each body is what stops a literal
+		// `<script` inside a payload reading as another opening tag; `link` is void
+		// and has no body to step over.
+		$body = $opener === '<script' ? '(?:.*?<\\/script>)?' : '';
+		return (string) preg_replace_callback(
+			'/' . preg_quote( $opener, '/' ) . '(?=[\s>])[^>]*>' . $body . '/is',
+			static function ( array $match ) use ( $opener, $attributes, $marker ): string {
+				$end  = (int) strpos( $match[0], '>' );
+				$open = substr( $match[0], 0, $end + 1 );
+
+				if ( strpos( $open, $marker ) !== false ) {
+					return $match[0];
+				}
+
+				return $opener . ' ' . $attributes . ' '
+					. ltrim( substr( $open, strlen( $opener ) ) )
+					. substr( $match[0], $end + 1 );
+			},
+			$tag
+		);
 	}
 
 	/**
