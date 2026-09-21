@@ -206,19 +206,19 @@ msgstr "カテゴリの更新に失敗しました:"
 msgid "Failed to delete category: "
 msgstr "カテゴリの削除に失敗しました:"
 
-#: inc/api/cookies.php:348
+#: inc/api/cookies.php:372
 msgid "Failed to create custom cookie: "
 msgstr "カスタムクッキーの作成に失敗しました:"
 
-#: inc/api/cookies.php:370
+#: inc/api/cookies.php:394
 msgid "Failed to update custom cookie: "
 msgstr "カスタムクッキーの更新に失敗しました:"
 
-#: inc/api/cookies.php:391
+#: inc/api/cookies.php:415
 msgid "Failed to delete custom cookie: "
 msgstr "カスタムクッキーの削除に失敗しました:"
 
-#: inc/api/cookies.php:457
+#: inc/api/cookies.php:502
 msgid "Failed to update cookie category: "
 msgstr "クッキーカテゴリの更新に失敗しました:"
 
@@ -261,7 +261,7 @@ msgid "Plugin is already inactive."
 msgstr "プラグインはすでに無効です。"
 
 #: inc/api/plugin.php:228
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Plugin deactivated successfully."
 msgstr "プラグインが正常に無効化されました。"
 
@@ -382,14 +382,14 @@ msgid "No user email found in the decrypted data."
 msgstr "復号されたデータにユーザーのメールアドレスが見つかりません。"
 
 #: inc/modules/cookie-policy/api.php:77
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Cookie Policy page already exists."
 msgstr "クッキーポリシーページはすでに存在します。"
 
 #: inc/modules/cookie-policy/api.php:91
 #: build/admin.js:2
-#: build/admin.js:58
-#: build/admin.js:88
+#: build/admin.js:59
+#: build/admin.js:92
 #: build/public.js:1
 msgid "Cookie Policy"
 msgstr "クッキーポリシー"
@@ -494,18 +494,18 @@ msgid "Table of Contents"
 msgstr "目次"
 
 #: inc/modules/cookie-policy/shortcode.php:206
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Cookie Name"
 msgstr "クッキー名"
 
 #: inc/modules/cookie-policy/shortcode.php:207
 #: inc/modules/privacy-policy/shortcode.php:476
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Purpose"
 msgstr "目的"
 
 #: inc/modules/cookie-policy/shortcode.php:208
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Duration"
 msgstr "期間"
@@ -513,7 +513,7 @@ msgstr "期間"
 #: inc/modules/cookie-policy/shortcode.php:209
 #: inc/modules/privacy-policy/shortcode.php:478
 #: build/admin.js:27
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Domain"
 msgstr "ドメイン"
 
@@ -556,7 +556,7 @@ msgid "This content is blocked because it requires %s cookies."
 msgstr "このコンテンツは %s クッキーが必要なためブロックされています。"
 
 #: inc/traits/placeholder-content.php:86
-#: inc/utils/options.php:297
+#: inc/utils/options.php:301
 msgid "Accept & Load"
 msgstr "同意して読み込む"
 
@@ -737,42 +737,42 @@ msgstr "認証が必要です。"
 msgid "Failed to fetch quota."
 msgstr "クォータの取得に失敗しました。"
 
-#: inc/modules/site-scanner/saas-client.php:1528
+#: inc/modules/site-scanner/saas-client.php:1545
 msgid "Another registration is already in progress. Please try again in a moment."
 msgstr "別の登録がすでに進行中です。しばらくしてから再試行してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1558
-#: inc/modules/site-scanner/saas-client.php:1863
+#: inc/modules/site-scanner/saas-client.php:1575
+#: inc/modules/site-scanner/saas-client.php:1884
 msgid "Could not determine site domain."
 msgstr "サイトのドメインを特定できませんでした。"
 
-#: inc/modules/site-scanner/saas-client.php:1570
+#: inc/modules/site-scanner/saas-client.php:1587
 msgid "Could not generate a secure registration nonce. Please retry."
 msgstr "安全な登録用ノンスを生成できませんでした。再試行してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1598
+#: inc/modules/site-scanner/saas-client.php:1619
 msgid "Failed to encode registration request."
 msgstr "登録リクエストのエンコードに失敗しました。"
 
 #. translators: %s: error message from the network call
-#: inc/modules/site-scanner/saas-client.php:1620
+#: inc/modules/site-scanner/saas-client.php:1641
 #, php-format
 msgid "Could not reach the SureCookie service: %s"
 msgstr "SureCookieサービスに接続できませんでした: %s"
 
-#: inc/modules/site-scanner/saas-client.php:1634
+#: inc/modules/site-scanner/saas-client.php:1655
 msgid "Registration could not be initiated."
 msgstr "登録を開始できませんでした。"
 
-#: inc/modules/site-scanner/saas-client.php:1649
+#: inc/modules/site-scanner/saas-client.php:1670
 msgid "Received an invalid verification token. Please retry."
 msgstr "無効な検証トークンを受信しました。再試行してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1684
+#: inc/modules/site-scanner/saas-client.php:1705
 msgid "Failed to encode verification completion."
 msgstr "検証完了のエンコードに失敗しました。"
 
-#: inc/modules/site-scanner/saas-client.php:2119
+#: inc/modules/site-scanner/saas-client.php:2140
 msgid "Failed to fetch results."
 msgstr "結果の取得に失敗しました。"
 
@@ -815,77 +815,77 @@ msgstr "デフォルトカテゴリは削除できません。"
 msgid "Category deleted successfully."
 msgstr "カテゴリが正常に削除されました。"
 
-#: inc/services/cookie-service.php:60
-#: inc/services/cookie-service.php:407
+#: inc/services/cookie-service.php:62
+#: inc/services/cookie-service.php:475
 msgid "No scanned cookies found."
 msgstr "スキャンされたクッキーは見つかりませんでした。"
 
-#: inc/services/cookie-service.php:91
+#: inc/services/cookie-service.php:93
 msgid "Scanned cookies retrieved successfully."
 msgstr "スキャンされたクッキーを正常に取得しました。"
 
-#: inc/services/cookie-service.php:108
+#: inc/services/cookie-service.php:176
 msgid "Custom cookies retrieved successfully."
 msgstr "カスタムクッキーを正常に取得しました。"
 
-#: inc/services/cookie-service.php:139
-#: inc/services/cookie-service.php:359
+#: inc/services/cookie-service.php:207
+#: inc/services/cookie-service.php:427
 msgid "Cookie name is required."
 msgstr "クッキー名は必須です。"
 
-#: inc/services/cookie-service.php:146
+#: inc/services/cookie-service.php:214
 msgid "Cookie category is required."
 msgstr "クッキーカテゴリは必須です。"
 
-#: inc/services/cookie-service.php:161
+#: inc/services/cookie-service.php:229
 msgid "A cookie with this name already exists."
 msgstr "この名前のクッキーはすでに存在します。"
 
-#: inc/services/cookie-service.php:198
+#: inc/services/cookie-service.php:266
 msgid "Custom cookie created successfully."
 msgstr "カスタムクッキーが正常に作成されました。"
 
-#: inc/services/cookie-service.php:217
-#: inc/services/cookie-service.php:288
+#: inc/services/cookie-service.php:285
+#: inc/services/cookie-service.php:356
 msgid "Cookie ID is required."
 msgstr "クッキーIDは必須です。"
 
-#: inc/services/cookie-service.php:227
-#: inc/services/cookie-service.php:297
+#: inc/services/cookie-service.php:295
+#: inc/services/cookie-service.php:365
 msgid "Cookie not found."
 msgstr "クッキーが見つかりません。"
 
-#: inc/services/cookie-service.php:270
+#: inc/services/cookie-service.php:338
 msgid "Custom cookie updated successfully."
 msgstr "カスタムクッキーが正常に更新されました。"
 
-#: inc/services/cookie-service.php:307
+#: inc/services/cookie-service.php:375
 msgid "Custom cookie deleted successfully."
 msgstr "カスタムクッキーが正常に削除されました。"
 
-#: inc/services/cookie-service.php:366
+#: inc/services/cookie-service.php:434
 msgid "Current category is required."
 msgstr "現在のカテゴリは必須です。"
 
-#: inc/services/cookie-service.php:373
-#: inc/services/cookie-service.php:509
+#: inc/services/cookie-service.php:441
+#: inc/services/cookie-service.php:577
 msgid "New category is required."
 msgstr "新しいカテゴリは必須です。"
 
-#: inc/services/cookie-service.php:397
+#: inc/services/cookie-service.php:465
 msgid "Cookie is already in the selected category."
 msgstr "クッキーはすでに選択されたカテゴリにあります。"
 
-#: inc/services/cookie-service.php:415
+#: inc/services/cookie-service.php:483
 msgid "Current category not found in scanned cookies."
 msgstr "現在のカテゴリがスキャンされたクッキーに見つかりません。"
 
-#: inc/services/cookie-service.php:424
-#: inc/services/cookie-service.php:698
+#: inc/services/cookie-service.php:492
+#: inc/services/cookie-service.php:766
 msgid "Cookie not found in the specified category."
 msgstr "指定されたカテゴリにクッキーが見つかりません。"
 
-#: inc/services/cookie-service.php:478
+#: inc/services/cookie-service.php:546
 msgid "Cookie category updated successfully."
 msgstr "クッキーカテゴリが正常に更新されました。"
 
@@ -895,21 +895,21 @@ msgstr "私たちは、あなたの体験を向上させ、サイトの利用状
 
 #: inc/utils/options.php:73
 #: build/admin.js:2
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Only Essential"
 msgstr "必須のみ"
 
 #: inc/utils/options.php:84
 #: build/admin.js:2
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Accept All"
 msgstr "すべて受け入れる"
 
 #: inc/utils/options.php:89
 #: build/admin.js:2
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Decline"
 msgstr "拒否する"
@@ -918,24 +918,24 @@ msgstr "拒否する"
 msgid "Cookie Settings"
 msgstr "クッキー設定"
 
-#: inc/utils/options.php:174
+#: inc/utils/options.php:178
 #: build/admin.js:2
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Preferences"
 msgstr "設定"
 
-#: inc/utils/options.php:179
+#: inc/utils/options.php:183
 msgid "Privacy Preference"
 msgstr "プライバシー設定"
 
-#: inc/utils/options.php:184
+#: inc/utils/options.php:188
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr "私たちは、コンテンツのパーソナライズ、広告の調整と測定、より良い体験の提供のためにクッキーや類似技術を使用しています。"
 
-#: inc/utils/options.php:213
+#: inc/utils/options.php:217
 #: build/admin.js:6
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Cookie Preferences"
 msgstr "クッキー設定"
 
@@ -979,16 +979,16 @@ msgstr "スキャンのキャンセルに失敗しました。"
 
 #: build/admin.js:1
 #: build/admin.js:2
-#: build/admin.js:51
-#: build/admin.js:61
-#: build/admin.js:85
-#: build/admin.js:87
-#: build/admin.js:88
+#: build/admin.js:52
+#: build/admin.js:62
+#: build/admin.js:89
 #: build/admin.js:91
 #: build/admin.js:92
+#: build/admin.js:95
 #: build/admin.js:96
-#: build/admin.js:104
-#: build/admin.js:107
+#: build/admin.js:100
+#: build/admin.js:108
+#: build/admin.js:111
 msgid "Failed to load settings"
 msgstr "設定の読み込みに失敗しました"
 
@@ -1027,13 +1027,13 @@ msgstr "365日"
 msgid "Never"
 msgstr "なし"
 
-#: build/admin.js:76
-#: build/admin.js:85
+#: build/admin.js:80
+#: build/admin.js:89
 msgid "Cookie Scanner"
 msgstr "クッキースキャナー"
 
 #: build/admin.js:2
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "All Cookies"
 msgstr "すべてのクッキー"
 
@@ -1051,17 +1051,17 @@ msgid "Layout"
 msgstr "レイアウト"
 
 #: build/admin.js:2
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Visibility"
 msgstr "表示"
 
 #: build/admin.js:2
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Re-Consent"
 msgstr "再同意"
 
 #: build/admin.js:2
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Custom CSS"
 msgstr "カスタムCSS"
 
@@ -1104,8 +1104,8 @@ msgstr "認証がキャンセルされました。もう一度お試しくださ
 #: inc/modules/assisted-scan/collector.php:332
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:32
-#: build/admin.js:49
+#: build/admin.js:33
+#: build/admin.js:50
 msgid "Cancel"
 msgstr "キャンセル"
 
@@ -1113,15 +1113,15 @@ msgstr "キャンセル"
 #: build/admin.js:7
 #: build/admin.js:8
 #: build/admin.js:23
-#: build/admin.js:32
-#: build/admin.js:86
+#: build/admin.js:33
+#: build/admin.js:90
 #: build/onboarding.js:1
 msgid "Delete"
 msgstr "削除"
 
 #: build/admin.js:2
-#: build/admin.js:32
-#: build/admin.js:102
+#: build/admin.js:33
+#: build/admin.js:106
 msgid "Save"
 msgstr "保存"
 
@@ -1185,10 +1185,10 @@ msgstr "無料プランの上限に達しました"
 
 #: build/admin.js:2
 #: build/admin.js:8
-#: build/admin.js:55
-#: build/admin.js:61
-#: build/admin.js:71
-#: build/admin.js:85
+#: build/admin.js:56
+#: build/admin.js:62
+#: build/admin.js:75
+#: build/admin.js:89
 #: build/onboarding.js:7
 msgid "Upgrade Now"
 msgstr "今すぐアップグレード"
@@ -1242,7 +1242,7 @@ msgid "Your settings have been successfully saved."
 msgstr "設定が正常に保存されました。"
 
 #: build/admin.js:2
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Save failed!"
 msgstr "保存に失敗しました！"
 
@@ -1263,16 +1263,16 @@ msgid "Configure the text content that appears in your cookie consent banner and
 msgstr "クッキー同意バナーと設定モーダルに表示されるテキストコンテンツを設定します"
 
 #: build/admin.js:2
-#: build/admin.js:51
-#: build/admin.js:61
-#: build/admin.js:85
-#: build/admin.js:87
-#: build/admin.js:88
+#: build/admin.js:52
+#: build/admin.js:62
+#: build/admin.js:89
 #: build/admin.js:91
 #: build/admin.js:92
+#: build/admin.js:95
 #: build/admin.js:96
-#: build/admin.js:104
-#: build/admin.js:107
+#: build/admin.js:100
+#: build/admin.js:108
+#: build/admin.js:111
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr "設定の読み込み中にエラーが発生しました。ページを更新して再試行してください。"
 
@@ -1439,8 +1439,8 @@ msgid "Consent Details"
 msgstr "同意の詳細"
 
 #: build/admin.js:1
-#: build/admin.js:29
-#: build/admin.js:86
+#: build/admin.js:30
+#: build/admin.js:90
 msgid "Unknown"
 msgstr "不明"
 
@@ -1450,7 +1450,7 @@ msgstr "データがありません。"
 
 #: build/admin.js:6
 #: build/admin.js:27
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Actions"
 msgstr "操作"
 
@@ -1469,13 +1469,13 @@ msgstr "IPアドレス"
 #: inc/modules/business-details/shortcode.php:94
 #: inc/modules/privacy-policy/validator.php:142
 #: build/admin.js:6
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Country"
 msgstr "国"
 
 #: build/admin.js:6
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Status"
 msgstr "ステータス"
 
@@ -1498,7 +1498,7 @@ msgid "Field"
 msgstr "フィールド"
 
 #: build/admin.js:6
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Value"
 msgstr "値"
@@ -1538,8 +1538,8 @@ msgstr "同意プリセット"
 #: inc/modules/privacy-policy/shortcode.php:477
 #: build/admin.js:6
 #: build/admin.js:27
-#: build/admin.js:29
-#: build/admin.js:86
+#: build/admin.js:30
+#: build/admin.js:90
 msgid "Category"
 msgstr "カテゴリ"
 
@@ -1713,23 +1713,23 @@ msgstr "保持期間を選択"
 msgid "Automatically delete consent logs older than the selected period."
 msgstr "選択した期間より古い同意ログを自動的に削除します。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "SureCookie admin menu location toggle"
 msgstr "SureCookie管理メニューの位置切替"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Hide SureCookie branding toggle"
 msgstr "SureCookieブランディング非表示切替"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Hide SureCookie Branding"
 msgstr "SureCookieブランディングを非表示にする"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Remove the \"Powered by SureCookie\" text from the consent banner and preferences modal."
 msgstr "同意バナーおよび設定モーダルから「Powered by SureCookie」のテキストを削除します。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "to remove the \"Powered by SureCookie\" text from the consent banner and preferences modal."
 msgstr "同意バナーおよび設定モーダルから「Powered by SureCookie」のテキストを削除するために。"
 
@@ -1745,22 +1745,22 @@ msgstr "アンインストール時にデータを削除"
 msgid "When enabled, all plugin data including consent logs, settings, and scan results will be permanently deleted when you uninstall SureCookie. Leave disabled to preserve data for compliance records or future reinstallation."
 msgstr "有効にすると、同意ログ、設定、スキャン結果を含むすべてのプラグインデータがSureCookieのアンインストール時に完全に削除されます。データを保存してコンプライアンス記録や将来の再インストールに備える場合は無効のままにしてください。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Contribute to SureCookie toggle"
 msgstr "SureCookieへの貢献切り替え"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Contribute to SureCookie"
 msgstr "SureCookieに貢献する"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Help shape the future of SureCookie. Share how you use the plugin so we can build features that matter, fix issues faster, and make smarter decisions."
 msgstr "SureCookieの未来を共に作りましょう。プラグインの使用方法を共有していただくことで、重要な機能の構築、問題の迅速な修正、より賢明な意思決定が可能になります。"
 
 #: build/admin.js:2
-#: build/admin.js:61
-#: build/admin.js:104
-#: build/admin.js:110
+#: build/admin.js:62
+#: build/admin.js:108
+#: build/admin.js:114
 msgid "Learn More"
 msgstr "詳細はこちら"
 
@@ -1773,802 +1773,802 @@ msgid "Consent logs may be required to demonstrate proof of consent under GDPR A
 msgstr "同意ログはGDPR第7条第1項の同意証明として必要になる場合があります。アンインストール前に同意記録のエクスポートを検討してください。"
 
 #: build/admin.js:27
-#: build/admin.js:61
-#: build/admin.js:68
-#: build/admin.js:86
+#: build/admin.js:62
+#: build/admin.js:72
+#: build/admin.js:90
 #: build/onboarding.js:4
 #: build/public.js:4
 msgid "Name"
 msgstr "名前"
 
 #: build/admin.js:27
-#: build/admin.js:29
-#: build/admin.js:61
+#: build/admin.js:30
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Provider"
 msgstr "提供者"
 
 #: build/admin.js:27
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Duration (Days)"
 msgstr "期間（日数）"
 
 #: build/admin.js:27
-#: build/admin.js:68
-#: build/admin.js:86
+#: build/admin.js:72
+#: build/admin.js:90
 #: build/onboarding.js:4
 msgid "Type"
 msgstr "タイプ"
 
 #: inc/modules/privacy-policy/shortcode.php:944
 #: build/admin.js:25
-#: build/admin.js:96
+#: build/admin.js:100
 #: build/onboarding.js:3
 msgid "Uncategorized"
 msgstr "未分類"
 
 #: build/admin.js:23
-#: build/admin.js:32
-#: build/admin.js:86
+#: build/admin.js:33
+#: build/admin.js:90
 #: build/onboarding.js:1
 msgid "Edit"
 msgstr "編集"
 
-#: build/admin.js:25
-#: build/admin.js:86
-#: build/onboarding.js:3
+#: build/admin.js:23
+#: build/admin.js:90
+#: build/onboarding.js:1
 msgid "Scanned"
 msgstr "スキャン済み"
 
-#: build/admin.js:25
-#: build/admin.js:86
-#: build/onboarding.js:3
+#: build/admin.js:23
+#: build/admin.js:90
+#: build/onboarding.js:1
 msgid "Custom"
 msgstr "カスタム"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Delete Custom Cookie"
 msgstr "カスタムクッキーを削除"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Edit Cookie"
 msgstr "クッキーを編集"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Update Cookie"
 msgstr "クッキーを更新"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Add New Cookie"
 msgstr "新しいクッキーを追加"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Save Cookie"
 msgstr "クッキーを保存"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "e.g., my_custom_cookie"
 msgstr "例：my_custom_cookie"
 
-#: build/admin.js:29
-#: build/admin.js:32
-#: build/admin.js:86
+#: build/admin.js:30
+#: build/admin.js:33
+#: build/admin.js:90
 msgid "Select a category"
 msgstr "カテゴリを選択してください"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "No categories available. Please create a category first."
 msgstr "利用可能なカテゴリがありません。まずカテゴリを作成してください。"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "e.g., 30"
 msgstr "例：30"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "e.g., Your Company Name"
 msgstr "例：あなたの会社名"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "e.g., .example.com"
 msgstr "例：.example.com"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Description"
 msgstr "説明"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Enter a description for this cookie…"
 msgstr "このクッキーの説明を入力してください…"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Describe the purpose of this cookie…"
 msgstr "このクッキーの目的を説明してください…"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Category Name"
 msgstr "カテゴリ名"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "e.g., Performance Cookies"
 msgstr "例：パフォーマンスクッキー"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Enter a description for this cookie category…"
 msgstr "このクッキーカテゴリの説明を入力してください…"
 
 #. translators: %1$s is the category name, %2$s is the number of cookies
-#: build/admin.js:32
+#: build/admin.js:33
 #, js-format
 msgid "Are you sure you want to delete this cookie category? <br/> The category \"%1$s\" has %2$s assigned to it:"
 msgstr "このクッキーカテゴリを削除してもよろしいですか？<br/>カテゴリ「%1$s」には%2$s個のクッキーが割り当てられています："
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "cookie"
 msgid_plural "cookies"
 msgstr[0] "クッキー"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Are you sure you want to delete this cookie category? This action cannot be undone."
 msgstr "このクッキーカテゴリを削除してもよろしいですか？この操作は元に戻せません。"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Delete Cookie Category"
 msgstr "クッキーカテゴリを削除"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Keep cookies when deleting category"
 msgstr "カテゴリ削除時にクッキーを保持する"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Keep cookies"
 msgstr "クッキーを保持する"
 
-#: build/admin.js:32
+#: build/admin.js:33
 #: build/onboarding.js:4
 msgid "Please enter a category name"
 msgstr "カテゴリ名を入力してください"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "No cookie categories found. Click \"Add New Category\" to create one."
 msgstr "クッキーカテゴリが見つかりません。「新しいカテゴリを追加」をクリックして作成してください。"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Edit Category"
 msgstr "カテゴリを編集"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Add New Category"
 msgstr "新しいカテゴリを追加"
 
-#: build/admin.js:32
-#: build/admin.js:51
+#: build/admin.js:33
+#: build/admin.js:52
 msgid "Manage Categories"
 msgstr "カテゴリを管理"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Manage cookie categories that appear in the privacy preferences modal"
 msgstr "プライバシー設定モーダルに表示されるクッキーカテゴリを管理します"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Add Category"
 msgstr "カテゴリを追加"
 
-#: build/admin.js:49
+#: build/admin.js:50
 #: build/onboarding.js:4
 msgid "Please enter a cookie name"
 msgstr "クッキー名を入力してください"
 
-#: build/admin.js:49
+#: build/admin.js:50
 #: build/onboarding.js:4
 msgid "Please select a category"
 msgstr "カテゴリを選択してください"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to load custom cookies"
 msgstr "カスタムクッキーの読み込みに失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to create custom cookie"
 msgstr "カスタムクッキーの作成に失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Custom cookie created successfully"
 msgstr "カスタムクッキーが正常に作成されました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to update custom cookie"
 msgstr "カスタムクッキーの更新に失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Custom cookie updated successfully"
 msgstr "カスタムクッキーが正常に更新されました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to delete custom cookie"
 msgstr "カスタムクッキーの削除に失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Custom cookie deleted successfully"
 msgstr "カスタムクッキーが正常に削除されました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Failed to create category"
 msgstr "カテゴリの作成に失敗しました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Category created successfully"
 msgstr "カテゴリが正常に作成されました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Failed to update category"
 msgstr "カテゴリの更新に失敗しました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Category updated successfully"
 msgstr "カテゴリが正常に更新されました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Failed to delete category"
 msgstr "カテゴリの削除に失敗しました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Category deleted successfully"
 msgstr "カテゴリが正常に削除されました"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Create and manage all cookies for your website. These cookies will appear in the selected privacy preference categories."
 msgstr "ウェブサイトのすべてのクッキーを作成および管理します。これらのクッキーは選択されたプライバシー設定カテゴリに表示されます。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Manage Cookies"
 msgstr "クッキーを管理"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "New Cookie"
 msgstr "新しいクッキー"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "All your cookies will be displayed here"
 msgstr "すべてのクッキーがここに表示されます"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Click the button below to create your first custom cookie"
 msgstr "下のボタンをクリックして最初のカスタムクッキーを作成してください"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Add custom CSS to style your cookie banner. Changes will be reflected in both preview and frontend after saving."
 msgstr "クッキーバナーのスタイルをカスタムCSSで追加します。保存後、プレビューとフロントエンドの両方に変更が反映されます。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "CSS Code Editor"
 msgstr "CSSコードエディター"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Reset Custom CSS"
 msgstr "カスタムCSSをリセット"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Are you sure you want to reset custom CSS? This will remove all your custom styles."
 msgstr "カスタムCSSをリセットしてもよろしいですか？これによりすべてのカスタムスタイルが削除されます。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Custom CSS has been reset. The banner will now use default styles."
 msgstr "カスタムCSSがリセットされました。バナーはデフォルトのスタイルを使用します。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Write your custom CSS below. Use <strong>!important</strong> to override inline styles.<br />You can target banner elements using classes like <strong>.surecookie-banner</strong>, <strong>.surecookie-accept-btn</strong>, etc."
 msgstr "以下にカスタムCSSを記述してください。インラインスタイルを上書きするには <strong>!important</strong> を使用します。<br />バナー要素は <strong>.surecookie-banner</strong>、<strong>.surecookie-accept-btn</strong> などのクラスでターゲットにできます。"
 
-#: build/admin.js:51
-#: build/admin.js:68
+#: build/admin.js:52
+#: build/admin.js:69
 msgid "<span></span> Quick Tips:"
 msgstr "<span></span> クイックヒント："
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Use <b>.surecookie-banner</b> to target the cookie banner (works in both preview and frontend)"
 msgstr "<b>.surecookie-banner</b> を使用してクッキーバナーをターゲットにします（プレビューとフロントエンドの両方で機能します）"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Use <b>.surecookie-accept-btn</b>, <b>.surecookie-decline-btn</b> for buttons"
 msgstr "<b>.surecookie-accept-btn</b>、<b>.surecookie-decline-btn</b> をボタンに使用します"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Important: Use <b>!important</b> to override inline styles"
 msgstr "重要：インラインスタイルを上書きするには <b>!important</b> を使用してください"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Changes take effect after clicking \"Save Changes\" below"
 msgstr "変更は下の「変更を保存」ボタンをクリック後に反映されます"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Your CSS is saved and will persist after page refresh"
 msgstr "CSSは保存され、ページ更新後も維持されます"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Disabled"
 msgstr "無効"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Consent Logging"
 msgstr "同意ログ"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Enable consent logging to view consent analytics"
 msgstr "同意ログを有効にして同意分析を表示します"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Enable"
 msgstr "有効にする"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Overview"
 msgstr "概要"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Active"
 msgstr "アクティブ"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Inactive"
 msgstr "非アクティブ"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Cookie Banner"
 msgstr "クッキーバナー"
 
-#: build/admin.js:51
-#: build/admin.js:55
-#: build/admin.js:91
+#: build/admin.js:52
+#: build/admin.js:56
+#: build/admin.js:95
 msgid "Configure"
 msgstr "設定"
 
-#: build/admin.js:52
+#: build/admin.js:53
 #: build/onboarding.js:4
 msgid "Launch Setup Wizard"
 msgstr "セットアップウィザードを起動"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Open Support Ticket"
 msgstr "サポートチケットを開く"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Help Center"
 msgstr "ヘルプセンター"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Join our Community"
 msgstr "コミュニティに参加"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Leave Us a Review"
 msgstr "レビューを残す"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Quick Access"
 msgstr "クイックアクセス"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Recent Consent Logs"
 msgstr "最近の同意ログ"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Toggle Preview"
 msgstr "プレビュー切替"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Click this button to show or hide the cookie consent banner preview."
 msgstr "このボタンをクリックしてクッキー同意バナープレビューの表示・非表示を切り替えます。"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Click here to start"
 msgstr "ここをクリックして開始"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "design your banner"
 msgstr "バナーをデザインする"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Here's a preview of the cookie consent banner."
 msgstr "こちらはクッキー同意バナーのプレビューです。"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "You can adjust the content and design settings."
 msgstr "コンテンツとデザイン設定を調整できます。"
 
 #. translators: 1: number of completed steps, 2: total number of steps
-#: build/admin.js:55
+#: build/admin.js:56
 #, js-format
 msgid "%1$d of %2$d steps complete"
 msgstr "%1$d / %2$d ステップ完了"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "You're all set! SureCookie is ready to protect your site."
 msgstr "準備完了です！SureCookie はあなたのサイトを保護する準備ができています。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 #: build/onboarding.js:14
 msgid "Go to Dashboard"
 msgstr "ダッシュボードへ移動"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Scan Your Site for Cookies"
 msgstr "サイトのクッキーをスキャン"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Run the cookie scanner to discover and categorize cookies your site uses."
 msgstr "クッキースキャナーを実行して、サイトで使用されているクッキーを検出および分類します。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Scan Now"
 msgstr "今すぐスキャン"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Set up the Consent Banner"
 msgstr "同意バナーを設定"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Customize your cookie consent banner - content, layout, and visibility."
 msgstr "クッキー同意バナーの内容、レイアウト、表示設定をカスタマイズします。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Review Consent Logs"
 msgstr "同意ログを確認"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "See who has consented and when - useful for compliance audits."
 msgstr "誰がいつ同意したかを確認できます。コンプライアンス監査に役立ちます。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "View Logs"
 msgstr "ログを見る"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Publish Your Cookie Policy"
 msgstr "クッキーポリシーを公開"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Review and publish the cookie policy page on your site."
 msgstr "サイトのクッキーポリシーページを確認して公開します。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Review Page"
 msgstr "ページを確認"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Generate a cookie policy page so visitors know how you handle their data."
 msgstr "訪問者がデータの取り扱い方法を知るためのクッキーポリシーページを作成します。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Create Page"
 msgstr "ページを作成"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Get Started with SureCookie"
 msgstr "SureCookie を始めましょう"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Follow these steps to set up cookie consent on your site in minutes."
 msgstr "数分でサイトのクッキー同意を設定するための手順に従ってください。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Continue Learning"
 msgstr "学習を続ける"
 
 #. translators: 1: number of completed steps, 2: total number of steps
-#: build/admin.js:58
+#: build/admin.js:59
 #, js-format
 msgid "%1$d of %2$d setup steps complete."
 msgstr "%1$d / %2$d 設定ステップ完了。"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Open Learn"
 msgstr "学習を開く"
 
-#: build/admin.js:58
-#: build/public.js:1
+#: build/admin.js:62
+#: build/public.js:4
 msgid "All cookies accepted."
 msgstr "すべてのクッキーが許可されました。"
 
-#: build/admin.js:58
-#: build/public.js:1
+#: build/admin.js:62
+#: build/public.js:4
 msgid "Non-essential cookies rejected."
 msgstr "必須でないクッキーは拒否されました。"
 
-#: build/admin.js:58
-#: build/public.js:1
+#: build/admin.js:62
+#: build/public.js:4
 msgid "Preferences saved successfully."
 msgstr "設定が正常に保存されました。"
 
-#: build/admin.js:58
+#: build/admin.js:59
 #: build/public.js:1
 msgid "Close privacy preferences dialog"
 msgstr "プライバシー設定ダイアログを閉じる"
 
-#: build/admin.js:59
+#: build/admin.js:60
 #: build/public.js:2
 msgid "Always Active"
 msgstr "常に有効"
 
 #. translators: %s: cookie category name
-#: build/admin.js:60
+#: build/admin.js:61
 #: build/public.js:3
 #, js-format
 msgid "%s: always active, cannot be disabled"
 msgstr "%s: 常に有効で、無効にできません"
 
-#: build/admin.js:60
+#: build/admin.js:61
 #: build/public.js:3
 msgid "View Cookies"
 msgstr "クッキーを見る"
 
 #. translators: %s: cookie category name
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 #, js-format
 msgid "%s cookies details"
 msgstr "%s クッキーの詳細"
 
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Expiry"
 msgstr "有効期限"
 
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Reject All"
 msgstr "すべて拒否"
 
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Confirm My Choices"
 msgstr "選択を確認"
 
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Powered by SureCookie (opens in new tab)"
 msgstr "SureCookie による提供（新しいタブで開きます）"
 
 #: inc/utils/localize-data.php:321
 #: build/admin.js:6
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "Powered by"
 msgstr "提供元"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Buttons are for reference only in preview."
 msgstr "ボタンはプレビューでの参照用です。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Close preview"
 msgstr "プレビューを閉じる"
 
-#: build/admin.js:61
 #: build/admin.js:62
+#: build/admin.js:63
 msgid "Complete"
 msgstr "完了"
 
-#: build/admin.js:61
 #: build/admin.js:62
+#: build/admin.js:63
 msgid "Queued…"
 msgstr "キューに追加中…"
 
-#: build/admin.js:61
 #: build/admin.js:62
+#: build/admin.js:63
 msgid "Starting scan…"
 msgstr "スキャン開始中…"
 
 #. translators: 1: current page index, 2: total pages
-#: build/admin.js:62
+#: build/admin.js:63
 #, js-format
 msgid "Scanning page %1$d of %2$d…"
 msgstr "ページ %1$d / %2$d をスキャン中…"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "Scanning pages…"
 msgstr "ページをスキャン中…"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "Analyzing cookies…"
 msgstr "クッキーを分析中…"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "Finalizing…"
 msgstr "最終処理中…"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "Scan failed"
 msgstr "スキャン失敗"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "In progress…"
 msgstr "進行中…"
 
-#: build/admin.js:62
+#: build/admin.js:63
 msgid "Scan progress"
 msgstr "スキャン進行状況"
 
 #. translators: 1: completed pages, 2: total pages
-#: build/admin.js:63
+#: build/admin.js:64
 #, js-format
 msgid "%1$d of %2$d pages scanned"
 msgstr "%1$d / %2$d ページをスキャン済み"
 
-#: build/admin.js:63
+#: build/admin.js:64
 msgid "Preparing scan…"
 msgstr "スキャン準備中…"
 
 #. translators: %s: estimated time remaining
-#: build/admin.js:64
+#: build/admin.js:65
 #, js-format
 msgid "· ~%s left"
 msgstr "· 約 %s 残り"
 
-#: build/admin.js:64
+#: build/admin.js:65
 msgid "Scan Completed with Errors"
 msgstr "エラーありでスキャン完了"
 
 #. translators: %d: number of failed pages
-#: build/admin.js:65
+#: build/admin.js:66
 #, js-format
 msgid "%d page(s) could not be scanned. Check the logs for details."
 msgstr "%d ページのスキャンに失敗しました。詳細はログを確認してください。"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Scan Completed!"
 msgstr "スキャン完了！"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Cookie scan has been completed successfully."
 msgstr "クッキースキャンが正常に完了しました。"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Could not copy logs automatically."
 msgstr "ログを自動でコピーできませんでした。"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Logs copied to clipboard!"
 msgstr "ログをクリップボードにコピーしました！"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Latest Scanning Logs"
 msgstr "最新のスキャンログ"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "View logs from the most recent cookie scanning process."
 msgstr "最新のクッキースキャンプロセスのログを表示します。"
 
-#: build/admin.js:65
-#: build/admin.js:68
+#: build/admin.js:66
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Copied"
 msgstr "コピー済み"
 
 #: build/admin.js:2
-#: build/admin.js:65
-#: build/admin.js:68
+#: build/admin.js:66
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Copy"
 msgstr "コピー"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "This field contains the scanning status results only."
 msgstr "このフィールドにはスキャン状態の結果のみが含まれています。"
 
-#: build/admin.js:65
+#: build/admin.js:66
 msgid "Scan appears stuck"
 msgstr "スキャンが停止しているようです"
 
 #. translators: 1: completed pages, 2: total pages, 3: elapsed time
-#: build/admin.js:66
+#: build/admin.js:67
 #, js-format
 msgid "%1$d of %2$d pages scanned after %3$s with no recent progress."
 msgstr "%1$d / %2$d ページを %3$s 経過後にスキャンしましたが、最近の進捗はありません。"
 
 #. translators: %s: elapsed time
-#: build/admin.js:67
+#: build/admin.js:68
 #, js-format
 msgid "No progress detected after %s."
 msgstr "%s 経過後に進捗が検出されませんでした。"
 
-#: build/admin.js:67
-#: build/admin.js:72
+#: build/admin.js:68
+#: build/admin.js:76
 msgid "Cancelling…"
 msgstr "キャンセル中…"
 
-#: build/admin.js:67
+#: build/admin.js:68
 msgid "Cancel Scan"
 msgstr "スキャンをキャンセル"
 
-#: build/admin.js:67
+#: build/admin.js:68
 msgid "Copy Logs for Support"
 msgstr "サポート用にログをコピー"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Your scan limit will reset tomorrow."
 msgstr "スキャン制限は明日リセットされます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "The scan runs in the background - you can safely navigate away."
 msgstr "スキャンはバックグラウンドで実行されます - 安心して他のページに移動できます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Make sure your site is publicly accessible (not behind basic auth or maintenance mode)."
 msgstr "サイトが公開されていることを確認してください（ベーシック認証やメンテナンスモードの背後にないこと）。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Check if a firewall or security plugin is blocking external requests to your site."
 msgstr "ファイアウォールやセキュリティプラグインが外部からのリクエストをブロックしていないか確認してください。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Pages with heavy JavaScript may take longer to scan. If scanning fails repeatedly, try fewer pages."
 msgstr "JavaScriptが多用されているページはスキャンに時間がかかる場合があります。スキャンが繰り返し失敗する場合は、ページ数を減らしてみてください。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "If issues persist, copy the logs and <a>contact our support team.</a>"
 msgstr "問題が続く場合は、ログをコピーして<a>サポートチームにお問い合わせください。</a>"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "contact our support team"
 msgstr "サポートチームにお問い合わせください"
 
-#: build/admin.js:71
-#: build/admin.js:88
-#: build/admin.js:96
+#: build/admin.js:75
+#: build/admin.js:92
+#: build/admin.js:100
 #: build/onboarding.js:7
 msgid "(no title)"
 msgstr "(タイトルなし)"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:7
 msgid "Failed to initiate scan"
 msgstr "スキャンの開始に失敗しました"
 
 #. translators: 1: remaining scans, 2: total daily scans
-#: build/admin.js:79
+#: build/admin.js:83
 #: build/onboarding.js:12
 #, js-format
 msgid "You have %1$d of %2$d daily scans remaining"
 msgstr "本日利用可能なスキャンは %1$d 件中 %2$d 件です"
 
 #. translators: %s: time until reset (e.g. "4h 22m")
-#: build/admin.js:80
-#: build/admin.js:82
+#: build/admin.js:84
+#: build/admin.js:86
 #, js-format
 msgid "Resets in %s"
 msgstr "リセットまで %s"
 
-#: build/admin.js:82
+#: build/admin.js:86
 #: build/onboarding.js:12
 msgid "Limits refreshed."
 msgstr "制限が更新されました。"
 
-#: build/admin.js:82
+#: build/admin.js:86
 #: build/onboarding.js:12
 msgid "Failed to refresh limits."
 msgstr "制限の更新に失敗しました。"
 
-#: build/admin.js:82
+#: build/admin.js:86
 msgid "Your session expired. Please reload to reconnect."
 msgstr "セッションの有効期限が切れました。再接続するにはリロードしてください。"
 
-#: build/admin.js:82
+#: build/admin.js:86
 #: build/onboarding.js:12
 msgid "We couldn't fetch your limits right now. Please try again in a moment."
 msgstr "現在、制限情報を取得できません。しばらくしてから再度お試しください。"
 
-#: build/admin.js:82
+#: build/admin.js:86
 #: build/onboarding.js:12
 msgid "Refreshing…"
 msgstr "更新中…"
 
-#: build/admin.js:82
+#: build/admin.js:86
 msgid "Refresh limits"
 msgstr "制限を更新"
 
 #. translators: %d: maximum pages
-#: build/admin.js:69
-#: build/admin.js:84
+#: build/admin.js:73
+#: build/admin.js:88
 #: build/onboarding.js:5
 #: build/onboarding.js:14
 #, js-format
@@ -2576,585 +2576,585 @@ msgid "You have selected more than %d pages"
 msgstr "%d ページを超えて選択しています"
 
 #. translators: %d: maximum pages
-#: build/admin.js:74
+#: build/admin.js:78
 #: build/onboarding.js:9
 #, js-format
 msgid "Your plan supports scanning up to %d pages. Please remove extra pages to continue."
 msgstr "プランでは最大 %d ページまでスキャン可能です。続行するには余分なページを削除してください。"
 
-#: build/admin.js:84
+#: build/admin.js:88
 msgid "Daily Limit Reached"
 msgstr "日次制限に達しました"
 
 #. translators: 1: scans used, 2: scan limit
-#: build/admin.js:85
+#: build/admin.js:89
 #, js-format
 msgid "You've used %1$d of %2$d daily scans. Your credits will refresh automatically tomorrow."
 msgstr "本日 %1$d 件中 %2$d 件のスキャンを使用しました。クレジットは明日自動的に更新されます。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "You've used all your scan credits for today. Your credits will refresh automatically tomorrow."
 msgstr "本日のスキャンクレジットをすべて使い切りました。クレジットは明日自動的に更新されます。"
 
-#: build/admin.js:71
+#: build/admin.js:75
 msgid "Scan Started!"
 msgstr "スキャン開始！"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:14
 msgid "Scanning…"
 msgstr "スキャン中…"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:14
 msgid "Start Scan"
 msgstr "スキャン開始"
 
-#: build/admin.js:72
+#: build/admin.js:76
 msgid "Cancel Stuck Scan"
 msgstr "停止したスキャンをキャンセル"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:6
 msgid "WordPress Cron is Disabled"
 msgstr "WordPress Cronが無効です"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:6
 msgid "The WordPress cron system is not working on your site. Cookie scanning may not work as expected. Please enable WP-Cron or set up a server cron job to ensure proper functionality."
 msgstr "サイトのWordPress Cronシステムが動作していません。クッキースキャンが正常に機能しない可能性があります。WP-Cronを有効にするか、サーバーのcronジョブを設定して適切な機能を確保してください。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Select"
 msgstr "選択"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Configure how the \"Cookie Preferences\" button appears on your site, allowing users to update their consent at any time."
 msgstr "サイト上の「クッキー設定」ボタンの表示方法を設定し、ユーザーがいつでも同意内容を更新できるようにします。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "No re-consent method active"
 msgstr "再同意方法が有効になっていません"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Visitors won't be able to update their cookie preferences unless you add a menu item or place the shortcode on a page. You can safely ignore this if the shortcode is already added."
 msgstr "訪問者は、メニュー項目を追加するかショートコードをページに配置しない限り、クッキー設定を更新できません。ショートコードがすでに追加されている場合は、このメッセージは無視して問題ありません。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Button Label"
 msgstr "ボタンラベル"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "The label shown on the Cookie Preferences link."
 msgstr "クッキー設定リンクに表示されるラベル。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Menu Level"
 msgstr "メニューレベル"
 
-#: build/admin.js:85
-#: build/admin.js:88
+#: build/admin.js:89
+#: build/admin.js:92
 msgid "Shortcode"
 msgstr "ショートコード"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Floating Widget"
 msgstr "フローティングウィジェット"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Select a WordPress menu to automatically add the Cookie Preferences link to it. When clicked, it opens the consent preferences modal directly."
 msgstr "WordPressのメニューを選択して、クッキー設定リンクを自動的に追加します。クリックすると、同意設定モーダルが直接開きます。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "No WordPress menus found."
 msgstr "WordPressのメニューが見つかりません。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Create a menu in Appearance > Menus."
 msgstr "外観 > メニューでメニューを作成してください。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Select Menu"
 msgstr "メニューを選択"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Use this shortcode to display the Cookie Preferences link anywhere on your site. When clicked, it opens the consent preferences modal directly."
 msgstr "このショートコードを使用して、サイトの任意の場所にクッキー設定リンクを表示します。クリックすると、同意設定モーダルが直接開きます。"
 
-#: build/admin.js:85
-#: build/admin.js:88
-#: build/admin.js:91
-#: build/admin.js:96
+#: build/admin.js:89
+#: build/admin.js:92
+#: build/admin.js:95
+#: build/admin.js:100
 msgid "Shortcode Copied!"
 msgstr "ショートコードをコピーしました！"
 
-#: build/admin.js:85
-#: build/admin.js:88
+#: build/admin.js:89
+#: build/admin.js:92
 msgid "Could not copy to clipboard. Please copy the shortcode manually."
 msgstr "クリップボードにコピーできませんでした。ショートコードを手動でコピーしてください。"
 
 #: build/admin.js:2
-#: build/admin.js:85
-#: build/admin.js:88
+#: build/admin.js:89
+#: build/admin.js:92
 msgid "Copied!"
 msgstr "コピーしました！"
 
-#: build/admin.js:85
-#: build/admin.js:88
+#: build/admin.js:89
+#: build/admin.js:92
 msgid "Copy shortcode"
 msgstr "ショートコードをコピー"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Enable Floating Widget"
 msgstr "フローティングウィジェットを有効にする"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "to show a floating cookie preferences button on every page."
 msgstr "すべてのページにフローティングクッキー設定ボタンを表示します。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Failed to deactivate plugin."
 msgstr "プラグインの無効化に失敗しました。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Conflicting Plugins Detected."
 msgstr "競合するプラグインが検出されました。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "It's recommended to deactivate them to avoid issues."
 msgstr "問題を避けるために無効化することを推奨します。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Deactivate Plugin"
 msgstr "プラグインを無効化"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Conflicting Plugins Detected"
 msgstr "競合するプラグインが検出されました"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "The following plugins may conflict with SureCookie. It's recommended to deactivate them to avoid issues."
 msgstr "以下のプラグインはSureCookieと競合する可能性があります。問題を避けるために無効化することを推奨します。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Version:"
 msgstr "バージョン："
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Deactivation successful. Reloading the page in 3 seconds."
 msgstr "無効化に成功しました。3秒後にページをリロードします。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "The plugin could not be deactivated. Please try again."
 msgstr "プラグインを無効化できませんでした。もう一度お試しください。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Deactivating…"
 msgstr "無効化中…"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Deactivate"
 msgstr "無効化"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Close"
 msgstr "閉じる"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Preview:"
 msgstr "プレビュー："
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "ON"
 msgstr "オン"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "OFF"
 msgstr "オフ"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "What's New?"
 msgstr "新機能は？"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Free version"
 msgstr "無料版"
 
-#: build/admin.js:86
-#: build/admin.js:96
+#: build/admin.js:90
+#: build/admin.js:100
 msgid "Knowledge Base"
 msgstr "ナレッジベース"
 
-#: build/admin.js:96
-#: build/admin.js:102
+#: build/admin.js:100
+#: build/admin.js:106
 msgid "Analytics"
 msgstr "分析"
 
-#: build/admin.js:96
-#: build/admin.js:102
+#: build/admin.js:100
+#: build/admin.js:106
 msgid "Marketing"
 msgstr "マーケティング"
 
-#: build/admin.js:96
-#: build/admin.js:102
+#: build/admin.js:100
+#: build/admin.js:106
 msgid "Functional"
 msgstr "機能的"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Resource"
 msgstr "リソース"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Script"
 msgstr "スクリプト"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Iframe"
 msgstr "iframe"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Control where your cookie banner appears on your site."
 msgstr "サイト上でクッキーバナーの表示位置を制御します。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Want More Control over Your Cookie Banner?"
 msgstr "クッキーバナーの表示をもっと細かく制御したいですか？"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Upgrade to hide it on selected pages, posts, archives, or on specific user roles."
 msgstr "選択したページ、投稿、アーカイブ、または特定のユーザーロールで非表示にするにはアップグレードしてください。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "The previously selected page no longer exists or could not be loaded."
 msgstr "以前に選択されたページは存在しないか、読み込めませんでした。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "The selected page is not published and will not appear to visitors."
 msgstr "選択されたページは公開されておらず、訪問者には表示されません。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Cookie Policy Page"
 msgstr "クッキーポリシーページ"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Clear selected page"
 msgstr "選択したページをクリア"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Select a Page"
 msgstr "ページを選択"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "A link to this page will appear in the consent preferences modal footer."
 msgstr "このページへのリンクは同意設定モーダルのフッターに表示されます。"
 
-#: build/admin.js:88
 #: build/admin.js:92
+#: build/admin.js:96
 msgid "Auto Generate"
 msgstr "自動生成"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Automatically create a published Cookie Policy page containing a dynamically generated cookie table that always stays up to date."
 msgstr "常に最新の状態を保つ動的に生成されたクッキーテーブルを含む公開されたクッキーポリシーページを自動的に作成します。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Cookie Policy page created successfully!"
 msgstr "クッキーポリシーページが正常に作成されました！"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Failed to generate page. Please try again."
 msgstr "ページの生成に失敗しました。もう一度お試しください。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "An error occurred while generating the page. Please try again."
 msgstr "ページの生成中にエラーが発生しました。もう一度お試しください。"
 
-#: build/admin.js:88
 #: build/admin.js:92
+#: build/admin.js:96
 msgid "Page Already Linked"
 msgstr "ページはすでにリンクされています"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Generate Cookie Policy Page"
 msgstr "クッキーポリシーページを生成"
 
-#: build/admin.js:88
 #: build/admin.js:92
+#: build/admin.js:96
 msgid "Edit Page"
 msgstr "ページを編集"
 
-#: build/admin.js:88
 #: build/admin.js:92
+#: build/admin.js:96
 msgid "View Page"
 msgstr "ページを表示"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Use this shortcode to display the cookie policy with a dynamically generated cookie table on any page or post. The table always reflects the latest scanned and custom cookies."
 msgstr "このショートコードを使用して、動的に生成されたクッキーテーブル付きのクッキーポリシーを任意のページや投稿に表示できます。テーブルは常に最新のスキャン済みおよびカスタムクッキーを反映します。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Please enter at least one region code"
 msgstr "少なくとも1つの地域コードを入力してください"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Invalid region code format. Use ISO 3166 codes like EU, US, US-CA, or GB."
 msgstr "無効な地域コード形式です。EU、US、US-CA、GBのようなISO 3166コードを使用してください。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "EU/EEA (GDPR)"
 msgstr "EU/EEA（GDPR）"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "California (CCPA)"
 msgstr "カリフォルニア（CCPA）"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "United Kingdom"
 msgstr "イギリス"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Brazil (LGPD)"
 msgstr "ブラジル（LGPD）"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Edit Regional Rule"
 msgstr "地域ルールを編集"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Add Regional Rule"
 msgstr "地域ルールを追加"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Set default consent state for visitors from this region. Google uses the most specific match."
 msgstr "この地域からの訪問者のデフォルト同意状態を設定します。Googleは最も具体的な一致を使用します。"
 
-#: build/admin.js:102
-#: build/admin.js:103
+#: build/admin.js:106
+#: build/admin.js:107
 msgid "Add Rule"
 msgstr "ルールを追加"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Quick Presets"
 msgstr "クイックプリセット"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Apply preset:"
 msgstr "プリセットを適用："
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Region Codes"
 msgstr "地域コード"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Comma-separated ISO 3166 codes: EU, US, US-CA, GB, BR, etc."
 msgstr "カンマ区切りのISO 3166コード：EU、US、US-CA、GB、BRなど。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Default Consent State"
 msgstr "デフォルト同意状態"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Choose which categories are granted by default for visitors from this region before they interact with the banner."
 msgstr "バナーと対話する前に、この地域からの訪問者にデフォルトで許可されるカテゴリを選択してください。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Functional Storage"
 msgstr "機能的ストレージ"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Enables storage for site functionality like preferences and language."
 msgstr "設定や言語などのサイト機能のためのストレージを有効にします。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Functional storage default"
 msgstr "機能的ストレージのデフォルト"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Analytics Storage"
 msgstr "分析ストレージ"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Enables storage for analytics purposes like visit duration and page views."
 msgstr "訪問時間やページビューなどの分析目的のストレージを有効にします。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Analytics storage default"
 msgstr "分析ストレージのデフォルト"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Marketing / Ads Storage"
 msgstr "マーケティング／広告ストレージ"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Enables storage for advertising purposes including ad personalization and user data."
 msgstr "広告のパーソナライズやユーザーデータを含む広告目的のストレージを有効にします。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Marketing storage default"
 msgstr "マーケティングストレージのデフォルト"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Essential cookies (security_storage) are always granted. These defaults apply before the visitor interacts with the consent banner."
 msgstr "必須クッキー（security_storage）は常に許可されます。これらのデフォルトは訪問者が同意バナーと対話する前に適用されます。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Granted"
 msgstr "許可済み"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Denied"
 msgstr "拒否済み"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Active Regional Rules"
 msgstr "有効な地域ルール"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Set different default consent states per region. Google uses the most specific match (e.g., US-CA overrides US)."
 msgstr "地域ごとに異なるデフォルト同意状態を設定します。Googleは最も具体的な一致（例：US-CAはUSを上書き）を使用します。"
 
-#: build/admin.js:103
+#: build/admin.js:107
 msgid "Edit rule for"
 msgstr "ルールを編集"
 
-#: build/admin.js:103
+#: build/admin.js:107
 msgid "Delete rule for"
 msgstr "ルールを削除"
 
 #. translators: %s: comma-separated duplicate region codes
-#: build/admin.js:104
+#: build/admin.js:108
 #, js-format
 msgid "These region codes already exist in another rule: %s"
 msgstr "これらの地域コードはすでに別のルールに存在します: %s"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Delete Regional Rule"
 msgstr "地域ルールを削除"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Are you sure you want to delete this regional consent rule? Visitors from this region will use the global default."
 msgstr "この地域の同意ルールを削除してもよろしいですか？この地域の訪問者はグローバルデフォルトを使用します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Google Consent Mode v2"
 msgstr "Google 同意モード v2"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Automatically communicate user consent preferences to Google services."
 msgstr "ユーザーの同意設定を自動的にGoogleサービスに伝達します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Enable Google Consent Mode Switch"
 msgstr "Google 同意モードスイッチを有効にする"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Enable Google Consent Mode"
 msgstr "Google 同意モードを有効にする"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Supported services: Analytics 4, Google Ads, Tag Manager, Campaign Manager 360, Ad Manager, Floodlight, and DV360"
 msgstr "対応サービス: Analytics 4、Google 広告、タグマネージャー、キャンペーンマネージャー 360、アドマネージャー、フラッドライト、DV360"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Wait Time (milliseconds)"
 msgstr "待機時間（ミリ秒）"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "How long Google services wait for consent before making requests. Default: 500ms. Range: 0–2000ms."
 msgstr "Googleサービスが同意を待つ時間。デフォルト: 500ms。範囲: 0～2000ms。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Mandatory for EU/EEA as of March 2024"
 msgstr "2024年3月よりEU/EEAで必須"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Google now requires Consent Mode v2 for all websites using Google services in the European Economic Area."
 msgstr "Googleは現在、欧州経済領域内でGoogleサービスを使用するすべてのウェブサイトに同意モードv2を要求しています。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Learn more about Google Consent Mode v2 →"
 msgstr "Google 同意モード v2 について詳しくはこちら →"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Where should the banner appear?"
 msgstr "バナーはどこに表示しますか？"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Choose where the banner is shown. Visitors outside selected regions will not see it."
 msgstr "バナーを表示する場所を選択します。選択した地域外の訪問者には表示されません。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Show to all visitors worldwide"
 msgstr "世界中のすべての訪問者に表示"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Use the same experience for everyone, regardless of location."
 msgstr "場所に関係なく、すべての人に同じ体験を提供します。"
 
-#: build/admin.js:32
-#: build/admin.js:86
-#: build/admin.js:96
-#: build/admin.js:104
+#: build/admin.js:33
+#: build/admin.js:90
+#: build/admin.js:100
+#: build/admin.js:108
 msgid "Pro"
 msgstr "プロ"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Show only where required by law"
 msgstr "法律で必要な場所のみに表示"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Target specific regions with tailored consent experiences."
 msgstr "特定の地域をターゲットにし、カスタマイズされた同意体験を提供します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Mode: Show to all visitors worldwide"
 msgstr "モード: 世界中のすべての訪問者に表示"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Your existing banner settings apply to all visitors. No geographic targeting is active."
 msgstr "既存のバナー設定はすべての訪問者に適用されます。地理的ターゲティングは有効になっていません。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Unlock Regional Targeting"
 msgstr "地域ターゲティングを解除"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Show banner only in selected regions, create custom regional rules, and control fallback behavior."
 msgstr "選択した地域のみにバナーを表示し、カスタム地域ルールを作成し、フォールバック動作を制御します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Location detection uses GeoLite2 data by MaxMind, available from <link>https://www.maxmind.com</link>."
 msgstr "位置検出はMaxMindのGeoLite2データを使用しています。<link>https://www.maxmind.com</link>から入手可能です。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "IAB Transparency & Consent Framework"
 msgstr "IAB 透明性＆同意フレームワーク"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr "同意バナーをIAB TCF 2.3に準拠させ、グローバルベンダーリストと統合します。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr "IAB TCF 2.3準拠を解除 - 近日公開予定"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr "完全なTCFモードを有効にし、TC文字列を生成し、訪問者にIABベンダーリストを表示します。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Google Additional Consent (AC)"
 msgstr "Google 追加同意（AC）"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr "IABグローバルベンダーリストにない広告技術ベンダーを扱うために、IAB TCFと併せてGoogle追加同意を追加します。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr "Google追加同意の解除 - 近日公開予定"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr "AC文字列を生成し、addtl_consentクッキーをミラーリングし、Googleの追加同意プロバイダーリストを訪問者に表示します - 完全なGoogle広告/GAM収益化に必要です。"
 
@@ -3206,7 +3206,7 @@ msgstr "機能一覧"
 msgid "Connected to SureCookie"
 msgstr "SureCookieに接続済み"
 
-#: build/admin.js:48
+#: build/admin.js:49
 #: build/onboarding.js:7
 #: build/onboarding.js:14
 msgid "Back"
@@ -3221,7 +3221,7 @@ msgstr "次へ"
 msgid "Skip"
 msgstr "スキップ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 #: build/onboarding.js:6
 msgid "Connecting…"
 msgstr "接続中…"
@@ -3278,7 +3278,7 @@ msgstr "完了"
 msgid "Exit Setup"
 msgstr "セットアップを終了する"
 
-#: build/admin.js:61
+#: build/admin.js:62
 #: build/public.js:4
 msgid "This website uses cookies to enhance your browsing experience, personalize content, provide social media features, and analyze our traffic. You can review and manage your cookie settings at any time, or accept all cookies to proceed."
 msgstr "このウェブサイトは、閲覧体験の向上、コンテンツのパーソナライズ、ソーシャルメディア機能の提供、およびトラフィック分析のためにクッキーを使用しています。クッキー設定はいつでも確認・管理でき、すべてのクッキーを受け入れて続行することも可能です。"
@@ -3307,7 +3307,7 @@ msgstr "必須クッキーのみを受け入れる"
 msgid "Accept all cookies"
 msgstr "すべてのクッキーを受け入れる"
 
-#: build/admin.js:58
+#: build/admin.js:59
 #: build/public.js:1
 msgid "Consent Forwarding"
 msgstr "同意の転送"
@@ -3324,7 +3324,7 @@ msgstr "受信元"
 #: build/admin.js:3
 #: build/admin.js:4
 #: build/admin.js:6
-#: build/admin.js:110
+#: build/admin.js:114
 #: build/onboarding.js:1
 msgid "Received"
 msgstr "受信済み"
@@ -3369,39 +3369,39 @@ msgstr "ローカルホスト"
 msgid "Consent log export upgrade"
 msgstr "同意ログエクスポートのアップグレード"
 
-#: build/admin.js:58
+#: build/admin.js:59
 #: build/public.js:1
 msgid "Preference sections"
 msgstr "設定セクション"
 
 #: inc/api/settings.php:686
-#: build/admin.js:58
+#: build/admin.js:59
 #: build/public.js:1
 msgid "Cookies"
 msgstr "クッキー"
 
 #. translators: %d: number of partner sites
-#: build/admin.js:59
+#: build/admin.js:60
 #: build/public.js:2
 #, js-format
 msgid "%d connected site(s)"
 msgstr "%d 接続済みサイト"
 
-#: build/admin.js:59
+#: build/admin.js:60
 #: build/public.js:2
 msgid "Sites that will receive your consent"
 msgstr "同意を受け取るサイト"
 
-#: build/admin.js:59
+#: build/admin.js:60
 #: build/public.js:2
 msgid "No partner sites configured."
 msgstr "パートナーサイトが設定されていません。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Cookie Notice"
 msgstr "クッキーノーティス"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Automatically sync cookie consent across multiple domains and forward consent choices to connected services, without asking visitors to consent again."
 msgstr "複数のドメイン間でクッキー同意を自動的に同期し、接続されたサービスに同意の選択を転送します。訪問者に再度同意を求めることはありません。"
 
@@ -3467,126 +3467,126 @@ msgid "%d of these logs was shared with connected partner sites. Deleting will a
 msgid_plural "%d of these logs were shared with connected partner sites. Deleting will also erase those forwarded copies (GDPR Art. 17)."
 msgstr[0] "%d 件のログが連携パートナーサイトと共有されました。削除すると、転送されたコピーも消去されます（GDPR 第17条）。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Admin and plugin preferences for SureCookie."
 msgstr "SureCookie の管理者およびプラグイン設定。"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "SureCookie Admin Menu"
 msgstr "SureCookie 管理メニュー"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "Toggle to show SureCookie in the main menu or under Settings → SureCookie."
 msgstr "SureCookie をメインメニューに表示するか、設定 → SureCookie の下に表示するかを切り替えます。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Connect Your AI Client"
 msgstr "AI クライアントを接続"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Create an Application Password"
 msgstr "アプリケーションパスワードを作成"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Open Application Passwords"
 msgstr "アプリケーションパスワードを開く"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Add to your AI client:"
 msgstr "AI クライアントに追加："
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Learn more about the WordPress MCP Adapter"
 msgstr "WordPress MCP アダプターについて詳しく知る"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Claude Code"
 msgstr "Claude Code"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Claude Desktop"
 msgstr "Claude Desktop"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Cursor"
 msgstr "Cursor"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "VS Code"
 msgstr "VS Code"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "SureCookie Only"
 msgstr "SureCookie のみ"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Global"
 msgstr "グローバル"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Copy setup prompt for AI client"
 msgstr "AI クライアント用のセットアッププロンプトをコピー"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Prompt copied! Paste it into your AI client."
 msgstr "プロンプトをコピーしました！AI クライアントに貼り付けてください。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Failed to copy prompt to clipboard"
 msgstr "プロンプトのクリップボードへのコピーに失敗しました"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Copy JSON config"
 msgstr "JSON 設定をコピー"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Copied to clipboard"
 msgstr "クリップボードにコピーされました"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Failed to copy to clipboard"
 msgstr "クリップボードへのコピーに失敗しました"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "MCP Adapter plugin not detected"
 msgstr "MCP アダプタープラグインが検出されません"
 
 #. translators: %s: WP MCP Adapter plugin name.
-#: build/admin.js:107
+#: build/admin.js:111
 #, js-format
 msgid "To connect AI clients to your site, the %s plugin is required. Download the latest release from GitHub, upload it via Plugins > Add New > Upload Plugin, and activate."
 msgstr "AI クライアントをサイトに接続するには、%s プラグインが必要です。GitHub から最新リリースをダウンロードし、プラグイン > 新規追加 > プラグインのアップロードからアップロードして有効化してください。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Download from GitHub"
 msgstr "GitHub からダウンロード"
 
 #: build/admin.js:2
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "MCP"
 msgstr "MCP"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Configure AI client access to SureCookie through the Model Context Protocol."
 msgstr "モデルコンテキストプロトコルを通じて SureCookie への AI クライアントアクセスを設定します。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Enable MCP"
 msgstr "MCP を有効化"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "WordPress Abilities API not available"
 msgstr "WordPress Abilities API が利用できません"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "MCP requires the WordPress Abilities API (WordPress 6.9 or later). Update WordPress to use this feature."
 msgstr "MCPはWordPressのAbilities API（WordPress 6.9以降）が必要です。この機能を使用するにはWordPressを更新してください。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Unsaved changes"
 msgstr "未保存の変更"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr "MCPエンドポイントは設定を保存した後にのみ有効になります。"
 
@@ -3656,7 +3656,7 @@ msgid "Daily page budget reached. The scheduled scan will retry automatically."
 msgstr "1日のページ予算に達しました。スケジュールされたスキャンは自動的に再試行されます。"
 
 #: build/admin.js:2
-#: build/admin.js:97
+#: build/admin.js:101
 msgid "Manual"
 msgstr "手動"
 
@@ -3720,205 +3720,205 @@ msgstr "再要求を確認"
 msgid "New"
 msgstr "新規"
 
-#: build/admin.js:51
-#: build/admin.js:96
+#: build/admin.js:52
+#: build/admin.js:100
 msgid "Automatic Scanning"
 msgstr "自動スキャン"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Manage"
 msgstr "管理"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Since the last scan:"
 msgstr "前回のスキャン以降："
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "new cookie"
 msgid_plural "new cookies"
 msgstr[0] "新しいクッキー"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "removed"
 msgstr "削除済み"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "new tracker domain"
 msgid_plural "new tracker domains"
 msgstr[0] "新しいトラッカードメイン"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "No scans yet. Schedule automatic scans to track changes over time."
 msgstr "まだスキャンはありません。自動スキャンをスケジュールして、時間経過による変化を追跡しましょう。"
 
 #. translators: %s: next scan date
-#: build/admin.js:52
+#: build/admin.js:53
 #, js-format
 msgid "Next scan: %s"
 msgstr "次のスキャン: %s"
 
-#: build/admin.js:52
+#: build/admin.js:53
 msgid "Scheduling is off"
 msgstr "スケジューリングはオフです"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Network-activated"
 msgstr "ネットワークで有効化済み"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Manage in Network Admin"
 msgstr "ネットワーク管理で管理"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Google Consent Mode is enabled, so SureCookie allows Google's Consent Mode scripts to function correctly. As a result, this script cannot be blocked."
 msgstr "Google同意モードが有効になっているため、SureCookieはGoogleの同意モードスクリプトが正しく機能するようにします。そのため、このスクリプトはブロックできません。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Necessary"
 msgstr "必要"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "What Changed in the Last Scan"
 msgstr "前回のスキャンで変更された内容"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Cookies and tracker domains that changed compared to the previous scan."
 msgstr "前回のスキャンと比較して変更されたクッキーおよびトラッカードメイン。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "No differences were detected compared to the previous scan."
 msgstr "前回のスキャンと比較して差異は検出されませんでした。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "New Cookies"
 msgstr "新しいクッキー"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "No Longer Detected"
 msgstr "検出されなくなったもの"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Recategorized"
 msgstr "再分類されたもの"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "New Tracker Domains"
 msgstr "新しいトラッカードメイン"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Third-party"
 msgstr "サードパーティ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Monthly"
 msgstr "毎月"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Re-scan your site once a month."
 msgstr "サイトを月に一度再スキャンしてください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Weekly"
 msgstr "毎週"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Re-scan every week for faster drift detection."
 msgstr "より早い変化検出のために毎週再スキャンしてください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "All Published Content"
 msgstr "公開済みのすべてのコンテンツ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Enable Automatic Scanning"
 msgstr "自動スキャンを有効にする"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Run scheduled scans in the background and detect changes automatically."
 msgstr "バックグラウンドでスケジュールされたスキャンを実行し、変更を自動的に検出します。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Scan Frequency"
 msgstr "スキャン頻度"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "WordPress cron is disabled"
 msgstr "WordPressのcronが無効です"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Scheduled scans rely on cron. Ask your host to set up a real server cron job so automatic scans run on time."
 msgstr "スケジュールされたスキャンはcronに依存しています。ホスティング提供者に依頼して、実際のサーバーcronジョブを設定し、自動スキャンが時間通りに実行されるようにしてください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Last Scan"
 msgstr "最終スキャン"
 
 #. translators: %s: last scan date-time
-#: build/admin.js:97
+#: build/admin.js:101
 #, js-format
 msgid "Scanned on %s"
 msgstr "%s にスキャン済み"
 
-#: build/admin.js:97
+#: build/admin.js:101
 msgid "Scheduled"
 msgstr "スケジュール済み"
 
 #. translators: %d: number of new cookies
-#: build/admin.js:99
+#: build/admin.js:103
 #, js-format
 msgid "%d New Cookies"
 msgstr "%d 新しいクッキー"
 
 #. translators: %d: number of cookies no longer detected
-#: build/admin.js:100
+#: build/admin.js:104
 #, js-format
 msgid "%d Removed"
 msgstr "%d 削除済み"
 
 #. translators: %d: number of recategorized cookies
-#: build/admin.js:101
+#: build/admin.js:105
 #, js-format
 msgid "%d Recategorized"
 msgstr "%d 再分類済み"
 
 #. translators: %d: number of new tracker domains
-#: build/admin.js:102
+#: build/admin.js:106
 #, js-format
 msgid "%d New Tracker Domains"
 msgstr "%d 新しいトラッカードメイン"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "View Changes"
 msgstr "変更を表示"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "No scans yet - run your first scan to start monitoring changes."
 msgstr "まだスキャンされていません - 最初のスキャンを実行して変更の監視を開始してください。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Stay Compliant Automatically"
 msgstr "自動でコンプライアンスを維持"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Get weekly scans, instant alerts, smart classification, and automatic protection from new trackers."
 msgstr "毎週のスキャン、即時アラート、スマート分類、新しいトラッカーからの自動保護を受け取ります。"
 
 #. translators: 1: remaining pages, 2: total daily page budget
-#: build/admin.js:81
+#: build/admin.js:85
 #, js-format
 msgid "%1$d of %2$d daily pages remaining on this site"
 msgstr "%2$d中%1$dの1日のページがこのサイトで残っています"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Terms and Conditions"
 msgstr "利用規約"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:6
 msgid "Cookie Scanning Not Available on Local Sites"
 msgstr "ローカルサイトではクッキースキャンは利用できません"
 
-#: build/admin.js:85
+#: build/admin.js:89
 #: build/onboarding.js:6
 msgid "This site is running on a local or development environment that our cloud scanner cannot reach. Cookie scanning will be available once your site is live on a publicly accessible domain."
 msgstr "このサイトはローカルまたは開発環境で稼働しており、当社のクラウドスキャナーがアクセスできません。サイトが公開ドメインでライブになれば、クッキースキャンが利用可能になります。"
@@ -3937,62 +3937,62 @@ msgstr "SureRankでウェブサイトのトラフィックを増やしましょ�
 msgid "Page failed: %1$s - %2$s"
 msgstr "ページの処理に失敗しました: %1$s - %2$s"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "WP-Cron disabled - scans won’t run automatically"
 msgstr "WP-Cronが無効のため、スキャンは自動実行されません"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:7
 msgid "Consider Plan Upgrade"
 msgstr "プランのアップグレードをご検討ください"
 
 #. translators: 1: pages scanned, 2: pages submitted
-#: build/admin.js:72
+#: build/admin.js:76
 #, js-format
 msgid "Scanned %1$d of %2$d pages - your daily page budget is used up. The remaining pages will scan after it resets."
 msgstr "%1$d / %2$d ページをスキャンしました。1日分のページ枠を使い切りました。残りのページは枠のリセット後にスキャンされます。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Update the environment variables"
 msgstr "環境変数を更新する"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "WP_API_USERNAME"
 msgstr "WP_API_USERNAME"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Your WordPress username (prefilled)."
 msgstr "あなたのWordPressユーザー名（入力済み）。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "WP_API_PASSWORD"
 msgstr "WP_API_PASSWORD"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Replace \"your-application-password\" with the password from Step 1."
 msgstr "\"your-application-password\" をステップ1で取得したパスワードに置き換えてください。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Verify Node.js version"
 msgstr "Node.jsのバージョンを確認する"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "In your terminal, run:"
 msgstr "ターミナルで次のコマンドを実行してください:"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "The version must be 20.1 or higher."
 msgstr "バージョンは20.1以上である必要があります。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "If it is lower, run:"
 msgstr "それより低い場合は、次のコマンドを実行してください:"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Restart your AI client and paste the copied prompt again into your AI client."
 msgstr "AIクライアントを再起動し、コピーしたプロンプトをAIクライアントに再度貼り付けてください。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr "AIクライアントがWordPressサイトに接続されました。ぜひご活用ください！"
 
@@ -4008,7 +4008,7 @@ msgstr "認証されていないユーザーです。"
 msgid "Invalid parameters."
 msgstr "無効なパラメーターです。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "More scan limits, geographic targeting, re-consent widget, and more."
 msgstr "より多くのスキャン制限、地理的ターゲティング、再同意ウィジェットなど。"
 
@@ -4060,67 +4060,67 @@ msgstr "同意ログをエクスポート"
 msgid "Upgrade to premium to download CSV report for legal audits and GDPR Article 7 documentation."
 msgstr "法的監査およびGDPR第7条の文書化のためにCSVレポートをダウンロードするにはプレミアムにアップグレードしてください。"
 
-#: build/admin.js:55
+#: build/admin.js:56
 msgid "Do More with SureCookie Premium"
 msgstr "SureCookieプレミアムでさらにできること"
 
-#: build/admin.js:75
+#: build/admin.js:79
 #: build/onboarding.js:10
 msgid "Checking your scan limits…"
 msgstr "スキャン制限を確認中…"
 
-#: build/admin.js:75
+#: build/admin.js:79
 #: build/onboarding.js:10
 msgid "Run your first scan to connect this site with SureCookie. Your plan's full scan limits unlock automatically once the connection is established."
 msgstr "最初のスキャンを実行してこのサイトをSureCookieに接続してください。接続が確立されるとプランの全スキャン制限が自動的に解除されます。"
 
 #. translators: %d: maximum pages
-#: build/admin.js:76
+#: build/admin.js:80
 #, js-format
 msgid "We'll visit the selected content to detect all cookies in use. Allowed %d pages per scan due to resource constraints."
 msgstr "選択したコンテンツを訪問して使用中のすべてのクッキーを検出します。リソース制約によりスキャンあたり最大 %d ページが許可されています。"
 
 #. translators: %d: maximum items
-#: build/admin.js:83
+#: build/admin.js:87
 #: build/onboarding.js:13
 #, js-format
 msgid "Select up to %d items to scan…"
 msgstr "最大 %d 件のアイテムを選択してスキャン…"
 
-#: build/admin.js:83
+#: build/admin.js:87
 #: build/onboarding.js:13
 msgid "Select Content"
 msgstr "コンテンツを選択"
 
-#: build/admin.js:84
+#: build/admin.js:88
 msgid "Select the content you want to scan."
 msgstr "スキャンしたいコンテンツを選択してください。"
 
-#: build/admin.js:71
+#: build/admin.js:75
 msgid "Scanning your content for cookies. This may take a few minutes."
 msgstr "クッキーのためにコンテンツをスキャンしています。数分かかる場合があります。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Content from Manual Scan"
 msgstr "手動スキャンのコンテンツ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Scan all published content, as per plan limit."
 msgstr "プランの制限に従って公開済みのすべてのコンテンツをスキャンします。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Selected Content"
 msgstr "選択されたコンテンツ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Choose specific content to scan below."
 msgstr "以下からスキャンする特定のコンテンツを選択してください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Content to Scan"
 msgstr "スキャンするコンテンツ"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Select content to scan…"
 msgstr "スキャンするコンテンツを選択…"
 
@@ -4156,7 +4156,7 @@ msgstr "ライセンスが有効化されました"
 msgid "Activating…"
 msgstr "有効化中…"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:6
 #: build/onboarding.js:7
 msgid "Activate License"
@@ -4192,43 +4192,43 @@ msgstr "この文書には、SureCookieによって保存された同意の選�
 msgid "This document is automatically generated by the SureCookie plugin and contains a record of the consent choice stored at the time of export. It may be used for internal documentation and review. Legal requirements may vary."
 msgstr "この文書はSureCookieプラグインによって自動生成され、エクスポート時に保存された同意の選択記録が含まれています。内部文書やレビューに使用される場合があります。法的要件は異なる場合があります。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Enter your custom CSS here"
 msgstr "ここにカスタムCSSを入力してください"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Use !important to override inline styles"
 msgstr "インラインスタイルを上書きするには!importantを使用してください"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Your cookie banner is enabled."
 msgstr "クッキーバナーは有効になっています。"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Your cookie banner is currently disabled."
 msgstr "クッキーバナーは現在無効になっています。"
 
 #: build/admin.js:2
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:7
 msgid "Activate SureCookie Pro"
 msgstr "SureCookie Proを有効化"
 
 #. translators: %d: maximum pages
-#: build/admin.js:73
+#: build/admin.js:77
 #, js-format
 msgid "Your first scan can cover up to %d pages while we connect your site. Remove the extra pages to start - Your plan's full limits unlock automatically afterward."
 msgstr "最初のスキャンでは、サイト接続中に最大%dページをカバーできます。開始するには余分なページを削除してください。その後、プランの全制限が自動的に解除されます。"
 
 #. translators: %d: maximum pages
-#: build/admin.js:75
+#: build/admin.js:79
 #: build/onboarding.js:10
 #, js-format
 msgid "The free plan supports scanning up to %d pages. Upgrade now to scan more pages and keep your cookie list updated automatically."
 msgstr "無料プランでは最大%dページのスキャンがサポートされています。今すぐアップグレードして、より多くのページをスキャンし、クッキーリストを自動的に更新しましょう。"
 
 #. translators: %s: SureCookie plan tier, e.g. "Business"
-#: build/admin.js:86
+#: build/admin.js:90
 #, js-format
 msgid "%s version"
 msgstr "%sバージョン"
@@ -4246,7 +4246,7 @@ msgstr "WordPressのメールは、ウェブホストが信頼性の高い配信
 msgid "Spectra Blocks is a complete rebuild of Spectra on WordPress's modern core-block APIs - an AI website builder built directly into the Block Editor."
 msgstr "Spectra Blocksは、WordPressの最新のコアブロックAPI上にSpectraを完全に再構築したもので、ブロックエディターに直接組み込まれたAIウェブサイトビルダーです。"
 
-#: inc/api/cookies.php:480
+#: inc/api/cookies.php:525
 msgid "Failed to update cookie categories: "
 msgstr "クッキーカテゴリの更新に失敗しました:"
 
@@ -4358,12 +4358,12 @@ msgstr "支援スキャン進行中…"
 msgid "Assisted scan finished."
 msgstr "支援スキャンが終了しました。"
 
-#: inc/services/known-services-service.php:71
-#: inc/services/known-services-service.php:201
+#: inc/services/known-services-service.php:67
+#: inc/services/known-services-service.php:197
 msgid "Unknown service."
 msgstr "不明なサービスです。"
 
-#: inc/services/known-services-service.php:78
+#: inc/services/known-services-service.php:74
 msgid "This is a Pro service. Upgrade to add it."
 msgstr "これはProサービスです。追加するにはアップグレードしてください。"
 
@@ -4376,29 +4376,29 @@ msgid "Cookies cannot be moved to the category being deleted."
 msgstr "削除中のカテゴリにクッキーを移動できません。"
 
 #: inc/services/cookie-category-service.php:275
-#: inc/services/cookie-service.php:389
-#: inc/services/cookie-service.php:535
+#: inc/services/cookie-service.php:457
+#: inc/services/cookie-service.php:603
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "選択されたカテゴリは存在しません。再読み込みして再試行してください。"
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:584
 msgid "No cookies selected."
 msgstr "クッキーが選択されていません。"
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:525
+#: inc/services/cookie-service.php:593
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "1回のリクエストでクッキーが多すぎます。最大 %d 個まで選択してください。"
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:644
+#: inc/services/cookie-service.php:712
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d 個のクッキーが選択されたカテゴリに移動されました。"
 
-#: inc/services/cookie-service.php:652
+#: inc/services/cookie-service.php:720
 msgid "No cookies could be updated."
 msgstr "更新できるクッキーがありませんでした。"
 
@@ -4407,23 +4407,23 @@ msgid "Scanning"
 msgstr "スキャン中"
 
 #: build/admin.js:2
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Known Services"
 msgstr "既知のサービス"
 
 #: build/admin.js:2
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Scripts and Embeds"
 msgstr "スクリプトと埋め込み"
 
 #: inc/api/settings.php:648
 #: build/admin.js:2
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Geographic Rules"
 msgstr "地理的ルール"
 
 #: build/admin.js:2
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Consent Sharing"
 msgstr "同意の共有"
 
@@ -4488,121 +4488,121 @@ msgstr "選択をクリア"
 msgid "Select all cookies"
 msgstr "すべてのクッキーを選択"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Assigned cookies will be moved to another category instead of being deleted."
 msgstr "割り当てられたクッキーは削除されず、別のカテゴリに移動されます。"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Move Cookies To"
 msgstr "クッキーを移動先へ"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Search services…"
 msgstr "サービスを検索…"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Search services"
 msgstr "サービスを検索"
 
-#: build/admin.js:32
-#: build/admin.js:45
+#: build/admin.js:33
+#: build/admin.js:46
 msgid "All Categories"
 msgstr "すべてのカテゴリ"
 
 #. translators: %d: number of cookies
-#: build/admin.js:33
+#: build/admin.js:34
 #, js-format
 msgid "%d cookie"
 msgid_plural "%d cookies"
 msgstr[0] "%d 個のクッキー"
 
 #. translators: %d: number of iframes
-#: build/admin.js:34
+#: build/admin.js:35
 #, js-format
 msgid "%d iframe"
 msgid_plural "%d iframes"
 msgstr[0] "%d 個の iframe"
 
 #. translators: %d: number of scripts
-#: build/admin.js:35
+#: build/admin.js:36
 #, js-format
 msgid "%d script"
 msgid_plural "%d scripts"
 msgstr[0] "%d 個のスクリプト"
 
-#: build/admin.js:37
+#: build/admin.js:38
 #: build/onboarding.js:14
 msgid "Added"
 msgstr "追加済み"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "Detected"
 msgstr "検出済み"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "Remove"
 msgstr "削除"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "Add Service"
 msgstr "サービスを追加"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "No services match your search."
 msgstr "検索に一致するサービスがありません。"
 
-#: build/admin.js:37
-#: build/admin.js:86
+#: build/admin.js:38
+#: build/admin.js:90
 msgid "Loads before consent"
 msgstr "同意前に読み込み"
 
 #. translators: %s: service name (e.g. Stripe)
-#: build/admin.js:38
+#: build/admin.js:39
 #, js-format
 msgid "%s is a necessary service, so it loads before consent - its cookies can be set without consent."
 msgstr "%s は必要なサービスのため、同意前に読み込まれます。そのクッキーは同意なしで設定される可能性があります。"
 
-#: build/admin.js:38
+#: build/admin.js:39
 msgid "Blocked When \"Block Scripts until Consent\" Is On"
 msgstr "「同意までスクリプトをブロック」がオンのときにブロックされる"
 
 #. translators: %1$s: service name; %2$s: consent category name
-#: build/admin.js:39
+#: build/admin.js:40
 #, js-format
 msgid "When blocking is on, %1$s is blocked until visitors accept “%2$s”, so a scan never sees these cookies. Declaring them here keeps your cookie policy complete."
 msgstr "ブロックがオンの場合、%1$s は訪問者が「%2$s」を承諾するまでブロックされるため、スキャンでこれらのクッキーは検出されません。ここで宣言することでクッキーポリシーを完全に保てます。"
 
 #. translators: %d: number of cookies
-#: build/admin.js:41
+#: build/admin.js:42
 #, js-format
 msgid "%d cookie added to your cookie policy"
 msgid_plural "%d cookies added to your cookie policy"
 msgstr[0] "%d 個のクッキーがクッキーポリシーに追加されました"
 
 #. translators: %d: number of iframes
-#: build/admin.js:42
+#: build/admin.js:43
 #, js-format
 msgid "%d embed blocked before consent"
 msgid_plural "%d embeds blocked before consent"
 msgstr[0] "%d 個の埋め込みが同意前にブロックされました"
 
 #. translators: %d: number of scripts
-#: build/admin.js:43
+#: build/admin.js:44
 #, js-format
 msgid "%d script blocked before consent"
 msgid_plural "%d scripts blocked before consent"
 msgstr[0] "%d 個のスクリプトが同意前にブロックされました"
 
-#: build/admin.js:44
+#: build/admin.js:45
 msgid "No categories available"
 msgstr "利用可能なカテゴリがありません"
 
-#: build/admin.js:44
+#: build/admin.js:45
 msgid "Create a cookie category first - new cookies land in Uncategorized until then."
 msgstr "まずクッキーカテゴリを作成してください。新しいクッキーはそれまで「未分類」に入ります。"
 
 #. translators: %d: number of days
-#: build/admin.js:45
+#: build/admin.js:46
 #, js-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -4610,717 +4610,717 @@ msgstr[0] "%d 日"
 
 #: inc/modules/cookie-policy/shortcode.php:404
 #: build/admin.js:23
-#: build/admin.js:45
+#: build/admin.js:46
 #: build/onboarding.js:1
 msgid "Session"
 msgstr "セッション"
 
-#: build/admin.js:45
+#: build/admin.js:46
 msgid "Failed to add service"
 msgstr "サービスの追加に失敗しました"
 
-#: build/admin.js:45
+#: build/admin.js:46
 msgid "Failed to remove service"
 msgstr "サービスの削除に失敗しました"
 
-#: build/admin.js:45
+#: build/admin.js:46
 msgid "Service removed"
 msgstr "サービスが削除されました"
 
 #. translators: %s: service name (e.g. YouTube)
-#: build/admin.js:46
+#: build/admin.js:47
 #, js-format
 msgid "Added %s"
 msgstr "%s を追加しました"
 
 #. translators: %d: number of cookies declared
-#: build/admin.js:47
+#: build/admin.js:48
 #, js-format
 msgid "%d cookie was added to your cookie policy."
 msgid_plural "%d cookies were added to your cookie policy."
 msgstr[0] "%d 個のクッキーがクッキーポリシーに追加されました。"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "This service is now managed. It stays blocked before consent."
 msgstr "このサービスは現在管理されています。同意前はブロックされたままです。"
 
 #. translators: %s: service name
-#: build/admin.js:48
 #: build/admin.js:49
+#: build/admin.js:50
 #, js-format
 msgid "Add %s"
 msgstr "%s を追加"
 
-#: build/admin.js:48
-#: build/admin.js:51
-#: build/admin.js:88
+#: build/admin.js:49
+#: build/admin.js:52
+#: build/admin.js:92
 msgid "Add from a Known Service"
 msgstr "既知のサービスから追加"
 
-#: build/admin.js:48
 #: build/admin.js:49
+#: build/admin.js:50
 msgid "Review what this adds to your cookie policy, then confirm."
 msgstr "これがクッキーポリシーに追加する内容を確認し、確定してください。"
 
-#: build/admin.js:48
+#: build/admin.js:49
 msgid "Quickly add popular services like YouTube or Google Analytics in one click. Perfect for scripts that scanners can't detect before consent - ensuring your cookie policy stays complete."
 msgstr "YouTube や Google Analytics などの人気サービスをワンクリックで素早く追加できます。スキャナーが同意前に検出できないスクリプトに最適で、クッキーポリシーの完全性を保ちます。"
 
-#: build/admin.js:48
+#: build/admin.js:49
 msgid "Could not load the services catalog. Please try again."
 msgstr "サービスカタログを読み込めませんでした。再試行してください。"
 
-#: build/admin.js:48
+#: build/admin.js:49
 msgid "This is a Pro service"
 msgstr "これはプロ向けサービスです"
 
-#: build/admin.js:48
+#: build/admin.js:49
 msgid "Upgrade to add this service and declare its cookies in one click."
 msgstr "このサービスを追加し、そのクッキーをワンクリックで宣言するにはアップグレードしてください。"
 
-#: build/admin.js:48
 #: build/admin.js:49
+#: build/admin.js:50
 msgid "Unlock Every Tracking Service"
 msgstr "すべてのトラッキングサービスをアンロック"
 
-#: build/admin.js:48
 #: build/admin.js:49
+#: build/admin.js:50
 msgid "Free covers the most common services. Upgrade to add any service in the catalog in one click."
 msgstr "無料プランは最も一般的なサービスをカバーしています。カタログ内の任意のサービスをワンクリックで追加するにはアップグレードしてください。"
 
-#: build/admin.js:48
 #: build/admin.js:49
+#: build/admin.js:50
 msgid "Confirm Add"
 msgstr "追加を確認"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Quickly add popular services like YouTube or Google Analytics in one click. Perfect for scripts that scanners can’t detect before consent - ensuring your cookie policy stays complete."
 msgstr "YouTubeやGoogle Analyticsなどの人気サービスをワンクリックで素早く追加できます。スキャナーが同意前に検出できないスクリプトに最適で、クッキーポリシーを完全に保つことができます。"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to load services"
 msgstr "サービスの読み込みに失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "An error occurred while loading services. Please refresh the page to try again."
 msgstr "サービスの読み込み中にエラーが発生しました。再試行するにはページを更新してください。"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Installed Services"
 msgstr "インストール済みサービス"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Available Services"
 msgstr "利用可能なサービス"
 
-#: build/admin.js:49
 #: build/admin.js:50
+#: build/admin.js:51
 msgid "Failed to update cookie categories"
 msgstr "クッキーカテゴリの更新に失敗しました"
 
-#: build/admin.js:49
 #: build/admin.js:50
+#: build/admin.js:51
 msgid "Cookie categories updated"
 msgstr "クッキーカテゴリが更新されました"
 
 #. translators: %d: number of cookies that could not be updated.
-#: build/admin.js:50
+#: build/admin.js:51
 #, js-format
 msgid "%d cookie(s) could not be updated. Reload and try again."
 msgstr "%d 個のクッキーを更新できませんでした。再読み込みして再試行してください。"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Change Cookie Categories Carefully"
 msgstr "クッキーカテゴリの変更は慎重に行ってください"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "A cookie's category determines how it behaves when users decline consent. Cookies marked as Essential always remain active. Moving a cookie out of Essential may cause it to be blocked or deleted, which can break features like login or checkout. Similarly, assigning tracking cookies to Essential may conflict with privacy regulations. Your choice is remembered, so a later scan will not move the cookie back."
 msgstr "クッキーのカテゴリは、ユーザーが同意を拒否した場合の動作を決定します。必須としてマークされたクッキーは常に有効のままです。必須からクッキーを移動すると、ブロックまたは削除され、ログインやチェックアウトなどの機能が壊れる可能性があります。同様に、トラッキングクッキーを必須に割り当てることはプライバシー規制と矛盾する場合があります。選択は記憶されるため、後のスキャンでクッキーが元に戻されることはありません。"
 
 #. translators: %s: service name (e.g. Google Analytics)
-#: build/admin.js:51
+#: build/admin.js:52
 #, js-format
 msgid "Looks like %s"
 msgstr "%s のようです"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "We spotted cookies from this service. Add it to declare its cookies in one step."
 msgstr "このサービスのクッキーを検出しました。一括でクッキーを宣言するために追加してください。"
 
-#: build/admin.js:51
-#: build/admin.js:86
+#: build/admin.js:52
+#: build/admin.js:90
 msgid "Add as Service"
 msgstr "サービスとして追加"
 
-#: build/admin.js:51
+#: build/admin.js:52
 msgid "Dismiss"
 msgstr "却下"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Welcome to SureCookie!"
 msgstr "SureCookieへようこそ！"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Get your site compliant in minutes - show a cookie banner, block trackers before consent, and automatically detect cookies used on your site."
 msgstr "数分でサイトを準拠させましょう - クッキーバナーを表示し、同意前にトラッカーをブロックし、サイトで使用されているクッキーを自動検出します。"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Set Up Cookie Banner"
 msgstr "クッキーバナーを設定"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Scan My Site"
 msgstr "サイトをスキャン"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "Start with the banner, then scan your site to detect cookies."
 msgstr "まずバナーを設定し、その後サイトをスキャンしてクッキーを検出します。"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "SureForms Video Thumbnail"
 msgstr "SureForms ビデオサムネイル"
 
-#: build/admin.js:58
+#: build/admin.js:59
 msgid "SureForms: Custom WordPress Forms MADE SIMPLE"
 msgstr "SureForms: カスタムWordPressフォームが簡単に作成可能"
 
-#: build/admin.js:67
+#: build/admin.js:68
 msgid "Possible causes: Scan server under heavy load, your site is unreachable from our scanner, your site has CRON issues, or a page caused a browser timeout."
 msgstr "考えられる原因：スキャンサーバーの過負荷、スキャナーからサイトにアクセスできない、サイトにCRONの問題がある、またはページがブラウザのタイムアウトを引き起こした。"
 
-#: build/admin.js:67
+#: build/admin.js:68
 msgid "Some pages could not be analyzed"
 msgstr "一部のページを分析できませんでした"
 
 #. translators: 1: scanned pages, 2: total pages, 3: failed pages
-#: build/admin.js:68
+#: build/admin.js:69
 #, js-format
 msgid "Scanned %1$d of %2$d pages - %3$d could not be analyzed. The cookies we did find are saved, and results add up across scans, so you can re-run the scan to pick up the rest."
 msgstr "%2$d ページ中 %1$d ページをスキャンしました - %3$d ページを分析できませんでした。検出したクッキーは保存され、結果はスキャンを重ねるごとに加算されるため、残りを取得するために再スキャンできます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Once the scan is complete, the cookies it found appear under <a>Cookies</a>, and the scripts and embeds under <b>Scripts and Embeds</b>."
 msgstr "スキャンが完了すると、検出されたクッキーは<a>クッキー</a>の下に、スクリプトと埋め込みは<b>スクリプトと埋め込み</b>の下に表示されます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Keep the scan tab in front until it finishes: browsers slow down background tabs."
 msgstr "スキャンが完了するまでタブを前面に保ってください：ブラウザはバックグラウンドタブを遅くします。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Pages already collected are saved, so closing the tab early keeps what it found."
 msgstr "既に収集されたページは保存されるため、タブを早めに閉じても検出済みの内容は保持されます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "An ad blocker or privacy extension in this browser can hide trackers from the scan."
 msgstr "このブラウザの広告ブロッカーやプライバシー拡張機能がスキャンからトラッカーを隠すことがあります。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "If remote scanning fails, try Assisted Scanner method: <button></button>"
 msgstr "リモートスキャンが失敗した場合は、アシストスキャナーメソッドを試してください: <button></button>"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Switch to Default Scanner"
 msgstr "デフォルトスキャナーに切り替え"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Switch to Assisted Scanner"
 msgstr "アシストスキャナーに切り替え"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Scan From This Browser"
 msgstr "このブラウザからスキャン"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Your host blocked the scanner"
 msgstr "ホストがスキャナーをブロックしました"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Your site's firewall or bot protection served our scanner a security challenge instead of your page, so the scan completed without results. This does not affect your visitors, only automated scanners. Allowlist the SureCookie scanner (or ask your host to) and run the scan again."
 msgstr "サイトのファイアウォールやボット保護がスキャナーに対してセキュリティチャレンジを出したため、スキャンは結果なしで完了しました。これは訪問者には影響せず、自動スキャナーのみが対象です。SureCookieスキャナーをホワイトリストに追加するか（またはホストに依頼して）再度スキャンを実行してください。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "Services we still detected on your site (via a first-party check):"
 msgstr "サイトでまだ検出されたサービス（ファーストパーティチェックによる）:"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "How to allowlist the scanner"
 msgstr "スキャナーをホワイトリストに登録する方法"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "No cookies found in this browser scan"
 msgstr "このブラウザスキャンでクッキーは見つかりませんでした"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "We found services on your pages that your browser did not load, which usually means an ad blocker or privacy extension is active. Try again in a browser with extensions disabled, or add the cookies manually."
 msgstr "ページ上でブラウザが読み込まなかったサービスが見つかりました。通常、これは広告ブロッカーやプライバシー拡張機能が有効であることを意味します。拡張機能を無効にしたブラウザで再試行するか、クッキーを手動で追加してください。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "The scan visited your pages but no cookies were set. Some services only set cookies after a visitor accepts the banner, so they may not appear. You can also add cookies manually."
 msgstr "スキャンはページを訪問しましたが、クッキーは設定されませんでした。一部のサービスは訪問者がバナーを承諾した後にのみクッキーを設定するため、表示されない場合があります。クッキーは手動で追加することもできます。"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "No cookies found in this scan"
 msgstr "このスキャンでクッキーは見つかりませんでした"
 
-#: build/admin.js:68
+#: build/admin.js:69
 msgid "The scanner reached your site but did not detect any cookies. Some services only set cookies after a visitor accepts the banner, so they may not appear in a scan. You can also add cookies manually."
 msgstr "スキャナーはサイトに到達しましたが、クッキーは検出されませんでした。一部のサービスは訪問者がバナーを承諾した後にのみクッキーを設定するため、スキャンでは表示されない場合があります。クッキーは手動で追加することもできます。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Scan from Your Browser (Best for this site)"
 msgstr "あなたのブラウザからスキャン（このサイトに最適）"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Scan from Your Browser"
 msgstr "あなたのブラウザからスキャン"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Our scanner couldn't fully access your site due to server restrictions. This method runs the scan directly in your browser, ensuring accurate detection without being blocked."
 msgstr "サーバーの制限によりスキャナーがサイトに完全にアクセスできませんでした。この方法はブラウザで直接スキャンを実行し、ブロックされることなく正確な検出を保証します。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Run the scan directly in your browser. This helps detect cookies, scripts, and embeds even when external scanners are blocked."
 msgstr "ブラウザで直接スキャンを実行します。外部スキャナーがブロックされている場合でも、クッキー、スクリプト、埋め込みを検出するのに役立ちます。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Detects cookies, scripts, and embeds as your visitors would see them."
 msgstr "訪問者が見るようにクッキー、スクリプト、埋め込みを検出します。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Works even when hosting or firewall blocks external scans."
 msgstr "ホスティングやファイアウォールが外部スキャンをブロックしていても動作します。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Results appear automatically in your Tracking Manager."
 msgstr "結果は自動的にトラッキングマネージャーに表示されます。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Some advanced detections may still require a remote scan when available."
 msgstr "一部の高度な検出は、利用可能な場合にリモートスキャンが必要になることがあります。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "How this works"
 msgstr "仕組み"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Before You Start"
 msgstr "開始前に"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "To measure cookie duration accurately, this scan temporarily clears cookies for your site in this browser (including your consent choice). Your WordPress login session is preserved, so you'll remain signed in."
 msgstr "クッキーの有効期間を正確に測定するために、このスキャンでは一時的にこのブラウザのサイトのクッキー（同意の選択も含む）をクリアします。WordPressのログインセッションは保持されるため、サインイン状態は維持されます。"
 
 #. translators: %d: maximum pages
-#: build/admin.js:70
+#: build/admin.js:74
 #: build/onboarding.js:6
 #, js-format
 msgid "An assisted scan visits up to %d pages. Remove some pages to continue."
 msgstr "支援スキャンは最大 %d ページまで訪問します。続行するにはページを減らしてください。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 #: build/onboarding.js:6
 msgid "Scanning in your browser…"
 msgstr "ブラウザでスキャン中…"
 
-#: build/admin.js:70
+#: build/admin.js:74
 #: build/onboarding.js:6
 msgid "Start Browser Scan"
 msgstr "ブラウザスキャンを開始"
 
-#: build/admin.js:70
+#: build/admin.js:74
 #: build/onboarding.js:6
 msgid "A new tab opens to scan your selected pages - keep it active until it finishes."
 msgstr "選択したページをスキャンするために新しいタブが開きます - 完了するまでアクティブにしてください。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 #: build/onboarding.js:6
 msgid "Switch Back"
 msgstr "戻る"
 
-#: build/admin.js:70
+#: build/admin.js:74
 msgid "This page did not load the scanner, so it was skipped. A redirect or a login requirement usually causes this."
 msgstr "このページはスキャナーを読み込まなかったため、スキップされました。リダイレクトやログイン要件が通常の原因です。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 msgid "This page took too long to respond."
 msgstr "このページの応答に時間がかかりすぎました。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 msgid "Skipped because the scan was cancelled."
 msgstr "スキャンがキャンセルされたためスキップされました。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 msgid "This page could not be collected."
 msgstr "このページは収集できませんでした。"
 
-#: build/admin.js:70
+#: build/admin.js:74
 msgid "Pages In This Scan"
 msgstr "このスキャンのページ"
 
 #. translators: 1: cookie count, 2: script count
-#: build/admin.js:71
+#: build/admin.js:75
 #, js-format
 msgid "%1$d cookies, %2$d scripts"
 msgstr "%1$d 個のクッキー、%2$d 個のスクリプト"
 
-#: build/admin.js:71
+#: build/admin.js:75
 msgid "Collecting…"
 msgstr "収集中…"
 
-#: build/admin.js:71
+#: build/admin.js:75
 msgid "Waiting"
 msgstr "待機中"
 
-#: build/admin.js:71
+#: build/admin.js:75
 msgid "Re-scan"
 msgstr "再スキャン"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:1
 msgid "Could not start the assisted scan."
 msgstr "支援スキャンを開始できませんでした。"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:14
 msgid "Could not start the assisted scan"
 msgstr "支援スキャンを開始できませんでした"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:14
 msgid "Please try again in a moment."
 msgstr "しばらくしてからもう一度お試しください。"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:14
 msgid "Your browser blocked the scan window"
 msgstr "ブラウザがスキャンウィンドウをブロックしました"
 
-#: build/admin.js:71
+#: build/admin.js:75
 #: build/onboarding.js:14
 msgid "Allow pop-ups for this site, then start the scan again."
 msgstr "このサイトのポップアップを許可してから、再度スキャンを開始してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 msgid "View Scan Logs"
 msgstr "スキャンログを見る"
 
-#: build/admin.js:76
-#: build/admin.js:85
+#: build/admin.js:80
+#: build/admin.js:89
 msgid "Scan your website to find cookies, scripts, and trackers that require consent."
 msgstr "ウェブサイトをスキャンして、同意が必要なクッキー、スクリプト、トラッカーを見つけます。"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "This is taking a little longer than usual"
 msgstr "通常より少し時間がかかっています"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "A page is taking a while to respond, but your scan is still running in the background. Any cookies already found have been saved. You can leave this page and come back - or cancel and try again with fewer pages."
 msgstr "ページの応答に時間がかかっていますが、スキャンはバックグラウンドで実行中です。既に見つかったクッキーは保存されています。このページを離れて戻ることも、キャンセルしてページ数を減らして再試行することもできます。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Scan Queued for Later"
 msgstr "スキャンは後で実行されるようにキューに入りました"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Today's page budget is used up, so the remaining pages will scan automatically once it resets. Any cookies already found are saved. To scan sooner, run it again with fewer pages."
 msgstr "本日のページ予算が使い切られたため、残りのページはリセット後に自動的にスキャンされます。既に見つかったクッキーは保存されています。早くスキャンしたい場合は、ページ数を減らして再実行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Scan Couldn't Be Completed"
 msgstr "スキャンを完了できませんでした"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "iFrame"
 msgstr "iFrame"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Head"
 msgstr "ヘッド"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Body"
 msgstr "ボディ"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Footer"
 msgstr "フッター"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Anywhere (fallback)"
 msgstr "どこでも（フォールバック）"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "This resource is whitelisted, so it always loads - even before consent."
 msgstr "このリソースはホワイトリストに登録されているため、同意前でも常に読み込まれます。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "This script is managed by Google Consent Mode and always loads while GCM is enabled."
 msgstr "このスクリプトはGoogle同意モードで管理されており、GCMが有効な間は常に読み込まれます。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "This resource matches a whitelist rule (custom entry or common service), so it always loads."
 msgstr "このリソースはホワイトリストルール（カスタムエントリまたは一般的なサービス）に一致するため、常に読み込まれます。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Script & Iframe"
 msgstr "スクリプト＆iFrame"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Blocked until consent"
 msgstr "同意までブロック"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Not blocked"
 msgstr "ブロックされていません"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Whitelisted"
 msgstr "ホワイトリスト登録済み"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Managed by GCM"
 msgstr "GCMで管理"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Source"
 msgstr "ソース"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Managed via Known Services - its cookies are declared in your cookie policy."
 msgstr "既知のサービス経由で管理されており、そのクッキーはクッキーポリシーに記載されています。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Recognized Known Services catalog entry - Click \"Add as Service\" to declare its cookies."
 msgstr "認識された既知のサービスカタログエントリ - 「サービスとして追加」をクリックしてクッキーを宣言してください。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Managed Service"
 msgstr "管理されたサービス"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Known Service"
 msgstr "既知のサービス"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Always Allowed"
 msgstr "常に許可"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Category for"
 msgstr "カテゴリ："
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Block until consent (recommended)"
 msgstr "同意が得られるまでブロック（推奨）"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Edit Resource"
 msgstr "リソースを編集"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Add Script or Embed"
 msgstr "スクリプトまたは埋め込みを追加"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Update"
 msgstr "更新"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Behavior"
 msgstr "動作"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Whitelisted Resource Warning"
 msgstr "ホワイトリストリソース警告"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "If a resource sets cookies, allowing it directly can be a GDPR violation - only whitelist resources you are sure about."
 msgstr "リソースがクッキーを設定する場合、直接許可するとGDPR違反になる可能性があります。確実なリソースのみをホワイトリストに登録してください。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Detected by the scanner, so the value cannot be edited."
 msgstr "スキャナーによって検出されたため、値は編集できません。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "e.g. Support chat"
 msgstr "例：サポートチャット"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Domain / Host"
 msgstr "ドメイン / ホスト"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "e.g. connect.facebook.net"
 msgstr "例：connect.facebook.net"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "The host the resource loads from. Pasting a full tag or URL also works."
 msgstr "リソースが読み込まれるホスト。完全なタグやURLを貼り付けても機能します。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Path / Pattern (advanced)"
 msgstr "パス / パターン（高度）"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "e.g. /fbevents.js"
 msgstr "例：/fbevents.js"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Optional: narrow the rule to resources that also contain this path, so only one file on the host is blocked."
 msgstr "任意：このパスを含むリソースにルールを絞り込み、ホスト上の特定のファイルのみをブロックします。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Script Keywords"
 msgstr "スクリプトキーワード"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "e.g. fbq, fbq.push"
 msgstr "例：fbq, fbq.push"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "JavaScript function names to block that depend on the main script (comma separated)."
 msgstr "メインスクリプトに依存するブロック対象のJavaScript関数名（カンマ区切り）。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Script Location"
 msgstr "スクリプトの場所"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Anywhere"
 msgstr "どこでも"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Where the script loads on the page. SureCookie only looks for it in this section."
 msgstr "スクリプトがページのどこで読み込まれるか。SureCookieはこのセクションのみを確認します。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "This resource stays blocked until the visitor consents to this category."
 msgstr "訪問者がこのカテゴリに同意するまで、このリソースはブロックされたままです。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Unlock Whitelisting"
 msgstr "ホワイトリストのロック解除"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Whitelist your own scripts and common services so essential integrations keep working before consent."
 msgstr "自身のスクリプトや一般的なサービスをホワイトリストに登録し、同意前でも重要な統合が機能し続けるようにします。"
 
 #. translators: %d: number of GCM-managed services.
-#: build/admin.js:87
+#: build/admin.js:91
 #, js-format
 msgid "Managed by Google Consent Mode (%d)"
 msgstr "Google同意モードによって管理されています（%d）"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "View services"
 msgstr "サービスを見る"
 
-#: build/admin.js:86
-#: build/admin.js:87
+#: build/admin.js:90
+#: build/admin.js:91
 msgid "Managed by Google Consent Mode"
 msgstr "Google同意モードによって管理されています"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Auto-whitelisted"
 msgstr "自動ホワイトリスト登録済み"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Enter the script domain or host."
 msgstr "スクリプトのドメインまたはホストを入力してください。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Select a category."
 msgstr "カテゴリを選択してください。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "A rule for this script already exists."
 msgstr "このスクリプトのルールはすでに存在します。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Control how scripts and embeds load based on user consent - block them until allowed or mark essential ones to always run."
 msgstr "ユーザーの同意に基づいてスクリプトや埋め込みの読み込みを制御します - 許可されるまでブロックするか、重要なものは常に実行するようにマークします。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Behavior: Always Allowed"
 msgstr "動作：常に許可"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Block Scripts and Embeds Until Consent Switch"
 msgstr "同意までスクリプトと埋め込みをブロックするスイッチ"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Block Scripts Until Consent"
 msgstr "同意までスクリプトをブロック"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Prevent non-essential scripts and embeds from loading until users give consent."
 msgstr "ユーザーが同意を与えるまで、重要でないスクリプトや埋め込みの読み込みを防ぎます。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Detected and Managed Resources"
 msgstr "検出および管理されたリソース"
 
 #. translators: 1: scanner-detected count, 2: custom rule count
-#: build/admin.js:88
+#: build/admin.js:92
 #, js-format
 msgid "%1$d detected by scanner, %2$d custom"
 msgstr "%1$d がスキャナーによって検出され、%2$d はカスタムです"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "New Resource"
 msgstr "新しいリソース"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "All your scripts will be displayed here"
 msgstr "すべてのスクリプトがここに表示されます"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Run a scan to detect third-party resources, or add a script manually."
 msgstr "サードパーティのリソースを検出するためにスキャンを実行するか、スクリプトを手動で追加してください。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Add New Resource"
 msgstr "新しいリソースを追加"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Unlock Custom Script Rules & Whitelisting"
 msgstr "カスタムスクリプトルールとホワイトリストのロックを解除"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Add your own scripts to block under any category, whitelist trusted scripts, and manage it all from one place."
 msgstr "任意のカテゴリでブロックするために独自のスクリプトを追加し、信頼できるスクリプトをホワイトリストに登録し、すべてを一元管理します。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Generate your cookie policy automatically from your settings, or display it anywhere using a shortcode."
 msgstr "設定からクッキーポリシーを自動生成するか、ショートコードを使ってどこにでも表示できます。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Automatically re-scan your site and get notified when new cookies or trackers appear."
 msgstr "サイトを自動的に再スキャンし、新しいクッキーやトラッカーが現れたときに通知を受け取ります。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Show your cookie banner only in regions where consent is required."
 msgstr "同意が必要な地域でのみクッキーバナーを表示します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Share visitor consent across your sites so users don’t need to give consent again."
 msgstr "訪問者の同意をサイト間で共有し、ユーザーが再度同意する必要がないようにします。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Unlock Consent Sharing"
 msgstr "同意共有のロックを解除"
 
@@ -5386,7 +5386,7 @@ msgid "The uploaded file does not contain any importable SureCookie settings for
 msgstr "アップロードされたファイルには、このサイト用のインポート可能なSureCookie設定が含まれていません。"
 
 #: inc/api/settings.php:431
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Settings imported successfully."
 msgstr "設定が正常にインポートされました。"
 
@@ -5492,101 +5492,101 @@ msgstr "Kadenceカラーパレット"
 msgid "Theme Colors"
 msgstr "テーマカラー"
 
-#: inc/services/known-services-service.php:161
+#: inc/services/known-services-service.php:157
 msgid "The service could not be installed."
 msgstr "サービスをインストールできませんでした。"
 
-#: inc/services/known-services-service.php:176
+#: inc/services/known-services-service.php:172
 msgid "Service installed. Every cookie it declares was already present, so no new cookie definitions were created."
 msgstr "サービスがインストールされました。宣言されたすべてのクッキーはすでに存在していたため、新しいクッキー定義は作成されませんでした。"
 
-#: inc/services/known-services-service.php:177
+#: inc/services/known-services-service.php:173
 msgid "Service installed and its cookies declared."
 msgstr "サービスがインストールされ、そのクッキーが宣言されました。"
 
-#: inc/services/known-services-service.php:212
+#: inc/services/known-services-service.php:208
 msgid "Service removed and its declared cookies deleted."
 msgstr "サービスが削除され、宣言されたクッキーが削除されました。"
 
-#: inc/services/known-services-service.php:213
+#: inc/services/known-services-service.php:209
 msgid "That service was not installed, so nothing was removed."
 msgstr "そのサービスはインストールされていなかったため、何も削除されませんでした。"
 
-#: inc/services/known-services-service.php:243
+#: inc/services/known-services-service.php:239
 msgid "Catalog refreshed."
 msgstr "カタログが更新されました。"
 
-#: inc/services/script-blocking-service.php:171
+#: inc/services/script-blocking-service.php:166
 msgid "A resource domain and a target category are both required."
 msgstr "リソースドメインとターゲットカテゴリーの両方が必要です。"
 
-#: inc/services/script-blocking-service.php:184
-#: inc/services/script-blocking-service.php:443
+#: inc/services/script-blocking-service.php:179
+#: inc/services/script-blocking-service.php:438
 msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr "そのカテゴリーは存在しません。surecookie/cookie-categoriesのアクション「list」を使用して有効なIDを確認してください。"
 
-#: inc/services/script-blocking-service.php:201
+#: inc/services/script-blocking-service.php:196
 msgid "Resource category updated."
 msgstr "リソースカテゴリが更新されました。"
 
-#: inc/services/script-blocking-service.php:240
+#: inc/services/script-blocking-service.php:235
 msgid "That resource was already excluded from blocking."
 msgstr "そのリソースはすでにブロックから除外されていました。"
 
-#: inc/services/script-blocking-service.php:241
+#: inc/services/script-blocking-service.php:236
 msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
 msgstr "リソースはブロックから除外されました。これはスクリプトとiframeのみを対象としており、embedやobjectタグは含まれませんのでご注意ください。"
 
-#: inc/services/script-blocking-service.php:263
+#: inc/services/script-blocking-service.php:258
 msgid "A resource domain is required."
 msgstr "リソースドメインが必要です。"
 
-#: inc/services/script-blocking-service.php:290
+#: inc/services/script-blocking-service.php:285
 msgid "Resource will be blocked again until consent."
 msgstr "同意が得られるまでリソースは再度ブロックされます。"
 
-#: inc/services/script-blocking-service.php:291
+#: inc/services/script-blocking-service.php:286
 msgid "That resource was not excluded, so nothing changed."
 msgstr "そのリソースは除外されていなかったため、変更はありませんでした。"
 
-#: inc/services/script-blocking-service.php:371
+#: inc/services/script-blocking-service.php:366
 msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr "有効なカテゴリが必要です。surecookie/cookie-categoriesのaction \"list\"を使用して有効なIDを確認してください。"
 
-#: inc/services/script-blocking-service.php:378
+#: inc/services/script-blocking-service.php:373
 msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
 msgstr "そのパターンのルールはすでに存在します。代わりに \"update_rule\" を使用してください。"
 
-#: inc/services/script-blocking-service.php:387
+#: inc/services/script-blocking-service.php:382
 msgid "Blocking rule created."
 msgstr "ブロックルールが作成されました。"
 
-#: inc/services/script-blocking-service.php:409
-#: inc/services/script-blocking-service.php:475
+#: inc/services/script-blocking-service.php:404
+#: inc/services/script-blocking-service.php:470
 msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
 msgstr "そのパターンに一致するブロックルールはありません。現在のルールを確認するには \"list_rules\" を使用してください。"
 
-#: inc/services/script-blocking-service.php:427
+#: inc/services/script-blocking-service.php:422
 msgid "Another rule already uses that pattern."
 msgstr "別のルールがすでにそのパターンを使用しています。"
 
-#: inc/services/script-blocking-service.php:439
+#: inc/services/script-blocking-service.php:434
 msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr "そのカテゴリは有効なIDではありません。surecookie/cookie-categoriesのaction \"list\"を使用して有効なIDを確認してください。"
 
-#: inc/services/script-blocking-service.php:454
+#: inc/services/script-blocking-service.php:449
 msgid "Blocking rule updated."
 msgstr "ブロックルールが更新されました。"
 
-#: inc/services/script-blocking-service.php:485
+#: inc/services/script-blocking-service.php:480
 msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
 msgstr "ブロックルールが削除されました。それによりカバーされていたリソースはもはやブロックされません。"
 
-#: inc/services/script-blocking-service.php:642
+#: inc/services/script-blocking-service.php:637
 msgid "A domain or URL pattern is required."
 msgstr "ドメインまたはURLパターンが必要です。"
 
-#: inc/services/script-blocking-service.php:649
+#: inc/services/script-blocking-service.php:644
 msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
 msgstr "そのパターンは広すぎます。パターンは部分文字列としてマッチするため、\"com\"のような単純なトークンはサイト上のほぼすべてのサードパーティリソースにマッチします。完全なドメイン（例: \"example.com\"）やURLパスを使用してください。"
 
@@ -5835,12 +5835,12 @@ msgid "Internal counter mirroring the consent-log table."
 msgstr "同意ログテーブルを反映する内部カウンター。"
 
 #: build/admin.js:2
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Blocked Content UI"
 msgstr "ブロックされたコンテンツUI"
 
 #: build/admin.js:2
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Import / Export"
 msgstr "インポート / エクスポート"
 
@@ -5856,331 +5856,331 @@ msgstr "日付範囲を選択"
 msgid "Clear"
 msgstr "クリア"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Not In Use"
 msgstr "未使用"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Hide Unused Categories"
 msgstr "未使用のカテゴリを非表示"
 
-#: build/admin.js:32
+#: build/admin.js:33
 msgid "Categories with no cookies, scripts, or services are hidden from the preferences modal. A category reappears automatically when usage changes, and is never removed from the consent record."
 msgstr "クッキー、スクリプト、またはサービスがないカテゴリは、設定モーダルから非表示になります。使用状況が変わるとカテゴリは自動的に再表示され、同意記録からは決して削除されません。"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to update category visibility"
 msgstr "カテゴリの表示更新に失敗しました"
 
-#: build/admin.js:61
+#: build/admin.js:62
 msgid "This is a worldwide banner preview"
 msgstr "これは世界中のバナープレビューです"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
 msgstr "地理的ルールが適用されない場合に訪問者が見るデフォルトバナーを表示します。これをオンにすると、ルールのプレビューは閉じられます。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Edit Worldwide Default"
 msgstr "世界デフォルトを編集"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
 msgstr "訪問者が選択を行う前に、世界中のすべての訪問者に対するデフォルトの同意状態を設定します。地域のルールはそれぞれの地域の法律に従ってこれを上書きします。"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Worldwide"
 msgstr "世界中"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Edit worldwide default consent"
 msgstr "世界デフォルトの同意を編集"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
 msgstr "同意が与えられるまで第三者コンテンツ（動画や地図など）がブロックされた場合に、訪問者に何を表示するかを制御します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Use video thumbnails"
 msgstr "ビデオのサムネイルを使用"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Use Video Thumbnails"
 msgstr "ビデオのサムネイルを使用"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
 msgstr "プレースホルダーに動画自身のサムネイル（例：YouTube）を表示します。注：これは同意前にプロバイダーからサムネイルを読み込みます。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Upload Image"
 msgstr "画像をアップロード"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Default Placeholder Image"
 msgstr "デフォルトのプレースホルダー画像"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Select Placeholder Image"
 msgstr "プレースホルダー画像を選択"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Use this image"
 msgstr "この画像を使用"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Placeholder Text"
 msgstr "プレースホルダーテキスト"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Enter placeholder text"
 msgstr "プレースホルダーテキストを入力"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
 msgstr "{service} を使ってブロックされたサービス名（例：YouTube）を挿入します。"
 
-#: build/admin.js:104
+#: build/admin.js:108
 msgid "Button Text"
 msgstr "ボタンテキスト"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
 msgstr "ClaudeやCursorのようなAIクライアントがSureCookieを通じてクッキーバナー、スキャナー、同意設定を管理できるようにします。無効にすると、機能は登録されず、AIクライアントは接続できません。"
 
-#: build/admin.js:107
-#: build/admin.js:109
+#: build/admin.js:111
+#: build/admin.js:113
 msgid "All Settings"
 msgstr "すべての設定"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Your entire portable configuration in one file."
 msgstr "あなたのすべてのポータブル設定が1つのファイルに。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Nothing imported"
 msgstr "何もインポートされませんでした"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Import complete"
 msgstr "インポート完了"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "None of the settings in this file could be applied to this site."
 msgstr "このファイルの設定はこのサイトに適用できませんでした。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Your settings were imported. Here is what happened:"
 msgstr "設定がインポートされました。結果は以下の通りです："
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Applied"
 msgstr "適用済み"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Skipped (Pro)"
 msgstr "スキップ（Pro）"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Ignored"
 msgstr "無視"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "These settings need SureCookie Pro"
 msgstr "これらの設定にはSureCookie Proが必要です"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Upgrade to Pro to use the skipped features on this site."
 msgstr "このサイトでスキップされた機能を使用するにはProにアップグレードしてください。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Move your SureCookie setup between sites with a portable settings export."
 msgstr "ポータブル設定のエクスポートでSureCookieの設定をサイト間で移動します。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Export settings"
 msgstr "設定をエクスポート"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
 msgstr "含める内容を選択し、ポータブルSureCookie設定のJSONファイルをダウンロードしてください。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "What to export"
 msgstr "エクスポートする内容"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Export your entire portable configuration."
 msgstr "ポータブル設定全体をエクスポートします。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Export more with SureCookie Pro"
 msgstr "SureCookie Proでさらにエクスポート"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
 msgstr "Proでは、地理的ターゲティング、同意の転送、フローティングウィジェットなどの設定をエクスポートに追加します。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Settings exported successfully."
 msgstr "設定が正常にエクスポートされました。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Failed to export settings."
 msgstr "設定のエクスポートに失敗しました。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Please try again."
 msgstr "もう一度お試しください。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Exporting…"
 msgstr "エクスポート中…"
 
-#: build/admin.js:109
-#: build/admin.js:110
+#: build/admin.js:113
+#: build/admin.js:114
 msgid "Import settings"
 msgstr "設定をインポート"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
 msgstr "SureCookieのエクスポートファイルをアップロードして、現在のサイトにマージするか、すべての転送可能な設定を置き換えます。"
 
-#: build/admin.js:109
+#: build/admin.js:113
 msgid "JSON export file"
 msgstr "JSONエクスポートファイル"
 
 #. translators: %s: selected import filename.
-#: build/admin.js:110
+#: build/admin.js:114
 #, js-format
 msgid "Selected file: %s"
 msgstr "選択されたファイル: %s"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Replace all settings"
 msgstr "すべての設定を置き換える"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
 msgstr "有効にすると、インポートファイルに存在しない転送可能な設定は現在のサイトの値を保持せず、デフォルトにリセットされます。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "No settings were applied from this file."
 msgstr "このファイルから適用された設定はありませんでした。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Failed to import settings."
 msgstr "設定のインポートに失敗しました。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Please check the file and try again."
 msgstr "ファイルを確認して、もう一度お試しください。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Please choose a SureCookie export file first."
 msgstr "まずSureCookieのエクスポートファイルを選択してください。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Importing…"
 msgstr "インポート中…"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Access"
 msgstr "アクセス"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "28 days left"
 msgstr "残り28日"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Erasure"
 msgstr "消去"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "In progress"
 msgstr "進行中"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "6 days left"
 msgstr "残り6日"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Portability"
 msgstr "ポータビリティ"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "3 days overdue"
 msgstr "3日遅延"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Responded"
 msgstr "対応済み"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Data Request Logs"
 msgstr "データリクエストログ"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "One Form for Every Request"
 msgstr "すべてのリクエストに1つのフォーム"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
 msgstr "ショートコードでフォームを追加するか、プライバシーポリシーページに表示させます。リクエストはあいまいなメールではなく、完全な形で届きます。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Every Request Verified by Email"
 msgstr "すべてのリクエストはメールで確認"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
 msgstr "各送信は24時間で期限切れになる使い捨てリンクを送信します。実際に本人が行ったリクエストだけに対応します。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "A Deadline on Every Request"
 msgstr "すべてのリクエストに期限付き"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
 msgstr "確認済みの各リクエストにはデフォルトで30日の期限が設定され、リストでカウントダウンされます。期限切れの行は赤くなります。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "One Reminder Email a Day"
 msgstr "1日1回のリマインダーメール"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
 msgstr "毎日、1週間以内に期限が来るものやすでに期限切れのものをリストアップしたメールが届きます。期限切れ前に通知されます。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Reply With the Data Attached"
 msgstr "データを添付して返信"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
 msgstr "ワンクリックでWordPress、プラグイン、SureCookieがそのメールに関するデータを集めて返信に添付します。手作業で組み立てる必要はありません。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "A Record of What You Did"
 msgstr "行ったことの記録"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
 msgstr "すべてのステップにタイムスタンプが付きます：確認、メモ、送信した返信、失敗したメールも。何が起きたかを示せます。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Available in SureCookie Pro"
 msgstr "SureCookie Proで利用可能"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "You Have 30 Days to Answer a Data Request"
 msgstr "データリクエストには30日以内に回答が必要です"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
 msgstr "GDPRやCCPAの下で、訪問者は自分の個人データのコピーを要求したり削除を求めたりでき、回答には決まった日数があります。手作業ではメールのやり取り、スプレッドシート、手動で組み立てるエクスポートが必要でした。"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "How Pro Handles Each Request"
 msgstr "Proが各リクエストを処理する方法"
 
@@ -6199,7 +6199,7 @@ msgstr "SureCookie 設定"
 msgid "Managed by SureCookie"
 msgstr "SureCookie によって管理されています"
 
-#: inc/api/cookies.php:415
+#: inc/api/cookies.php:439
 msgid "Failed to remove cookie: "
 msgstr "クッキーの削除に失敗しました:"
 
@@ -6265,7 +6265,7 @@ msgid "Add your business details before publishing this policy."
 msgstr "このポリシーを公開する前に事業詳細を追加してください。"
 
 #: inc/modules/privacy-policy/api.php:309
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Privacy Policy published."
 msgstr "プライバシーポリシーが公開されました。"
 
@@ -6761,55 +6761,55 @@ msgid "If you have a question about this policy, or you want to exercise any of 
 msgstr "このポリシーについて質問がある場合や、上記の権利を行使したい場合は、こちらからご連絡ください："
 
 #: inc/modules/privacy-policy/validator.php:139
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Legal Entity Name"
 msgstr "法人名"
 
 #: inc/modules/privacy-policy/validator.php:140
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Postal Address"
 msgstr "郵送先住所"
 
 #: inc/modules/privacy-policy/validator.php:141
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Postal Code"
 msgstr "郵便番号"
 
 #: inc/modules/privacy-policy/validator.php:143
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Privacy Contact Email"
 msgstr "プライバシー連絡用メールアドレス"
 
 #: inc/modules/privacy-policy/validator.php:144
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Grievance Officer Name"
 msgstr "苦情担当者名"
 
 #: inc/modules/privacy-policy/validator.php:145
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Grievance Officer Email"
 msgstr "苦情担当者メールアドレス"
 
 #: inc/modules/privacy-policy/validator.php:146
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Data Transfer Safeguards"
 msgstr "データ転送の安全対策"
 
 #: inc/modules/privacy-policy/validator.php:147
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Sale or Sharing Declaration"
 msgstr "販売または共有の宣言"
 
 #: inc/modules/privacy-policy/validator.php:148
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Applicable Privacy Regimes"
 msgstr "適用されるプライバシー規制"
 
@@ -6822,80 +6822,80 @@ msgid "Domain verified."
 msgstr "ドメインが確認されました。"
 
 #: inc/modules/site-scanner/api.php:376
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Your site is registered and can now be scanned."
 msgstr "あなたのサイトは登録され、スキャン可能になりました。"
 
-#: inc/modules/site-scanner/saas-client.php:1334
+#: inc/modules/site-scanner/saas-client.php:1351
 msgid "A verification attempt is already running. Please try again in a moment."
 msgstr "検証試行がすでに実行中です。しばらくしてから再度お試しください。"
 
-#: inc/modules/site-scanner/saas-client.php:1764
+#: inc/modules/site-scanner/saas-client.php:1785
 msgid "The registration request was rejected as malformed. This is a bug in the plugin rather than something you can fix - please contact support."
 msgstr "登録リクエストが不正な形式のため拒否されました。これはプラグインのバグであり、あなたが修正できるものではありません。サポートにお問い合わせください。"
 
-#: inc/modules/site-scanner/saas-client.php:1765
+#: inc/modules/site-scanner/saas-client.php:1786
 msgid "No pending registration matches this site. Start registration again."
 msgstr "このサイトに一致する保留中の登録はありません。登録を再開してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1766
+#: inc/modules/site-scanner/saas-client.php:1787
 msgid "The registration handshake got out of step, usually because two attempts overlapped. Wait a moment and start registration again."
 msgstr "登録のハンドシェイクがずれました。通常、2つの試行が重なったためです。少し待ってから登録を再開してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1767
+#: inc/modules/site-scanner/saas-client.php:1788
 msgid "Registration was never started for this site. Start it again."
 msgstr "このサイトの登録は開始されていません。再度開始してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1782
+#: inc/modules/site-scanner/saas-client.php:1803
 msgid "Registration could not be completed. Please retry, and contact support if it keeps failing."
 msgstr "登録を完了できませんでした。再試行し、それでも失敗する場合はサポートに連絡してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1805
+#: inc/modules/site-scanner/saas-client.php:1826
 msgid "We could not confirm that you control this domain, because our verification request to your site did not come back with the expected token."
 msgstr "あなたがこのドメインを管理していることを確認できませんでした。サイトへの検証リクエストが期待されたトークンを返さなかったためです。"
 
-#: inc/modules/site-scanner/saas-client.php:1808
+#: inc/modules/site-scanner/saas-client.php:1829
 msgid "Your site's SSL certificate also failed validation from here, so that is the likely cause: it may be self-signed, expired, or issued for a different domain."
 msgstr "あなたのサイトのSSL証明書もここでの検証に失敗しました。自己署名証明書、期限切れ、または異なるドメイン用に発行された可能性があります。これが原因と考えられます。"
 
-#: inc/modules/site-scanner/saas-client.php:1810
+#: inc/modules/site-scanner/saas-client.php:1831
 msgid "The REST API at /wp-json/ did not respond from here either, so check that pretty permalinks are on and no security plugin has disabled it."
 msgstr "ここからも /wp-json/ の REST API が応答しなかったため、きれいなパーマリンクが有効であり、セキュリティプラグインが無効にしていないか確認してください。"
 
-#: inc/modules/site-scanner/saas-client.php:1812
+#: inc/modules/site-scanner/saas-client.php:1833
 msgid "A firewall or security plugin blocking our request is the most common cause."
 msgstr "ファイアウォールやセキュリティプラグインがリクエストをブロックしていることが最も一般的な原因です。"
 
-#: inc/modules/site-scanner/saas-client.php:1816
+#: inc/modules/site-scanner/saas-client.php:1837
 msgid "You can prove ownership with a DNS record instead, which works even when a firewall blocks us."
 msgstr "代わりに DNS レコードで所有権を証明できます。これはファイアウォールがブロックしている場合でも機能します。"
 
-#: inc/modules/site-scanner/saas-client.php:1855
+#: inc/modules/site-scanner/saas-client.php:1876
 msgid "There is no registration waiting to be completed. Start a scan to register again."
 msgstr "完了待ちの登録はありません。再登録するにはスキャンを開始してください。"
 
-#: inc/services/cookie-service.php:349
+#: inc/services/cookie-service.php:417
 msgid "Duration must be a whole number of days."
 msgstr "期間は整数の日数でなければなりません。"
 
-#: inc/services/cookie-service.php:380
+#: inc/services/cookie-service.php:448
 msgid "Nothing to update."
 msgstr "更新するものはありません。"
 
-#: inc/services/cookie-service.php:479
+#: inc/services/cookie-service.php:547
 msgid "Cookie updated successfully."
 msgstr "クッキーは正常に更新されました。"
 
-#: inc/services/cookie-service.php:680
+#: inc/services/cookie-service.php:748
 msgid "Cookie name and category are required."
 msgstr "クッキー名とカテゴリは必須です。"
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:757
 msgid "Category not found in scanned cookies."
 msgstr "スキャンされたクッキーにカテゴリが見つかりません。"
 
-#: inc/services/cookie-service.php:708
+#: inc/services/cookie-service.php:776
 msgid "Cookie removed."
 msgstr "クッキーが削除されました。"
 
@@ -6905,7 +6905,7 @@ msgstr "クッキーが削除されました。"
 msgid "This content is blocked because it would connect to %s."
 msgstr "このコンテンツは %s に接続するためブロックされています。"
 
-#: inc/utils/options.php:292
+#: inc/utils/options.php:296
 msgid "This content is blocked because it would connect to {service}."
 msgstr "このコンテンツは {service} に接続するためブロックされています。"
 
@@ -6970,7 +6970,7 @@ msgid "Compliance Check"
 msgstr "コンプライアンスチェック"
 
 #: build/admin.js:2
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Business Details"
 msgstr "事業者情報"
 
@@ -7006,682 +7006,682 @@ msgstr "州 / 地域"
 msgid "Session ID…"
 msgstr "セッションID…"
 
-#: build/admin.js:27
+#: build/admin.js:28
 msgid "It will come back on the next scan if your site still sets it."
 msgstr "サイトがまだ設定している場合、次のスキャンで戻ってきます。"
 
-#: build/admin.js:27
+#: build/admin.js:28
 msgid "This action cannot be undone."
 msgstr "この操作は元に戻せません。"
 
 #. translators: %s: what happens after the deletion.
-#: build/admin.js:28
+#: build/admin.js:29
 #, js-format
 msgid "Are you sure you want to delete the cookie \"<strong></strong>\"? %s"
 msgstr "クッキー「<strong></strong>」を削除してもよろしいですか？ %s"
 
 #. translators: %s: what happens after the deletion.
-#: build/admin.js:29
+#: build/admin.js:30
 #, js-format
 msgid "Are you sure you want to delete this cookie? %s"
 msgstr "このクッキーを削除してもよろしいですか？ %s"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Delete Scanned Cookie"
 msgstr "スキャンしたクッキーを削除"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Edit Scanned Cookie"
 msgstr "スキャンしたクッキーを編集"
 
-#: build/admin.js:29
+#: build/admin.js:30
 msgid "Cookie Category"
 msgstr "クッキーカテゴリ"
 
 #. translators: %d: number of stylesheets
-#: build/admin.js:36
+#: build/admin.js:37
 #, js-format
 msgid "%d stylesheet"
 msgid_plural "%d stylesheets"
 msgstr[0] "%d スタイルシート"
 
 #. translators: %d: number of resources SureCookie cannot block
-#: build/admin.js:37
+#: build/admin.js:38
 #, js-format
 msgid "%d resource that cannot be blocked"
 msgid_plural "%d resources that cannot be blocked"
 msgstr[0] "%d ブロックできないリソース"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "This service is now managed. It loads before consent."
 msgstr "このサービスは現在管理されています。コンセント前に読み込まれます。"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "This service is now managed. SureCookie cannot block it, so it still loads before consent."
 msgstr "このサービスは現在管理されています。SureCookieはブロックできないため、コンセント前に読み込まれます。"
 
-#: build/admin.js:37
+#: build/admin.js:38
 msgid "This service is now managed."
 msgstr "このサービスは現在管理されています。"
 
-#: build/admin.js:39
+#: build/admin.js:40
 msgid "Not blocked before consent"
 msgstr "コンセント前にブロックされていません"
 
 #. translators: %s: service name (e.g. Google Fonts)
-#: build/admin.js:40
+#: build/admin.js:41
 #, js-format
 msgid "%s is delivered as an image. Blocking rewrites script, iframe, embed, object and link tags only, so this service loads before consent. Self-host it if that matters for your compliance."
 msgstr "%s は画像として配信されます。ブロックはscript、iframe、embed、object、linkタグのみを書き換えるため、このサービスはコンセント前に読み込まれます。コンプライアンス上重要な場合はセルフホストしてください。"
 
 #. translators: %d: number of stylesheets
-#: build/admin.js:44
+#: build/admin.js:45
 #, js-format
 msgid "%d stylesheet blocked before consent"
 msgid_plural "%d stylesheets blocked before consent"
 msgstr[0] "%d スタイルシートがコンセント前にブロックされました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to remove cookie"
 msgstr "クッキーの削除に失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Cookie removed"
 msgstr "クッキーが削除されました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Failed to update cookie"
 msgstr "クッキーの更新に失敗しました"
 
-#: build/admin.js:49
+#: build/admin.js:50
 msgid "Cookie updated successfully"
 msgstr "クッキーが正常に更新されました"
 
-#: build/admin.js:50
+#: build/admin.js:51
 msgid "Manage Cookie Policy"
 msgstr "クッキーポリシーを管理"
 
-#: build/admin.js:52
-#: build/admin.js:85
-#: build/admin.js:96
+#: build/admin.js:53
+#: build/admin.js:89
+#: build/admin.js:100
 #: build/onboarding.js:6
 msgid "Upgrade to Premium"
 msgstr "プレミアムにアップグレード"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Could not copy"
 msgstr "コピーできませんでした"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Copy the value manually."
 msgstr "値を手動でコピーしてください。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "We Could Not Verify Your Domain"
 msgstr "ドメインを確認できませんでした"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Verify With a DNS Record Instead"
 msgstr "代わりにDNSレコードで確認する"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Add this TXT record at your DNS provider, then retry. This proves you own the domain without us needing to reach your site, so a firewall cannot block it."
 msgstr "このTXTレコードをDNSプロバイダーに追加し、再試行してください。これにより、サイトにアクセスすることなくドメインの所有権を証明できるため、ファイアウォールによるブロックを防げます。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Domain verified"
 msgstr "ドメインが確認されました"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Still not verified"
 msgstr "まだ確認されていません"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "DNS changes can take a while to propagate. Try again shortly."
 msgstr "DNSの変更が反映されるまでに時間がかかることがあります。しばらくしてから再試行してください。"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "Retry Verification"
 msgstr "確認を再試行"
 
-#: build/admin.js:68
+#: build/admin.js:72
 #: build/onboarding.js:4
 msgid "DNS changes usually apply within minutes, but can take up to a day."
 msgstr "DNSの変更は通常数分で反映されますが、最大で1日かかることがあります。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Session Expired"
 msgstr "セッションの有効期限が切れました"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Your session or license changed since this page loaded. Reload the page to reconnect, then start the scan again."
 msgstr "このページが読み込まれてからセッションまたはライセンスが変更されました。ページをリロードして再接続し、再度スキャンを開始してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Site Verification Failed"
 msgstr "サイトの確認に失敗しました"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "The scanning service could not reach your site to verify it. A firewall, security plugin, or SSL problem is the usual cause. Check those and try again."
 msgstr "スキャンサービスがサイトにアクセスできませんでした。通常、ファイアウォール、セキュリティプラグイン、またはSSLの問題が原因です。これらを確認して再試行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Couldn't Reach the Scanner"
 msgstr "スキャナーに接続できませんでした"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Your site could not reach the scanning service. Check your connection and try again. Any cookies already found are saved."
 msgstr "サイトがスキャンサービスに接続できませんでした。接続を確認して再試行してください。既に見つかったクッキーは保存されています。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "No Pages Left to Scan"
 msgstr "スキャンするページが残っていません"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "The pages you selected are no longer published, so there was nothing to scan. Choose your pages again and start a new scan."
 msgstr "選択したページは公開されていないため、スキャンするものがありません。ページを再選択して新しいスキャンを開始してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Scan Already Running"
 msgstr "スキャンは既に実行中です"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "A scan is already running on this site. Wait for it to finish, then start the next one. If nothing appears to be running, reload the page and try again."
 msgstr "このサイトでは既にスキャンが実行中です。終了を待ってから次のスキャンを開始してください。何も実行されていないように見える場合は、ページをリロードして再試行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Scan Couldn't Be Started"
 msgstr "スキャンを開始できませんでした"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "SureCookie could not start the scan, usually a temporary problem reaching the scanning service. Any cookies already found are saved. Please try again in a moment."
 msgstr "SureCookieはスキャンを開始できませんでした。通常、スキャンサービスへの一時的な接続問題が原因です。既に見つかったクッキーは保存されています。しばらくしてから再試行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "The scan request was rejected before it started. Reload the page and try again."
 msgstr "スキャン要求は開始前に拒否されました。ページをリロードして再試行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Scanning Needs SureCookie Pro"
 msgstr "スキャンにはSureCookie Proが必要です"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "This scan is a Pro feature. Upgrade to run it, or carry on with the cookies already found."
 msgstr "このスキャンはPro機能です。実行するにはアップグレードするか、既に見つかったクッキーで続行してください。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Daily Scan Limit Reached"
 msgstr "1日のスキャン制限に達しました"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "You have used every scan allowed today. Any cookies already found are saved, and you can scan again once the limit resets."
 msgstr "本日許可されたスキャンをすべて使用しました。既に見つかったクッキーは保存されており、制限がリセットされると再度スキャンできます。"
 
-#: build/admin.js:72
+#: build/admin.js:76
 #: build/onboarding.js:14
 msgid "Any cookies already found have been saved, and results add up across scans, so nothing is lost. Please try again in a moment."
 msgstr "既に見つかったクッキーは保存されており、スキャン結果は累積されるため、何も失われません。しばらくしてから再試行してください。"
 
 #. translators: 1: whole hours remaining, 2: remaining minutes.
-#: build/admin.js:77
+#: build/admin.js:81
 #, js-format
 msgid "%1$dh %2$dm"
 msgstr "%1$dh %2$dm"
 
 #. translators: %d: minutes remaining.
-#: build/admin.js:78
+#: build/admin.js:82
 #, js-format
 msgid "%dm"
 msgstr "%dm"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "<p>By scanning you accept our <a>Terms and Conditions</a>.</p>"
 msgstr "<p>スキャンを行うことで、<a>利用規約</a>に同意したことになります。</p>"
 
-#: build/admin.js:85
+#: build/admin.js:89
 msgid "Unlock Geo Rules, Advanced Scanning & more with SureCookie Premium."
 msgstr "SureCookie Premiumでジオルール、高度なスキャンなどをアンロックしましょう。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Cannot be blocked"
 msgstr "ブロックできません"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "SureCookie cannot block this resource. It loads as an image, and blocking only rewrites script, iframe, embed, object and link tags."
 msgstr "SureCookieはこのリソースをブロックできません。画像として読み込まれるため、ブロックはスクリプト、iframe、embed、object、およびlinkタグのみを書き換えます。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "This resource is in a category that is never held back, so it loads before consent. Move it to another category to have it blocked."
 msgstr "このリソースは決して保留されないカテゴリに属しているため、同意前に読み込まれます。ブロックするには別のカテゴリに移動してください。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Always load"
 msgstr "常に読み込む"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "SureCookie stops managing this resource, in the page and in the browser. Use this when it must load before consent."
 msgstr "SureCookieはページ内およびブラウザ内でこのリソースの管理を停止します。同意前に読み込む必要がある場合に使用してください。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "SureCookie stops managing anything matching this rule, in the page and in the browser. Use this when it must load before consent."
 msgstr "SureCookieはページ内およびブラウザ内でこのルールに一致するすべてのものの管理を停止します。同意前に読み込む必要がある場合に使用してください。"
 
-#: build/admin.js:86
+#: build/admin.js:90
 msgid "Block until consent"
 msgstr "同意までブロック"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Allowed to load while Google Consent Mode is active, instead of being blocked before consent. Tag Manager is one of them."
 msgstr "Google同意モードが有効な間はブロックされずに読み込まれます。Tag Managerもその一つです。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. Google Tag Manager is on this list, and Consent Mode does not reach the non-Google tags you deploy through it, so each of those needs its own consent check inside Tag Manager. They cannot be removed here."
 msgstr "これらのGoogleサービスはGoogle同意モードが有効な間、同意前にブロックされずに読み込まれます。Googleタグ製品の場合、同意モードはそれらが保存できるものや使用できる識別子を制御しますが、Googleへの連絡を止めることはありません。Googleタグマネージャーはこのリストに含まれており、同意モードはタグマネージャーを通じて展開する非Googleタグには適用されないため、それぞれにタグマネージャー内で独自の同意チェックが必要です。これらはここで削除できません。"
 
-#: build/admin.js:87
+#: build/admin.js:91
 msgid "Choose scripts and domains that should never be blocked, so essential integrations like Stripe or Cloudflare Turnstile keep working. Google Consent Mode scripts are whitelisted automatically when it is enabled."
 msgstr "StripeやCloudflare Turnstileなどの重要な統合が機能し続けるように、決してブロックされるべきでないスクリプトやドメインを選択してください。Google同意モードのスクリプトは有効時に自動的にホワイトリストに登録されます。"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "GDPR (European Economic Area)"
 msgstr "GDPR（欧州経済領域）"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "UK GDPR"
 msgstr "英国GDPR"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "CCPA / CPRA (California)"
 msgstr "CCPA / CPRA（カリフォルニア）"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "DPDP Act (India)"
 msgstr "DPDP法（インド）"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "COPPA (children, United States)"
 msgstr "COPPA（子供、アメリカ合衆国）"
 
-#: build/admin.js:88
-#: build/admin.js:91
+#: build/admin.js:92
+#: build/admin.js:95
 msgid "Not decided yet"
 msgstr "まだ決まっていません"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "No"
 msgstr "いいえ"
 
-#: build/admin.js:88
+#: build/admin.js:92
 msgid "Yes"
 msgstr "はい"
 
 #. translators: %d: number of business detail fields still empty.
-#: build/admin.js:89
+#: build/admin.js:93
 #, js-format
 msgid "%d item still needs your input"
 msgid_plural "%d items still need your input"
 msgstr[0] "%d 件の入力がまだ必要です"
 
-#: build/admin.js:89
+#: build/admin.js:93
 msgid "Your published privacy policy is incomplete"
 msgstr "公開されているプライバシーポリシーが不完全です"
 
-#: build/admin.js:89
+#: build/admin.js:93
 msgid "Complete your business details to improve your privacy policy"
 msgstr "プライバシーポリシーを改善するために事業詳細を完成させてください"
 
 #. translators: %s: comma-separated list of missing fields.
-#: build/admin.js:90
+#: build/admin.js:94
 #, js-format
 msgid "This page is live and still missing: %s. Visitors see nothing where those details should be."
 msgstr "このページは公開されていますが、まだ以下が不足しています: %s。訪問者はこれらの詳細があるべき場所に何も表示されません。"
 
 #. translators: %s: comma-separated list of missing fields.
-#: build/admin.js:91
+#: build/admin.js:95
 #, js-format
 msgid "Still needed: %s."
 msgstr "まだ必要です: %s。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Who is responsible for this website. These details appear in your privacy policy and cookie policy, and are available as shortcodes anywhere in your content."
 msgstr "このウェブサイトの責任者です。これらの詳細はプライバシーポリシーやクッキーポリシーに表示され、コンテンツ内のショートコードとしてどこでも利用可能です。"
 
-#: build/admin.js:91
-#: build/admin.js:92
+#: build/admin.js:95
+#: build/admin.js:96
 msgid "Shortcodes"
 msgstr "ショートコード"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Use these anywhere shortcodes work and they are replaced with the details on the Configure tab. If a detail is empty, visitors see nothing rather than the shortcode."
 msgstr "ショートコードが機能する場所ならどこでも使用でき、Configureタブの詳細に置き換えられます。詳細が空の場合、訪問者にはショートコードの代わりに何も表示されません。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Not set"
 msgstr "未設定"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "The registered name of the organisation running this website, not the site title."
 msgstr "このウェブサイトを運営する組織の登録名であり、サイトタイトルではありません。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "One line per row. Leave the rows you do not need empty."
 msgstr "1行につき1行。不要な行は空白のままにしてください。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Select a country"
 msgstr "国を選択してください"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Where privacy requests should go. This is published on your policy pages, so prefer a shared address over a personal one."
 msgstr "プライバシーに関するリクエストの送付先です。これはポリシーページに公開されるため、個人の住所よりも共有アドレスを推奨します。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Select the laws that apply"
 msgstr "適用される法律を選択してください"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Only select the laws this site is actually subject to. Which law binds you depends on where you are established and who you target, not on where your visitors happen to be."
 msgstr "このサイトが実際に対象となる法律のみを選択してください。どの法律が適用されるかは、あなたがどこに設立され、誰を対象としているかによります。訪問者の所在地によるものではありません。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "What you rely on when personal data leaves your region, for example \"EU Standard Contractual Clauses\"."
 msgstr "個人データがあなたの地域を離れる際に依拠するもの、例えば「EU標準契約条項」など。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "India's DPDP Act requires a named grievance officer."
 msgstr "インドのDPDP法では、指定された苦情担当者が必要です。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Does this site sell or share personal information?"
 msgstr "このサイトは個人情報を販売または共有していますか？"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "As those terms are defined under California law. This is a legal determination about your business, so we cannot work it out for you."
 msgstr "これらの用語はカリフォルニア州法の下で定義されています。これはあなたのビジネスに関する法的判断であり、私たちが代わりに判断することはできません。"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "Enter a valid email address."
 msgstr "有効なメールアドレスを入力してください。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Always relevant"
 msgstr "常に関連する"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "What is stored when a visitor answers the cookie banner, how long it is kept, and the country lookup that happens on server."
 msgstr "訪問者がクッキーバナーに回答したときに保存されるもの、それが保持される期間、およびサーバーで行われる国の照会。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Your cookie categories, plus a link to the Cookie Policy page or the full table when there is no such page."
 msgstr "あなたのクッキーカテゴリと、クッキーポリシーページへのリンク、またはそのようなページがない場合は完全な表。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Legal entity name and registered address from Business Details."
 msgstr "事業詳細からの法人名および登録住所。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Privacy contact address, rendered as a link."
 msgstr "プライバシー連絡先住所、リンクとして表示されます。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Two dates: when the policy was last edited, and when the cookie list was last refreshed."
 msgstr "2つの日付：ポリシーが最後に編集された日と、クッキーリストが最後に更新された日。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Situational"
 msgstr "状況に応じて"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Third-party services your pages load, from the most recent scan."
 msgstr "最新のスキャンからのあなたのページが読み込むサードパーティサービス。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "What this site sends from its own server, which browser settings cannot block."
 msgstr "このサイトが自身のサーバーから送信するもので、ブラウザ設定ではブロックできません。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Data subject rights, and how to exercise them on this site."
 msgstr "データ主体の権利と、このサイトでそれらを行使する方法。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Where information is processed. Renders nothing until you set a transfer safeguard."
 msgstr "情報が処理される場所。転送保護措置を設定するまで何も表示されません。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Region-specific consent rules. Needs SureCookie Pro to say anything beyond \"the same everywhere\"."
 msgstr "地域別の同意ルール。「どこでも同じ」以上のことを言うにはSureCookie Proが必要です。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "One privacy regime's rights section. Accepts gdpr, uk_gdpr, cpra, dpdp or coppa."
 msgstr "1つのプライバシー制度の権利セクション。gdpr、uk_gdpr、cpra、dpdp、またはcoppaを受け入れます。"
 
-#: build/admin.js:92
-#: build/admin.js:95
+#: build/admin.js:96
+#: build/admin.js:99
 msgid "Something went wrong."
 msgstr "何か問題が発生しました。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Privacy Policy Page"
 msgstr "プライバシーポリシーページ"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Generate a privacy policy draft from your cookie and consent settings, then review it before publishing."
 msgstr "クッキーと同意設定からプライバシーポリシーの草案を生成し、公開前に確認してください。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "The linked privacy policy page is gone"
 msgstr "リンクされたプライバシーポリシーページがなくなりました"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "It was deleted or moved to the trash. Generate a new one to replace it."
 msgstr "削除されたかゴミ箱に移動されました。新しいものを生成して置き換えてください。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "creates a policy based on your site's configuration. You should review and adjust it to meet your legal requirements."
 msgstr "サイトの設定に基づいてポリシーを作成します。法的要件を満たすように確認および調整する必要があります。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Privacy Policy draft created."
 msgstr "プライバシーポリシーの草案が作成されました。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Generate Privacy Policy Draft"
 msgstr "プライバシーポリシー草案を生成"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Mark as Publish"
 msgstr "公開済みにマーク"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Publishing is unavailable until your business details are complete."
 msgstr "ビジネス情報が完了するまで公開は利用できません。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "This page is a draft. Nothing is visible to visitors until you publish it."
 msgstr "このページは草案です。公開するまで訪問者には表示されません。"
 
-#: build/admin.js:92
+#: build/admin.js:96
 msgid "Set this as your Privacy Policy page"
 msgstr "これをプライバシーポリシーページに設定する"
 
 #. translators: 1: title of the page being moved, 2: its new address, 3: the address it gives up.
-#: build/admin.js:94
+#: build/admin.js:98
 #, js-format
 msgid "The page \"%1$s\" currently uses the /%3$s/ address. Switching moves it to /%2$s/, turns it back into a draft, and gives /%3$s/ to this page. Both keep their titles."
 msgstr "ページ「%1$s」は現在 /%3$s/ のアドレスを使用しています。切り替えると /%2$s/ に移動し、草案に戻り、/%3$s/ はこのページに割り当てられます。両方ともタイトルはそのままです。"
 
 #. translators: %s: title of the page WordPress currently uses.
-#: build/admin.js:95
+#: build/admin.js:99
 #, js-format
 msgid "Your site is currently using the \"%s\" page. Switching will update it across your site."
 msgstr "サイトは現在「%s」ページを使用しています。切り替えるとサイト全体で更新されます。"
 
-#: build/admin.js:95
+#: build/admin.js:99
 msgid "This tells WordPress, your theme and other plugins which page is your privacy policy. It also controls the login-screen link."
 msgstr "これはWordPress、テーマ、その他のプラグインにどのページがプライバシーポリシーかを伝えます。またログイン画面のリンクも制御します。"
 
-#: build/admin.js:95
+#: build/admin.js:99
 msgid "Replace now"
 msgstr "今すぐ置き換え"
 
-#: build/admin.js:95
+#: build/admin.js:99
 msgid "Use now"
 msgstr "今すぐ使用"
 
-#: build/admin.js:95
+#: build/admin.js:99
 msgid "<span></span> What’s Next:"
 msgstr "<span></span> 次のステップ："
 
 #. translators: %d: number of placeholder blocks left in the draft.
-#: build/admin.js:96
+#: build/admin.js:100
 #, js-format
 msgid "Replace the %d block marked \"Replace this block\" with your own wording, then delete the marker."
 msgid_plural "Replace the %d blocks marked \"Replace this block\" with your own wording, then delete the markers."
 msgstr[0] "「このブロックを置き換える」とマークされた %d ブロックを自分の文言に置き換え、そのマーカーを削除してください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "No \"Replace this block\" sections are left in the draft."
 msgstr "草案に「このブロックを置き換える」セクションは残っていません。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Fill in the parts only you know: What your own forms collect, how long you keep it, and why you are allowed to."
 msgstr "自分だけが知っている部分を記入してください：自分のフォームが収集するもの、保持期間、許可されている理由。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Leave the shortcodes in place. Those sections rewrite themselves when your cookie and consent settings change."
 msgstr "ショートコードはそのままにしてください。クッキーと同意設定が変わるとこれらのセクションは自動的に書き換えられます。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Finally have it reviewed by a qualified professional in your jurisdiction before publishing."
 msgstr "最後に、公開前に管轄地域の有資格専門家に確認してもらってください。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Each section of the generated page is its own shortcode, so you can delete or reorder them, or drop them into a page you wrote yourself. They always render your current settings."
 msgstr "生成されたページの各セクションは独自のショートコードなので、削除や並べ替え、または自分で作成したページに挿入できます。常に現在の設定を反映します。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Scan your site as a real visitor would do"
 msgstr "実際の訪問者のようにサイトをスキャンする"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "See what loads before and after consent"
 msgstr "同意前後に何が読み込まれるかを見る"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Detect scripts and trackers firing too early"
 msgstr "早すぎるスクリプトやトラッカーの検出"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Get clear, actionable fixes"
 msgstr "明確で実行可能な修正案を得る"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Schedule automatic checkup"
 msgstr "自動チェックのスケジュール設定"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Informing compliance report"
 msgstr "コンプライアンス報告の通知"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Connect your Site"
 msgstr "サイトを接続する"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Compliance Check - Coming Soon"
 msgstr "コンプライアンスチェック - 近日公開"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Detect what runs on your site before consent - and fix it before it becomes a compliance risk."
 msgstr "同意前にサイトで実行されるものを検出し、コンプライアンスリスクになる前に修正します。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Are you sure nothing loads before consent?"
 msgstr "同意前に何も読み込まれないことを確認しましたか？"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Many sites unintentionally load tracking scripts before consent - even with a cookie banner enabled."
 msgstr "多くのサイトはクッキーバナーが有効でも、同意前にトラッキングスクリプトを意図せず読み込んでいます。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Even if your cookie banner looks correct, scripts, cookies, or embeds may still run before a visitor gives consent. Compliance Check helps you detect and fix these issues automatically."
 msgstr "クッキーバナーが正しく見えても、スクリプト、クッキー、埋め込みが訪問者の同意前に実行されることがあります。コンプライアンスチェックはこれらの問題を自動で検出し修正を支援します。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Your site might be loading trackers too early"
 msgstr "あなたのサイトはトラッカーを早すぎる段階で読み込んでいる可能性があります"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "What you'll be able to do:"
 msgstr "できること："
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "This check runs on your live site and requires a connected SureCookie agent."
 msgstr "このチェックはライブサイトで実行され、接続されたSureCookieエージェントが必要です。"
 
-#: build/admin.js:96
+#: build/admin.js:100
 msgid "Reuse the Manual scan selected content."
 msgstr "手動スキャンで選択したコンテンツを再利用します。"
 
 #. translators: %d: number of cookies found.
-#: build/admin.js:98
+#: build/admin.js:102
 #, js-format
 msgid "%d Cookies Found"
 msgstr "%d 個のクッキーが見つかりました"
 
-#: build/admin.js:102
+#: build/admin.js:106
 msgid "Visitors are treated as consenting before they answer"
 msgstr "訪問者は回答する前に同意したものとみなされます"
 
 #. translators: %s: comma-separated consent category names, e.g. "Analytics, Marketing"
-#: build/admin.js:103
+#: build/admin.js:107
 #, js-format
 msgid "The Worldwide default grants %s on the first page view, before the banner is answered. Google tags fire immediately, and a later Decline cannot recall what was already sent."
 msgstr "世界共通のデフォルト設定では、バナーに回答する前の最初のページビューで %s が許可されます。Googleタグは即座に発火し、その後の拒否では既に送信されたものを取り消せません。"
 
-#: build/admin.js:103
+#: build/admin.js:107
 msgid "No regional rules configured. The Worldwide default above applies to every visitor."
 msgstr "地域別ルールは設定されていません。上記の世界共通デフォルトがすべての訪問者に適用されます。"
 
-#: build/admin.js:107
+#: build/admin.js:111
 msgid "Not imported"
 msgstr "インポートされていません"
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Upgrade to Premium:"
 msgstr "プレミアムにアップグレード："
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Finish Setup:"
 msgstr "セットアップを完了："
 
-#: build/admin.js:110
+#: build/admin.js:114
 msgid "Data Requests is a premium feature. Once Pro is active and licensed, this page becomes the request log itself."
 msgstr "データリクエストはプレミアム機能です。Proが有効かつライセンスされると、このページがリクエストログ自体になります。"
 
@@ -7870,30 +7870,197 @@ msgid "Your IP address is sent to %s on page views to work out which country you
 msgstr "ページ閲覧時に、訪問元の国を判別するためにあなたのIPアドレスが %s に送信されます。適切な同意ルールを適用するためです。返されるのは国名のみで、住所は保存されません。"
 
 #. translators: 1: the address the page is published at now, 2: the address it moves to.
-#: build/admin.js:93
+#: build/admin.js:97
 #, js-format
 msgid "This page is published at /%1$s/. Switching moves it to /%2$s/, and the old address will stop working."
 msgstr "このページは現在 /%1$s/ に公開されています。切り替えると /%2$s/ に移動し、古いアドレスは使用できなくなります。"
 
 #. translators: %s: comma-separated list of field names.
-#: build/admin.js:108
+#: build/admin.js:112
 #, js-format
 msgid "These had an unusable value and were reset to their default: %s"
 msgstr "これらは使用できない値だったため、デフォルトにリセットされました: %s"
 
 #. translators: %s: comma-separated list of field names.
-#: build/admin.js:109
+#: build/admin.js:113
 #, js-format
 msgid "These had an unusable value, so your existing settings were kept: %s"
 msgstr "これらは使用できない値だったため、既存の設定が保持されました: %s"
 
-#: build/admin.js:91
+#: build/admin.js:95
 msgid "This field is required."
 msgstr "このフィールドは必須です。"
 
 #. translators: 1: number of fields, 2: comma-separated field labels.
-#: build/admin.js:92
+#: build/admin.js:96
 #, js-format
 msgid "%1$d item still needs your input: %2$s"
 msgid_plural "%1$d items still need your input: %2$s"
 msgstr[0] "%1$d 件の項目にまだ入力が必要です: %2$s"
+
+#: inc/api/cookies.php:460
+msgid "Failed to remove service cookies: "
+msgstr "サービスクッキーの削除に失敗しました: "
+
+#: inc/integrations/site-health/init.php:69
+msgid "Visitor identification"
+msgstr "訪問者の識別"
+
+#: inc/integrations/site-health/init.php:87
+msgid "SureCookie can identify your visitors"
+msgstr "SureCookieは訪問者を識別できます"
+
+#: inc/integrations/site-health/init.php:90
+msgid "Privacy"
+msgstr "プライバシー"
+
+#: inc/integrations/site-health/init.php:93
+msgid "Visitor addresses reach SureCookie directly, so geographic rules, consent-log countries and per-visitor rate limits all describe the real visitor."
+msgstr "訪問者のアドレスは直接SureCookieに届くため、地理的ルール、同意ログの国、および訪問者ごとのレート制限はすべて実際の訪問者を示します。"
+
+#: inc/integrations/site-health/init.php:103
+msgid "SureCookie sees your proxy instead of your visitors"
+msgstr "SureCookieは訪問者の代わりにあなたのプロキシを見ています"
+
+#: inc/integrations/site-health/init.php:106
+msgid "Requests reach this site through a CDN, so every address SureCookie resolves belongs to the CDN edge rather than to your visitor."
+msgstr "リクエストはCDNを経由してこのサイトに届くため、SureCookieが解決するすべてのアドレスは訪問者ではなくCDNエッジに属します。"
+
+#: inc/integrations/site-health/init.php:107
+msgid "Requests reach this site through a reverse proxy, so every address SureCookie resolves belongs to that proxy rather than to your visitor."
+msgstr "リクエストはリバースプロキシを経由してこのサイトに届くため、SureCookieが解決するすべてのアドレスは訪問者ではなくそのプロキシに属します。"
+
+#: inc/integrations/site-health/init.php:109
+msgid "Three things are affected: geographic rules resolve the wrong country, so a visitor can be shown the wrong consent model; consent logs record that wrong country; and the per-visitor rate limits collapse into one shared bucket."
+msgstr "影響を受けるのは3つあります：地理的ルールが誤った国を解決するため、訪問者に誤った同意モデルが表示される可能性があり、同意ログはその誤った国を記録し、訪問者ごとのレート制限は1つの共有バケットにまとめられます。"
+
+#: inc/integrations/site-health/init.php:124
+msgid "Forwarded headers are already trusted from a recognised proxy, and only X-Forwarded-For is read. Your CDN is either not sending that header or is sending its own instead, so name the header it overwrites on every request. Name only that one: a header a proxy merely passes through would let a visitor choose their own country and rate-limit bucket."
+msgstr "転送ヘッダーは既に認識されたプロキシから信頼されており、X-Forwarded-Forのみが読み取られます。あなたのCDNはそのヘッダーを送信していないか、代わりに独自のヘッダーを送信しているため、毎回上書きされるヘッダーの名前を指定してください。その1つだけを指定してください：プロキシが単に通過させるヘッダーは、訪問者が自分の国やレート制限バケットを選べることになってしまいます。"
+
+#: inc/integrations/site-health/init.php:130
+msgid "That header is correct for Cloudflare, whose edge ranges ship recognised. On any other CDN, substitute the header your provider documents as overwritten and add its published ranges through the surecookie_trusted_proxy_ips filter, or its forwarded header stays untrusted and nothing changes."
+msgstr "そのヘッダーはCloudflareに適切であり、そのエッジ範囲は認識されています。他のCDNの場合は、プロバイダーが上書きすると文書化しているヘッダーに置き換え、surecookie_trusted_proxy_ipsフィルターを通じて公開されている範囲を追加してください。そうしないと、その転送ヘッダーは信頼されず、何も変わりません。"
+
+#: inc/integrations/site-health/init.php:140
+msgid "Your reverse proxy is not passing the visitor address on at all. Prefer fixing it in the server, where every plugin benefits: with nginx, ngx_http_realip_module rewrites the peer address itself, so SureCookie needs no configuration."
+msgstr "あなたのリバースプロキシは訪問者のアドレスをまったく渡していません。すべてのプラグインが恩恵を受けるサーバー側での修正を優先してください：nginxの場合、ngx_http_realip_moduleがピアアドレス自体を書き換えるため、SureCookieは設定不要です。"
+
+#: inc/integrations/site-health/init.php:142
+msgid "Passing the header to PHP works too, and needs nothing on the SureCookie side because a recognised proxy is already trusted:"
+msgstr "ヘッダーをPHPに渡すことも可能で、認識されたプロキシは既に信頼されているため、SureCookie側での設定は不要です："
+
+#: inc/integrations/site-health/init.php:144
+msgid "Use $proxy_add_x_forwarded_for, which appends. A proxy that relays the visitor's own X-Forwarded-For untouched leaves nothing to tell a forged value from a real one, which would let a visitor pick their own country and per-visitor rate-limit bucket."
+msgstr "追加する$proxy_add_x_forwarded_forを使用してください。訪問者自身のX-Forwarded-Forをそのまま中継するプロキシは、偽造値と本物の値を区別できず、訪問者が自分の国や訪問者ごとのレート制限バケットを選べることになります。"
+
+#: inc/integrations/site-health/init.php:164
+msgid "Visitor address (direct)"
+msgstr "訪問者のアドレス（直接）"
+
+#: inc/integrations/site-health/init.php:165
+msgid "CDN edge address - forwarded headers not trusted"
+msgstr "CDNエッジアドレス - 転送ヘッダーは信頼されていません"
+
+#: inc/integrations/site-health/init.php:166
+msgid "Reverse proxy address - forwarded headers not trusted"
+msgstr "リバースプロキシアドレス - 転送ヘッダーは信頼されていません"
+
+#: inc/integrations/site-health/init.php:171
+msgid "Visitor IP source"
+msgstr "訪問者のIPソース"
+
+#: inc/services/cookie-service.php:120
+msgid "A service is required."
+msgstr "サービスが必要です。"
+
+#: inc/services/cookie-service.php:129
+msgid "Service cookies removed."
+msgstr "サービスのクッキーが削除されました。"
+
+#: build/admin.js:23
+#: build/onboarding.js:1
+msgid "This cookie is declared by a service in the catalog, so its details come from there and cannot be edited here. Use Remove service to stop listing it."
+msgstr "このクッキーはカタログ内のサービスによって宣言されているため、その詳細はそこから取得され、ここで編集することはできません。リストから外すには「サービスを削除」を使用してください。"
+
+#: build/admin.js:23
+#: build/onboarding.js:1
+msgid "Remove service"
+msgstr "サービスを削除"
+
+#: build/admin.js:23
+#: build/onboarding.js:1
+msgid "Declared"
+msgstr "宣言済み"
+
+#: build/admin.js:25
+#: build/onboarding.js:3
+msgid "Listed because a service in the catalog is present on your site and is documented to set it, not because a scan observed it."
+msgstr "スキャンで観測されたためではなく、カタログ内のサービスがあなたのサイトに存在し、そのサービスが設定すると文書化されているためリストされています。"
+
+#: build/admin.js:27
+msgid "this service"
+msgstr "このサービス"
+
+#: build/admin.js:27
+msgid "Remove Service Cookies"
+msgstr "サービスのクッキーを削除"
+
+#. translators: %s: service name (e.g. Google Ads).
+#: build/admin.js:28
+#, js-format
+msgid "\"<strong></strong>\" is listed because %s was detected on your site, not because a scan saw the cookie. Removing it clears every cookie that service declares, here and on your cookie policy. If the service is still used anywhere on your site, it will be detected again and its cookies re-listed."
+msgstr "\"<strong></strong>\" は %s があなたのサイトで検出されたためリストされています。スキャンでクッキーが見られたためではありません。削除すると、そのサービスが宣言するすべてのクッキーがここおよびクッキーポリシーからクリアされます。サイトのどこかでそのサービスがまだ使用されている場合、再度検出され、そのクッキーが再リストされます。"
+
+#: build/admin.js:50
+msgid "Failed to remove service cookies"
+msgstr "サービスのクッキーの削除に失敗しました"
+
+#: build/admin.js:50
+msgid "Service cookies removed"
+msgstr "サービスのクッキーが削除されました"
+
+#. translators: %d: number of services recognised on the site.
+#: build/admin.js:70
+#, js-format
+msgid "SureCookie recognised %d service on your site."
+msgid_plural "SureCookie recognised %d services on your site."
+msgstr[0] "SureCookieはあなたのサイトで %d のサービスを認識しました。"
+
+#. translators: %d: number of cookies the scan observed.
+#: build/admin.js:71
+#, js-format
+msgid "This scan observed %d cookie."
+msgid_plural "This scan observed %d cookies."
+msgstr[0] "このスキャンでは %d のクッキーが観測されました。"
+
+#: build/admin.js:71
+msgid "Their cookies are already on your cookie policy, including any the scan could not see for itself, so a low cookie count does not mean the scan failed."
+msgstr "それらのクッキーはすでにあなたのクッキーポリシーに含まれており、スキャンが自ら確認できなかったものも含まれているため、クッキー数が少ないことはスキャンの失敗を意味しません。"
+
+#: build/admin.js:71
+msgid "Some Recognised Services Are Not Declared"
+msgstr "認識されたサービスの一部が宣言されていません"
+
+#: build/admin.js:71
+msgid "Services We Recognised"
+msgstr "認識されたサービス"
+
+#. translators: %s: comma-separated service names.
+#: build/admin.js:72
+#, js-format
+msgid "%s is marked as removed in your Known Services library, so its cookies are not on your cookie policy and scanning again will not add them."
+msgid_plural "%s are marked as removed in your Known Services library, so their cookies are not on your cookie policy and scanning again will not add them."
+msgstr[0] "%s はあなたの既知のサービスライブラリで削除済みとしてマークされているため、そのクッキーはあなたのクッキーポリシーに含まれておらず、再スキャンしても追加されません。"
+
+#: build/admin.js:72
+msgid "Open Known Services"
+msgstr "既知のサービスを開く"
+
+#: build/admin.js:90
+msgid "Compliance Guard is holding this resource until you review it, so it does not load yet - not even for a visitor who has consented. Release it from Automatic Scanning, or set it to Always load here."
+msgstr "Compliance Guardはこのリソースをレビューのために保留しているため、まだ読み込まれていません—同意した訪問者に対しても読み込まれません。自動スキャンから解除するか、ここで常に読み込むよう設定してください。"
+
+#: build/admin.js:90
+msgid "Held for review"
+msgstr "レビューのため保留中"

@@ -466,7 +466,9 @@ class Sync {
 				}
 
 				if ( ! isset( $declared_by_key[ $key ] ) ) {
-					$merged[ $category ][] = $cookie;
+					// No literal catalog row, but a pattern row may still describe it.
+					// Blanks only, so a scan-resolved value and an admin's correction win.
+					$merged[ $category ][] = $this->fill_from_catalog_pattern( $cookie );
 					continue;
 				}
 
@@ -601,6 +603,32 @@ class Sync {
 		}
 
 		return $transformed;
+	}
+
+	/**
+	 * Fill a scanned cookie's blank curated fields from a catalog pattern.
+	 *
+	 * The exact name+domain key a literal match needs is one a pattern row can
+	 * never satisfy, so a dynamic name kept the blank Purpose (#1202).
+	 *
+	 * @param array<string, mixed> $cookie Scanned cookie.
+	 * @since 1.5.1
+	 * @return array<string, mixed>
+	 */
+	private function fill_from_catalog_pattern( array $cookie ): array {
+		$details = Declared_Cookies::get_instance()->catalog_details_for( $cookie );
+
+		if ( $details === [] ) {
+			return $cookie;
+		}
+
+		foreach ( [ 'provider', 'purpose', 'description', 'duration' ] as $field ) {
+			if ( empty( $cookie[ $field ] ) && ! empty( $details[ $field ] ) ) {
+				$cookie[ $field ] = $details[ $field ];
+			}
+		}
+
+		return $cookie;
 	}
 
 	/**

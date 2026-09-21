@@ -93,6 +93,13 @@ class Settings {
 			}
 		}
 
+		// Repairs sites already holding a 0, which reaches the page as the truthy
+		// string "0" and renders the banner at 0px.
+		if ( (int) ( $public_settings['banner_width'] ?? 0 ) <= 0 ) {
+			$defaults                        = self::get_settings_defaults();
+			$public_settings['banner_width'] = $defaults['banner_width'] ?? 650;
+		}
+
 		/*
 		 * Display-only companion to `hide_unused_categories`: the ids the consent UI
 		 * may render. `cookie_categories` itself is never filtered, because the
@@ -195,7 +202,7 @@ class Settings {
 			case 'bool':
 				return Sanitize::boolean( $value );
 			case 'int':
-				return Sanitize::integer( $value );
+				return self::clamp_to_range( $key, Sanitize::integer( $value ) );
 			case 'array':
 				// Sanitize::array() hard-hints array; writers that must not lose the stored value drop the key before calling.
 				return Sanitize::array( is_array( $value ) ? $value : [] );
@@ -209,5 +216,31 @@ class Settings {
 			default:
 				return Sanitize::text( $value );
 		}
+	}
+
+	/**
+	 * Hold an integer inside the range its schema declares.
+	 *
+	 * `Sanitize::integer()` is `absint()`, so an emptied field arrives as 0. Every
+	 * writer cleans through here, so this is the one place that keeps it out of the
+	 * database.
+	 *
+	 * @param string $key   Option key.
+	 * @param int    $value Sanitized integer.
+	 * @since 1.5.1
+	 * @return int
+	 */
+	private static function clamp_to_range( $key, $value ) {
+		[ $min, $max ] = Options::get_option_range( $key );
+
+		if ( $min !== null && $value < $min ) {
+			return $min;
+		}
+
+		if ( $max !== null && $value > $max ) {
+			return $max;
+		}
+
+		return $value;
 	}
 }

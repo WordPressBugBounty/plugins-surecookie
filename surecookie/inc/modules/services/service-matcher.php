@@ -31,7 +31,15 @@ class Service_Matcher {
 	/**
 	 * Collect the lower-cased third-party script/iframe URLs reported across pages.
 	 *
-	 * @param array<int, array<string, mixed>> $pages Scan result pages.
+	 * Accepts both shapes this is called with: a live scan page, where an iframe
+	 * carries `src`, and the stored resources option, where `admin/sync.php`
+	 * files that same value under `url`. Reading only `src` left every
+	 * path-gated embed (`youtube.com/embed/`, `youtu.be/`) matched against a
+	 * bare host, so no such service was ever detected from the store. Falling
+	 * back on an EMPTY string matters too: a row the blocker merged in sets
+	 * `url` to '', which `??` treats as present.
+	 *
+	 * @param array<int, array<string, mixed>> $pages Scan result pages, or stored resource sets.
 	 * @since 1.3.0
 	 * @return array<int, string>
 	 */
@@ -39,17 +47,22 @@ class Service_Matcher {
 		$urls = [];
 
 		foreach ( $pages as $page ) {
-			foreach ( $page['scripts'] ?? [] as $script ) {
-				$candidate = (string) ( $script['url'] ?? $script['domain'] ?? '' );
-				if ( $candidate !== '' ) {
-					$urls[] = strtolower( $candidate );
-				}
-			}
+			foreach ( [
+				'scripts' => [ 'url', 'domain' ],
+				'iframes' => [ 'src', 'url', 'domain' ],
+			] as $bucket => $keys ) {
+				foreach ( (array) ( $page[ $bucket ] ?? [] ) as $resource ) {
+					if ( ! is_array( $resource ) ) {
+						continue;
+					}
 
-			foreach ( $page['iframes'] ?? [] as $iframe ) {
-				$candidate = (string) ( $iframe['src'] ?? $iframe['domain'] ?? '' );
-				if ( $candidate !== '' ) {
-					$urls[] = strtolower( $candidate );
+					foreach ( $keys as $key ) {
+						$candidate = trim( (string) ( $resource[ $key ] ?? '' ) );
+						if ( $candidate !== '' ) {
+							$urls[] = strtolower( $candidate );
+							break;
+						}
+					}
 				}
 			}
 		}

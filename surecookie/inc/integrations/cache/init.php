@@ -57,7 +57,7 @@ class Init {
 	 *
 	 * @since 1.4.0
 	 */
-	private const SELECTORS = [ '#surecookie-public-root', '.surecookie-*' ];
+	private const SELECTORS = [ '#surecookie-public-root', '#surecookie-preferences-root', '.surecookie-*' ];
 
 	/**
 	 * Opt-out attributes for our own assets.

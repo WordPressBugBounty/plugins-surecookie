@@ -88,6 +88,30 @@ final class Entry_Match {
 	}
 
 	/**
+	 * Whether an entry names this exact host, rather than merely reaching it.
+	 *
+	 * `matches()` answers "does this entry claim this resource", which a parent
+	 * domain, a keyword and a filename all satisfy. A caller that has to tell an
+	 * allow aimed at one host from one that happens to cover it needs the
+	 * narrower question - the Compliance Guard's hold outranks the second.
+	 *
+	 * @since 1.5.1
+	 * @param string $entry Stored exclusion or whitelist value.
+	 * @param string $host  Host to test.
+	 * @return bool
+	 */
+	public static function names_host( string $entry, string $host ): bool {
+		$host = strtolower( trim( $host ) );
+		if ( $host === '' ) {
+			return false;
+		}
+
+		$claim = self::parts( strtolower( trim( $entry ) ) )['host'];
+
+		return $claim !== '' && self::without_www( $claim ) === self::without_www( $host );
+	}
+
+	/**
 	 * A host without its `www.` alias label.
 	 *
 	 * The one definition; `Blocker::without_www()` forwards here.

@@ -71,6 +71,14 @@ class Cookies extends Base {
 	protected const BULK_UPDATE_COOKIE_CATEGORY = '/cookies/bulk-category';
 
 	/**
+	 * Route Forget Declared Service. A declared cookie has no stored row of its
+	 * own on every path, so it is cleared by service, not by name.
+	 *
+	 * @since 1.5.1
+	 */
+	protected const FORGET_DECLARED_SERVICE = '/cookies/declared-service';
+
+	/**
 	 * Register API routes.
 	 *
 	 * @since 0.0.1
@@ -280,6 +288,22 @@ class Cookies extends Base {
 
 		register_rest_route(
 			$this->get_api_namespace(),
+			self::FORGET_DECLARED_SERVICE,
+			[
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => [ $this, 'forget_declared_service' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					'service_slug' => [
+						'required' => true,
+						'type'     => 'string',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->get_api_namespace(),
 			self::BULK_UPDATE_COOKIE_CATEGORY,
 			[
 				'methods'             => WP_REST_Server::EDITABLE,
@@ -413,6 +437,27 @@ class Cookies extends Base {
 		} catch ( \Exception $e ) {
 			SendJson::error(
 				[ 'message' => __( 'Failed to remove cookie: ', 'surecookie' ) . $e->getMessage() ]
+			);
+		}
+	}
+
+	/**
+	 * Stop publishing the cookies a catalog service declares.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full data about the request.
+	 * @since 1.5.1
+	 * @return void
+	 */
+	public function forget_declared_service( $request ): void {
+		try {
+			$service = sanitize_text_field( (string) $request->get_param( 'service_slug' ) );
+
+			$result = ( new CookieService() )->forget_declared_service( $service );
+
+			$result['success'] ? SendJson::success( $result ) : SendJson::error( $result );
+		} catch ( \Exception $e ) {
+			SendJson::error(
+				[ 'message' => __( 'Failed to remove service cookies: ', 'surecookie' ) . $e->getMessage() ]
 			);
 		}
 	}

@@ -18,6 +18,8 @@ use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Functions\Validate;
+use SureCookie\Inc\Modules\ScriptBlocking\Matched_Resources;
+use SureCookie\Inc\Modules\Services\Declared_Cookies;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -73,7 +75,7 @@ class CookieService {
 			$category_id = Sanitize::scalar( $category_data['id'] ?? '' );
 			$category_id = $category_id !== '' ? $category_id : (string) $category_key;
 
-			$category_based_cookies      = $scanned_cookies[ $category_id ] ?? [];
+			$category_based_cookies      = self::with_service_slug( $scanned_cookies[ $category_id ] ?? [] );
 			$custom_cookies_for_category = $custom_category_cookies[ $category_id ] ?? [];
 			$all_cookies                 = array_merge( $category_based_cookies, $custom_cookies_for_category );
 
@@ -92,6 +94,72 @@ class CookieService {
 			'cookies'          => $final_cookies_dataset,
 			'scanning_details' => Get::option( SURECOOKIE_SCANNED_DETAILS_OPTION, [ 'success' => true ], 'array' ),
 		];
+	}
+
+	/**
+	 * Stop publishing the cookies a catalog service declares.
+	 *
+	 * A declared cookie is an inference from the service being present, not an
+	 * observation, so it is cleared by discarding the evidence rather than by
+	 * deleting the row: the stored rows a scan wrote, and the blocker's matched
+	 * resources for that service. Deliberately NOT a suppression - both sources
+	 * re-establish themselves from live evidence, so a service that really is
+	 * still on the site comes back and the policy stays honest. That is also why
+	 * this is safe to offer next to a one-row delete (#1141).
+	 *
+	 * @since 1.5.1
+	 * @param string $slug Catalog service slug.
+	 * @return array{success: bool, message: string, removed?: int}
+	 */
+	public function forget_declared_service( string $slug ): array {
+		$slug = sanitize_key( $slug );
+
+		if ( $slug === '' ) {
+			return [
+				'success' => false,
+				'message' => __( 'A service is required.', 'surecookie' ),
+			];
+		}
+
+		$removed = Declared_Cookies::get_instance()->forget_service( $slug )
+			+ Matched_Resources::get_instance()->forget_service( $slug );
+
+		return [
+			'success' => true,
+			'message' => __( 'Service cookies removed.', 'surecookie' ),
+			'removed' => $removed,
+		];
+	}
+
+	/**
+	 * Name the service a declared row belongs to, for rows stored before the
+	 * field existed.
+	 *
+	 * Admin read path only: the row's owner is what the remove action addresses,
+	 * and without this a row from an older scan would remove only itself and
+	 * leave the rest of its service on the policy.
+	 *
+	 * @since 1.5.1
+	 * @param mixed $cookies Stored rows for one category.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function with_service_slug( $cookies ): array {
+		$rows = [];
+
+		foreach ( is_array( $cookies ) ? $cookies : [] as $cookie ) {
+			if ( is_array( $cookie ) && empty( $cookie['service_slug'] ) ) {
+				$parts = explode( ':', (string) ( $cookie['signature_id'] ?? '' ), 3 );
+
+				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
+					$cookie['service_slug']  = $parts[1];
+					$cookie['service_label'] = Declared_Cookies::get_instance()->label_for( $parts[1] );
+				}
+			}
+
+			$rows[] = $cookie;
+		}
+
+		return $rows;
 	}
 
 	/**

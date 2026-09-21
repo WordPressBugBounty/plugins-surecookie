@@ -40,6 +40,14 @@ class Api extends Base {
 	protected const ROUTE = '/known-services';
 
 	/**
+	 * Recognised-services route. Deliberately not nested under ROUTE: the slug
+	 * route's `[a-z0-9-]+` segment would also match it.
+	 *
+	 * @since 1.5.1
+	 */
+	protected const RECOGNISED_ROUTE = '/recognised-services';
+
+	/**
 	 * Register API routes.
 	 *
 	 * @since 1.3.0
@@ -52,6 +60,16 @@ class Api extends Base {
 			[
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_known_services' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+			]
+		);
+
+		register_rest_route(
+			$this->get_api_namespace(),
+			self::RECOGNISED_ROUTE,
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_recognised_services' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
 			]
 		);
@@ -118,12 +136,34 @@ class Api extends Base {
 			);
 		}
 
+		$recognised = Recognised_Services::get_instance();
+
 		return new WP_REST_Response(
 			[
-				'services'  => $services,
-				'installed' => array_values( $installed ),
-				'detected'  => $this->detected_slugs( array_keys( $catalog ) ),
+				'services'   => $services,
+				'installed'  => array_values( $installed ),
+				'detected'   => $recognised->slugs(),
+				'recognised' => $recognised->report(),
 			],
+			200
+		);
+	}
+
+	/**
+	 * Services this site is known to load, with their declared state.
+	 *
+	 * Kept apart from the catalog listing because the scanner screen needs only
+	 * this handful of rows, not all 170-odd services and their cookies.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request.
+	 * @since 1.5.1
+	 * @return WP_REST_Response { services:[ {slug,label,category,declared,suppressed} ] }.
+	 */
+	public function get_recognised_services( $request ): WP_REST_Response {
+		unset( $request );
+
+		return new WP_REST_Response(
+			[ 'services' => Recognised_Services::get_instance()->report() ],
 			200
 		);
 	}
@@ -173,18 +213,4 @@ class Api extends Base {
 		return new WP_REST_Response( $result, 200 );
 	}
 
-	/**
-	 * Catalog slugs detected in the most recent scan's resources.
-	 *
-	 * @param array<int, string> $slugs Catalog slugs to test.
-	 * @since 1.3.0
-	 * @return array<int, string>
-	 */
-	private function detected_slugs( array $slugs ): array {
-		$resources = (array) get_option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [] );
-		$matcher   = Service_Matcher::get_instance();
-		$urls      = $matcher->collect_resource_urls( [ $resources ] );
-
-		return array_values( $matcher->match_services( $slugs, $urls ) );
-	}
 }

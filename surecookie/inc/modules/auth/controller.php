@@ -234,8 +234,9 @@ class Controller {
 		// on the front-end banner render, so it stays out of the alloptions cache.
 		Update::option( self::SETTINGS_KEY, $decrypted_data_array );
 
-		// Push account_ref to SaaS so it can populate Site::tier without
-		// seeing the user's email (issue #469). Fire-and-forget.
+		// Push account_ref to SaaS so it can populate Site::tier without seeing the
+		// user's email (issue #469). Result is ignored: the callback must redirect
+		// either way, and the ref is CRM-only, so a miss costs no entitlement.
 		$account_ref = $decrypted_data_array['account_ref'] ?? null;
 		if ( is_string( $account_ref ) && $account_ref !== '' ) {
 			SaasClient::get_instance()->link_billing_account( $account_ref );

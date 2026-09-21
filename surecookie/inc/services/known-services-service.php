@@ -14,7 +14,7 @@ namespace SureCookie\Inc\Services;
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Modules\Services\Cron;
 use SureCookie\Inc\Modules\Services\Installed_Services;
-use SureCookie\Inc\Modules\Services\Service_Matcher;
+use SureCookie\Inc\Modules\Services\Recognised_Services;
 use SureCookie\Inc\Modules\Services\Services_Source;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,17 +38,13 @@ class KnownServicesService {
 	}
 
 	/**
-	 * Catalog slugs detected in the most recent scan's resources.
+	 * Catalog slugs this site is known to load.
 	 *
-	 * @param array<int, string> $slugs Slugs to test.
 	 * @return array<int, string>
 	 * @since 1.4.0
 	 */
-	public function detected_slugs( array $slugs ): array {
-		$resources = (array) get_option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [] );
-		$matcher   = Service_Matcher::get_instance();
-
-		return array_values( $matcher->match_services( $slugs, $matcher->collect_resource_urls( [ $resources ] ) ) );
+	public function detected_slugs(): array {
+		return Recognised_Services::get_instance()->slugs();
 	}
 
 	/**
@@ -91,7 +87,7 @@ class KnownServicesService {
 	public function list_services(): array {
 		$catalog   = $this->get_catalog();
 		$installed = Installed_Services::get_instance()->get_installed();
-		$detected  = $this->detected_slugs( array_keys( $catalog ) );
+		$detected  = $this->detected_slugs();
 		$pro_ready = Helper::is_pro_active();
 		$services  = [];
 

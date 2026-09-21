@@ -467,6 +467,27 @@ class Get {
 	}
 
 	/**
+	 * Scan-detected resources as the display surfaces should see them.
+	 *
+	 * The twin of {@see self::scanned_cookies_for_display()}: the stored option
+	 * holds only what a scan observed, while the blocker's own matched set and
+	 * the installed-service overlay arrive through the filter. Read the option
+	 * directly where you intend to write it back.
+	 *
+	 * @since 1.5.1
+	 * @return array<string, mixed> Payload shaped { scripts:[], iframes:[], ... }.
+	 */
+	public static function scanned_resources_for_display(): array {
+		/** This filter is documented in inc/api/scanned-resources.php */
+		$resources = apply_filters(
+			'surecookie_scanned_resources',
+			self::option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [], 'array' )
+		);
+
+		return is_array( $resources ) ? $resources : [];
+	}
+
+	/**
 	 * Get scanned cookies as a flat array with category field added to each cookie.
 	 *
 	 * @since 0.0.1
@@ -883,9 +904,11 @@ class Get {
 	 * @return string $cookie_policy_style_file CSS file name depending on RTL or LTR.
 	 */
 	public static function cookie_policy_style_css() {
-		$cookie_policy_style_file = 'cookie-policy.css';
-		if ( Get::is_rtl() && file_exists( SURECOOKIE_DIR . 'assets/css/cookie-policy-rtl.css' ) ) {
-			$cookie_policy_style_file = 'cookie-policy-rtl.css';
+		// Not cookie-policy.css: that exact path is a rule in Fanboy's Cookie
+		// Monster, so cookie-notice blocklists 204'd it and the tables lost every style.
+		$cookie_policy_style_file = 'policy-tables.css';
+		if ( Get::is_rtl() && file_exists( SURECOOKIE_DIR . 'assets/css/policy-tables-rtl.css' ) ) {
+			$cookie_policy_style_file = 'policy-tables-rtl.css';
 		}
 		return $cookie_policy_style_file;
 	}

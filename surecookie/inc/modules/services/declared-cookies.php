@@ -46,9 +46,9 @@ class Declared_Cookies {
 	private const MIN_WILDCARD_PREFIX = 3;
 
 	/**
-	 * Memoized catalog provider lookup: [ exact, prefixes ].
+	 * Memoized catalog detail lookup: [ exact, prefixes ].
 	 *
-	 * @var array{0: array<string, string>, 1: array<string, string>}|null
+	 * @var array{0: array<string, array<string, string>>, 1: array<string, array<string, string>>}|null
 	 * @since 1.3.0
 	 */
 	private ?array $provider_index = null;
@@ -120,6 +120,101 @@ class Declared_Cookies {
 	}
 
 	/**
+	 * Drop the stored declared rows one service owns.
+	 *
+	 * Suppression alone stops a service being declared again, but rows a scan
+	 * already persisted are in the option and stay on the policy, so removing a
+	 * service without this clears the read-time half and leaves the stored half
+	 * published. Matches the slug field or the older signature prefix, and only
+	 * ever on a declared row: an observed cookie is evidence the site set it, and
+	 * deleting that here would hide a live tracker.
+	 *
+	 * @since 1.5.1
+	 * @param string $slug Catalog service slug.
+	 * @return int Rows removed.
+	 */
+	public function forget_service( string $slug ): int {
+		$stored = get_option( SURECOOKIE_SCANNED_COOKIES_OPTION, [] );
+		if ( $slug === '' || ! is_array( $stored ) || empty( $stored ) ) {
+			return 0;
+		}
+
+		$prefix  = 'declared:' . $slug . ':';
+		$removed = 0;
+
+		foreach ( $stored as $category => $cookies ) {
+			if ( ! is_array( $cookies ) ) {
+				continue;
+			}
+
+			foreach ( $cookies as $index => $cookie ) {
+				if ( ! is_array( $cookie ) || ! self::is_declared( $cookie ) ) {
+					continue;
+				}
+
+				$owned = (string) ( $cookie['service_slug'] ?? '' ) === $slug
+					|| strncmp( (string) ( $cookie['signature_id'] ?? '' ), $prefix, strlen( $prefix ) ) === 0;
+
+				if ( $owned ) {
+					unset( $stored[ $category ][ $index ] );
+					++$removed;
+				}
+			}
+
+			$stored[ $category ] = array_values( $stored[ $category ] );
+		}
+
+		if ( $removed > 0 ) {
+			Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored );
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * A service's display name, falling back to its slug.
+	 *
+	 * Public so a row stored before `service_label` existed can still be named on
+	 * the admin read path.
+	 *
+	 * @since 1.5.1
+	 * @param string $service Catalog service slug.
+	 * @return string
+	 */
+	public function label_for( string $service ): string {
+		return self::service_label( $service );
+	}
+
+	/**
+	 * A service's display name, falling back to its slug.
+	 *
+	 * @since 1.5.1
+	 * @param string $service Catalog service slug.
+	 * @return string
+	 */
+	private static function service_label( string $service ): string {
+		$entry = Services_Source::get_instance()->get_catalog()[ $service ] ?? null;
+		$label = is_array( $entry ) ? (string) ( $entry['label'] ?? '' ) : '';
+
+		return $label !== '' ? $label : $service;
+	}
+
+	/**
+	 * Whether a stored row came from the catalog rather than an observation.
+	 *
+	 * Accepts the signature prefix as well as `source`, so rows written before
+	 * the marker existed are still recognised. Mirrors `Sync::is_declared_row()`.
+	 *
+	 * @since 1.5.1
+	 * @param array<string, mixed> $cookie Stored cookie row.
+	 * @return bool
+	 */
+	private static function is_declared( array $cookie ): bool {
+		return ( $cookie['source'] ?? '' ) === 'declared'
+			|| strncmp( (string) ( $cookie['signature_id'] ?? '' ), 'declared:', 9 ) === 0;
+	}
+
+	/**
 	 * Fill in a provider for stored scanned cookies that have none.
 	 *
 	 * Earlier scans read the provider from a key the scan API never sends, so
@@ -176,27 +271,42 @@ class Declared_Cookies {
 	 * @return string
 	 */
 	public function catalog_provider_for( array $cookie ): string {
+		return (string) ( $this->catalog_details_for( $cookie )['provider'] ?? '' );
+	}
+
+	/**
+	 * Everything the catalog knows about one cookie, or [] when unknown.
+	 *
+	 * A pattern row is the only curated text a dynamic name such as
+	 * `_ga_<container-id>` will ever have, so the match has to carry more than
+	 * the provider. #1130 still bars the pattern itself from becoming a row.
+	 *
+	 * @param array<string, mixed> $cookie Cookie with at least a name, ideally a domain.
+	 * @since 1.5.1
+	 * @return array<string, string>
+	 */
+	public function catalog_details_for( array $cookie ): array {
 		$name = Cookie_Identity::normalize_name( (string) ( $cookie['name'] ?? '' ) );
 		if ( $name === '' ) {
-			return '';
+			return [];
 		}
 
 		[ $exact, $prefixes ] = $this->catalog_provider_index();
 
 		// Exact name+domain first, then name-only (a first-party entry's domain is
 		// inferred from this host, so it need not match the tag's), then prefixes.
-		$provider = $exact[ Cookie_Identity::key_for( $cookie ) ] ?? $exact[ $name ] ?? '';
-		if ( $provider !== '' ) {
-			return $provider;
+		$details = $exact[ Cookie_Identity::key_for( $cookie ) ] ?? $exact[ $name ] ?? [];
+		if ( $details !== [] ) {
+			return $details;
 		}
 
-		foreach ( $prefixes as $prefix => $prefix_provider ) {
+		foreach ( $prefixes as $prefix => $prefix_details ) {
 			if ( str_starts_with( $name, $prefix ) ) {
-				return $prefix_provider;
+				return $prefix_details;
 			}
 		}
 
-		return '';
+		return [];
 	}
 
 	/**
@@ -271,8 +381,9 @@ class Declared_Cookies {
 		return $cookies_by_category;
 	}
 
+
 	/**
-	 * Build (and memoize) the catalog provider lookup, returning [ exact, prefixes ].
+	 * Build (and memoize) the catalog detail lookup, returning [ exact, prefixes ].
 	 *
 	 * `exact` is keyed by name+domain, plus a name-only key for first-party
 	 * entries: their domain is this site's host and the tag may use a different
@@ -286,7 +397,7 @@ class Declared_Cookies {
 	 * below the minimum length are dropped so a stray pattern swallows nothing.
 	 *
 	 * @since 1.3.0
-	 * @return array{0: array<string, string>, 1: array<string, string>}
+	 * @return array{0: array<string, array<string, string>>, 1: array<string, array<string, string>>}
 	 */
 	private function catalog_provider_index(): array {
 		if ( $this->provider_index !== null ) {
@@ -306,8 +417,16 @@ class Declared_Cookies {
 					continue;
 				}
 
-				$provider = (string) $cookie['provider'];
-				$name     = Cookie_Identity::normalize_name( (string) $cookie['name'] );
+				// The whole curated set, not just the provider: a pattern row is the
+				// only text a `_ga_<container-id>` style name ever gets (#1202). Key
+				// names and the day-count mapping mirror `transform()`.
+				$details = [
+					'provider'    => (string) $cookie['provider'],
+					'description' => (string) ( $cookie['description'] ?? '' ),
+					'purpose'     => (string) ( $cookie['purpose'] ?? '' ),
+					'duration'    => ! empty( $cookie['duration_days'] ) ? (string) absint( $cookie['duration_days'] ) : '',
+				];
+				$name    = Cookie_Identity::normalize_name( (string) $cookie['name'] );
 
 				$wildcard_at = strcspn( $name, '*<' );
 
@@ -315,16 +434,16 @@ class Declared_Cookies {
 					$prefix = substr( $name, 0, $wildcard_at );
 
 					if ( strlen( $prefix ) >= self::MIN_WILDCARD_PREFIX ) {
-						$prefixes[ $prefix ] = $provider;
+						$prefixes[ $prefix ] = $details;
 					}
 
 					continue;
 				}
 
-				$exact[ Cookie_Identity::key_for( $cookie ) ] = $provider;
+				$exact[ Cookie_Identity::key_for( $cookie ) ] = $details;
 
 				if ( Cookie_Identity::is_first_party( $cookie ) ) {
-					$exact[ $name ] = $provider;
+					$exact[ $name ] = $details;
 				}
 			}
 		}
@@ -392,25 +511,31 @@ class Declared_Cookies {
 			: null;
 
 		$cookie = [
-			'name'         => $name,
-			'value'        => '',
-			'domain'       => (string) ( $definition['domain'] ?? '' ),
-			'path'         => '/',
-			'expires'      => $expires,
-			'httpOnly'     => false,
-			'secure'       => true,
+			'name'          => $name,
+			'value'         => '',
+			'domain'        => (string) ( $definition['domain'] ?? '' ),
+			'path'          => '/',
+			'expires'       => $expires,
+			'httpOnly'      => false,
+			'secure'        => true,
 			// Third-party embed cookies are sent cross-site.
-			'sameSite'     => 'none',
-			'category'     => $category,
+			'sameSite'      => 'none',
+			'category'      => $category,
 			// The catalog knows the lifetime in days.
-			'duration'     => $duration_days > 0 ? (string) $duration_days : '',
-			'provider'     => (string) ( $definition['provider'] ?? '' ),
-			'description'  => (string) ( $definition['description'] ?? '' ),
-			'purpose'      => (string) ( $definition['purpose'] ?? '' ),
+			'duration'      => $duration_days > 0 ? (string) $duration_days : '',
+			'provider'      => (string) ( $definition['provider'] ?? '' ),
+			'description'   => (string) ( $definition['description'] ?? '' ),
+			'purpose'       => (string) ( $definition['purpose'] ?? '' ),
 			// Deterministic id so re-scans replace (never duplicate) the declared row.
-			'signature_id' => 'declared:' . $service . ':' . $name,
+			'signature_id'  => 'declared:' . $service . ':' . $name,
 			// Marks the cookie as declared-from-catalog rather than runtime-observed.
-			'source'       => 'declared',
+			'source'        => 'declared',
+			// Named so removal and the admin row resolve the owner from a field
+			// rather than parsing signature_id, which is an id and not a contract.
+			'service_slug'  => $service,
+			// The service's own name, never `provider`: YouTube's PREF row is
+			// provided by "Google", and removal is about the service, not the vendor.
+			'service_label' => self::service_label( $service ),
 		];
 
 		// Carry the marker so the scan-time merge knows this domain was inferred

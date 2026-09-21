@@ -211,7 +211,10 @@ class Matched_Resources {
 					continue;
 				}
 
-				$seen[ $key ]           = true;
+				$seen[ $key ] = true;
+				// Never written back, so the endpoints that edit the stored option
+				// cannot find this row: the admin table reads it to explain why.
+				$row['synthesized']     = true;
 				$cookies[ $category ][] = $row;
 			}
 		}
@@ -254,6 +257,54 @@ class Matched_Resources {
 		if ( $changed ) {
 			update_option( self::OPTION, $stored, false );
 		}
+	}
+
+	/**
+	 * Drop what this site recorded for one service.
+	 *
+	 * The ledger is evidence, and it is append-only, so an entry outlives the tag
+	 * that produced it and keeps declaring its cookies (#1141). Discarding one
+	 * service's evidence is self-correcting in the safe direction: if the resource
+	 * is genuinely gone nothing re-records it, and if it still loads the next page
+	 * view that serves it writes the entry back and the policy is accurate again.
+	 * Scoped to one service because wiping the ledger also erases rows that are a
+	 * gated embed's only admin row, and flips the blocking-state telemetry.
+	 *
+	 * @since 1.5.1
+	 * @param string $service Catalog service key.
+	 * @return int Entries dropped.
+	 */
+	public function forget_service( string $service ): int {
+		if ( $service === '' ) {
+			return 0;
+		}
+
+		$stored  = $this->stored();
+		$dropped = 0;
+
+		foreach ( $stored as $kind => $patterns ) {
+			foreach ( $patterns as $pattern => $entry ) {
+				if ( (string) ( $entry['service'] ?? '' ) === $service ) {
+					unset( $stored[ $kind ][ $pattern ], $this->seen[ $kind ][ $pattern ] );
+					++$dropped;
+				}
+			}
+		}
+
+		if ( $dropped === 0 ) {
+			return 0;
+		}
+
+		// An option holding two empty kinds is not the same as no option: analytics
+		// reads a present-but-empty ledger as "blocking is inert on a site with
+		// trackers". Having discarded the evidence, the honest answer is unknown.
+		if ( empty( $stored['script'] ) && empty( $stored['iframe'] ) ) {
+			delete_option( self::OPTION );
+		} else {
+			update_option( self::OPTION, $stored, false );
+		}
+
+		return $dropped;
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * Description: Real cookie consent for WordPress. Browser-based scanning, smart categorization, strict script blocking, and consent logs stored in your database.
  * Author: SureCookie
  * Author URI: https://surecookie.com/
- * Version: 1.5.0
+ * Version: 1.5.1
  * License: GPL-2.0-or-later
  * Text Domain: surecookie
  * Domain Path: /languages
@@ -27,7 +27,7 @@ define( 'SURECOOKIE_FILE', __FILE__ );
 define( 'SURECOOKIE_BASE', plugin_basename( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_DIR', plugin_dir_path( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_URL', plugins_url( '/', SURECOOKIE_FILE ) );
-define( 'SURECOOKIE_VERSION', '1.5.0' );
+define( 'SURECOOKIE_VERSION', '1.5.1' );
 
 /**
  * Define the necessary core constants..

@@ -109,6 +109,22 @@ class Translation_Filter {
 			$translated = (string) apply_filters( 'wpml_translate_single_string', $value, self::STRING_CONTEXT, $name );
 		}
 
+		/**
+		 * Filter a SureCookie string after translation, before sanitisation.
+		 *
+		 * The single funnel for every server-rendered string, so this reaches
+		 * the banner, the preferences modal, the blocked-content placeholder,
+		 * the cookie-policy shortcode and the re-consent label. Runs before
+		 * sanitisation deliberately: a translator plugin returning markup still
+		 * has it escaped by us, so the filter cannot widen what we allow.
+		 *
+		 * @param string $translated   Translated value.
+		 * @param string $name         Registered string name, `surecookie_<key>`.
+		 * @param bool   $is_multiline Whether the key holds rich text.
+		 * @since 1.5.1
+		 */
+		$translated = (string) apply_filters( 'surecookie_translate_string', $translated, $name, $is_multiline );
+
 		return $is_multiline
 			? wp_kses_post( $translated )
 			: sanitize_text_field( $translated );
@@ -127,8 +143,7 @@ class Translation_Filter {
 				continue;
 			}
 
-			$is_multiline = $key === 'message_description';
-			$data[ $key ] = self::translate_string( $data[ $key ], 'surecookie_' . $key, $is_multiline );
+			$data[ $key ] = self::translate_string( $data[ $key ], 'surecookie_' . $key, Init::is_multiline( $key ) );
 		}
 
 		return $data;
@@ -154,8 +169,7 @@ class Translation_Filter {
 				continue;
 			}
 
-			$is_multiline             = $key === 'message_description';
-			$data['defaults'][ $key ] = self::translate_string( $value, 'surecookie_' . $key, $is_multiline );
+			$data['defaults'][ $key ] = self::translate_string( $value, 'surecookie_' . $key, Init::is_multiline( $key ) );
 		}
 
 		return $data;

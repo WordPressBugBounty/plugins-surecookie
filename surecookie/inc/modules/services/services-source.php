@@ -82,7 +82,8 @@ class Services_Source {
 
 	/**
 	 * Resolve the unified catalog: slug => {label, category, gcm_compatible?,
-	 * patterns keyed by Pattern_Kinds bucket, cookies:[...]}. `_meta` is stripped.
+	 * cookieless?, patterns keyed by Pattern_Kinds bucket, cookies:[...]}. `_meta`
+	 * is stripped.
 	 *
 	 * First-party placeholder domains are resolved here, on the way out of the
 	 * caches, so every consumer (Known Services REST, install(), declared-cookie
@@ -105,7 +106,8 @@ class Services_Source {
 	/**
 	 * Project the catalog into the blocking view consumed by Known_Scripts /
 	 * Blocker: category => slug => {label, one array per Pattern_Kinds bucket,
-	 * gcm_compatible?}. Only services with at least one pattern are emitted.
+	 * gcm_compatible?, cookieless?}. Only services with at least one pattern are
+	 * emitted.
 	 *
 	 * @since 1.3.0
 	 * @return array<string, array<string, array<string, mixed>>>
@@ -334,8 +336,8 @@ class Services_Source {
 
 	/**
 	 * Project a unified catalog into the blocking view (category => slug =>
-	 * {label, one array per Pattern_Kinds bucket, gcm_compatible?}); services
-	 * without patterns are omitted.
+	 * {label, one array per Pattern_Kinds bucket, gcm_compatible?, cookieless?});
+	 * services without patterns are omitted.
 	 *
 	 * Every bucket is emitted, including the ones no pass reads: a consumer that
 	 * only cares what gets rewritten filters on `Pattern_Kinds::enforced()`,
@@ -371,6 +373,10 @@ class Services_Source {
 				$entry['gcm_compatible'] = (bool) $service['gcm_compatible'];
 			}
 
+			if ( isset( $service['cookieless'] ) ) {
+				$entry['cookieless'] = (bool) $service['cookieless'];
+			}
+
 			$view[ $category ][ $slug ] = $entry;
 		}
 
@@ -381,11 +387,13 @@ class Services_Source {
 	 * Merge two unified catalogs at the slug level, `$override` winning per slug.
 	 *
 	 * Deliberately a replace and not a deep merge: the remote has to stay able to
-	 * retire a cookie row or a pattern that has gone wrong. The one exception is
-	 * blocking patterns, where the bundled entry is a floor - the validator admits
-	 * a remote row on valid cookies alone, so a cookies-only row would otherwise
-	 * silently stop blocking a service that every bundled entry has patterns for.
-	 * Emptiness is treated as an incomplete row, never as "stop blocking this".
+	 * retire a cookie row or a pattern that has gone wrong. Two things are floors
+	 * instead. Blocking patterns, because the validator admits a remote row on
+	 * valid cookies alone, so a cookies-only row would otherwise silently stop
+	 * blocking a service that every bundled entry has patterns for - emptiness is
+	 * treated as an incomplete row, never as "stop blocking this". And a bundled
+	 * `cookieless` assertion, which survives a remote row that says nothing about
+	 * it.
 	 *
 	 * @param array<string, array<string, mixed>> $base     Bundled floor.
 	 * @param array<string, array<string, mixed>> $override Remote/cached catalog.
@@ -412,6 +420,12 @@ class Services_Source {
 				$entry['patterns'] = $declared
 					? self::reclassify_patterns( $patterns, (array) $base[ $slug ]['patterns'] )
 					: $base[ $slug ]['patterns'];
+			}
+
+			// A floor like patterns: a remote that has never heard of the key must
+			// not revoke the claim, but an explicit remote value still retires it.
+			if ( is_array( $entry ) && ! array_key_exists( 'cookieless', $entry ) && ! empty( $base[ $slug ]['cookieless'] ) ) {
+				$entry['cookieless'] = true;
 			}
 
 			$base[ $slug ] = $entry;

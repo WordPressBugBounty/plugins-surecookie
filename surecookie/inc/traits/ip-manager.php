@@ -452,6 +452,48 @@ trait IpManager {
 	}
 
 	/**
+	 * Which address the plugin ends up treating as the visitor.
+	 *
+	 * Asks `get_client_ip()` what it resolved rather than re-deriving its
+	 * decision, so the answer cannot disagree with the address the rest of the
+	 * plugin uses. Re-deriving would report `visitor` for a site that enabled
+	 * proxy trust but named a header its proxy never sets, which is the state
+	 * most likely to follow the advice this powers.
+	 *
+	 * `cdn` and `local` mean a proxy's own address is standing in for the
+	 * visitor's: geo targeting resolves the proxy's country, consent logs store
+	 * it, and the per-IP rate limits collapse into one bucket. Membership is
+	 * tested against the filtered trusted-proxy set, so an operator who
+	 * declared their own CDN through `surecookie_trusted_proxy_ips` is covered;
+	 * the Cloudflare list only picks which remediation to offer.
+	 *
+	 * A private or loopback peer reports `local` even on an intranet where it
+	 * IS the visitor. That matches `is_usable_client_ip()`, which already
+	 * refuses those ranges as infrastructure rather than a visitor.
+	 *
+	 * @since 1.5.1
+	 * @return string One of `visitor`, `cdn`, `local`.
+	 */
+	public static function visitor_ip_source(): string {
+		$resolved = self::get_client_ip();
+
+		// Anything the trait already refuses to store as a client IP is
+		// infrastructure rather than a visitor, whatever the trust settings say:
+		// a proxy on this host or network.
+		if ( ! self::is_usable_client_ip( $resolved ) ) {
+			return 'local';
+		}
+
+		// A routable address known to be a proxy edge. The union matters in both
+		// directions: the trusted set alone misses a Cloudflare-fronted site
+		// whose operator NARROWED `surecookie_trusted_proxy_ips`, and the
+		// Cloudflare list alone misses every CDN declared through that filter.
+		$edges = array_merge( self::get_trusted_proxy_ranges(), self::cloudflare_proxy_ranges() );
+
+		return self::ip_in_ranges( $resolved, $edges ) ? 'cdn' : 'visitor';
+	}
+
+	/**
 	 * Get client's IP address.
 	 *
 	 * REMOTE_ADDR by default (cannot be spoofed). Forwarded headers are trusted

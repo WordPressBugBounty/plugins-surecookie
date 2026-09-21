@@ -74,12 +74,7 @@ class ScriptBlockingService {
 	 * @since 1.4.0
 	 */
 	public function get_scanned_resources_payload(): array {
-		$resources = Get::option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [], 'array' );
-
-		/** This filter is documented in inc/api/scanned-resources.php */
-		$resources = apply_filters( 'surecookie_scanned_resources', $resources );
-
-		return is_array( $resources ) ? $this->annotate_rows( $resources ) : [];
+		return $this->annotate_rows( Get::scanned_resources_for_display() );
 	}
 
 	/**

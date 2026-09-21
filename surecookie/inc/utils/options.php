@@ -168,6 +168,10 @@ class Options {
 					'type'    => 'int',
 					'default' => 650,
 					'group'   => 'banner',
+					// Enforced on write by Settings::get_cleaned_value(); a stored 0
+					// collapsed the banner to its padding (issue #1176).
+					'min'     => 300,
+					'max'     => 800,
 				],
 				'preferences_btn_text'          => [
 					'type'    => 'string',
@@ -391,6 +395,24 @@ class Options {
 	public static function get_option_type( $option ) {
 		$settings = self::get_all_configurations();
 		return isset( $settings[ $option ]['type'] ) && Validate::not_empty( $settings[ $option ]['type'] ) ? $settings[ $option ]['type'] : 'string';
+	}
+
+	/**
+	 * Declared value range for an option, as `[ min, max ]`. Either bound is null
+	 * when the schema does not set it.
+	 *
+	 * @param string $option Option key.
+	 * @since 1.5.1
+	 * @return array{0: ?int, 1: ?int}
+	 */
+	public static function get_option_range( $option ) {
+		$settings = self::get_all_configurations();
+		$config   = isset( $settings[ $option ] ) && is_array( $settings[ $option ] ) ? $settings[ $option ] : [];
+
+		return [
+			isset( $config['min'] ) ? (int) $config['min'] : null,
+			isset( $config['max'] ) ? (int) $config['max'] : null,
+		];
 	}
 
 	/**

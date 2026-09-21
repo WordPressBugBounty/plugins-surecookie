@@ -58,7 +58,8 @@ class Dataset_Validator {
 
 	/**
 	 * Validate a unified services dataset (service slug => {label, category,
-	 * gcm_compatible?, patterns keyed by Pattern_Kinds bucket, cookies:[...]}).
+	 * gcm_compatible?, cookieless?, patterns keyed by Pattern_Kinds bucket,
+	 * cookies:[...]}).
 	 *
 	 * Coercive (drop-bad-keep-good): the `_meta` key is dropped, non-slug keys are
 	 * skipped, the service-level `category` is coerced to a valid consent key
@@ -136,6 +137,12 @@ class Dataset_Validator {
 				'patterns'       => $patterns,
 				'cookies'        => $clean_cookies,
 			];
+
+			// Presence-sensitive, unlike every other key here: an absent `cookieless`
+			// means "not asserted", so the merge can keep the bundled claim.
+			if ( array_key_exists( 'cookieless', $service ) ) {
+				$entry['cookieless'] = ! empty( $service['cookieless'] );
+			}
 
 			$out[ $slug ] = $entry;
 			++$service_count;

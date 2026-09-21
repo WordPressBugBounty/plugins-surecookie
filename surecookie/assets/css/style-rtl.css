@@ -80,7 +80,8 @@
 #surecookie-admin-root,
 #surecookie-admin-root *,
 #surecookie-public-root,
-#surecookie-public-root * {
+#surecookie-preferences-root,
+:is(#surecookie-public-root, #surecookie-preferences-root) * {
 	font-family: Figtree, sans-serif !important;
 	box-sizing: border-box;
 	letter-spacing: normal;
@@ -89,23 +90,23 @@
 }
 
 /* Global Focus Styling for Accessibility */
-#surecookie-public-root .surecookie-preferences-modal .surecookie-btn-outline:focus-visible,
-#surecookie-public-root .surecookie-preferences-modal .surecookie-btn-primary:focus-visible,
-#surecookie-public-root .surecookie-preferences-modal .surecookie-modal-close-btn:focus-visible,
-#surecookie-public-root button:focus-visible,
-#surecookie-public-root a:focus-visible,
-#surecookie-public-root input:focus-visible {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-outline:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-primary:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-modal-close-btn:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) button:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) a:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) input:focus-visible {
 	outline: 2px solid var(--surecookie-banner-primary-color, #2563eb);
 	box-shadow: none;
 }
 /* Category trigger + cookie table toggle - use box-shadow so the ring follows border-radius */
-#surecookie-public-root .surecookie-preferences-modal button.surecookie-category-trigger:focus-visible,
-#surecookie-public-root .surecookie-preferences-modal button.surecookie-cookie-table-toggle:focus-visible {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal button.surecookie-category-trigger:focus-visible,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal button.surecookie-cookie-table-toggle:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 2px var(--surecookie-banner-primary-color, #2563eb);
 }
 /* Toggle switch pill - ring must follow the pill shape, not form a box */
-#surecookie-public-root .surecookie-preferences-modal .surecookie-toggle-btn:focus-visible {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-toggle-btn:focus-visible {
 	outline: none;
 	box-shadow:
 		0 0 0 2px #fff,
@@ -128,10 +129,10 @@
 }
 .surecookie-styles button:focus,
 #surecookie-admin-root button:focus,
-#surecookie-public-root button:focus,
+:is(#surecookie-public-root, #surecookie-preferences-root) button:focus,
 .surecookie-styles button:focus:not(:focus-visible),
 #surecookie-admin-root button:focus:not(:focus-visible),
-#surecookie-public-root button:focus:not(:focus-visible) {
+:is(#surecookie-public-root, #surecookie-preferences-root) button:focus:not(:focus-visible) {
 	outline: none;
 }
 
@@ -218,7 +219,7 @@
 /* ==========================================================================
    Cookie Banner Styles
 ========================================================================== */
-#surecookie-public-root {
+:is(#surecookie-public-root, #surecookie-preferences-root) {
 	all: initial;
 	display: block;
 	position: relative;
@@ -233,7 +234,7 @@
 
 /* Admin preview: the values above outrank every drawer, so stay below Force
    UI's z-50 drawer context. */
-#surecookie-public-root.surecookie-preview-admin {
+:is(#surecookie-public-root, #surecookie-preferences-root).surecookie-preview-admin {
 	--surecookie-z-overlay: 20;
 	--surecookie-z-banner: 30;
 	--surecookie-z-modal: 40;
@@ -241,7 +242,7 @@
 
 /* Full-screen dim behind the banner (opt-in). Sits just below the banner so
    the banner stays interactive while the rest of the page is blocked. */
-#surecookie-public-root .surecookie-banner-overlay {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-overlay {
 	position: fixed;
 	inset: 0;
 	background-color: var(--surecookie-banner-overlay-color, rgba(0, 0, 0, 0.6));
@@ -251,8 +252,8 @@
 }
 
 /* Banner Position Styles */
-#surecookie-public-root .surecookie-banner-position-top,
-#surecookie-public-root .surecookie-banner-position-bottom {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-top,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom {
 	position: fixed;
 	right: 0;
 	left: 0;
@@ -260,39 +261,39 @@
 	pointer-events: auto;
 	z-index: var(--surecookie-z-banner);
 }
-#surecookie-public-root .surecookie-banner-position-top {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-top {
 	top: 0;
 }
-#surecookie-public-root .surecookie-banner-position-bottom {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom {
 	bottom: 0;
 }
 
-#surecookie-public-root .surecookie-banner-position-box-base {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-box-base {
 	position: fixed;
 	max-width: 90vw;
 	pointer-events: auto;
 	z-index: var(--surecookie-z-banner);
 	outline-color: var(--surecookie-banner-primary-color, #2563eb);
 }
-#surecookie-public-root .surecookie-banner-position-top-left {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-top-left {
 	top: 20px;
 	right: 20px;
 }
-#surecookie-public-root .surecookie-banner-position-top-right {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-top-right {
 	top: 20px;
 	left: 20px;
 }
-#surecookie-public-root .surecookie-banner-position-bottom-left {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom-left {
 	bottom: 20px;
 	right: 20px;
 }
-#surecookie-public-root .surecookie-banner-position-bottom-right {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom-right {
 	bottom: 20px;
 	left: 20px;
 }
 
-#surecookie-public-root .surecookie-banner-position-bottom-center,
-#surecookie-public-root .surecookie-banner-position-middle {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom-center,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-middle {
 	position: fixed;
 	max-width: 90vw;
 	pointer-events: auto;
@@ -300,14 +301,14 @@
 }
 /* Centering uses margin:auto instead of transform so slide animations
    (which set transform) don't override the centering and cause a jerk. */
-#surecookie-public-root .surecookie-banner-position-bottom-center {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-bottom-center {
 	bottom: 20px;
 	right: 0;
 	left: 0;
 	margin-inline: auto;
 	width: fit-content;
 }
-#surecookie-public-root .surecookie-banner-position-middle {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-position-middle {
 	inset: 0;
 	margin: auto;
 	width: fit-content;
@@ -486,7 +487,7 @@
 }
 
 /* Button Base Styles */
-#surecookie-public-root .surecookie-btn-base {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-base {
 	padding: 8px 16px;
 	border-radius: 4px;
 	cursor: pointer;
@@ -507,15 +508,15 @@
 }
 
 /* Accessible focus indicator for banner buttons */
-#surecookie-public-root .surecookie-btn-base:focus-visible {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-base:focus-visible {
 	outline: 2px solid var(--surecookie-banner-primary-color, #2563eb);
 	outline-offset: 2px;
 }
 
-#surecookie-public-root .surecookie-btn-transparent {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-transparent {
 	background-color: transparent;
 }
-#surecookie-public-root .surecookie-btn-with-border {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-with-border {
 	border: 1px solid;
 }
 .surecookie-btn-font-semibold {
@@ -523,8 +524,8 @@
 }
 
 /* Button background colors */
-#surecookie-public-root .surecookie-accept-btn,
-#surecookie-public-root .surecookie-accept-all-btn {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-accept-btn,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-accept-all-btn {
 	background-color: var(--surecookie-banner-primary-color, #2563eb);
 	color: var(--surecookie-banner-primary-text-color, #fff);
 }
@@ -532,43 +533,43 @@
 /* Decline button uses the secondary palette role. Falls back to primary so
    existing palettes that did not define a separate decline color keep
    their previous appearance. */
-#surecookie-public-root .surecookie-decline-btn {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-decline-btn {
 	background-color: var(--surecookie-banner-secondary-color, var(--surecookie-banner-primary-color, #2563eb));
 	color: var(--surecookie-banner-secondary-text-color, #fff);
 }
 
 /* Button hover styles - accept/accept-all darken via primary-hover. */
-#surecookie-public-root .surecookie-accept-btn:hover,
-#surecookie-public-root .surecookie-accept-all-btn:hover,
-#surecookie-public-root .surecookie-btn-primary:hover {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-accept-btn:hover,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-accept-all-btn:hover,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-primary:hover {
 	background-color: var(--surecookie-banner-primary-hover-color, #1d4ed8);
 	border-color: var(--surecookie-banner-primary-hover-color, #1d4ed8);
 }
 
 /* Decline hover: subtle darken via filter so we don't need a separate
    secondary-hover variable. */
-#surecookie-public-root .surecookie-decline-btn:hover {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-decline-btn:hover {
 	filter: brightness(0.92);
 }
 
-#surecookie-public-root .surecookie-preferences-btn {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-btn {
 	background-color: transparent;
 	border: 1px solid currentcolor;
 }
-#surecookie-public-root .surecookie-preferences-btn:hover {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-btn:hover {
 	opacity: 0.8;
 }
 
 /* Preferences button always carries a primary-colored border so the button
    is discoverable on both light and dark banners. Both the public root and
    the preview root are listed because the rule needs to fire in both. */
-#surecookie-public-root .surecookie-preferences-btn,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-btn,
 .surecookie-preview-root-container .surecookie-preferences-btn {
 	border: 1px solid var(--surecookie-banner-primary-color, #2563eb);
 }
 
 /* On dark banners use the accent colour instead of the white text colour */
-#surecookie-public-root .surecookie-banner[data-dark-mode="true"] .surecookie-preferences-btn {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner[data-dark-mode="true"] .surecookie-preferences-btn {
 	border-color: var(--surecookie-banner-primary-color, #2563eb);
 }
 
@@ -585,7 +586,7 @@
 .surecookie-public-banner[data-banner="true"] {
 	box-sizing: border-box;
 }
-#surecookie-public-root .surecookie-public-banner-wrapper {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-public-banner-wrapper {
 	position: absolute;
 	width: 0;
 	height: 0;
@@ -616,7 +617,7 @@
 /* ==========================================================================
    Preferences Modal Styles
 ========================================================================== */
-#surecookie-public-root .surecookie-modal-backdrop {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-modal-backdrop {
 	position: fixed;
 	top: 0;
 	right: 0;
@@ -629,7 +630,7 @@
 	animation: surecookieFadeIn 0.2s ease-out;
 	pointer-events: auto;
 }
-#surecookie-public-root .surecookie-modal-wrapper {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-modal-wrapper {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -959,7 +960,7 @@
 	border: none;
 	background: none;
 }
-#surecookie-public-root .surecookie-cookie-table th,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-cookie-table th,
 .surecookie-modal-branding-content span:last-child {
 	font-weight: 600;
 }
@@ -1021,11 +1022,6 @@
 }
 .surecookie-preferences-modal .surecookie-btn-primary:hover {
 	background-color: var(--surecookie-banner-primary-hover-color);
-}
-.surecookie-preferences-modal .surecookie-btn-sm {
-	height: 32px;
-	padding: 0 12px;
-	font-size: 13px;
 }
 .surecookie-modal-footer-branding {
 	/* Border + container text derive from the banner text color so the
@@ -1119,7 +1115,7 @@
 }
 
 /* Cookie Table Toggle Styles */
-#surecookie-public-root .surecookie-preferences-modal .surecookie-cookie-table-toggle {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-cookie-table-toggle {
 	display: flex;
 	align-items: center;
 	gap: 2px;
@@ -1135,26 +1131,26 @@
 	border-radius: 4px;
 	box-shadow: none;
 }
-#surecookie-public-root .surecookie-preferences-modal .surecookie-cookie-table-toggle:hover {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-cookie-table-toggle:hover {
 	opacity: 0.7;
 }
-#surecookie-public-root .surecookie-preferences-modal .surecookie-cookie-table-label {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-cookie-table-label {
 	font-size: 13px;
 	font-weight: 600;
 	color: var(--surecookie-banner-text-color);
 	opacity: 0.9;
 }
-#surecookie-public-root .surecookie-preferences-modal .surecookie-table-chevron {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-table-chevron {
 	display: flex;
 	align-items: center;
 	transition: transform 0.2s ease;
 	opacity: 0.6;
 	color: var(--surecookie-banner-text-color);
 }
-#surecookie-public-root .surecookie-preferences-modal .surecookie-table-chevron.expanded {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-table-chevron.expanded {
 	transform: rotate(-90deg);
 }
-#surecookie-public-root .surecookie-preferences-modal .surecookie-cookie-table-wrapper {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-cookie-table-wrapper {
 	margin-top: 8px;
 }
 
@@ -1300,7 +1296,7 @@
 /* Responsive styles */
 @media (max-width: 768px) {
 	/* Small horizontal gutter so the rounded modal isn't flush with the screen edge. */
-	#surecookie-public-root .surecookie-modal-wrapper {
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-modal-wrapper {
 		padding: 16px 8px;
 	}
 	.surecookie-preferences-modal {
@@ -1311,6 +1307,23 @@
 	.surecookie-preferences-modal .surecookie-modal-footer {
 		padding: 10px;
 		justify-content: space-between;
+	}
+	/* The three labels are translated, so the row's width is locale-dependent and
+	   no breakpoint can be right for every language: wrap instead, and let each
+	   line's items share its width so a wrapped action still reads as a button. */
+	.surecookie-preferences-modal .surecookie-modal-footer,
+	.surecookie-preferences-modal .surecookie-footer-actions {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.surecookie-preferences-modal .surecookie-footer-actions,
+	.surecookie-preferences-modal .surecookie-modal-footer > button {
+		flex: 1 1 auto;
+	}
+	.surecookie-preferences-modal .surecookie-modal-footer button {
+		height: 32px;
+		font-size: 13px;
+		min-width: 0;
 	}
 
 	/* Box / popup banners keep their rounded corners on mobile. */
@@ -1345,20 +1358,6 @@
 	}
 }
 
-/* Stack preference-modal footer buttons vertically on very small screens. */
-@media (max-width: 320px) {
-	.surecookie-preferences-modal .surecookie-modal-footer,
-	.surecookie-preferences-modal .surecookie-footer-actions {
-		flex-direction: column;
-		align-items: stretch;
-	}
-	.surecookie-preferences-modal .surecookie-btn-outline,
-	.surecookie-preferences-modal .surecookie-btn-primary {
-		width: 100%;
-		min-width: 0;
-	}
-}
-
 /* ==========================================================================
    Accessibility Styles
 ========================================================================== */
@@ -1374,7 +1373,7 @@
 }
 
 /* Category accordion trigger - button reset so it inherits container layout */
-#surecookie-public-root .surecookie-preferences-modal button.surecookie-category-trigger {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal button.surecookie-category-trigger {
 	background: none;
 	border: none;
 	padding: 0;
@@ -1385,7 +1384,7 @@
 	box-shadow: none;
 }
 
-#surecookie-public-root .surecookie-preferences-modal .surecookie-modal-close-btn:focus-visible {
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-modal-close-btn:focus-visible {
 	opacity: 1;
 }
 
@@ -1401,8 +1400,8 @@
 	}
 
 	/* Disable modal animations */
-	#surecookie-public-root .surecookie-modal-backdrop,
-	#surecookie-public-root .surecookie-banner-overlay,
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-modal-backdrop,
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner-overlay,
 	.surecookie-preferences-modal {
 		animation: none;
 	}
@@ -1411,7 +1410,7 @@
 	.surecookie-preferences-modal .surecookie-toggle-knob,
 	.surecookie-preferences-modal .surecookie-toggle-btn,
 	.surecookie-preferences-modal .surecookie-expand-icon,
-	#surecookie-public-root .surecookie-preferences-modal .surecookie-table-chevron,
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-table-chevron,
 	.surecookie-preferences-modal .surecookie-modal-close-btn {
 		transition: none;
 	}
@@ -1428,14 +1427,14 @@
 ========================================================================== */
 @media (forced-colors: active) {
 	/* Ensure banner and modal buttons have visible borders */
-	#surecookie-public-root .surecookie-btn-base,
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-base,
 	.surecookie-preferences-modal .surecookie-btn-outline,
 	.surecookie-preferences-modal .surecookie-btn-primary {
 		border: 1px solid buttontext;
 	}
 
 	/* Ensure focus indicators use system colors */
-	#surecookie-public-root .surecookie-btn-base:focus-visible,
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-btn-base:focus-visible,
 	.surecookie-preferences-modal .surecookie-btn-outline:focus-visible,
 	.surecookie-preferences-modal .surecookie-btn-primary:focus-visible,
 	.surecookie-preferences-modal .surecookie-modal-close-btn:focus-visible {
@@ -1450,7 +1449,7 @@
 
 	/* Ensure modal and banner have visible boundaries */
 	.surecookie-preferences-modal,
-	#surecookie-public-root .surecookie-banner {
+	:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-banner {
 		border: 1px solid canvastext;
 	}
 }

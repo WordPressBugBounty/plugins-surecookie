@@ -31,6 +31,19 @@ class Utils {
 	}
 
 	/**
+	 * The address WordPress serves the site from, which is where `rest_url()`
+	 * builds from and therefore where the SaaS must fetch the verification
+	 * token. Equal to get_site_url() except on a "WordPress in its own
+	 * directory" install, where core lives under a path the REST API does not.
+	 *
+	 * @since 1.5.1
+	 * @return string
+	 */
+	public static function get_home_url(): string {
+		return str_replace( 'http://', 'https://', rtrim( home_url(), '/' ) ) . '/';
+	}
+
+	/**
 	 * Generate a unique site ID based on site URL.
 	 *
 	 * @since 0.0.1

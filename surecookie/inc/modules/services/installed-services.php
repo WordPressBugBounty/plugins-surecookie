@@ -391,6 +391,10 @@ class Installed_Services {
 		}
 		Settings::update( 'custom_cookies', $custom );
 
+		// Suppression only stops the next declaration; rows a scan already stored
+		// are in the option and would stay on the policy (issue #1141).
+		$removed += Declared_Cookies::get_instance()->forget_service( $slug );
+
 		unset( $data['installed'][ $slug ] );
 		if ( ! in_array( $slug, $data['suppressed'], true ) ) {
 			$data['suppressed'][] = $slug;

@@ -1258,23 +1258,22 @@ class SaasClient {
 	 */
 	public function get_cached_plan(): string {
 		$cached = $this->get_cached_quota();
-		return isset( $cached['_plan'] ) ? (string) $cached['_plan'] : '';
+		// Scan-path writes re-persist the snapshot without the `_plan` sentinel, so fall back
+		// to the plan the SaaS snapshot itself carries rather than reporting nothing.
+		return (string) ( $cached['_plan'] ?? $cached['plan'] ?? '' );
 	}
 
 	/**
 	 * Push the billing-account / license linkage to the SaaS (issue #469).
-	 *
-	 * Fire-and-forget - SaaS queues a tier-refresh job from this and the next
-	 * scan resolves tier from there. We don't block the OAuth callback page.
 	 *
 	 * @since 0.0.1-beta.3
 	 *
 	 * @param string      $account_ref Opaque UUID from billing portal OAuth.
 	 * @param string|null $license_id  SureCart license UUID (Pro path only).
 	 * @param string|null $license_key SureCart license key - one-time only.
-	 * @return bool True if the linkage request was dispatched; false if the site
-	 *              isn't registered yet or there was nothing to send, so the
-	 *              caller keeps retrying until registration lands.
+	 * @return bool True only when the SaaS confirmed the link. Everything else
+	 *              (unregistered, nothing to send, transport, auth, quota or
+	 *              validation failure) is false, so the caller keeps retrying.
 	 */
 	public function link_billing_account( string $account_ref, ?string $license_id = null, ?string $license_key = null ): bool {
 
@@ -1300,16 +1299,34 @@ class SaasClient {
 		$body = (string) wp_json_encode( $payload );
 		$url  = $this->get_api_base_url() . 'site/billing-link';
 
-		wp_remote_post(
+		$response = wp_remote_post(
 			$url,
 			[
-				'method'   => 'POST',
-				'timeout'  => 5,
-				'blocking' => false, // Fire-and-forget.
-				'headers'  => $this->get_request_headers( 'POST', $url, $body ),
-				'body'     => $body,
+				// Only a license_key makes the SaaS verify with SureCart, so the Pro path
+				// gets room for that hop while the OAuth callback keeps a short ceiling.
+				'timeout' => isset( $payload['license_key'] ) ? 15 : 5,
+				'headers' => $this->get_request_headers( 'POST', $url, $body ),
+				'body'    => $body,
 			]
 		);
+
+		// Warning, not error: Logger routes 'error' to WP_CLI::error(), which exits 1.
+		if ( is_wp_error( $response ) ) {
+			Logger::get_instance()->log( 'Billing link failed: ' . $response->get_error_message(), 'warning' );
+			return false;
+		}
+
+		$response_code = (int) wp_remote_retrieve_response_code( $response );
+		$data          = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+
+		// A 401 is deliberately not routed through handle_unauthorized_response(): it treats
+		// site_not_verified as recoverable and clears credentials, which from this background
+		// push would destroy a registration handshake that is still in progress.
+		if ( $response_code !== 200 || ! is_array( $data ) || empty( $data['success'] ) ) {
+			$error_code = is_array( $data ) && isset( $data['error'] ) ? (string) $data['error'] : 'no_error_code';
+			Logger::get_instance()->log( sprintf( 'Billing link failed (HTTP %d): %s', $response_code, $error_code ), 'warning' );
+			return false;
+		}
 
 		return true;
 	}
@@ -1574,6 +1591,10 @@ class SaasClient {
 
 		$register_body = [
 			'site_url'       => $site_url,
+			// Where the REST API actually is. site_url() is the WordPress
+			// Address and the two differ on a subdirectory install, so sending
+			// only the former left the SaaS guessing (surecookie-saas#250).
+			'home_url'       => Utils::get_home_url(),
 			'admin_email'    => $admin_email,
 			'install_nonce'  => $install_nonce,
 			'plugin_version' => SURECOOKIE_VERSION,

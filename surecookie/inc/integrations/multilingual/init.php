@@ -49,6 +49,32 @@ class Init {
 	];
 
 	/**
+	 * Keys whose value is rich text and must survive translation as markup.
+	 *
+	 * The same single source of truth as TRANSLATABLE_KEYS, for the same
+	 * reason: registration and both translation passes each restated it and
+	 * two of them were wrong, so multilingual sites lost their markup (#1171).
+	 *
+	 * @since 1.5.1
+	 */
+	public const MULTILINE_KEYS = [
+		'message_description',
+		'preferences_modal_description',
+		'placeholder_description',
+	];
+
+	/**
+	 * Whether a translatable key holds rich text rather than plain text.
+	 *
+	 * @param string $key Setting key.
+	 * @since 1.5.1
+	 * @return bool
+	 */
+	public static function is_multiline( string $key ): bool {
+		return in_array( $key, self::MULTILINE_KEYS, true );
+	}
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.1-beta.1

@@ -85,7 +85,7 @@ class String_Registration {
 
 			// Rich-text fields hold multi-line HTML and must be registered as
 			// multiline so translators can edit the full markup.
-			$is_multiline = in_array( $key, [ 'message_description', 'preferences_modal_description', 'placeholder_description' ], true );
+			$is_multiline = Init::is_multiline( $key );
 			$string_name  = 'surecookie_' . $key;
 
 			if ( Init::is_polylang_active() ) {

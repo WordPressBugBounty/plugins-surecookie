@@ -419,6 +419,7 @@
         "label": "Cloudflare Web Analytics",
         "description": "Privacy-first web analytics.",
         "category": "analytics",
+        "cookieless": true,
         "pro": true,
         "patterns": {
             "scripts": [
@@ -714,6 +715,7 @@
         "label": "Fathom Analytics",
         "description": "Privacy-friendly website analytics.",
         "category": "analytics",
+        "cookieless": true,
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1971,6 +1973,7 @@
         "label": "Plausible Analytics",
         "description": "Lightweight privacy-friendly analytics.",
         "category": "analytics",
+        "cookieless": true,
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2230,6 +2233,7 @@
         "label": "Simple Analytics",
         "description": "Privacy-first website analytics.",
         "category": "analytics",
+        "cookieless": true,
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2640,6 +2644,7 @@
         "label": "Umami",
         "description": "Open-source privacy analytics.",
         "category": "analytics",
+        "cookieless": true,
         "pro": true,
         "patterns": {
             "scripts": [
