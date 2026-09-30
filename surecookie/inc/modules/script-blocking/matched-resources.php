@@ -83,9 +83,10 @@ class Matched_Resources {
 	 * @param string $subject  Resource URL, or the pattern that matched.
 	 * @param string $service  Matched service key.
 	 * @param string $category Category the pattern resolved to.
+	 * @param string $via      How the pattern matched: 'content' for an inline body, 'src' otherwise.
 	 * @return void
 	 */
-	public function record( string $kind, string $subject, string $service, string $category ): void {
+	public function record( string $kind, string $subject, string $service, string $category, string $via = 'src' ): void {
 		$kind = $kind === 'iframe' ? 'iframe' : 'script';
 
 		// A custom rule already has a row of its own, so it is not news here.
@@ -105,13 +106,18 @@ class Matched_Resources {
 			return;
 		}
 
-		if ( isset( $this->seen[ $kind ][ $pattern ] ) ) {
+		// Provenance only ever strengthens, so a page carrying both an inline
+		// mention and the real <script src> does not depend on tag order.
+		$via  = $via === 'content' ? 'content' : 'src';
+		$seen = $this->seen[ $kind ][ $pattern ]['via'] ?? null;
+		if ( $seen === 'src' || $seen === $via ) {
 			return;
 		}
 
 		$this->seen[ $kind ][ $pattern ] = [
 			'service'  => $service,
 			'category' => $category,
+			'via'      => $via,
 		];
 
 		$this->dirty = true;
@@ -243,9 +249,13 @@ class Matched_Resources {
 		foreach ( $this->seen as $kind => $patterns ) {
 			foreach ( $patterns as $pattern => $entry ) {
 				if ( isset( $stored[ $kind ][ $pattern ] ) ) {
-					continue;
-				}
-				if ( count( $stored[ $kind ] ?? [] ) >= self::MAX_PER_KIND ) {
+					// Only a src sighting rewrites an entry. A row stored before this
+					// option carried provenance is a real load, and nothing downgrades
+					// one: withdrawing a cookie the site really sets is the worse error.
+					if ( ( $stored[ $kind ][ $pattern ]['via'] ?? '' ) !== 'content' || $entry['via'] !== 'src' ) {
+						continue;
+					}
+				} elseif ( count( $stored[ $kind ] ?? [] ) >= self::MAX_PER_KIND ) {
 					break;
 				}
 
@@ -319,10 +329,13 @@ class Matched_Resources {
 		foreach ( $this->stored() as $patterns ) {
 			foreach ( $patterns as $entry ) {
 				$service = (string) ( $entry['service'] ?? '' );
-				// Scan-detected rows carry their own cookies already.
-				if ( $service !== '' && strncmp( $service, 'scan_', 5 ) !== 0 ) {
-					$services[ $service ] = true;
+				// Scan rows carry their own cookies already, and a body that merely
+				// names a host is evidence for blocking, not that the site loads it.
+				if ( $service === '' || strncmp( $service, 'scan_', 5 ) === 0 || ( $entry['via'] ?? 'src' ) === 'content' ) {
+					continue;
 				}
+
+				$services[ $service ] = true;
 			}
 		}
 

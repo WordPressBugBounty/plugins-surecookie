@@ -9,6 +9,7 @@
 namespace SureCookie;
 
 use SureCookie\Admin\Analytics;
+use SureCookie\Admin\Live_Versions;
 use SureCookie\Admin\Menu;
 use SureCookie\Admin\Onboarding;
 use SureCookie\Admin\Post_States;
@@ -257,6 +258,8 @@ class SureCookie_Loader {
 
 		/* Initialize third-party integrations (Abilities API, etc.) */
 		Integrations_Initializer::get_instance();
+
+		Live_Versions::maybe_clear_cache();
 
 		if ( is_admin() ) {
 			/* Admin menu */

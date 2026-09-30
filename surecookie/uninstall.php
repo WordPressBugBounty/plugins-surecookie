@@ -127,6 +127,7 @@ function surecookie_get_option_keys() {
 		'surecookie_analytics_events_version',
 		'surecookie_usage_events_pending',
 		'surecookie_usage_events_pushed',
+		'surecookie_last_user_login',
 		'surecookie_first_auto_scan_frequency',
 		'surecookie_first_auto_scan_started_flag',
 		// Pro activation redirect.
@@ -174,6 +175,8 @@ function surecookie_delete_transients(): void {
 	// Geolocation circuit-breaker state (IpManager::geo_breaker_key()).
 	delete_transient( 'surecookie_geo_breaker' );
 	delete_transient( 'surecookie_state_events_checked' );
+	// Live_Versions::CACHE_KEY, the dashboard's new-version check.
+	delete_transient( 'surecookie_live_versions' );
 	// Issue #473 - scanner registration / verification transients.
 	delete_transient( 'surecookie_registering_site' );
 	delete_transient( 'surecookie_pending_verification' );

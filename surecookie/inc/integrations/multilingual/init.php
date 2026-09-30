@@ -28,8 +28,10 @@ class Init {
 	/**
 	 * Translatable string setting keys.
 	 *
-	 * Single source of truth used by both String_Registration
-	 * and Translation_Filter.
+	 * The registration inventory, NOT a map of the frontend payload:
+	 * String_Registration registers all of these, but READ_SITE_TRANSLATED_KEYS
+	 * are nested under `placeholder` in the payload, so Translation_Filter's
+	 * top-level loop cannot reach them. `TranslatableKeyInventoryTest` pins it.
 	 *
 	 * @since 0.0.1-beta.1
 	 */
@@ -49,6 +51,21 @@ class Init {
 	];
 
 	/**
+	 * Keys translated where they are read, not on the frontend payload.
+	 *
+	 * The server-rendered placeholder overlay never passes through
+	 * `surecookie_frontend_localize_data`, so the getters are the only point both
+	 * builders share; flattening these into the payload would translate twice and
+	 * double-fire `surecookie_translate_string`.
+	 *
+	 * @since 1.6.0
+	 */
+	public const READ_SITE_TRANSLATED_KEYS = [
+		'placeholder_description',
+		'placeholder_button_text',
+	];
+
+	/**
 	 * Keys whose value is rich text and must survive translation as markup.
 	 *
 	 * The same single source of truth as TRANSLATABLE_KEYS, for the same
@@ -62,17 +79,6 @@ class Init {
 		'preferences_modal_description',
 		'placeholder_description',
 	];
-
-	/**
-	 * Whether a translatable key holds rich text rather than plain text.
-	 *
-	 * @param string $key Setting key.
-	 * @since 1.5.1
-	 * @return bool
-	 */
-	public static function is_multiline( string $key ): bool {
-		return in_array( $key, self::MULTILINE_KEYS, true );
-	}
 
 	/**
 	 * Constructor.
@@ -96,6 +102,17 @@ class Init {
 		 * @since 0.0.1-beta.1
 		 */
 		do_action( 'surecookie_multilingual_initialized' );
+	}
+
+	/**
+	 * Whether a translatable key holds rich text rather than plain text.
+	 *
+	 * @param string $key Setting key.
+	 * @since 1.5.1
+	 * @return bool
+	 */
+	public static function is_multiline( string $key ): bool {
+		return in_array( $key, self::MULTILINE_KEYS, true );
 	}
 
 	/**

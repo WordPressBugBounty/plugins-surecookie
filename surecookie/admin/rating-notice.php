@@ -12,6 +12,7 @@
 
 namespace SureCookie\Admin;
 
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -71,7 +72,7 @@ class Rating_Notice {
 	 * Register the rating notice with BSF_Admin_Notices when the milestone is met.
 	 *
 	 * Short-circuits (in order) when:
-	 *  - the current user lacks {@see SURECOOKIE_CAPABILITY},
+	 *  - the current user lacks {@see Helper::capability()},
 	 *  - the `surecookie_show_rating_notice` filter returns false,
 	 *  - the ask was already answered on this site,
 	 *  - the site hasn't logged {@see MIN_CONSENT_LOGS} consents yet.
@@ -80,7 +81,7 @@ class Rating_Notice {
 	 * @return void
 	 */
 	public function display_notice(): void {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return;
 		}
 
@@ -118,7 +119,7 @@ class Rating_Notice {
 				// Yield to any other BSF notice already on screen: a review ask
 				// stacked under a compliance warning reads as noise.
 				'display-with-other-notices' => false,
-				'capability'                 => SURECOOKIE_CAPABILITY,
+				'capability'                 => Helper::capability(),
 				// Suppress WordPress core's native "×": it only snoozes (reading the wrapper's repeat interval) instead of dismissing permanently, and it
 				// escapes click tracking. The three CTA links are the intended exits.
 				'is_dismissible'             => false,
@@ -177,7 +178,7 @@ class Rating_Notice {
 	public function handle_notice_response(): void {
 		if ( ! check_ajax_referer( 'surecookie_rating_notice', 'nonce', false ) ) {
 			wp_send_json_error( [ 'message' => __( 'Invalid nonce.', 'surecookie' ) ], 403 );
-		} elseif ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		} elseif ( ! current_user_can( Helper::capability() ) ) {
 			wp_send_json_error( [ 'message' => __( 'Unauthorized user.', 'surecookie' ) ], 403 );
 		} else {
 			// Nonce is verified above via check_ajax_referer.

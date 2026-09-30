@@ -395,7 +395,7 @@ class SaasClient {
 	 * @return bool
 	 */
 	public static function is_local_site(): bool {
-		return self::is_local_url( Utils::get_site_url() );
+		return self::is_local_url( Utils::get_home_url() );
 	}
 
 	/**
@@ -431,8 +431,10 @@ class SaasClient {
 			];
 		}
 
-		$site_id  = Utils::generate_site_id();
-		$base_url = Utils::get_site_url();
+		$site_id = Utils::generate_site_id();
+		// The Site Address, not the WordPress Address: this is the base the scanner
+		// crawls and the one the SaaS registered the site under.
+		$base_url = Utils::get_home_url();
 
 		// 64-char hex token; site-context-bound while staying compatible with
 		// Blocker::is_scan_bypass_request() strict token format validation.
@@ -1055,7 +1057,7 @@ class SaasClient {
 	 * @return array{success: bool, quota: array<string, mixed>, plan?: string, message?: string, error_code?: string}
 	 */
 	public function get_quota(): array {
-		$site_url = Utils::get_site_url();
+		$site_url = Utils::get_home_url();
 
 		// Localhost / dev sites can't reach the SaaS - the request would 404 every poll
 		// and spam the log. Surface a dedicated error_code so the UI can react.
@@ -1494,7 +1496,11 @@ class SaasClient {
 			return [];
 		}
 
-		$current_domain = wp_parse_url( Utils::get_site_url(), PHP_URL_HOST );
+		// The Site Address is what the SaaS keys identity on and what every scanned
+		// permalink carries. Watching the WordPress Address instead meant a site whose
+		// two addresses differ never detected drift, so it kept signing as a site the
+		// same-origin check then refused - permanently, with no way back.
+		$current_domain = wp_parse_url( Utils::get_home_url(), PHP_URL_HOST );
 		if ( $creds['registered_domain'] !== $current_domain ) {
 			Logger::get_instance()->save_log(
 				sprintf(
@@ -1568,7 +1574,9 @@ class SaasClient {
 	 */
 	private function register_site(): array {
 		$site_url = Utils::get_site_url();
-		$domain   = wp_parse_url( $site_url, PHP_URL_HOST );
+		// Identity is the Site Address; $site_url still goes on the wire so the SaaS
+		// can record the WordPress Address alongside it.
+		$domain = wp_parse_url( Utils::get_home_url(), PHP_URL_HOST );
 		if ( empty( $domain ) ) {
 			return [
 				'success' => false,
@@ -1877,7 +1885,7 @@ class SaasClient {
 			];
 		}
 
-		$domain = wp_parse_url( Utils::get_site_url(), PHP_URL_HOST );
+		$domain = wp_parse_url( Utils::get_home_url(), PHP_URL_HOST );
 		if ( empty( $domain ) ) {
 			return [
 				'success' => false,

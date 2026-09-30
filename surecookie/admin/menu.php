@@ -76,7 +76,7 @@ class Menu {
 			add_menu_page(
 				'SureCookie',
 				$this->get_top_level_menu_title( $unread_logs ),
-				SURECOOKIE_CAPABILITY,
+				Helper::capability(),
 				SURECOOKIE_PREFIX,
 				[ $this, 'render_admin_page' ],
 				'none',
@@ -124,7 +124,7 @@ class Menu {
 					SURECOOKIE_PREFIX,
 					$submenu['page_title'],
 					$submenu['menu_title'] ?? $submenu['page_title'],
-					SURECOOKIE_CAPABILITY,
+					Helper::capability(),
 					$submenu['id'],
 					[ $this, 'render_admin_page' ]
 				);
@@ -140,7 +140,7 @@ class Menu {
 		add_options_page(
 			'SureCookie',
 			'SureCookie',
-			SURECOOKIE_CAPABILITY,
+			Helper::capability(),
 			SURECOOKIE_PREFIX,
 			[ $this, 'render_admin_page' ]
 		);
@@ -153,7 +153,7 @@ class Menu {
 	 * @return void
 	 */
 	public function render_admin_page(): void {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			wp_die( esc_html__( 'You don\'t have access to this page.', 'surecookie' ) );
 		}
 
@@ -341,7 +341,7 @@ class Menu {
 			SURECOOKIE_PREFIX,
 			__( 'Upgrade', 'surecookie' ),
 			__( 'Upgrade', 'surecookie' ),
-			SURECOOKIE_CAPABILITY,
+			Helper::capability(),
 			$upgrade_slug,
 			'__return_null'
 		);
@@ -376,7 +376,7 @@ class Menu {
 	 * @return void
 	 */
 	private function enqueue_admin_menu_icon_style(): void {
-		if ( ! is_admin() || ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! is_admin() || ! current_user_can( Helper::capability() ) ) {
 			return;
 		}
 
@@ -401,7 +401,7 @@ class Menu {
 	 * @return int
 	 */
 	private function get_unread_logs_count(): int {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return 0;
 		}
 
@@ -440,7 +440,7 @@ class Menu {
 	 * @return int
 	 */
 	private function get_open_data_requests_count(): int {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return 0;
 		}
 

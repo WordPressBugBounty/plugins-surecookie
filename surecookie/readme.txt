@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -48,7 +48,7 @@ The WordPress.org version of SureCookie includes the core consent workflow:
 * Privacy policy generator: Build a privacy policy draft from your cookie and consent settings, with the factual sections kept current by shortcodes.
 * Business details: Enter your legal entity, address and privacy contact once, then reuse them anywhere with shortcodes such as [surecookie_company_name].
 * Preference modal: Let visitors review and manage cookie categories.
-* Accept, Accept All, Decline, and Preferences buttons: Control the button text and order.
+* Accept, Accept All, Decline, and Preferences buttons: Control each button's text, order and visibility.
 * Real browser cookie scanner: Scan selected pages using a browser-based scanning service.
 * Cookie categories: Use Essential, Functional, Analytics, Marketing, and Uncategorized categories. See [managing cookie categories](https://surecookie.com/docs/manage-cookie-categories/?utm_source=wporg&utm_medium=readme&utm_campaign=core_plugin&utm_content=cookie_categories_docs).
 * Custom cookies: Add and manage cookies manually when needed.
@@ -122,7 +122,7 @@ You can customize:
 * Banner message and description
 * Rich text banner content
 * Accept, Accept All, Decline, and Preferences button labels
-* Button order
+* Button order and visibility
 * Banner position and width
 * Banner logo
 * Banner animation
@@ -250,6 +250,10 @@ For consent logging and country detection, visitor IP addresses may be processed
 IP addresses are masked before being stored in your WordPress database.
 
 MaxMind attribution: [https://www.maxmind.com](https://www.maxmind.com)
+
+= New Version Check =
+
+At most once a day, when someone who can update plugins opens a SureCookie admin screen, SureCookie asks `library.surecookie.com/api/plugin/live-versions` for the current SureCookie and SureCookie Pro version numbers, so the dashboard can tell you when yours is older. The request sends no site data beyond what WordPress includes in every outgoing request, such as your site address in its user agent.
 
 = Service URLs =
 
@@ -479,6 +483,28 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.6.0 - 30-September-2026 =
+* New: Banner > Content now lets you manage all four buttons in one place. You can reorder them, show or hide each one, and set custom labels. Empty labels fall back to translated defaults, so most sites do not need to change anything. Preferences and refusal options always remain visible.
+* New: PixelYourSite now respects visitor consent. Its pixels, cookies, and tracking events are held until the visitor accepts the relevant category, then start on the same page. Google Consent Mode and Global Privacy Control are also respected.
+* New: The dashboard now shows when a new version of SureCookie or SureCookie Pro is available, with a quick link to the updates screen. Visible only to users who can update plugins.
+* New: Added a `surecookie_capability` filter to control who can manage SureCookie settings. Useful for agencies that want to restrict access. Default behavior remains unchanged.
+* Improvement: The default banner message is now shorter and fits better on mobile screens, helping PageSpeed measure your site content instead of the banner. Custom messages are not affected.
+* Improvement: Reduced unused configuration data loaded on each page, lowering page size while keeping cookie policy and preferences unchanged.
+* Fix: Improved compatibility with W3 Total Cache so the banner and its scripts are not broken by file combining.
+* Fix: Screen readers now announce banner buttons using their visible labels, improving accessibility across all languages.
+* Fix: The preferences window now only shows Accept All where it is enabled in the banner, ensuring consent logs remain accurate.
+* Fix: Button order and labels are now validated to prevent missing or duplicate buttons, and labels are limited to a safe length.
+* Fix: Visitors sending Global Privacy Control could be treated as consenting on the server, allowing some plugins to run when they should not. The server now matches the browser and Google Consent Mode, so everything except essential cookies is denied regardless of consent model or any earlier choice.
+* Fix: Re-requesting consent now correctly resets previous choices on both browser and server, preventing trackers from running before a new choice is made.
+* Fix: Google reCAPTCHA and Google Fonts are now blocked until consent when using Google Consent Mode. You can still allow them manually if needed.
+* Fix: HubSpot tracking is now correctly blocked for EU-hosted portals.
+* Fix: Cookie policy now lists only services your site actually loads, avoiding incorrect entries.
+* Fix: Google Consent Mode defaults are now consistent for all visitors, preventing cached pages from applying incorrect consent states.
+* Fix: Placeholder content styling is now consistent across themes, while still allowing basic formatting.
+* Fix: Microsoft Clarity now receives consent updates correctly, so analytics tracking and session recordings work as expected.
+* Fix: EU and EEA geographic rules now apply correctly across all supported regions.
+* Fix: Scripts that depend on each other now load in the correct order after consent, preventing broken functionality.
+
 = 1.5.1 - 21-September-2026 =
 - New: A surecookie_translate_string filter for translation plugins other than WPML and Polylang. It receives every string SureCookie renders on the server, along with the string's name and whether it holds formatting.
 - Improvement: The services catalog now records which services set no cookies at all, starting with Fathom Analytics, Plausible, Simple Analytics, Umami and Cloudflare Web Analytics. With SureCookie Pro this stops Compliance Guard holding them for review. On its own it changes nothing, and those services are still blocked until consent under their category.
@@ -618,32 +644,5 @@ Initial public release of SureCookie.
 = 1.2.2 - 10-July-2026 =
 - Fix: Enabling Resource Blocking could break the page layout on WordPress 7.0 sites using classic themes with block-based content - block and global styles were pushed into the page body instead of the header, inverting the CSS cascade and collapsing multi-column sections. Resource Blocking no longer interferes with WordPress 7.0's on-demand block-style loading.
 - Fix: Blocked video embeds (Vimeo, YouTube, and other WordPress responsive embeds) no longer leave a large empty gap around the "content is blocked" placeholder. The placeholder now overlays the embed's reserved aspect-ratio space instead of adding its own height on top of it.
-
-= 1.2.1 - 09-July-2026 =
-- Improvement: Reduced the consent banner script (public.js) by over 96% - from ~1.4 MB to ~50 KB minified - by removing admin-only code that was bundled into the public page.
-- Improvement: Frontend scripts now load with the defer strategy and no longer pull in WordPress's api-fetch library, shrinking the script dependency chain and improving LCP / Lighthouse scores.
-- Improvement: Consent-log delivery failures now log a console warning instead of failing silently.
-- Improvement: A misbehaving surecookie-pro's floating widget can no longer prevent the consent banner from rendering.
-- Improvement: On local and development sites (localhost, .local, .localhost, and private/loopback IP ranges), cookie scanning is now blocked up front with a clear notice - instead of appearing to start and then failing - since the SureCookie agent app cannot reach a local site.
-- Compatibility: The consent banner now renders reliably alongside JS-delay/optimization plugins (e.g. WP Rocket, Perfmatters) that run scripts after the page has loaded.
-- Compatibility: The Cookie Policy page link, cookie category names and descriptions, and the Re-request Consent button label now translate via WPML and Polylang to match the active language.
-- Fix: Consent-log entries are no longer silently lost on pages served from a long-lived page cache - the banner now automatically refreshes its security token and retries.
-- Fix: Added .site, .test domain support to the SureCookie agent app for staging development environments for further testing and scanning.
-- Fix: The bullet-number lists in the messages editor now renders correctly when the description text includes HTML.
-- Fix: Deleting a core cookie category unable to process and stuck in the deleting state.
-- Fix: SureCookie agent's auth details not getting deleted when the plugin's "Delete Data on Uninstall" option is enabled.
-- Fix: "Powered by" label from the banner is not being translated with provided translation files.
-- Developer note: `window.surecookieManager` is available from DOMContentLoaded (never at HTML parse time). Integrations should use the `surecookie_*` events, and third-party scripts registering `surecookie.*` filters should be enqueued with the defer strategy.
-
-= 1.2.0 - 25-June-2026 =
-- New: Introducing "Automatic Scanning" feature to keep your site compliant with regular interval scheduled scan.
-- New: Introducing "Re-request Consent" feature to allow admins to trigger a new consent request for all visitors.
-- New: Introducing "Background Overlay" option to the banner layout settings, which dims the page behind the banner until a choice is made.
-- New: Added highlighting logs count to the SureCookie admin menu > Logs, to show the number of new consent logs since the last visit.
-- Improvement: Added "Reset to Default" button for the Banner Content and Preference Modal Description fields, allowing admins to revert to default text easily.
-- Improvement: Updated scanning capacity sync with the SureCookie agent app for a more consistent scanning experience.
-- Fix: The content blocker scanner showed a block toggle for Google scripts managed by Google Consent Mode, even though the toggle had no effect. These resources now display an explanatory note instead, clarifying that Consent Mode manages them.
-- Fix: Deactivation conflict with other plugins resolved on network setup level.
-- Compatibility - Synced up Resource blocked scripts with Google consent mode scripts, so that the toggle is not shown for Google scripts managed by Consent Mode.
 
 For older releases, see the full SureCookie changelog [here](https://surecookie.com/changelog/).

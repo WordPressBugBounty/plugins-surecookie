@@ -95,53 +95,23 @@ class Init {
 			'test'        => self::TEST_ID,
 		];
 
-		if ( 'visitor' === $source ) {
+		if ( $source === 'visitor' ) {
 			return $result;
 		}
 
 		$result['status'] = 'recommended';
 		$result['label']  = __( 'SureCookie sees your proxy instead of your visitors', 'surecookie' );
 
-		$result['description'] = '<p>' . ( 'cdn' === $source
+		$result['description'] = '<p>' . ( $source === 'cdn'
 			? esc_html__( 'Requests reach this site through a CDN, so every address SureCookie resolves belongs to the CDN edge rather than to your visitor.', 'surecookie' )
 			: esc_html__( 'Requests reach this site through a reverse proxy, so every address SureCookie resolves belongs to that proxy rather than to your visitor.', 'surecookie' )
 		) . '</p><p>'
 			. esc_html__( 'Three things are affected: geographic rules resolve the wrong country, so a visitor can be shown the wrong consent model; consent logs record that wrong country; and the per-visitor rate limits collapse into one shared bucket.', 'surecookie' )
 			. '</p>';
 
-		$result['actions'] = 'cdn' === $source ? $this->cdn_actions() : $this->local_actions();
+		$result['actions'] = $source === 'cdn' ? $this->cdn_actions() : $this->local_actions();
 
 		return $result;
-	}
-
-	/**
-	 * Remediation for a CDN peer.
-	 *
-	 * @since 1.5.1
-	 * @return string
-	 */
-	private function cdn_actions(): string {
-		return '<p>' . esc_html__( 'Forwarded headers are already trusted from a recognised proxy, and only X-Forwarded-For is read. Your CDN is either not sending that header or is sending its own instead, so name the header it overwrites on every request. Name only that one: a header a proxy merely passes through would let a visitor choose their own country and rate-limit bucket.', 'surecookie' ) . '</p>'
-			. '<pre><code>' . esc_html(
-				"add_filter( 'surecookie_trusted_client_ip_headers', function () {\n"
-				. "    return array( 'CF-Connecting-IP' );\n"
-				. '} );'
-			) . '</code></pre>'
-			. '<p>' . esc_html__( 'That header is correct for Cloudflare, whose edge ranges ship recognised. On any other CDN, substitute the header your provider documents as overwritten and add its published ranges through the surecookie_trusted_proxy_ips filter, or its forwarded header stays untrusted and nothing changes.', 'surecookie' ) . '</p>';
-	}
-
-	/**
-	 * Remediation for a reverse proxy.
-	 *
-	 * @since 1.5.1
-	 * @return string
-	 */
-	private function local_actions(): string {
-		return '<p>' . esc_html__( 'Your reverse proxy is not passing the visitor address on at all. Prefer fixing it in the server, where every plugin benefits: with nginx, ngx_http_realip_module rewrites the peer address itself, so SureCookie needs no configuration.', 'surecookie' ) . '</p>'
-			. '<pre><code>' . esc_html( "set_real_ip_from 10.0.0.0/8;\nreal_ip_header X-Forwarded-For;" ) . '</code></pre>'
-			. '<p>' . esc_html__( 'Passing the header to PHP works too, and needs nothing on the SureCookie side because a recognised proxy is already trusted:', 'surecookie' ) . '</p>'
-			. '<pre><code>' . esc_html( 'fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;' ) . '</code></pre>'
-			. '<p>' . esc_html__( 'Use $proxy_add_x_forwarded_for, which appends. A proxy that relays the visitor\'s own X-Forwarded-For untouched leaves nothing to tell a forged value from a real one, which would let a visitor pick their own country and per-visitor rate-limit bucket.', 'surecookie' ) . '</p>';
 	}
 
 	/**
@@ -182,5 +152,35 @@ class Init {
 		);
 
 		return $info;
+	}
+
+	/**
+	 * Remediation for a CDN peer.
+	 *
+	 * @since 1.5.1
+	 * @return string
+	 */
+	private function cdn_actions(): string {
+		return '<p>' . esc_html__( 'Forwarded headers are already trusted from a recognised proxy, and only X-Forwarded-For is read. Your CDN is either not sending that header or is sending its own instead, so name the header it overwrites on every request. Name only that one: a header a proxy merely passes through would let a visitor choose their own country and rate-limit bucket.', 'surecookie' ) . '</p>'
+			. '<pre><code>' . esc_html(
+				"add_filter( 'surecookie_trusted_client_ip_headers', function () {\n"
+				. "    return array( 'CF-Connecting-IP' );\n"
+				. '} );'
+			) . '</code></pre>'
+			. '<p>' . esc_html__( 'That header is correct for Cloudflare, whose edge ranges ship recognised. On any other CDN, substitute the header your provider documents as overwritten and add its published ranges through the surecookie_trusted_proxy_ips filter, or its forwarded header stays untrusted and nothing changes.', 'surecookie' ) . '</p>';
+	}
+
+	/**
+	 * Remediation for a reverse proxy.
+	 *
+	 * @since 1.5.1
+	 * @return string
+	 */
+	private function local_actions(): string {
+		return '<p>' . esc_html__( 'Your reverse proxy is not passing the visitor address on at all. Prefer fixing it in the server, where every plugin benefits: with nginx, ngx_http_realip_module rewrites the peer address itself, so SureCookie needs no configuration.', 'surecookie' ) . '</p>'
+			. '<pre><code>' . esc_html( "set_real_ip_from 10.0.0.0/8;\nreal_ip_header X-Forwarded-For;" ) . '</code></pre>'
+			. '<p>' . esc_html__( 'Passing the header to PHP works too, and needs nothing on the SureCookie side because a recognised proxy is already trusted:', 'surecookie' ) . '</p>'
+			. '<pre><code>' . esc_html( 'fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;' ) . '</code></pre>'
+			. '<p>' . esc_html__( 'Use $proxy_add_x_forwarded_for, which appends. A proxy that relays the visitor\'s own X-Forwarded-For untouched leaves nothing to tell a forged value from a real one, which would let a visitor pick their own country and per-visitor rate-limit bucket.', 'surecookie' ) . '</p>';
 	}
 }

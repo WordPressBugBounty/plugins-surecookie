@@ -1075,7 +1075,7 @@ class Shortcode {
 	private function unresolved( string $text, string $hint ): string {
 		$out = '<p class="surecookie-privacy-policy-unresolved">' . esc_html( $text ) . '</p>';
 
-		if ( is_user_logged_in() && current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( is_user_logged_in() && current_user_can( Helper::capability() ) ) {
 			$out .= '<p class="surecookie-privacy-policy-hint"><em>' . esc_html( $hint ) . '</em></p>';
 		}
 

@@ -1002,7 +1002,7 @@
         "description": "Loads Google web fonts.",
         "category": "functional",
         "pro": true,
-        "gcm_compatible": true,
+        "gcm_compatible": false,
         "patterns": {
             "scripts": [],
             "iframes": [],
@@ -1212,7 +1212,15 @@
                 "js.hs-analytics.net",
                 "js.hsforms.net",
                 "js.hscollectedforms.net",
-                "track.hubspot.com"
+                "track.hubspot.com",
+                "hs-scripts.com",
+                "hs-analytics.net",
+                "hs-banner.com",
+                "hscollectedforms.net",
+                "hsforms.net",
+                "hsforms.com",
+                "usemessages.com",
+                "track-eu1.hubspot.com"
             ],
             "iframes": []
         },
@@ -2084,7 +2092,7 @@
         "description": "Google bot and spam protection.",
         "category": "marketing",
         "pro": false,
-        "gcm_compatible": true,
+        "gcm_compatible": false,
         "patterns": {
             "scripts": [
                 "google.com/recaptcha",

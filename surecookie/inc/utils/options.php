@@ -53,7 +53,7 @@ class Options {
 				],
 				'message_description'           => [
 					'type'    => 'rich_text',
-					'default' => __( 'We use cookies to improve your experience and understand how you use our site. You can review your choices at any time.', 'surecookie' ),
+					'default' => __( 'We use cookies to improve your experience. You can change your choice at any time.', 'surecookie' ),
 					'group'   => 'banner',
 				],
 
@@ -72,6 +72,7 @@ class Options {
 					'type'    => 'string',
 					'default' => __( 'Only Essential', 'surecookie' ),
 					'group'   => 'buttons',
+					'max'     => 50,
 				],
 				'accept_all_enabled'            => [
 					'type'    => 'bool',
@@ -83,11 +84,13 @@ class Options {
 					'type'    => 'string',
 					'default' => __( 'Accept All', 'surecookie' ),
 					'group'   => 'buttons',
+					'max'     => 50,
 				],
 				'decline_btn_text'              => [
 					'type'    => 'string',
 					'default' => __( 'Decline', 'surecookie' ),
 					'group'   => 'buttons',
+					'max'     => 50,
 				],
 				'settings_btn_text'             => [
 					'type'    => 'string',
@@ -96,7 +99,8 @@ class Options {
 				],
 
 				'button_order'                  => [
-					'type'    => 'string',
+					// A comma string, validated by Settings::normalize_button_order().
+					'type'    => 'button_order',
 					'default' => 'accept_all,accept,preferences,decline',
 					'group'   => 'buttons',
 				],
@@ -177,6 +181,7 @@ class Options {
 					'type'    => 'string',
 					'default' => __( 'Preferences', 'surecookie' ),
 					'group'   => 'buttons',
+					'max'     => 50,
 				],
 				'preferences_modal_heading'     => [
 					'type'    => 'string',
@@ -399,7 +404,7 @@ class Options {
 
 	/**
 	 * Declared value range for an option, as `[ min, max ]`. Either bound is null
-	 * when the schema does not set it.
+	 * when the schema does not set it. For a string option `max` is its length.
 	 *
 	 * @param string $option Option key.
 	 * @since 1.5.1

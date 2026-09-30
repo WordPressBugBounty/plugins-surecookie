@@ -21,6 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Settings {
 	/**
+	 * Banner button tokens in their default `button_order`. Each has a
+	 * `{token}_btn_text` label setting. Mirrored in src/shared/utils/acceptAllVisibility.js.
+	 *
+	 * @since 1.6.0
+	 */
+	public const BUTTON_TOKENS = [ 'accept_all', 'accept', 'preferences', 'decline' ];
+
+	/**
 	 * Default values.
 	 *
 	 * @var array<string, mixed>
@@ -33,6 +41,13 @@ class Settings {
 	 * @var array<string, mixed>
 	 */
 	private static $settings_dataset = [];
+
+	/**
+	 * String `max` lengths by key; memoized apart from $defaults, as they hold no translated text.
+	 *
+	 * @var array<string, int>|null
+	 */
+	private static $max_lengths = null;
 
 	/**
 	 * Get plugin default settings.
@@ -95,8 +110,8 @@ class Settings {
 
 		// Repairs sites already holding a 0, which reaches the page as the truthy
 		// string "0" and renders the banner at 0px.
+		$defaults = self::get_settings_defaults();
 		if ( (int) ( $public_settings['banner_width'] ?? 0 ) <= 0 ) {
-			$defaults                        = self::get_settings_defaults();
 			$public_settings['banner_width'] = $defaults['banner_width'] ?? 650;
 		}
 
@@ -111,6 +126,34 @@ class Settings {
 		$public_settings['categories_in_use'] = ! empty( $public_settings['hide_unused_categories'] )
 			? Get::categories_in_use()
 			: [];
+
+		// Empty label = translated default (#957); a pre-validation order is repaired. Done here,
+		// before the multilingual pass, so the page payload and the public REST route agree.
+		$live = null;
+		foreach ( self::BUTTON_TOKENS as $token ) {
+			$label_key = "{$token}_btn_text";
+			$label     = $public_settings[ $label_key ] ?? '';
+
+			// Unicode spaces and invisible format characters too: either renders a blank, unnamed button.
+			if ( ! is_string( $label ) || preg_match( '/^[\s\p{Z}\p{Cf}]*$/u', $label ) === 1 ) {
+				// Read fresh, not from $defaults: a multilingual plugin can set the page language after
+				// that cache fills (Polylang does on `wp`), and a blank label has no registered string.
+				$live  = $live ?? Options::get_all_configurations();
+				$label = (string) ( $live[ $label_key ]['default'] ?? '' );
+			}
+
+			$public_settings[ $label_key ] = self::clamp_length( $label_key, $label );
+		}
+
+		$button_order                    = self::normalize_button_order( $public_settings['button_order'] ?? '' );
+		$public_settings['button_order'] = $button_order !== '' ? $button_order : (string) ( $defaults['button_order'] ?? '' );
+
+		// Trimmed here, not in LocalizeData, because this dataset also answers the
+		// anonymous `get-frontend-settings` route: trimming one surface would leave
+		// the full rows a single unauthenticated GET away and let the two disagree.
+		if ( ! empty( $public_settings['custom_cookies'] ) && is_array( $public_settings['custom_cookies'] ) ) {
+			$public_settings['custom_cookies'] = array_map( [ Get::class, 'public_cookie_row' ], $public_settings['custom_cookies'] );
+		}
 
 		return apply_filters( 'surecookie_public_settings', $public_settings );
 	}
@@ -155,16 +198,17 @@ class Settings {
 			$setting_db = [];
 		}
 
-		// If the value is same as existing, return true. No need to update.
-		if ( self::get( $key ) === $value ) {
-			return true;
-		}
-
 		if ( ! self::accepts_value( $key, $value ) ) {
 			return false;
 		}
 
-		$setting_db[ $key ] = self::get_cleaned_value( $key, $value );
+		// A value that cleans to what is already in effect is a no-op, not a refusal (update_option() would say false).
+		$cleaned = self::get_cleaned_value( $key, $value );
+		if ( self::get( $key ) === $cleaned ) {
+			return true;
+		}
+
+		$setting_db[ $key ] = $cleaned;
 		return Update::option( SURECOOKIE_SETTINGS_OPTION, $setting_db );
 	}
 
@@ -182,7 +226,13 @@ class Settings {
 	 * @return bool
 	 */
 	public static function accepts_value( $key, $value ): bool {
-		return Options::get_option_type( $key ) === 'array'
+		$type = Options::get_option_type( $key );
+
+		if ( $type === 'button_order' ) {
+			return self::normalize_button_order( $value ) !== '';
+		}
+
+		return $type === 'array'
 			? is_array( $value )
 			: ( is_scalar( $value ) || $value === null );
 	}
@@ -212,10 +262,69 @@ class Settings {
 				return Sanitize::hex_color( $value );
 			case 'rich_text':
 				return Sanitize::rich_text( $value );
+			case 'button_order':
+				return self::normalize_button_order( $value );
 			case 'string':
 			default:
-				return Sanitize::text( $value );
+				return self::clamp_length( $key, Sanitize::text( $value ) );
 		}
+	}
+
+	/**
+	 * Known, unique tokens, keeping Preferences and a reject button (accept or decline) so no
+	 * writer leaves visitors unable to choose or refuse. A Pro region's `button_config` never passes here.
+	 *
+	 * @param mixed $value Comma-separated order.
+	 * @since 1.6.0
+	 * @return string Normalized order, or '' when it names no known token.
+	 */
+	public static function normalize_button_order( $value ): string {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		$tokens = array_values( array_unique( array_intersect( array_map( 'trim', explode( ',', (string) $value ) ), self::BUTTON_TOKENS ) ) );
+
+		if ( empty( $tokens ) ) {
+			return '';
+		}
+
+		if ( ! in_array( 'preferences', $tokens, true ) ) {
+			$tokens[] = 'preferences';
+		}
+
+		if ( empty( array_intersect( [ 'accept', 'decline' ], $tokens ) ) ) {
+			$tokens[] = 'decline';
+		}
+
+		return implode( ',', $tokens );
+	}
+
+	/**
+	 * Cut a sanitized string to the length its schema declares as `max`, counted as visitors see it.
+	 *
+	 * @param string $key   Option key.
+	 * @param string $value Sanitized string.
+	 * @since 1.6.0
+	 * @return string
+	 */
+	public static function clamp_length( $key, string $value ): string {
+		if ( self::$max_lengths === null ) {
+			self::$max_lengths = array_map(
+				static fn( $config ) => (int) $config['max'],
+				array_filter( Options::get_all_configurations(), static fn( $config ) => isset( $config['max'] ) && ( $config['type'] ?? 'string' ) === 'string' )
+			);
+		}
+
+		$max = self::$max_lengths[ $key ] ?? null;
+		if ( $max === null ) {
+			return $value;
+		}
+
+		// sanitize_text_field() stores '<' as '&lt;': count and cut the decoded text, then re-sanitize.
+		$visible = html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
+
+		return mb_strlen( $visible ) <= $max ? $value : Sanitize::text( mb_substr( $visible, 0, $max ) );
 	}
 
 	/**

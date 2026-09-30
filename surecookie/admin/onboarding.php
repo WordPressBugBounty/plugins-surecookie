@@ -10,6 +10,7 @@
 namespace SureCookie\Admin;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Utils\LocalizeData;
@@ -51,7 +52,7 @@ class Onboarding {
 	 * @return void
 	 */
 	public function register_onboarding_page(): void {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return;
 		}
 
@@ -59,7 +60,7 @@ class Onboarding {
 			'surecookie-hidden',
 			__( 'SureCookie Setup', 'surecookie' ),
 			'',
-			SURECOOKIE_CAPABILITY,
+			Helper::capability(),
 			'surecookie-onboarding',
 			[ $this, 'render_hidden_settings_page' ]
 		);
@@ -72,7 +73,7 @@ class Onboarding {
 	 * @return void
 	 */
 	public function render_hidden_settings_page(): void {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'surecookie' ) );
 		}
 

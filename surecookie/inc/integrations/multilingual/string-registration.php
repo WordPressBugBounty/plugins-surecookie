@@ -87,13 +87,15 @@ class String_Registration {
 			// multiline so translators can edit the full markup.
 			$is_multiline = Init::is_multiline( $key );
 			$string_name  = 'surecookie_' . $key;
+			// Register the text the page renders, so Polylang's lookup by source string matches it.
+			$value = Settings::clamp_length( $key, $settings[ $key ] );
 
 			if ( Init::is_polylang_active() ) {
-				pll_register_string( $string_name, $settings[ $key ], self::STRING_CONTEXT, $is_multiline );
+				pll_register_string( $string_name, $value, self::STRING_CONTEXT, $is_multiline );
 			}
 
 			if ( Init::is_wpml_active() ) {
-				do_action( 'wpml_register_single_string', self::STRING_CONTEXT, $string_name, $settings[ $key ] );
+				do_action( 'wpml_register_single_string', self::STRING_CONTEXT, $string_name, $value );
 			}
 		}
 	}

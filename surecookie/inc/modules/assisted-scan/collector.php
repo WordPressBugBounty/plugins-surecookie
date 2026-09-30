@@ -19,6 +19,7 @@
 
 namespace SureCookie\Inc\Modules\AssistedScan;
 
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -122,7 +123,7 @@ class Collector {
 
 		// Capability first: cheaper than the option read, and it is the check that
 		// makes a leaked token useless to anyone else.
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return null;
 		}
 

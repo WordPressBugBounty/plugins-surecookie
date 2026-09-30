@@ -9,6 +9,7 @@
 
 namespace SureCookie\Inc\Utils;
 
+use SureCookie\Admin\Live_Versions;
 use SureCookie\Admin\Product_Promotion;
 use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Functions\Get;
@@ -44,6 +45,15 @@ class LocalizeData {
 	 * @since 1.2.1
 	 */
 	private const STALE_TOKEN_MAX_AGE_BUCKETS = 720;
+
+	/**
+	 * The only `website_links` keys the public bundle reads (3 call sites in
+	 * build/public.js, both branding anchors). The other 32 are admin-only CTAs,
+	 * so the frontend payload ships just these two.
+	 *
+	 * @since 1.6.0
+	 */
+	private const FRONTEND_WEBSITE_LINK_KEYS = [ 'banner_branding', 'preferences_modal_branding' ];
 	/**
 	 * Get keyed map of UTM-tagged outbound marketing links.
 	 *
@@ -199,7 +209,7 @@ class LocalizeData {
 	 * @since 0.0.1-beta.2
 	 */
 	public static function get_translatable_defaults(): array {
-		$keys = [ 'message_heading', 'message_description', 'preferences_modal_heading', 'preferences_modal_description', 'placeholder_description' ];
+		$keys = [ 'message_heading', 'message_description', 'preferences_modal_heading', 'preferences_modal_description', 'placeholder_description', 'accept_btn_text', 'accept_all_btn_text', 'decline_btn_text', 'preferences_btn_text' ];
 		return array_map( 'strval', array_intersect_key( Settings::get_settings_defaults(), array_flip( $keys ) ) );
 	}
 
@@ -270,13 +280,14 @@ class LocalizeData {
 			'cronType'                   => $cron_status ? $cron_status : 'unavailable',
 			'is_local_site'              => SaasClient::is_local_site(),
 			'show_upgrade_notice'        => $should_show_upgrade_notice,
+			'version_update'             => Live_Versions::get_update_notice(),
 
 			// Admin & user data.
 			'wp_dashboard_url'           => admin_url( 'admin.php' ),
 			'onboarding_complete_status' => get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ? 'yes' : 'no',
-			'can_manage_settings'        => current_user_can( SURECOOKIE_CAPABILITY ),
+			'can_manage_settings'        => current_user_can( Helper::capability() ),
 			// Core maps this to manage_network on multisite, where
-			// SURECOOKIE_CAPABILITY does not reach, so the UI hides the
+			// the plugin capability does not reach, so the UI hides the
 			// "use as WordPress privacy page" action instead of failing it.
 			'can_manage_privacy_options' => current_user_can( 'manage_privacy_options' ),
 			'business_shortcodes'        => Business_Shortcodes::for_admin(),
@@ -315,11 +326,18 @@ class LocalizeData {
 					'token'      => esc_url_raw( rest_url( 'surecookie/v1/consent-logs/token' ) ),
 				],
 				// Exposed so frontend banner / preferences modal branding links carry UTM attribution.
-				'website_links'            => self::get_website_links(),
+				// Narrowed to the keys the public bundle reads - the admin CTAs behind the rest
+				// are dead weight in every visitor's HTML.
+				'website_links'            => array_intersect_key(
+					self::get_website_links(),
+					array_flip( self::FRONTEND_WEBSITE_LINK_KEYS )
+				),
 				// Static UI chrome localized server-side - the public bundle
 				// ships without wp-i18n, so it cannot translate at runtime.
 				'branding_powered_by'      => __( 'Powered by', 'surecookie' ),
 				'placeholder'              => self::get_placeholder_data(),
+				// Off for a scan, an excluded region or a bypassed page; vendor hand-offs follow it.
+				'blocking'                 => Blocker::get_instance()->should_process(),
 			]
 		);
 
@@ -328,6 +346,10 @@ class LocalizeData {
 		if ( did_action( 'surecookie_wp_consent_api_initialized' ) ) {
 			$data['consent_model'] = Consent_Handler::get_active_consent_model();
 		}
+
+		// Consent_Handler prints the gtag defaults itself (consent-handler.php:259, :385)
+		// straight from Settings, so these three never had a reader on the public bundle.
+		unset( $data['gcm_wait_for_update'], $data['gcm_default_consent'], $data['gcm_region_defaults'] );
 
 		// wp_localize_script() html_entity_decode()s every top-level scalar, so
 		// pre-empt it here - this payload reaches every anonymous visitor.

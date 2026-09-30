@@ -161,8 +161,8 @@ class Settings_Metadata {
 
 			// Buttons.
 			'button_order'                 => [
-				'description' => __( 'Left-to-right order of the banner buttons, as a comma-separated list built from the tokens accept_all, accept (essential only), preferences and decline.', 'surecookie' ),
-				'hazard'      => __( 'Unrecognised tokens are dropped silently, so a value containing none of the four leaves the banner with no buttons at all.', 'surecookie' ),
+				'description' => __( 'Order of the banner buttons in reading order (mirrored on right-to-left pages), as a comma-separated list of the tokens accept_all, accept (essential only), preferences and decline. A token left out is hidden. Keep accept_all in the order and hide it with accept_all_enabled, which Geographic Targeting rules and the consent log also read.', 'surecookie' ),
+				'hazard'      => __( 'Preferences and at least one of accept or decline are always kept: a value without them has them appended, and unknown or repeated tokens are dropped. A value naming no known token is refused and the stored order kept.', 'surecookie' ),
 			],
 			'accept_btn_text'              => [
 				'description' => __( 'Label for the essential-only button. Empty falls back to the translated "Only Essential".', 'surecookie' ),
@@ -173,6 +173,9 @@ class Settings_Metadata {
 			],
 			'decline_btn_text'             => [
 				'description' => __( 'Label for the Decline button. Empty falls back to the translated "Decline".', 'surecookie' ),
+			],
+			'preferences_btn_text'         => [
+				'description' => __( 'Label for the Preferences button, which opens the category choices. Empty falls back to the translated "Preferences".', 'surecookie' ),
 			],
 
 			// Colours and styling.

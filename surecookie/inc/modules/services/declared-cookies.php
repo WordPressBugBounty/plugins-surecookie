@@ -186,35 +186,6 @@ class Declared_Cookies {
 	}
 
 	/**
-	 * A service's display name, falling back to its slug.
-	 *
-	 * @since 1.5.1
-	 * @param string $service Catalog service slug.
-	 * @return string
-	 */
-	private static function service_label( string $service ): string {
-		$entry = Services_Source::get_instance()->get_catalog()[ $service ] ?? null;
-		$label = is_array( $entry ) ? (string) ( $entry['label'] ?? '' ) : '';
-
-		return $label !== '' ? $label : $service;
-	}
-
-	/**
-	 * Whether a stored row came from the catalog rather than an observation.
-	 *
-	 * Accepts the signature prefix as well as `source`, so rows written before
-	 * the marker existed are still recognised. Mirrors `Sync::is_declared_row()`.
-	 *
-	 * @since 1.5.1
-	 * @param array<string, mixed> $cookie Stored cookie row.
-	 * @return bool
-	 */
-	private static function is_declared( array $cookie ): bool {
-		return ( $cookie['source'] ?? '' ) === 'declared'
-			|| strncmp( (string) ( $cookie['signature_id'] ?? '' ), 'declared:', 9 ) === 0;
-	}
-
-	/**
 	 * Fill in a provider for stored scanned cookies that have none.
 	 *
 	 * Earlier scans read the provider from a key the scan API never sends, so
@@ -381,6 +352,34 @@ class Declared_Cookies {
 		return $cookies_by_category;
 	}
 
+	/**
+	 * A service's display name, falling back to its slug.
+	 *
+	 * @since 1.5.1
+	 * @param string $service Catalog service slug.
+	 * @return string
+	 */
+	private static function service_label( string $service ): string {
+		$entry = Services_Source::get_instance()->get_catalog()[ $service ] ?? null;
+		$label = is_array( $entry ) ? (string) ( $entry['label'] ?? '' ) : '';
+
+		return $label !== '' ? $label : $service;
+	}
+
+	/**
+	 * Whether a stored row came from the catalog rather than an observation.
+	 *
+	 * Accepts the signature prefix as well as `source`, so rows written before
+	 * the marker existed are still recognised. Mirrors `Sync::is_declared_row()`.
+	 *
+	 * @since 1.5.1
+	 * @param array<string, mixed> $cookie Stored cookie row.
+	 * @return bool
+	 */
+	private static function is_declared( array $cookie ): bool {
+		return ( $cookie['source'] ?? '' ) === 'declared'
+			|| strncmp( (string) ( $cookie['signature_id'] ?? '' ), 'declared:', 9 ) === 0;
+	}
 
 	/**
 	 * Build (and memoize) the catalog detail lookup, returning [ exact, prefixes ].

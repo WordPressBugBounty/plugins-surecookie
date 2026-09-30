@@ -146,6 +146,19 @@ class Init {
 	];
 
 	/**
+	 * Exclusion filters asked once per resource, wanting a boolean back.
+	 *
+	 * W3 Total Cache reads none of the opt-out attributes above, so its own
+	 * filter is the only lever it offers.
+	 *
+	 * @since 1.6.0
+	 */
+	private const FILTERS_PER_FILE = [
+		'w3tc_minify_js_do_tag_minification',
+		'w3tc_minify_css_do_tag_minification',
+	];
+
+	/**
 	 * Page caches that clear via an action.
 	 *
 	 * @since 1.4.0
@@ -296,7 +309,7 @@ class Init {
 		// '' means "not one of ours", so it must never be looked up: one falsy
 		// entry anywhere in the graph would otherwise match every inline script on
 		// the page, core's and every third party's, and silently opt them all out.
-		if ( '' === $handle ) {
+		if ( $handle === '' ) {
 			return $attributes;
 		}
 
@@ -309,24 +322,6 @@ class Init {
 		}
 
 		return $attributes;
-	}
-
-	/**
-	 * Handle an inline script id belongs to, or '' when it is not one of ours.
-	 *
-	 * @param mixed $id Inline script id, e.g. `surecookie-public-js-extra`.
-	 * @return string
-	 */
-	private function inline_owner( $id ): string {
-		$id = (string) $id;
-
-		foreach ( [ '-js-extra', '-js-before', '-js-after' ] as $suffix ) {
-			if ( str_ends_with( $id, $suffix ) ) {
-				return substr( $id, 0, - strlen( $suffix ) );
-			}
-		}
-
-		return '';
 	}
 
 	/**
@@ -431,6 +426,24 @@ class Init {
 		 * @since 1.4.0
 		 */
 		do_action( 'surecookie_purge_caches' );
+	}
+
+	/**
+	 * Handle an inline script id belongs to, or '' when it is not one of ours.
+	 *
+	 * @param mixed $id Inline script id, e.g. `surecookie-public-js-extra`.
+	 * @return string
+	 */
+	private function inline_owner( $id ): string {
+		$id = (string) $id;
+
+		foreach ( [ '-js-extra', '-js-before', '-js-after' ] as $suffix ) {
+			if ( str_ends_with( $id, $suffix ) ) {
+				return substr( $id, 0, - strlen( $suffix ) );
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -568,9 +581,9 @@ class Init {
 	 *
 	 * WordPress has no core API for "leave this asset alone", so each plugin
 	 * exposes its own filter. They differ in the shape they expect - paths,
-	 * handles, selectors or CSV - so each shape gets its own table. Passing the
-	 * wrong shape fails silently, so add a filter only to a table whose shape
-	 * has been checked against that plugin's source.
+	 * handles, selectors, CSV or a per-resource boolean - so each shape gets its
+	 * own table. Passing the wrong shape fails silently, so add a filter only to
+	 * a table whose shape has been checked against that plugin's source.
 	 *
 	 * @since 1.4.0
 	 * @return void
@@ -615,6 +628,33 @@ class Init {
 					$existing = is_string( $list ) && $list !== '' ? $list . ',' : '';
 					return $existing . implode( ',', $paths() );
 				}
+			);
+		}
+
+		// W3TC hands us its own file identity: docroot-relative, or the full URL
+		// when the resource is external. Neither carries the leading slash a
+		// dependency path has, and an empty needle would match every file on the
+		// site, so both are handled before the comparison.
+		foreach ( self::FILTERS_PER_FILE as $filter ) {
+			add_filter(
+				$filter,
+				static function ( $minify, $tag = '', $file = '' ) use ( $paths ) {
+					if ( ! $minify || ! is_string( $file ) ) {
+						return $minify;
+					}
+
+					foreach ( $paths() as $path ) {
+						$needle = ltrim( (string) $path, '/' );
+
+						if ( $needle !== '' && strpos( $file, $needle ) !== false ) {
+							return false;
+						}
+					}
+
+					return $minify;
+				},
+				10,
+				3
 			);
 		}
 

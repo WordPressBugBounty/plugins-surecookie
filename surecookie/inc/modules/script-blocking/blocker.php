@@ -100,7 +100,6 @@ class Blocker {
 	 */
 	private const FETCHING_LINK_RELS = [ 'stylesheet', 'preload', 'modulepreload', 'prefetch', 'prerender', 'preconnect', 'dns-prefetch' ];
 
-
 	/**
 	 * Memoized core asset bases as [ host, path ]. See core_bases().
 	 *
@@ -140,6 +139,13 @@ class Blocker {
 	 * @var bool|null
 	 */
 	private ?bool $should_process = null;
+
+	/**
+	 * Memoized consent enforcement policy, independent of response type.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $should_enforce_consent = null;
 
 	/**
 	 * Constructor.
@@ -332,6 +338,51 @@ class Blocker {
 	}
 
 	/**
+	 * Check if blocking should run.
+	 *
+	 * Public for the page payload, read after `open_buffer()` already settled it,
+	 * so a browser hand-off holds a vendor exactly where this blocks.
+	 *
+	 * @since 0.0.1
+	 * @return bool
+	 */
+	public function should_process(): bool {
+		if ( $this->should_process === null ) {
+			$this->should_process = $this->evaluate_should_process();
+		}
+
+		return $this->should_process;
+	}
+
+	/**
+	 * Whether this visitor's consent should gate vendor activity on any response.
+	 *
+	 * Unlike should_process(), this is not disabled for AJAX/REST responses: server
+	 * events still need the page's consent policy, but never HTML-specific rewrites.
+	 *
+	 * @return bool
+	 */
+	public function should_enforce_consent(): bool {
+		if ( $this->should_enforce_consent === null ) {
+			$is_server_response = wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+			$should_enforce     = ( ! is_admin() || $is_server_response )
+				&& Utils::is_blocking_enabled()
+				&& Utils::should_process_based_on_geo()
+				&& ! Utils::is_scan_probe()
+				&& ! $this->is_editor_bypass();
+
+			if ( $should_enforce ) {
+				$filtered       = apply_filters( 'surecookie_should_block_scripts', true );
+				$should_enforce = is_bool( $filtered ) ? $filtered : true;
+			}
+
+			$this->should_enforce_consent = $should_enforce;
+		}
+
+		return $this->should_enforce_consent;
+	}
+
+	/**
 	 * Open the processing buffer once per request.
 	 *
 	 * Opening it before WordPress 7.0's own template-enhancement buffer (started
@@ -369,20 +420,6 @@ class Blocker {
 		// Before every other wp_footer callback, so all footer scripts land
 		// after the marker. Stripped again in process_buffer().
 		add_action( 'wp_footer', [ $this, 'mark_footer_start' ], -PHP_INT_MAX );
-	}
-
-	/**
-	 * Check if blocking should run.
-	 *
-	 * @since 0.0.1
-	 * @return bool
-	 */
-	private function should_process(): bool {
-		if ( $this->should_process === null ) {
-			$this->should_process = $this->evaluate_should_process();
-		}
-
-		return $this->should_process;
 	}
 
 	/**
@@ -450,18 +487,7 @@ class Blocker {
 			return false;
 		}
 
-		/**
-		 * Filter whether blocking should run.
-		 *
-		 * Reached from the output-buffer display handler, where PHP forbids opening a
-		 * buffer: an `ob_start()` in a callback is an uncatchable fatal that discards
-		 * the whole response. Keep callbacks to pure string work.
-		 *
-		 * @since 0.0.1
-		 * @param bool $should_process Whether to process the output.
-		 */
-		$filtered = apply_filters( 'surecookie_should_block_scripts', true );
-		return is_bool( $filtered ) ? $filtered : true;
+		return $this->should_enforce_consent();
 	}
 
 	/**
@@ -498,7 +524,6 @@ class Blocker {
 
 		return true;
 	}
-
 
 	/**
 	 * Check if buffer is HTML content.
@@ -1065,8 +1090,9 @@ class Blocker {
 		// The catalog is not readable from any admin screen, so note what we
 		// matched or this resource stays invisible there. $keys[0] is the src for
 		// a normal match and the pattern for one matched on inline content, which
-		// has no src of its own to record.
-		Matched_Resources::get_instance()->record( $scope, (string) ( $keys[0] ?? '' ), (string) $match_result['name'], (string) $match_result['category'] );
+		// has no src of its own to record; matched_in decides whether that entry
+		// may also publish the service's catalog-declared cookies.
+		Matched_Resources::get_instance()->record( $scope, (string) ( $keys[0] ?? '' ), (string) $match_result['name'], (string) $match_result['category'], (string) ( $match_result['matched_in'] ?? '' ) );
 
 		$skip = false;
 

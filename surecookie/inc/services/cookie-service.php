@@ -132,37 +132,6 @@ class CookieService {
 	}
 
 	/**
-	 * Name the service a declared row belongs to, for rows stored before the
-	 * field existed.
-	 *
-	 * Admin read path only: the row's owner is what the remove action addresses,
-	 * and without this a row from an older scan would remove only itself and
-	 * leave the rest of its service on the policy.
-	 *
-	 * @since 1.5.1
-	 * @param mixed $cookies Stored rows for one category.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function with_service_slug( $cookies ): array {
-		$rows = [];
-
-		foreach ( is_array( $cookies ) ? $cookies : [] as $cookie ) {
-			if ( is_array( $cookie ) && empty( $cookie['service_slug'] ) ) {
-				$parts = explode( ':', (string) ( $cookie['signature_id'] ?? '' ), 3 );
-
-				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
-					$cookie['service_slug']  = $parts[1];
-					$cookie['service_label'] = Declared_Cookies::get_instance()->label_for( $parts[1] );
-				}
-			}
-
-			$rows[] = $cookie;
-		}
-
-		return $rows;
-	}
-
-	/**
 	 * Get all custom cookies.
 	 *
 	 * @return array{success: bool, message: string, cookies: array<string, mixed>, count: int}
@@ -777,6 +746,37 @@ class CookieService {
 			'cookie_name' => $cookie_name,
 			'category'    => $category,
 		];
+	}
+
+	/**
+	 * Name the service a declared row belongs to, for rows stored before the
+	 * field existed.
+	 *
+	 * Admin read path only: the row's owner is what the remove action addresses,
+	 * and without this a row from an older scan would remove only itself and
+	 * leave the rest of its service on the policy.
+	 *
+	 * @since 1.5.1
+	 * @param mixed $cookies Stored rows for one category.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function with_service_slug( $cookies ): array {
+		$rows = [];
+
+		foreach ( is_array( $cookies ) ? $cookies : [] as $cookie ) {
+			if ( is_array( $cookie ) && empty( $cookie['service_slug'] ) ) {
+				$parts = explode( ':', (string) ( $cookie['signature_id'] ?? '' ), 3 );
+
+				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
+					$cookie['service_slug']  = $parts[1];
+					$cookie['service_label'] = Declared_Cookies::get_instance()->label_for( $parts[1] );
+				}
+			}
+
+			$rows[] = $cookie;
+		}
+
+		return $rows;
 	}
 
 	/**

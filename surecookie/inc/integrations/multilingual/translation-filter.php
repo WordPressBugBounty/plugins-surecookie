@@ -11,6 +11,7 @@
 
 namespace SureCookie\Inc\Integrations\Multilingual;
 
+use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -138,12 +139,15 @@ class Translation_Filter {
 	 * @since 0.0.1-beta.1
 	 */
 	private function translate_settings( array $data ): array {
+		// Init::READ_SITE_TRANSLATED_KEYS are nested in this payload, so this
+		// top-level loop never reaches them and their getters translate instead.
 		foreach ( Init::TRANSLATABLE_KEYS as $key ) {
 			if ( empty( $data[ $key ] ) || ! is_string( $data[ $key ] ) ) {
 				continue;
 			}
 
-			$data[ $key ] = self::translate_string( $data[ $key ], 'surecookie_' . $key, Init::is_multiline( $key ) );
+			// A translation must fit the same schema length as the source string.
+			$data[ $key ] = Settings::clamp_length( $key, self::translate_string( $data[ $key ], 'surecookie_' . $key, Init::is_multiline( $key ) ) );
 		}
 
 		return $data;

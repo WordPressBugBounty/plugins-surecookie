@@ -21,6 +21,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Get {
 	/**
+	 * Fields a cookie row may carry into a visitor-facing payload.
+	 *
+	 * The preferences modal renders provider, duration and expires, and a
+	 * withdrawal deletes by name within category, so every other stored field is
+	 * weight each anonymous visitor pays for. The cookie policy page is unaffected:
+	 * it renders Purpose and Domain server-side from the untrimmed rows.
+	 *
+	 * @since 1.6.0
+	 */
+	public const PUBLIC_COOKIE_FIELDS = [ 'id', 'name', 'category', 'provider', 'duration', 'expires' ];
+	/**
 	 * Per-request memo for the category usage tally. Never persisted: the tally
 	 * must stay dynamic so a newly detected cookie or script reveals its category.
 	 *
@@ -488,6 +499,19 @@ class Get {
 	}
 
 	/**
+	 * Project a cookie row down to PUBLIC_COOKIE_FIELDS.
+	 *
+	 * @since 1.6.0
+	 * @param mixed $cookie Stored cookie row.
+	 * @return array<string, mixed>
+	 */
+	public static function public_cookie_row( $cookie ): array {
+		return is_array( $cookie )
+			? array_intersect_key( $cookie, array_flip( self::PUBLIC_COOKIE_FIELDS ) )
+			: [];
+	}
+
+	/**
 	 * Get scanned cookies as a flat array with category field added to each cookie.
 	 *
 	 * @since 0.0.1
@@ -506,12 +530,10 @@ class Get {
 				if ( ! is_array( $cookie ) ) {
 					continue;
 				}
-				$flat[] = array_merge(
-					$cookie,
-					[
-						'category' => $category_id,
-						'type'     => 'scanned',
-					]
+				// Projected here rather than at the display getter: this is the only
+				// caller, and the cookie policy reads that getter for its full rows.
+				$flat[] = self::public_cookie_row(
+					array_merge( $cookie, [ 'category' => $category_id ] )
 				);
 			}
 		}
@@ -567,7 +589,10 @@ class Get {
 		}
 
 		// Scan-detected resources, after "Do not block" and after recategorization.
-		$resources = self::option( SURECOOKIE_SCANNED_RESOURCES_OPTION, [], 'array' );
+		// The display set, not the raw option: a resource the blocker matched but
+		// no scan saw is the only usage evidence its category has, so reading raw
+		// can hide a category that is still parking something (#1157).
+		$resources = self::scanned_resources_for_display();
 		foreach ( [
 			'scripts' => 'script',
 			'iframes' => 'iframe',

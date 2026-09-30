@@ -66,27 +66,7 @@ class Consent_Handler {
 	 */
 	public function sync_consent_state(): void {
 		$category_map      = self::get_full_category_map();
-		$preferences       = ConsentState::preferences();
 		$essential_wp_type = $category_map['essential'] ?? null;
-
-		if ( empty( $preferences ) ) {
-			$consent_model = self::get_active_consent_model();
-
-			// Opt-out (CCPA): allow everything by default until user explicitly declines.
-			$default_value = $consent_model === 'opt-out' ? 'allow' : 'deny';
-
-			// De-duplicate WP types - custom categories may share the same WP type.
-			$unique_wp_types = array_unique( array_values( $category_map ) );
-
-			foreach ( $unique_wp_types as $wp_type ) {
-				// Essential (functional) is always allowed regardless of consent model.
-				$value = $essential_wp_type !== null && $wp_type === $essential_wp_type
-					? 'allow'
-					: $default_value;
-				self::set_consent( $wp_type, $value );
-			}
-			return;
-		}
 
 		// The map is many-to-one and wp_set_consent() is one cookie per WP type,
 		// so first mapped category wins - as updateWpConsentApi() already does
@@ -100,10 +80,9 @@ class Consent_Handler {
 			}
 			$assigned[ $wp_type ] = true;
 
-			// Essential is always allowed - ignore tampered cookie values.
-			$value = $surecookie_cat === 'essential'
+			$value = $essential_wp_type !== null && $wp_type === $essential_wp_type
 				? 'allow'
-				: ( ! empty( $preferences[ $surecookie_cat ] ) ? 'allow' : 'deny' );
+				: ( ConsentState::allows( $surecookie_cat ) ? 'allow' : 'deny' );
 			self::set_consent( $wp_type, $value );
 		}
 	}

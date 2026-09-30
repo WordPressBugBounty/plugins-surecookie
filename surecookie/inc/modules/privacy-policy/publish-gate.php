@@ -124,7 +124,7 @@ final class Publish_Gate {
 	 * @return void
 	 */
 	public static function guard_transition( $new_status, $old_status = '', $post = null ): void {
-		if ( 'publish' !== $new_status || ! is_object( $post ) || 'page' !== ( $post->post_type ?? '' ) ) {
+		if ( $new_status !== 'publish' || ! is_object( $post ) || ( $post->post_type ?? '' ) !== 'page' ) {
 			return;
 		}
 

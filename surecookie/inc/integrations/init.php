@@ -17,6 +17,7 @@ use SureCookie\Inc\Integrations\Astra\Init as Astra;
 use SureCookie\Inc\Integrations\Cache\Init as Cache;
 use SureCookie\Inc\Integrations\Elementor\Init as Elementor;
 use SureCookie\Inc\Integrations\Multilingual\Init as Multilingual;
+use SureCookie\Inc\Integrations\PixelYourSite\Init as PixelYourSite;
 use SureCookie\Inc\Integrations\PrestoPlayer\Init as Presto_Player;
 use SureCookie\Inc\Integrations\SiteHealth\Init as Site_Health;
 use SureCookie\Inc\Integrations\ThemePalette\Init as Theme_Palette;
@@ -61,6 +62,9 @@ class Init {
 
 		// Presto Player block-level content blocker (gated inside Init).
 		Presto_Player::get_instance();
+
+		// PixelYourSite server-side consent checks and cache-mode switches.
+		PixelYourSite::get_instance();
 
 		// Elementor widgets that build their embed client-side (gated inside Init).
 		Elementor::get_instance();

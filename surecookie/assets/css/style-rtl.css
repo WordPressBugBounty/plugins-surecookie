@@ -914,7 +914,8 @@
 	flex-shrink: 0;
 	padding: 0;
 }
-.surecookie-preferences-modal .surecookie-toggle-btn:disabled {
+.surecookie-preferences-modal .surecookie-toggle-btn:disabled,
+.surecookie-preferences-modal .surecookie-toggle-btn[aria-disabled="true"] {
 	cursor: not-allowed;
 }
 .surecookie-preferences-modal .surecookie-toggle-knob {
@@ -1210,13 +1211,30 @@
 	text-transform: none;
 	letter-spacing: normal;
 }
-/* Rich-text (Jodit) content inside the placeholder description. */
-.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text p {
+/* Rich-text (Jodit) content inside the placeholder description. wp_kses_post, not
+   the toolbar, is the element ceiling, and the overlay sits on an arbitrary theme -
+   so strip theme chrome off every descendant, never the author's own formatting
+   (font-weight/style/decoration are deliberately absent). */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text * {
 	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
 	color: inherit;
 	font-size: inherit;
 	line-height: inherit;
+	text-align: inherit;
+	list-style-position: inside;
 }
+/* An <hr> is nothing but the border the reset above just removed. */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text hr {
+	border-top: 1px solid;
+	opacity: 0.3;
+}
+/* Both selectors: the child one spaces blockquote/heading/list/pre now that their
+   margins are gone, the descendant one keeps paragraphs inside a wrapper spaced. */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text > *:not(:last-child),
 .surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text p:not(:last-child) {
 	margin-bottom: 8px;
 }
@@ -1380,6 +1398,7 @@
 	font: inherit;
 	color: inherit;
 	text-align: right;
+	justify-content: flex-start;
 	width: 100%;
 	box-shadow: none;
 }

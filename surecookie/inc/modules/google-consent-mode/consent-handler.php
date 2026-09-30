@@ -10,7 +10,7 @@
 
 namespace SureCookie\Inc\Modules\GoogleConsentMode;
 
-use SureCookie\Inc\Functions\ConsentState;
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Traits\GetInstance;
@@ -30,11 +30,28 @@ class Consent_Handler {
 	use GetInstance;
 
 	/**
+	 * Shorthands a rule may store that Google never matches, since it reads only
+	 * ISO 3166-2 codes. EU is everywhere GDPR applies: the EEA (EU 27, Iceland,
+	 * Liechtenstein, Norway) plus the EU regions ISO codes on their own, such as RE.
+	 */
+	private const REGION_ALIASES = [
+		'EU' => [ 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'AX', 'GF', 'GP', 'MQ', 'MF', 'RE', 'YT' ],
+		'UK' => [ 'GB' ],
+	];
+
+	/**
 	 * Pre-generated consent script HTML.
 	 *
 	 * @var string
 	 */
 	private $consent_script = '';
+
+	/**
+	 * Built head correction (`build/gcm-head.js`), read once per request.
+	 *
+	 * @var string|null
+	 */
+	private $head_source = null;
 
 	/**
 	 * Constructor.
@@ -44,7 +61,9 @@ class Consent_Handler {
 	private function __construct() {
 		// Use output buffering to inject consent script at start of <head>.
 		// This guarantees execution before any tracking scripts (Critical Fix #4).
-		add_action( 'template_redirect', [ $this, 'start_output_buffer' ], 1 );
+		// Open before PixelYourSite's layer-rewrite buffer so its callback cannot
+		// rewrite SureCookie's cache-safe consent bootstrap.
+		add_action( 'template_redirect', [ $this, 'start_output_buffer' ], -1 );
 
 		// Warn admins when Google Site Kit's own Consent Mode is active (it
 		// conflicts with ours). Wired on admin_notices directly: the frontend
@@ -119,7 +138,7 @@ class Consent_Handler {
 	 * @since 0.0.0-alpha.1
 	 */
 	public function show_site_kit_conflict_notice(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return;
 		}
 
@@ -185,17 +204,10 @@ class Consent_Handler {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function generate_consent_script(): string {
-		// ::preferences() normalizes each value with a strict `=== true` check and
-		// rejects the whole cookie if any required key isn't a real boolean, so a
-		// tampered cookie with string "false" can't bypass the ternary in
-		// map_to_google_consent(). ::has_recorded_choice() distinguishes
-		// "no/invalid cookie" from "user declined all" for region-default skip.
-		$cookie_preferences = ConsentState::preferences();
-		$has_recorded       = ConsentState::has_recorded_choice();
-
-		// Check for Global Privacy Control (CCPA) - Critical Fix #3.
-		$gpc_enabled = $this->is_gpc_enabled();
-
+		// Nothing here reads the visitor's consent cookie or Sec-GPC: a page cache
+		// stores this block for everyone, so one visitor's choice would become the
+		// default of every visitor served that copy (#1254). The inlined head
+		// correction applies the visitor's own state in their browser instead.
 		$default_denied = [
 			'essential'  => true,
 			'functional' => false,
@@ -205,8 +217,7 @@ class Consent_Handler {
 
 		/*
 		 * A scan is measuring what this site sets, not consenting on anyone's
-		 * behalf, and it is checked before GPC because it is not a visitor at all.
-		 * Denying here is what made a Consent Mode site undetectable: the scanner
+		 * behalf. Denying here is what made a Consent Mode site undetectable: the scanner
 		 * already stands the blocker down so the real tags run, then this told
 		 * them to store nothing, and the scan reported the resulting silence as
 		 * the site's cookie list.
@@ -220,10 +231,6 @@ class Consent_Handler {
 				'analytics'  => true,
 				'marketing'  => true,
 			];
-		} elseif ( $gpc_enabled ) {
-			$preferences = $default_denied;
-		} elseif ( $cookie_preferences !== null ) {
-			$preferences = $cookie_preferences;
 		} else {
 			$preferences = $this->global_default_preferences( $default_denied );
 		}
@@ -254,14 +261,27 @@ class Consent_Handler {
 			$json_state = '{}';
 		}
 
+		$layer_names = wp_json_encode( $this->google_layer_names(), $json_flags );
+		if ( $layer_names === false ) {
+			$layer_names = '["dataLayer"]';
+		}
+
 		// Build script HTML.
 		$output  = '<script data-cfasync="false" data-surecookie-gcm="default">' . "\n";
-		$output .= 'window.dataLayer = window.dataLayer || [];' . "\n";
-		$output .= 'function gtag(){dataLayer.push(arguments);}' . "\n";
-		$output .= 'gtag(\'consent\', \'default\', ' . $json_state . ');' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already JSON-encoded with XSS flags.
+		$output .= 'window.surecookieGcmLayers = ' . $layer_names . ';' . "\n";
+		$output .= '(function(w){var o=w.pysOptions,v;if(o){if(o.gdpr){o.google_consent_mode=false;}return;}if(!Object.prototype.hasOwnProperty.call(w,"pysOptions")){Object.defineProperty(w,"pysOptions",{configurable:true,get:function(){return v;},set:function(o){v=o;if(o&&o.gdpr){o.google_consent_mode=false;}if(typeof w.surecookieGcmPysOptionsReady==="function"){w.surecookieGcmPysOptionsReady();}}});}})(window);' . "\n";
+		$output .= 'window.surecookieGcmPushConsent = function(command,state){var i,layer;for(i=0;i<window.surecookieGcmLayers.length;i++){layer=window[window.surecookieGcmLayers[i]]=window[window.surecookieGcmLayers[i]]||[];(function(){layer.push(arguments);})("consent",command,state);}};' . "\n";
+		$output .= 'window.surecookieGcmPushConsent(\'default\', ' . $json_state . ');' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already JSON-encoded with XSS flags.
 
 		// Region-specific consent defaults (Google Consent Mode v2 region parameter).
-		$output .= $this->generate_region_consent_defaults( $has_recorded, $gpc_enabled, $wait_time, $json_flags );
+		$output .= $this->generate_region_consent_defaults( $wait_time, $json_flags );
+
+		// A scan has no choice to correct. The renewal time is the same for every
+		// visitor, so the block stays cacheable.
+		if ( ! $is_scan ) {
+			$output .= 'window.surecookieGcm = ' . wp_json_encode( [ 'r' => (int) Settings::get( 'consent_renewed_at' ) ] ) . ';' . "\n";
+			$output .= $this->head_source() . "\n";
+		}
 
 		$output .= '</script>';
 
@@ -276,19 +296,12 @@ class Consent_Handler {
 	 *
 	 * @see https://developers.google.com/tag-platform/security/guides/consent#region-specific_behavior
 	 *
-	 * @param bool $has_recorded_choice Whether the visitor has already recorded a consent choice.
-	 * @param bool $gpc_enabled         Whether GPC is active.
-	 * @param int  $wait_time           Validated wait time in ms.
-	 * @param int  $json_flags          JSON encoding flags.
+	 * @param int $wait_time  Validated wait time in ms.
+	 * @param int $json_flags JSON encoding flags.
 	 * @return string Additional gtag consent default calls for regions.
 	 * @since 0.0.1-beta.1
 	 */
-	private function generate_region_consent_defaults( bool $has_recorded_choice, $gpc_enabled, $wait_time, $json_flags ): string {
-		// If user already has consent or GPC is active, region defaults are not needed because the global default already reflects the correct state.
-		if ( $gpc_enabled || $has_recorded_choice ) {
-			return '';
-		}
-
+	private function generate_region_consent_defaults( $wait_time, $json_flags ): string {
 		// A region default overrides the global one for the regions it names, so
 		// emitting these would put the scanner straight back on denied wherever
 		// its egress IP happens to resolve.
@@ -305,16 +318,11 @@ class Consent_Handler {
 		// Limit to 50 rules maximum to prevent abuse.
 		$region_defaults = array_slice( $region_defaults, 0, 50 );
 
-		// Build array of prepared consent-state configs (not JS strings).
-		$region_configs = [];
+		$rules = [];
 
 		foreach ( $region_defaults as $preset ) {
 			// Defense-in-depth: skip non-array entries so $preset[...] offset access below never runs on a scalar/null.
-			if ( ! is_array( $preset ) ) {
-				continue;
-			}
-
-			if ( empty( $preset['region'] ) || ! is_array( $preset['region'] ) ) {
+			if ( ! is_array( $preset ) || empty( $preset['region'] ) || ! is_array( $preset['region'] ) ) {
 				continue;
 			}
 
@@ -329,12 +337,27 @@ class Consent_Handler {
 				)
 			);
 
+			if ( ! empty( $regions ) ) {
+				$rules[] = [ $preset, $regions ];
+			}
+		}
+
+		// A code a rule names itself beats an alias covering it: gtag applies the last default for a country, so rule order would decide.
+		$explicit = array_diff( array_merge( [], ...array_column( $rules, 1 ) ), array_keys( self::REGION_ALIASES ) );
+
+		// Build array of prepared consent-state configs (not JS strings).
+		$region_configs = [];
+
+		foreach ( $rules as [ $preset, $codes ] ) {
+			$regions = [];
+			foreach ( $codes as $code ) {
+				$regions = array_merge( $regions, isset( self::REGION_ALIASES[ $code ] ) ? array_diff( self::REGION_ALIASES[ $code ], $explicit ) : [ $code ] );
+			}
+
+			// Every code this alias covers has a rule of its own.
 			if ( empty( $regions ) ) {
 				continue;
 			}
-
-			// Limit to 10 region codes per rule.
-			$regions = array_slice( $regions, 0, 10 );
 
 			// Build preferences with strict boolean resolution (handles Sanitize::array() string round-trip).
 			$preferences = [
@@ -345,7 +368,7 @@ class Consent_Handler {
 			];
 
 			$consent_state                    = $this->map_to_google_consent( $preferences );
-			$consent_state['region']          = array_values( $regions );
+			$consent_state['region']          = array_values( array_unique( $regions ) );
 			$consent_state['wait_for_update'] = $wait_time;
 
 			$region_configs[] = $consent_state;
@@ -381,7 +404,7 @@ class Consent_Handler {
 				continue;
 			}
 
-			$output .= 'gtag(\'consent\', \'default\', ' . $json_state . ');' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already JSON-encoded with XSS flags.
+			$output .= 'window.surecookieGcmPushConsent(\'default\', ' . $json_state . ');' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already JSON-encoded with XSS flags.
 		}
 
 		return $output;
@@ -416,18 +439,6 @@ class Consent_Handler {
 	}
 
 	/**
-	 * Check if Global Privacy Control (GPC) is enabled.
-	 *
-	 * Critical Fix #3: GPC support for CCPA compliance.
-	 *
-	 * @return bool True if GPC signal detected.
-	 * @since 0.0.0-alpha.1
-	 */
-	private function is_gpc_enabled(): bool {
-		return isset( $_SERVER['HTTP_SEC_GPC'] ) && $_SERVER['HTTP_SEC_GPC'] === '1';
-	}
-
-	/**
 	 * Map SureCookie categories to Google consent parameters.
 	 *
 	 * @param array<string, mixed> $preferences User preferences.
@@ -435,15 +446,10 @@ class Consent_Handler {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function map_to_google_consent( $preferences ): array {
-		$mapping = [
-			'ad_storage'              => $preferences['marketing'] ? 'granted' : 'denied',
-			'ad_user_data'            => $preferences['marketing'] ? 'granted' : 'denied',
-			'ad_personalization'      => $preferences['marketing'] ? 'granted' : 'denied',
-			'personalization_storage' => $preferences['marketing'] ? 'granted' : 'denied',
-			'analytics_storage'       => $preferences['analytics'] ? 'granted' : 'denied',
-			'functionality_storage'   => $preferences['functional'] ? 'granted' : 'denied',
-			'security_storage'        => 'granted', // Always granted (essential).
-		];
+		$mapping = [];
+		foreach ( self::consent_map() as $key => $category ) {
+			$mapping[ $key ] = $category === 'essential' || ! empty( $preferences[ $category ] ) ? 'granted' : 'denied';
+		}
 
 		/**
 		 * Filter: Allow developers to customize category mapping.
@@ -456,6 +462,113 @@ class Consent_Handler {
 
 		// Fall back to the original mapping if a filter returns a non-array, to avoid silent GCM misconfiguration.
 		return is_array( $filtered ) ? $filtered : $mapping;
+	}
+
+	/**
+	 * Consent Mode key to SureCookie category. `consent-map.json` is also bundled
+	 * into the head correction and consentManager.js, so the default and every
+	 * update map identically.
+	 *
+	 * @since 1.6.0
+	 * @return array<string, string>
+	 */
+	private static function consent_map(): array {
+		static $map = null;
+
+		if ( $map === null ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a bundled plugin asset, not a remote resource.
+			$decoded = json_decode( (string) file_get_contents( __DIR__ . '/consent-map.json' ), true );
+			$map     = is_array( $decoded ) ? $decoded : [];
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Resolve the Google data layers configured by PixelYourSite.
+	 *
+	 * @return array<int, string>
+	 */
+	private function google_layer_names(): array {
+		$layers = [ 'dataLayer' ];
+
+		if ( function_exists( 'PixelYourSite\\GA' )
+			&& function_exists( 'PixelYourSite\\GATags' )
+			&& \PixelYourSite\GA()->configured()
+		) {
+			$tags = \PixelYourSite\GATags();
+			$type = $tags->getOption( 'gtag_datalayer_type' );
+			if ( $type === 'disable' ) {
+				$layers[] = 'dataLayer';
+			} elseif ( $type === 'custom' ) {
+				$name = $tags->getOption( 'gtag_datalayer_name' );
+				if ( is_string( $name ) && $name !== '' ) {
+					$layers[] = $name;
+				}
+			} else {
+				$layers[] = 'dataLayerPYS';
+			}
+		}
+
+		if ( function_exists( 'PixelYourSite\\GTM' ) && \PixelYourSite\GTM()->configured() ) {
+			$name = \PixelYourSite\GTM()->getOption( 'gtm_dataLayer_name' );
+			if ( is_string( $name ) && $name !== '' ) {
+				$layers[] = $name;
+			} else {
+				$layers[] = 'dataLayer';
+			}
+		}
+
+		/**
+		 * Extra Google data layer names consent commands must reach.
+		 *
+		 * We can discover PixelYourSite's layers and the default one. A site
+		 * loading its own tag on a custom layer (`gtag/js?id=...&l=myLayer`)
+		 * is the only thing that knows that name, so it declares it here.
+		 *
+		 * @since 1.6.0
+		 * @param array<int, string> $names Layer names.
+		 */
+		$extra = apply_filters( 'surecookie_google_data_layers', [] );
+		if ( is_array( $extra ) ) {
+			$layers = array_merge( $layers, $extra );
+		}
+
+		// A layer is reached as `window[ name ]`, so anything that is not a
+		// plain JS identifier cannot be one. This also keeps an invalid byte out
+		// of the emitted JSON: wp_json_encode() re-encodes rather than failing,
+		// so a bad name would otherwise become a junk global nothing reads.
+		return array_values(
+			array_unique( array_filter( $layers, [ self::class, 'is_data_layer_name' ] ) )
+		);
+	}
+
+	/**
+	 * Whether a value can name a JavaScript global holding a data layer.
+	 *
+	 * @param mixed $name Candidate name.
+	 * @return bool
+	 */
+	private static function is_data_layer_name( $name ): bool {
+		return is_string( $name ) && preg_match( '/^[A-Za-z_$][A-Za-z0-9_$]*$/', $name ) === 1;
+	}
+
+	/**
+	 * The built head correction, or '' when the bundle has not been built.
+	 *
+	 * @since 1.6.0
+	 * @return string
+	 */
+	private function head_source(): string {
+		if ( $this->head_source === null ) {
+			$path = SURECOOKIE_DIR . 'build/gcm-head.js';
+
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a bundled plugin asset, not a remote resource.
+			$contents          = is_readable( $path ) ? file_get_contents( $path ) : false;
+			$this->head_source = is_string( $contents ) ? trim( $contents ) : '';
+		}
+
+		return $this->head_source;
 	}
 
 	/**

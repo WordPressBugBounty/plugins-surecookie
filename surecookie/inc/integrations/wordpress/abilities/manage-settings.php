@@ -317,7 +317,7 @@ class ManageSettings extends Base {
 					'success'  => false,
 					'message'  => sprintf(
 						/* translators: %s: comma-separated setting keys */
-						__( 'No settings were updated. These keys were given a value of the wrong type: %s.', 'surecookie' ),
+						__( 'No settings were updated. These keys were given a value that cannot be stored: %s.', 'surecookie' ),
 						implode( ', ', $invalid_keys )
 					),
 					'settings' => [],
@@ -360,7 +360,7 @@ class ManageSettings extends Base {
 		if ( ! empty( $invalid_keys ) ) {
 			$message .= ' ' . sprintf(
 				/* translators: %s: comma-separated setting keys */
-				__( 'Skipped (wrong value type): %s.', 'surecookie' ),
+				__( 'Skipped (value refused): %s.', 'surecookie' ),
 				implode( ', ', $invalid_keys )
 			);
 		}
@@ -383,7 +383,7 @@ class ManageSettings extends Base {
 	 * Options::get_all_configurations() are automatically available
 	 * without modifying this file.
 	 *
-	 * @return array<string, array<string, string|array<int, string>>>
+	 * @return array<string, array<string, string|int|array<int, string>>>
 	 * @since 0.0.1-alpha.1
 	 */
 	private static function build_settings_properties(): array {
@@ -392,19 +392,20 @@ class ManageSettings extends Base {
 		$delegated      = self::delegated_keys();
 
 		$type_map = [
-			'bool'       => 'boolean',
-			'int'        => 'integer',
-			'string'     => 'string',
+			'bool'         => 'boolean',
+			'int'          => 'integer',
+			'string'       => 'string',
 			// Long-form aliases. Nothing declares these today, but an unmapped
 			// type silently becomes 'string', which would misdeclare the key.
-			'boolean'    => 'boolean',
-			'integer'    => 'integer',
+			'boolean'      => 'boolean',
+			'integer'      => 'integer',
 			// Genuinely strings; the value is sanitized on write.
-			'url'        => 'string',
-			'rich_text'  => 'string',
-			'stylesheet' => 'string',
+			'url'          => 'string',
+			'rich_text'    => 'string',
+			'stylesheet'   => 'string',
+			'button_order' => 'string',
 			// PHP 'array' settings hold both lists and maps, so accept either.
-			'array'      => [ 'array', 'object' ],
+			'array'        => [ 'array', 'object' ],
 		];
 
 		foreach ( $configurations as $key => $config ) {
@@ -450,6 +451,11 @@ class ManageSettings extends Base {
 			// a partial one would reject a legitimate value before execute().
 			if ( ! empty( $config['enum'] ) && is_array( $config['enum'] ) ) {
 				$property['enum'] = array_values( $config['enum'] );
+			}
+
+			// A string's `max` is a length: declare it rather than cut silently on write.
+			if ( $schema_type === 'string' && isset( $config['max'] ) ) {
+				$property['maxLength'] = (int) $config['max'];
 			}
 
 			$properties[ $key ] = $property;

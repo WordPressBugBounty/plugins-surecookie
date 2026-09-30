@@ -19,6 +19,7 @@
 namespace SureCookie\Inc\Modules\BusinessDetails;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Modules\PrivacyPolicy\Countries;
 use SureCookie\Inc\Modules\PrivacyPolicy\Validator;
 use SureCookie\Inc\Traits\GetInstance;
@@ -202,7 +203,7 @@ class Shortcode {
 			return nl2br( esc_html( $value ), false );
 		}
 
-		if ( ! is_user_logged_in() || ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! is_user_logged_in() || ! current_user_can( Helper::capability() ) ) {
 			return '';
 		}
 

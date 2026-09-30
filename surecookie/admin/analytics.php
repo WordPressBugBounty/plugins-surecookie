@@ -31,6 +31,13 @@ class Analytics {
 	use GetInstance;
 
 	/**
+	 * Option holding when a user who can manage SureCookie was last in wp-admin.
+	 *
+	 * @since 1.6.0
+	 */
+	public const LAST_LOGIN_OPTION = 'surecookie_last_user_login';
+
+	/**
 	 * Analytics events schema version. Bump whenever an existing event's shape
 	 * (value or properties) changes, and add a `<new-version> => [ 'event' ]`
 	 * entry to RESHAPED_EVENTS_BY_VERSION so the installed base re-emits it once.
@@ -184,6 +191,8 @@ class Analytics {
 		// State-based events, throttled once per day. Deferred to `admin_init` (not inline on
 		// `plugins_loaded`) so add-ons registering a `surecookie_detect_state_events` listener
 		// on `init` are attached before detection fires its extension hook.
+		// Stamp first, so the detection this same visit triggers reports it and not the gap before it.
+		add_action( 'admin_init', [ $this, 'record_manager_visit' ] );
 		add_action( 'admin_init', [ $this, 'maybe_detect_state_events' ] );
 	}
 
@@ -267,6 +276,26 @@ class Analytics {
 
 		if ( get_transient( 'surecookie_state_events_checked' ) === false ) {
 			$this->detect_state_events();
+		}
+	}
+
+	/**
+	 * Stamp a wp-admin visit by a user who can manage SureCookie, for `last_user_login`.
+	 *
+	 * A visit rather than `wp_login`, which a remember-me session skips for 14 days. Other
+	 * users are ignored so customer accounts cannot make an unattended site look managed.
+	 *
+	 * @since 1.6.0
+	 * @return void
+	 */
+	public function record_manager_visit(): void {
+		// At most one write an hour, however busy the admin is.
+		if ( time() - (int) get_option( self::LAST_LOGIN_OPTION, 0 ) < HOUR_IN_SECONDS ) {
+			return;
+		}
+
+		if ( current_user_can( Helper::capability() ) && $this->is_tracking_enabled() ) {
+			update_option( self::LAST_LOGIN_OPTION, time() );
 		}
 	}
 
@@ -401,6 +430,11 @@ class Analytics {
 		// The one event whose value is a version by design: $force re-queues it every cycle,
 		// so it reports what each active site runs today rather than at first fire.
 		$events->track( 'user_active_version', SURECOOKIE_VERSION, [], true );
+
+		// ── last_user_login ──────────────────────────────────────────────
+		// Forced like the version above, so the two cross-tab per site: is anyone who could
+		// act on the dashboard's update notice still coming to wp-admin?
+		$events->track( 'last_user_login', $this->resolve_last_login(), [], true );
 
 		// ── onboarding_completed ─────────────────────────────────────────
 		// `source` names the screen that recorded it, separating the completion paths.
@@ -998,6 +1032,34 @@ class Analytics {
 		}
 
 		return 'over_1000';
+	}
+
+	/**
+	 * Age band of the last visit record_manager_visit() saw.
+	 *
+	 * `unknown` means none since this build was installed, not "never".
+	 *
+	 * @since 1.6.0
+	 * @return string
+	 */
+	private function resolve_last_login(): string {
+		$last = (int) get_option( self::LAST_LOGIN_OPTION, 0 );
+
+		if ( $last <= 0 ) {
+			return 'unknown';
+		}
+
+		$days = ( time() - $last ) / DAY_IN_SECONDS;
+
+		if ( $days < 7 ) {
+			return 'under_7d';
+		}
+
+		if ( $days < 30 ) {
+			return '7_30d';
+		}
+
+		return $days < 90 ? '30_90d' : 'over_90d';
 	}
 
 	/**

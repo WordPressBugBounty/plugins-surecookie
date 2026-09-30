@@ -8,6 +8,7 @@
 
 namespace SureCookie\Inc\API;
 
+use SureCookie\Inc\Functions\Helper;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -53,7 +54,7 @@ abstract class Base extends WP_REST_Controller {
 	 * @return bool|WP_Error True if valid, WP_REST_Response if invalid.
 	 */
 	public function validate_permission( $request ) {
-		if ( ! current_user_can( SURECOOKIE_CAPABILITY ) ) {
+		if ( ! current_user_can( Helper::capability() ) ) {
 			return new WP_Error(
 				'surecookie_rest_cannot_access',
 				__( 'You don\'t have access to do this.', 'surecookie' ),

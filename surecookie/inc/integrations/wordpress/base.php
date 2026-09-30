@@ -14,6 +14,8 @@
 
 namespace SureCookie\Inc\Integrations\Wordpress;
 
+use SureCookie\Inc\Functions\Helper;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -41,14 +43,14 @@ abstract class Base {
 	/**
 	 * Check if the current user has permission to execute this ability.
 	 *
-	 * Defaults to the plugin-wide SURECOOKIE_CAPABILITY ('manage_options').
+	 * Defaults to the plugin-wide capability from {@see Helper::capability()}.
 	 * Override in subclasses for more granular permission checks.
 	 *
 	 * @return bool
 	 * @since 0.0.1-alpha.1
 	 */
 	public function check_permission(): bool {
-		return current_user_can( SURECOOKIE_CAPABILITY );
+		return current_user_can( Helper::capability() );
 	}
 
 	/**

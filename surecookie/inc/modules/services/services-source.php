@@ -393,7 +393,8 @@ class Services_Source {
 	 * blocking a service that every bundled entry has patterns for - emptiness is
 	 * treated as an incomplete row, never as "stop blocking this". And a bundled
 	 * `cookieless` assertion, which survives a remote row that says nothing about
-	 * it.
+	 * it. `gcm_compatible` runs the other way for the same reason: the floor caps
+	 * it, so no remote row can release a service from consent gating on its own.
 	 *
 	 * @param array<string, array<string, mixed>> $base     Bundled floor.
 	 * @param array<string, array<string, mixed>> $override Remote/cached catalog.
@@ -426,6 +427,13 @@ class Services_Source {
 			// not revoke the claim, but an explicit remote value still retires it.
 			if ( is_array( $entry ) && ! array_key_exists( 'cookieless', $entry ) && ! empty( $base[ $slug ]['cookieless'] ) ) {
 				$entry['cookieless'] = true;
+			}
+
+			// The mirror of that, because releasing a resource from consent gating is
+			// a one-way compliance decision: the floor CAPS this one, so a remote may
+			// revoke the release but never grant one the bundled catalog withholds.
+			if ( is_array( $entry ) && ( isset( $entry['gcm_compatible'] ) || ! empty( $base[ $slug ]['gcm_compatible'] ) ) ) {
+				$entry['gcm_compatible'] = ! empty( $base[ $slug ]['gcm_compatible'] ) && ( $entry['gcm_compatible'] ?? true );
 			}
 
 			$base[ $slug ] = $entry;

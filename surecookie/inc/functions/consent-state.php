@@ -3,16 +3,19 @@
  * ConsentState - Server-side reader for the SureCookie consent cookie.
  *
  * Single source of truth for parsing `surecookie_user_consent` at PHP render
- * time. Consumed by Google Consent Mode, WP Consent API integration, and the
- * Presto Player block-handler.
+ * time. Consumed by the WP Consent API integration and SureCookie Pro's geo
+ * rules. Consent Mode reads it in the browser instead (#1254).
  *
- * Privacy-safe defaults: missing or invalid cookie → all categories denied.
+ * Privacy-safe defaults: missing or invalid cookie → all categories denied, and
+ * a choice older than the last "Re-request Consent" counts as none (#1264).
  *
  * @package SureCookie
  * @since 1.2.4
  */
 
 namespace SureCookie\Inc\Functions;
+
+use SureCookie\Inc\Integrations\WpConsentApi\Consent_Handler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -47,6 +50,13 @@ final class ConsentState {
 	 * @var bool
 	 */
 	private static bool $cache_initialized = false;
+
+	/**
+	 * Per-request memo of the active model used when no current choice exists.
+	 *
+	 * @var string|null
+	 */
+	private static ?string $default_model_cache = null;
 
 	/**
 	 * Preferences map as `[ category => bool ]`. Null when no/invalid cookie.
@@ -88,6 +98,32 @@ final class ConsentState {
 	}
 
 	/**
+	 * Resolve one category using the shared GPC, stored-choice and model order.
+	 *
+	 * @param string $category SureCookie category.
+	 * @return bool
+	 */
+	public static function allows( string $category ): bool {
+		if ( $category === 'essential' ) {
+			return true;
+		}
+
+		if ( self::gpc() ) {
+			return false;
+		}
+
+		if ( self::has_recorded_choice() ) {
+			return self::has_category( $category );
+		}
+
+		if ( self::$default_model_cache === null ) {
+			self::$default_model_cache = Consent_Handler::get_active_consent_model();
+		}
+
+		return self::$default_model_cache === 'opt-out';
+	}
+
+	/**
 	 * Whether the visitor has ever interacted with the banner. Distinct from
 	 * `has_category` - a "decline all" choice still counts as having a cookie.
 	 *
@@ -99,14 +135,27 @@ final class ConsentState {
 	}
 
 	/**
+	 * Whether the request carries Global Privacy Control. The only server-side
+	 * read, so every consumer agrees; strict `'1'`, the one value the spec defines.
+	 *
+	 * @since 1.6.0
+	 * @return bool
+	 */
+	public static function gpc(): bool {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Compared against a literal, never used as data.
+		return ( $_SERVER['HTTP_SEC_GPC'] ?? null ) === '1';
+	}
+
+	/**
 	 * Reset the per-request memo. Test-only.
 	 *
 	 * @since 1.2.4
 	 * @return void
 	 */
 	public static function reset_cache(): void {
-		self::$payload_cache     = null;
-		self::$cache_initialized = false;
+		self::$payload_cache       = null;
+		self::$cache_initialized   = false;
+		self::$default_model_cache = null;
 	}
 
 	/**
@@ -160,6 +209,14 @@ final class ConsentState {
 			if ( ! isset( $decoded['preferences'][ $key ] ) || ! is_bool( $decoded['preferences'][ $key ] ) ) {
 				return null;
 			}
+		}
+
+		// A choice from before the last "Re-request Consent" is no choice, the rule
+		// consentManager.isRenewalRequired() applies; an unreadable time counts as stale.
+		$renewed_at = (int) Settings::get( 'consent_renewed_at' );
+		$recorded   = is_string( $decoded['timestamp'] ?? null ) ? (int) strtotime( $decoded['timestamp'] ) : 0;
+		if ( $renewed_at > 0 && $recorded < $renewed_at ) {
+			return null;
 		}
 
 		return $decoded;

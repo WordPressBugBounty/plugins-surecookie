@@ -13,6 +13,7 @@
 
 namespace SureCookie\Inc\Modules\Mcp;
 
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Utils\Logger;
@@ -109,7 +110,7 @@ class Server {
 				// Transport access requires the same capability that gates
 				// ability execution; older adapters ignore this 13th argument.
 				static function (): bool {
-					return current_user_can( SURECOOKIE_CAPABILITY );
+					return current_user_can( Helper::capability() );
 				}
 			);
 		} catch ( \Throwable $e ) {

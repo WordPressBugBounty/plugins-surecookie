@@ -37,6 +37,30 @@ class Helper {
 	private const BUILDER_QUERY_VARS = [ 'elementor-preview', 'fl_builder', 'et_fb', 'bricks', 'vc_editable' ];
 
 	/**
+	 * The capability every SureCookie admin surface is gated on.
+	 *
+	 * Resolved per call rather than cached: the filter is the only lever a site
+	 * has to keep its own Administrators out of the consent configuration, and
+	 * it is registered long after the constant is defined.
+	 *
+	 * @since 1.6.0
+	 * @return string
+	 */
+	public static function capability(): string {
+		/**
+		 * Filter: capability required to manage SureCookie.
+		 *
+		 * @since 1.6.0
+		 * @param string $capability Capability name. Default SURECOOKIE_CAPABILITY.
+		 */
+		$capability = apply_filters( 'surecookie_capability', SURECOOKIE_CAPABILITY );
+
+		// An empty or non-string value reaches current_user_can() as a capability
+		// nobody holds, locking every user out with no way back through the UI.
+		return is_string( $capability ) && $capability !== '' ? $capability : SURECOOKIE_CAPABILITY;
+	}
+
+	/**
 	 * Whether this request is a frontend builder's own edit render.
 	 *
 	 * The capability is the credential: a query var alone would let any visitor

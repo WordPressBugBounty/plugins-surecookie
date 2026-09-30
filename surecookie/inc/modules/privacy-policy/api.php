@@ -134,9 +134,9 @@ class Api extends Base {
 	 *
 	 * Composes rather than replaces, so the audited nonce handling in Base is
 	 * reused. `manage_privacy_options` maps to `manage_network` on multisite,
-	 * where SURECOOKIE_CAPABILITY does not, so writing core's option under the
-	 * plugin capability alone would let a site admin set something core itself
-	 * refuses them.
+	 * where SureCookie's own capability does not, so writing core's option under
+	 * the plugin capability alone would let a site admin set something core
+	 * itself refuses them.
 	 *
 	 * @since 1.5.0
 	 * @param WP_REST_Request $request Incoming request.
