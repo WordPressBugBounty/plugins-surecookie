@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Modules\AssistedScan\Normalizer;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
@@ -654,11 +655,7 @@ class Sync {
 		];
 
 		foreach ( $candidates as $candidate ) {
-			if ( ! is_string( $candidate ) ) {
-				continue;
-			}
-
-			$provider = sanitize_text_field( trim( $candidate ) );
+			$provider = Sanitize::vendor( $candidate );
 			if ( $provider !== '' ) {
 				return $provider;
 			}

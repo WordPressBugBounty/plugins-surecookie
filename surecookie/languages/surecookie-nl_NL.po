@@ -223,7 +223,7 @@ msgid "Current category is required."
 msgstr "Huidige categorie is vereist."
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "Nieuwe categorie is vereist."
 
@@ -236,11 +236,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "Huidige categorie niet gevonden in gescande cookies."
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "Cookie niet gevonden in de opgegeven categorie."
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "Cookiecategorie succesvol bijgewerkt."
 
@@ -975,7 +975,7 @@ msgstr "Automatisch verwijderen van toestemmingslogs ouder dan de geselecteerde 
 #: build/onboarding.js:4
 #: build/public.js:4
 msgid "Name"
-msgstr "Categorie"
+msgstr "Naam"
 
 #: inc/modules/privacy-policy/shortcode.php:477
 #: build/admin.js:11
@@ -983,63 +983,63 @@ msgstr "Categorie"
 #: build/admin.js:35
 #: build/admin.js:96
 msgid "Category"
-msgstr "Provider"
+msgstr "Categorie"
 
 #: build/admin.js:32
 #: build/admin.js:35
 #: build/admin.js:68
 #: build/public.js:4
 msgid "Provider"
-msgstr "Domein"
+msgstr "Aanbieder"
 
 #: inc/modules/cookie-policy/shortcode.php:209
 #: inc/modules/privacy-policy/shortcode.php:478
 #: build/admin.js:32
 #: build/admin.js:35
 msgid "Domain"
-msgstr "Duur (dagen)"
+msgstr "Domein"
 
 #: build/admin.js:32
 #: build/admin.js:35
 msgid "Duration (Days)"
-msgstr "Type"
+msgstr "Duur (dagen)"
 
 #: build/admin.js:32
 #: build/admin.js:78
 #: build/admin.js:96
 #: build/onboarding.js:4
 msgid "Type"
-msgstr "Ongecategoriseerd"
+msgstr "Type"
 
 #: inc/modules/privacy-policy/shortcode.php:944
 #: build/admin.js:30
 #: build/admin.js:106
 #: build/onboarding.js:3
 msgid "Uncategorized"
-msgstr "Categorie wijzigen"
+msgstr "Ongecategoriseerd"
 
 #: build/admin.js:28
 #: build/admin.js:38
 #: build/admin.js:96
 #: build/onboarding.js:1
 msgid "Edit"
-msgstr "Gescand"
+msgstr "Bewerken"
 
 #: build/admin.js:28
 #: build/admin.js:96
 #: build/onboarding.js:1
 msgid "Scanned"
-msgstr "Aangepast"
+msgstr "Gescand"
 
 #: build/admin.js:28
 #: build/admin.js:96
 #: build/onboarding.js:1
 msgid "Custom"
-msgstr "Weet u zeker dat u de cookie \"<strong></strong>\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+msgstr "Aangepast"
 
 #: build/admin.js:35
 msgid "Delete Custom Cookie"
-msgstr "Cookiecategorie wijzigen"
+msgstr "Aangepaste cookie verwijderen"
 
 #: build/admin.js:35
 msgid "Edit Cookie"
@@ -3616,7 +3616,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "Eens per week (SureCookie)"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "Deze inhoud is momenteel geblokkeerd."
 
@@ -4219,7 +4219,7 @@ msgstr "Kon cookiecategorieën niet bijwerken:"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Accepteer en laad %s-inhoud"
@@ -4344,29 +4344,29 @@ msgstr "Cookies kunnen niet worden verplaatst naar de categorie die wordt verwij
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "De geselecteerde categorie bestaat niet meer. Herlaad en probeer het opnieuw."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "Geen cookies geselecteerd."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "Te veel cookies in één verzoek. Selecteer maximaal %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d cookie is verplaatst naar de geselecteerde categorie."
 msgstr[1] "%d cookies zijn verplaatst naar de geselecteerde categorie."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "Er konden geen cookies worden bijgewerkt."
 
@@ -6852,19 +6852,19 @@ msgstr "Duur moet een geheel aantal dagen zijn."
 msgid "Nothing to update."
 msgstr "Niets te updaten."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "Cookie succesvol bijgewerkt."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "Cookienaam en categorie zijn verplicht."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "Categorie niet gevonden in gescande cookies."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "Cookie verwijderd."
 

@@ -338,6 +338,10 @@ class LocalizeData {
 				'placeholder'              => self::get_placeholder_data(),
 				// Off for a scan, an excluded region or a bypassed page; vendor hand-offs follow it.
 				'blocking'                 => Blocker::get_instance()->should_process(),
+				'affiliate_carry'          => [
+					'home'   => home_url( '/' ),
+					'params' => self::get_affiliate_params(),
+				],
 			]
 		);
 
@@ -354,6 +358,31 @@ class LocalizeData {
 		// wp_localize_script() html_entity_decode()s every top-level scalar, so
 		// pre-empt it here - this payload reaches every anonymous visitor.
 		return Sanitize::rich_text_keys_after_decode( $data );
+	}
+
+	/**
+	 * Query params kept on internal links, each mapped to the catalog service whose
+	 * parked tracker reads it; the carry stops once that tracker is released.
+	 *
+	 * @since 1.6.1
+	 * @return array<string, string> Param name => catalog service slug.
+	 */
+	public static function get_affiliate_params(): array {
+		// SureCart's tracker reads `aff` from whichever page it is released on.
+		$params = apply_filters( 'surecookie_affiliate_params', defined( 'SURECART_PLUGIN_FILE' ) ? [ 'aff' => 'surecart' ] : [] );
+
+		if ( ! is_array( $params ) ) {
+			return [];
+		}
+
+		$valid = [];
+		foreach ( $params as $param => $service ) {
+			if ( is_string( $param ) && is_string( $service ) && preg_match( '/^[A-Za-z0-9_-]{1,32}$/', $param ) && preg_match( '/^[a-z0-9-]{1,64}$/', $service ) ) {
+				$valid[ $param ] = $service;
+			}
+		}
+
+		return $valid;
 	}
 
 	/**

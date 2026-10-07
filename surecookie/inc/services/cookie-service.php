@@ -52,7 +52,7 @@ class CookieService {
 	 * @since 0.0.0-alpha.1
 	 */
 	public function get_scanned_cookies(): array {
-		$scanned_cookies       = Get::scanned_cookies_for_display();
+		$scanned_cookies       = Get::scanned_cookies_unshadowed();
 		$cookie_categories     = Settings::get( 'cookie_categories' );
 		$final_cookies_dataset = [];
 
@@ -483,7 +483,8 @@ class CookieService {
 		$restore = [];
 		foreach ( [ 'purpose', 'description', 'duration', 'provider' ] as $field ) {
 			if ( array_key_exists( $field, $pins ) && trim( (string) $pins[ $field ] ) === '' ) {
-				$restore[ $field ] = CookieCategoryMemory::displaced_value( $identity, $field ) ?? '';
+				$displaced         = CookieCategoryMemory::displaced_value( $identity, $field ) ?? '';
+				$restore[ $field ] = $field === 'provider' ? Sanitize::vendor( $displaced ) : $displaced;
 			}
 		}
 

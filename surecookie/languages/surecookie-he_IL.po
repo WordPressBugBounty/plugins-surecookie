@@ -868,7 +868,7 @@ msgid "Current category is required."
 msgstr "הקטגוריה הנוכחית נדרשת."
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "קטגוריה חדשה נדרשת."
 
@@ -881,11 +881,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "הקטגוריה הנוכחית לא נמצאה בעוגיות הסרוקות."
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "העוגייה לא נמצאה בקטגוריה שצוינה."
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "קטגוריית העוגייה עודכנה בהצלחה."
 
@@ -3616,7 +3616,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "פעם בשבוע (SureCookie)"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "תוכן זה חסום כרגע."
 
@@ -4219,7 +4219,7 @@ msgstr "נכשל בעדכון קטגוריות העוגיות:"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "קבל וטעון תוכן %s"
@@ -4344,29 +4344,29 @@ msgstr "לא ניתן להעביר עוגיות לקטגוריה שנמחקת."
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "הקטגוריה שנבחרה כבר לא קיימת. נא לרענן ולנסות שוב."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "לא נבחרו עוגיות."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "יותר מדי עוגיות בבקשה אחת. נא לבחור עד %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d עוגיה הועברה לקטגוריה שנבחרה."
 msgstr[1] "%d עוגיות הועברו לקטגוריה שנבחרה."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "לא ניתן היה לעדכן עוגיות."
 
@@ -6852,19 +6852,19 @@ msgstr "המשך חייב להיות מספר שלם של ימים."
 msgid "Nothing to update."
 msgstr "אין מה לעדכן."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "העוגייה עודכנה בהצלחה."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "שם העוגייה והקטגוריה נדרשים."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "הקטגוריה לא נמצאה בעוגיות שנסרקו."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "העוגייה הוסרה."
 

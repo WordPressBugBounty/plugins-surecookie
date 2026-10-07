@@ -455,6 +455,7 @@ class Maintenance {
 			'full_width_banner_default'  => [ self::class, 'preserve_full_width_banner_default' ],
 			'scanned_cookie_durations'   => [ self::class, 'backfill_scanned_cookie_durations' ],
 			'installed_pattern_cookies'  => [ self::class, 'prune_installed_pattern_cookies' ],
+			'placeholder_providers'      => [ self::class, 'backfill_scanned_cookie_providers' ],
 		];
 	}
 

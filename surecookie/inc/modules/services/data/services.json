@@ -2462,11 +2462,23 @@
         "pro": true,
         "patterns": {
             "scripts": [
-                "js.surecart.com"
+                "js.surecart.com",
+                "/surecart/dist/scripts/visits.js",
+                "SureCartAffiliatesConfig"
             ],
             "iframes": []
         },
-        "cookies": []
+        "cookies": [
+            {
+                "name": "sc_click_id",
+                "domain": ".domain.com",
+                "duration_days": 30,
+                "category": "marketing",
+                "provider": "SureCart",
+                "purpose": "Stores the affiliate click ID from a SureCart affiliate link so a later purchase is credited to that affiliate. Its lifetime follows the store's affiliate tracking length.",
+                "description": null
+            }
+        ]
     },
     "taboola": {
         "label": "Taboola",

@@ -223,7 +223,7 @@ msgid "Current category is required."
 msgstr "La catégorie actuelle est requise"
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "La nouvelle catégorie est requise"
 
@@ -236,11 +236,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "Catégorie actuelle non trouvée dans les cookies scannés"
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "Cookie non trouvé dans la catégorie spécifiée"
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "Catégorie de cookie mise à jour avec succès"
 
@@ -3616,7 +3616,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "Une fois par semaine (SureCookie)"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "Ce contenu est actuellement bloqué."
 
@@ -4219,7 +4219,7 @@ msgstr "Échec de la mise à jour des catégories de cookies :"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Accepter et charger le contenu %s"
@@ -4344,29 +4344,29 @@ msgstr "Les cookies ne peuvent pas être déplacés vers la catégorie en cours 
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "La catégorie sélectionnée n'existe plus. Veuillez recharger et réessayer."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "Aucun cookie sélectionné."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "Trop de cookies dans une seule requête. Veuillez en sélectionner jusqu'à %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d cookie déplacé vers la catégorie sélectionnée."
 msgstr[1] "%d cookies déplacés vers la catégorie sélectionnée."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "Aucun cookie n'a pu être mis à jour."
 
@@ -6852,19 +6852,19 @@ msgstr "La durée doit être un nombre entier de jours."
 msgid "Nothing to update."
 msgstr "Rien à mettre à jour."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "Cookie mis à jour avec succès."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "Le nom et la catégorie du cookie sont obligatoires."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "Catégorie non trouvée dans les cookies analysés."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "Cookie supprimé."
 

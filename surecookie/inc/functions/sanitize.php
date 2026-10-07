@@ -236,6 +236,20 @@ class Sanitize {
 	}
 
 	/**
+	 * Sanitize a scanned vendor name. A classifier placeholder such as "null" names no vendor.
+	 *
+	 * @param mixed $value Raw vendor.
+	 *
+	 * @since 1.6.1
+	 * @return string The vendor, or '' when there is none.
+	 */
+	public static function vendor( $value ): string {
+		$vendor = is_string( $value ) ? trim( sanitize_text_field( $value ) ) : '';
+
+		return in_array( strtolower( $vendor ), [ 'null', 'none', 'unknown', 'n/a', 'undefined' ], true ) ? '' : $vendor;
+	}
+
+	/**
 	 * Sanitize int values
 	 *
 	 * @param mixed $value   Value to sanitize.

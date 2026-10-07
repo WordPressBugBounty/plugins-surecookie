@@ -868,7 +868,7 @@ msgid "Current category is required."
 msgstr "Απαιτείται τρέχουσα κατηγορία."
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "Απαιτείται νέα κατηγορία."
 
@@ -881,11 +881,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "Η τρέχουσα κατηγορία δεν βρέθηκε στα σαρωμένα cookies."
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "Το cookie δεν βρέθηκε στην καθορισμένη κατηγορία."
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "Η κατηγορία cookie ενημερώθηκε με επιτυχία."
 
@@ -3616,7 +3616,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "Μία φορά την εβδομάδα (SureCookie)"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "Αυτό το περιεχόμενο είναι αυτή τη στιγμή αποκλεισμένο."
 
@@ -4219,7 +4219,7 @@ msgstr "Αποτυχία ενημέρωσης κατηγοριών cookie:"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Αποδοχή και φόρτωση περιεχομένου %s"
@@ -4344,29 +4344,29 @@ msgstr "Τα cookies δεν μπορούν να μετακινηθούν στη�
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "Η επιλεγμένη κατηγορία δεν υπάρχει πλέον. Παρακαλώ ανανεώστε και δοκιμάστε ξανά."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "Δεν έχουν επιλεγεί cookies."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "Πάρα πολλά cookies σε ένα αίτημα. Παρακαλώ επιλέξτε έως %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d cookie μετακινήθηκε στην επιλεγμένη κατηγορία."
 msgstr[1] "%d cookies μετακινήθηκαν στην επιλεγμένη κατηγορία."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "Δεν ήταν δυνατή η ενημέρωση κανενός cookie."
 
@@ -6852,19 +6852,19 @@ msgstr "Η διάρκεια πρέπει να είναι ακέραιος αρι
 msgid "Nothing to update."
 msgstr "Δεν υπάρχει τίποτα για ενημέρωση."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "Το cookie ενημερώθηκε με επιτυχία."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "Το όνομα και η κατηγορία του cookie είναι υποχρεωτικά."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "Η κατηγορία δεν βρέθηκε στα σαρωμένα cookies."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "Το cookie αφαιρέθηκε."
 

@@ -478,6 +478,56 @@ class Get {
 	}
 
 	/**
+	 * The scan-observed set without any cookie a custom row already describes.
+	 *
+	 * A custom cookie is the admin's own record, whether authored by hand or added by a
+	 * Known Service, so on the same identity (name and domain, leading dot ignored) it
+	 * wins wherever it sits and in whichever category. The same name on another domain is
+	 * another cookie and stays. A first-party catalog row is matched on name alone, as a
+	 * site has one `_ga` whichever label of its host the scanner saw it on. One rule for
+	 * the cookie policy, All Cookies and the public payload, or each lists its own
+	 * duplicates (#1237).
+	 *
+	 * @since 1.6.1
+	 * @return array<string, mixed> Cookies grouped by category id.
+	 */
+	public static function scanned_cookies_unshadowed(): array {
+		$scanned = self::scanned_cookies_for_display();
+		$keys    = [];
+		$names   = [];
+
+		foreach ( self::formatted_custom_cookies() as $rows ) {
+			foreach ( $rows as $row ) {
+				$keys[ Cookie_Identity::key_for( $row ) ]                    = true;
+				$names[ Cookie_Identity::name_key( (string) $row['name'] ) ] = true;
+			}
+		}
+
+		if ( $keys === [] ) {
+			return $scanned;
+		}
+
+		foreach ( $scanned as $category_id => $rows ) {
+			if ( ! is_array( $rows ) ) {
+				continue;
+			}
+
+			$scanned[ $category_id ] = array_values(
+				array_filter(
+					$rows,
+					static function ( $row ) use ( $keys, $names ): bool {
+						return ! is_array( $row )
+							|| ! ( isset( $keys[ Cookie_Identity::key_for( $row ) ] )
+								|| ( Cookie_Identity::is_first_party( $row ) && isset( $names[ Cookie_Identity::name_key( (string) ( $row['name'] ?? '' ) ) ] ) ) );
+					}
+				)
+			);
+		}
+
+		return $scanned;
+	}
+
+	/**
 	 * Scan-detected resources as the display surfaces should see them.
 	 *
 	 * The twin of {@see self::scanned_cookies_for_display()}: the stored option
@@ -518,7 +568,7 @@ class Get {
 	 * @return array<int, array<string, mixed>> Flat array of scanned cookies.
 	 */
 	public static function all_scanned_cookies(): array {
-		$scanned_raw = self::scanned_cookies_for_display();
+		$scanned_raw = self::scanned_cookies_unshadowed();
 
 		$flat = [];
 

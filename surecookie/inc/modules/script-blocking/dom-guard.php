@@ -147,14 +147,14 @@ class Dom_Guard {
 	 *
 	 * Reads the same `surecookie_known_scripts` view the tag passes block from,
 	 * and applies the same per-resource decisions on top: a resource the admin
-	 * excluded is dropped, and a category override wins over the catalog's. Skip
+	 * excluded becomes an allowance, and a category override wins over the catalog's. Skip
 	 * either and the guard would contradict the tag passes - blocking something
 	 * the admin allowed, or holding a resource under a category the visitor has
 	 * already consented to, which consentManager would then restore and the
 	 * guard would immediately park again.
 	 *
 	 * @since 1.4.0
-	 * @return array{s: array<string, array{0: string, 1: string}>, i: array<string, array{0: string, 1: string}>, y: array<string, array{0: string, 1: string}>, t: array<string, bool>}
+	 * @return array{s: array<string, array{0: string|null, 1: string}>, i: array<string, array{0: string|null, 1: string}>, y: array<string, array{0: string|null, 1: string}>, t: array<string, bool>}
 	 */
 	private function build_patterns(): array {
 		$catalog = apply_filters( 'surecookie_known_scripts', [] );
@@ -192,7 +192,7 @@ class Dom_Guard {
 	 * @param array<string, mixed> $catalog Known-scripts view.
 	 * @param string               $kind    Resource kind Resource_Categories scopes by ('script'|'iframe').
 	 * @param string               $own     Catalog key this element type declares under.
-	 * @return array<string, array{0: string, 1: string}>
+	 * @return array<string, array{0: string|null, 1: string}>
 	 */
 	/**
 	 * Patterns whose producer meant its arrays literally, as a set.
@@ -241,7 +241,7 @@ class Dom_Guard {
 	 * @param array<string, mixed> $catalog Known-scripts view.
 	 * @param string               $kind    Resource kind Resource_Categories scopes by ('script'|'iframe').
 	 * @param string               $own     Catalog key this element type declares under.
-	 * @return array<string, array{0: string, 1: string}>
+	 * @return array<string, array{0: string|null, 1: string}>
 	 */
 	private function flatten_for( array $catalog, string $kind, string $own ): array {
 		$cross = $own === 'scripts' ? 'iframes' : 'scripts';
@@ -260,7 +260,7 @@ class Dom_Guard {
 	 * @param string               $bucket     Catalog key to read ('scripts'|'iframes').
 	 * @param bool                 $cross_kind Whether this is the pooled pass, which a
 	 *                                         `tag_scoped` producer opts out of.
-	 * @return array<string, array{0: string, 1: string}>
+	 * @return array<string, array{0: string|null, 1: string}>
 	 */
 	private function flatten_patterns( array $catalog, string $kind, string $bucket, bool $cross_kind ): array {
 		$patterns = [];
@@ -290,16 +290,23 @@ class Dom_Guard {
 
 				foreach ( $service[ $bucket ] as $pattern ) {
 					$pattern = (string) $pattern;
-					if ( $pattern === '' || Resource_Categories::matches_excluded_src( $pattern, $kind ) ) {
+					if ( $pattern === '' ) {
+						continue;
+					}
+
+					// An allowance stays in the map as `[ null, service ]` so a narrower
+					// allow can outrank a broader block, which an omission never could (#1116).
+					if ( Resource_Categories::matches_excluded_src( $pattern, $kind ) ) {
+						$patterns[ $pattern ] = [ null, (string) $service_key ];
 						continue;
 					}
 
 					/**
-					 * Filter: leave a pattern out of the browser guard's map.
+					 * Filter: let the browser guard allow a pattern instead of blocking it.
 					 *
 					 * The guard exists to catch what the server pass cannot see,
 					 * so anything the server is going to let through has to be
-					 * dropped here too or the two layers disagree - which is how
+					 * allowed here too or the two layers disagree - which is how
 					 * an always-allowed resource ended up loading in the page and
 					 * still being intercepted in the browser. Pro uses this for
 					 * its whitelist; the free exclusion is handled above.
@@ -316,6 +323,7 @@ class Dom_Guard {
 					 * @param string $kind    Resource kind ('script'|'iframe').
 					 */
 					if ( apply_filters( 'surecookie_guard_skip_pattern', false, $pattern, $kind ) ) {
+						$patterns[ $pattern ] = [ null, (string) $service_key ];
 						continue;
 					}
 

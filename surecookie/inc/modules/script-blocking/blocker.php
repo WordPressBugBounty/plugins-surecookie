@@ -1667,6 +1667,8 @@ class Blocker {
 	 * @return array{name: string, category: string, label: string, path?: string, location?: string, matched_pattern?: string, matched_in?: string}|null Match result or null.
 	 */
 	private function match_pattern( string $src, string $content, array $patterns ): ?array {
+		$best = null;
+
 		foreach ( $patterns as $pattern => $info ) {
 			// A pooled pattern was observed on a different tag, so it says
 			// nothing about inline code: matching it against a script body
@@ -1701,10 +1703,27 @@ class Blocker {
 			$info['matched_pattern'] = (string) $pattern;
 			$info['matched_in']      = $matched_in;
 
-			return $info;
+			// A pattern naming a path beats a bare host whatever the map order, so a
+			// catalogued file keeps its category under a scan row or a hold (#1313).
+			if ( null === $best || ( self::names_path( (string) $pattern ) && ! self::names_path( $best['matched_pattern'] ) ) ) {
+				$best = $info;
+			}
 		}
 
-		return null;
+		return $best;
+	}
+
+	/**
+	 * Whether a blocking pattern names a path rather than only a host.
+	 *
+	 * Mirrored by `namesPath()` in src/dom-guard/index.js; the two layers must rank alike.
+	 *
+	 * @param string $pattern Blocking pattern.
+	 * @since 1.6.1
+	 * @return bool
+	 */
+	public static function names_path( string $pattern ): bool {
+		return strpos( trim( $pattern, '/' ), '/' ) !== false;
 	}
 
 	/**

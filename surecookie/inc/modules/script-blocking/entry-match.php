@@ -135,7 +135,7 @@ final class Entry_Match {
 	 * @param string $value Entry or subject.
 	 * @return array{host: string, path: string, port: string}
 	 */
-	private static function parts( string $value ): array {
+	public static function parts( string $value ): array {
 		$value = trim( $value );
 
 		if ( strpos( $value, '//' ) === 0 ) {

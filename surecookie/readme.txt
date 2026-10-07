@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -483,6 +483,22 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.6.1 - 7-October-2026 =
+* Improvement: SureCart affiliates are now credited even if visitors browse a few pages before accepting cookies. The affiliate code is preserved on internal links until the tracker runs, without storing anything on the visitor’s device. Visitors who decline are still not credited.
+* Fix: Some scanned cookies showed "null" as the provider. This is now either left blank or filled correctly from the services list, and existing entries are fixed automatically after update.
+* Fix: On sites using optimization plugins like WP Rocket or Autoptimize, trackers served from your own site could run before consent. SureCookie now ensures these stay blocked until consent, while other optimizations continue as normal.
+* Fix: When using delayed JavaScript execution, blocking one tracker could stop other scripts from running. Scripts now continue to load as expected, while blocked trackers still wait for consent.
+* Fix: With W3 Total Cache Minify enabled, blocked scripts could be combined and run before consent. These are now excluded from combining so they load only after consent. If you use page caching, clear caches once after updating.
+* Fix: SureCart affiliate tracking could run before consent and set cookies even after visitors declined. It now waits for Marketing consent and is correctly reflected in the cookie policy.
+* Fix: Global Privacy Control is now fully respected by script blocking. Visitors sending this signal receive only essential cookies and scripts, regardless of previous choices.
+* Fix: Declining or withdrawing consent now removes both scanned and manually added cookies for that category. Essential and allowed cookies are preserved.
+* Fix: Pages visited during cookie scans could be cached with trackers unblocked. These pages are no longer cached, ensuring visitors always see the correct consent-controlled version. Clear your cache after updating.
+* Fix: Duplicate cookies could appear in the cookie policy when added manually and detected by scan. Cookies are now merged into a single entry using your custom wording.
+* Fix: Some scripts from known service domains could load before consent if not explicitly listed. Blocking now applies consistently across the entire domain, while still allowing exceptions where needed.
+* Fix: With certain optimization settings, the cookie banner could lose styling or appear behind content. Styling is now preserved and displayed correctly.
+* Fix: Translation issues in Dutch and other languages have been corrected, including table labels and scan timers.
+* Fix: On sites using WP Rocket with Minify JavaScript on, trackers such as Plausible, Fathom, Simple Analytics and Cloudflare Web Analytics were copied to your own site by WP Rocket and ran when a visitor first interacted, before they had chosen. They now stay at their original address and wait for consent.
+
 = 1.6.0 - 30-September-2026 =
 * New: Banner > Content now lets you manage all four buttons in one place. You can reorder them, show or hide each one, and set custom labels. Empty labels fall back to translated defaults, so most sites do not need to change anything. Preferences and refusal options always remain visible.
 * New: PixelYourSite now respects visitor consent. Its pixels, cookies, and tracking events are held until the visitor accepts the relevant category, then start on the same page. Google Consent Mode and Global Privacy Control are also respected.

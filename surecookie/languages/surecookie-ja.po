@@ -868,7 +868,7 @@ msgid "Current category is required."
 msgstr "現在のカテゴリは必須です。"
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "新しいカテゴリは必須です。"
 
@@ -881,11 +881,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "現在のカテゴリがスキャンされたクッキーに見つかりません。"
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "指定されたカテゴリにクッキーが見つかりません。"
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "クッキーカテゴリが正常に更新されました。"
 
@@ -3612,7 +3612,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "週1回（SureCookie）"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "このコンテンツは現在ブロックされています。"
 
@@ -4213,7 +4213,7 @@ msgstr "クッキーカテゴリの更新に失敗しました:"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "%s コンテンツを受け入れて読み込む"
@@ -4338,28 +4338,28 @@ msgstr "削除中のカテゴリにクッキーを移動できません。"
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "選択されたカテゴリは存在しません。再読み込みして再試行してください。"
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "クッキーが選択されていません。"
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "1回のリクエストでクッキーが多すぎます。最大 %d 個まで選択してください。"
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d 個のクッキーが選択されたカテゴリに移動されました。"
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "更新できるクッキーがありませんでした。"
 
@@ -6836,19 +6836,19 @@ msgstr "期間は整数の日数でなければなりません。"
 msgid "Nothing to update."
 msgstr "更新するものはありません。"
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "クッキーは正常に更新されました。"
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "クッキー名とカテゴリは必須です。"
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "スキャンされたクッキーにカテゴリが見つかりません。"
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "クッキーが削除されました。"
 

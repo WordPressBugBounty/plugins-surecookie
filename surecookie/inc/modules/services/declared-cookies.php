@@ -20,6 +20,7 @@ namespace SureCookie\Inc\Modules\Services;
 
 use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -194,6 +195,7 @@ class Declared_Cookies {
 	 * never overwritten, so this is safe to run after a scan resolved the vendor.
 	 *
 	 * @since 1.3.0
+	 * @throws \RuntimeException When the repaired cookies cannot be written.
 	 * @return int Number of cookies given a provider.
 	 */
 	public function backfill_missing_providers(): int {
@@ -210,12 +212,13 @@ class Declared_Cookies {
 			}
 
 			foreach ( $cookies as $index => $cookie ) {
-				if ( ! is_array( $cookie ) || ! empty( $cookie['provider'] ) ) {
+				// A placeholder ("null") counts as blank, so a row an older ingest stored that way is repaired too.
+				if ( ! is_array( $cookie ) || Sanitize::vendor( $cookie['provider'] ?? '' ) !== '' ) {
 					continue;
 				}
 
 				$provider = $this->catalog_provider_for( $cookie );
-				if ( $provider === '' ) {
+				if ( $provider === (string) ( $cookie['provider'] ?? '' ) ) {
 					continue;
 				}
 
@@ -224,8 +227,8 @@ class Declared_Cookies {
 			}
 		}
 
-		if ( $filled > 0 ) {
-			Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored );
+		if ( $filled > 0 && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
+			throw new \RuntimeException( 'SureCookie: could not write the repaired cookie providers.' );
 		}
 
 		return $filled;

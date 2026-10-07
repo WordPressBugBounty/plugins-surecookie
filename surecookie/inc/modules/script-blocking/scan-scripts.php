@@ -203,11 +203,10 @@ class Scan_Scripts {
 			return;
 		}
 
-		// Or if the catalog already covers the URL this row was recorded from.
-		// A row is keyed on the bare host, which is broader than a pattern like
-		// `google.com/recaptcha`, so the exact-key check above misses and the
-		// host row then shadows the specific pattern it duplicates: the browser
-		// guard has no way to let the narrower rule win (issue #1116).
+		// Or if a catalog HOST already covers the URL this row was recorded from: the
+		// catalog's own category then governs that host. A catalog PATH (`paypal.com/sdk`)
+		// does not, because the scan keeps one sample URL per host, so dropping the row
+		// would leave the rest of the host with no pattern at all (#1313).
 		if ( self::catalog_covers_observed_url( $resource, $existing_patterns ) ) {
 			return;
 		}
@@ -235,13 +234,12 @@ class Scan_Scripts {
 	}
 
 	/**
-	 * Whether a catalog pattern already covers the URL this row was seen at.
+	 * Whether a catalog host pattern already covers the URL this row was seen at.
 	 *
-	 * Matched against the observed URL, never the bare host. Skipping every row
-	 * whose host the catalog merely knows would stop blocking the paths it does
-	 * not name - `facebook.com/<anything else>` while the catalog names only
-	 * `facebook.com/tr` - and that is pre-consent tracking, the one direction
-	 * this feature must not fail in.
+	 * A host the catalog names (`b-cdn.net`) is already governed by its category, so a
+	 * row for one of its zones can only compete with that category. A path
+	 * (`facebook.com/tr`, `paypal.com/sdk`) governs just that file, and a row on the
+	 * same host is the only pattern for the rest of it, so it must survive (#1313).
 	 *
 	 * Patterns are indexed by host so a row tests two or three candidates
 	 * instead of the whole catalog. Measured on the shipped catalog, the naive
@@ -263,7 +261,7 @@ class Scan_Scripts {
 		}
 
 		foreach ( self::candidate_patterns( $existing_patterns, $url ) as $pattern ) {
-			if ( Entry_Match::matches( $pattern, $url ) ) {
+			if ( ! Blocker::names_path( $pattern ) && Entry_Match::matches( $pattern, $url ) ) {
 				return true;
 			}
 		}

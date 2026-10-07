@@ -12,7 +12,8 @@
  *     consent banner, which must run before the trackers it gates.
  *
  * REST reads are also marked uncacheable: an edge that caches them serves the
- * admin its pre-save settings, which reads as a save silently reverting.
+ * admin its pre-save settings, which reads as a save silently reverting. So is
+ * a scan's render, which is unblocked and grants Consent Mode.
  *
  * @package SureCookie\Inc\Integrations\Cache
  * @since 1.4.0
@@ -20,6 +21,9 @@
 
 namespace SureCookie\Inc\Integrations\Cache;
 
+use SureCookie\Inc\Modules\ScriptBlocking\Entry_Match;
+use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
+use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -108,6 +112,9 @@ class Init {
 		'flying_press_exclude_from_delay_js',
 		'flying_press_exclude_from_defer_js',
 		'wphb_delay_js_exclusions',
+		// With aggregation on, Autoptimize still minifies an excluded file under a new name.
+		'autoptimize_filter_js_consider_minified',
+		'autoptimize_filter_css_consider_minified',
 	];
 
 	/**
@@ -156,6 +163,18 @@ class Init {
 	private const FILTERS_PER_FILE = [
 		'w3tc_minify_js_do_tag_minification',
 		'w3tc_minify_css_do_tag_minification',
+	];
+
+	/**
+	 * Headers that keep a response out of the browser, page cache and CDN.
+	 *
+	 * @since 1.6.1
+	 */
+	private const NO_STORE_HEADERS = [
+		'Cache-Control'     => 'no-store, no-cache, must-revalidate, max-age=0',
+		'Pragma'            => 'no-cache',
+		// Cloudflare and other edges honour this even under a cache-everything rule.
+		'CDN-Cache-Control' => 'no-store',
 	];
 
 	/**
@@ -224,6 +243,22 @@ class Init {
 	private $dependency_paths = null;
 
 	/**
+	 * Resolved first-party blocking patterns, cached for the request.
+	 *
+	 * @var array<int, string>|null
+	 * @since 1.6.1
+	 */
+	private $tracker_paths = null;
+
+	/**
+	 * Resolved third-party blocking patterns, cached for the request.
+	 *
+	 * @var array<int, string>|null
+	 * @since 1.6.1
+	 */
+	private $external_tracker_fragments = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.4.0
@@ -249,6 +284,7 @@ class Init {
 		add_filter( 'wp_inline_script_attributes', [ $this, 'mark_inline_script' ], 20 );
 		add_filter( 'style_loader_tag', [ $this, 'mark_style' ], 20, 2 );
 		add_filter( 'rest_post_dispatch', [ $this, 'no_store_rest' ], 10, 3 );
+		add_filter( 'wp_headers', [ $this, 'no_store_scan' ], PHP_INT_MAX );
 
 		add_action( 'surecookie_admin_settings_after_processing', [ $this, 'purge' ] );
 
@@ -372,12 +408,33 @@ class Init {
 			define( 'DONOTCACHEPAGE', true );
 		}
 
-		$result->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );
-		$result->header( 'Pragma', 'no-cache' );
-		// Cloudflare and other edges honour this even under a cache-everything rule.
-		$result->header( 'CDN-Cache-Control', 'no-store' );
+		foreach ( self::NO_STORE_HEADERS as $name => $value ) {
+			$result->header( $name, $value );
+		}
 
 		return $result;
+	}
+
+	/**
+	 * Keep a scan's render out of every cache.
+	 *
+	 * The bypass rides a request header no page cache varies on, so a stored copy
+	 * would serve visitors unparked trackers and granted Consent Mode (#1236).
+	 *
+	 * @param mixed $headers Response headers from `wp_headers`.
+	 * @since 1.6.1
+	 * @return mixed
+	 */
+	public function no_store_scan( $headers = null ) {
+		if ( ! is_array( $headers ) || ! ( Blocking_Utils::is_scan_bypass_request() || Blocking_Utils::is_scan_probe() ) ) {
+			return $headers;
+		}
+
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+
+		return array_merge( $headers, self::NO_STORE_HEADERS );
 	}
 
 	/**
@@ -539,6 +596,126 @@ class Init {
 	}
 
 	/**
+	 * First-party blocking patterns, as the fragments exclusion lists match on.
+	 *
+	 * An optimiser that rewrites the page before the blocker, or renames a local file
+	 * as it prints, hands the blocker a tracker URL its pattern no longer matches.
+	 * Reached from those buffers' display handlers, as the blocker's read is.
+	 *
+	 * @since 1.6.1
+	 * @return array<int, string>
+	 */
+	private function tracker_paths(): array {
+		if ( ! empty( $this->tracker_paths ) ) {
+			return $this->tracker_paths;
+		}
+
+		$catalog  = apply_filters( 'surecookie_known_scripts', [] );
+		$site     = Entry_Match::without_www( strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
+		$patterns = [];
+
+		foreach ( is_array( $catalog ) ? $catalog : [] as $services ) {
+			foreach ( is_array( $services ) ? $services : [] as $service ) {
+				foreach ( array_keys( Pattern_Kinds::enforced() ) as $bucket ) {
+					$patterns[] = is_array( $service ) ? (array) ( $service[ $bucket ] ?? [] ) : [];
+				}
+			}
+		}
+
+		$paths = [];
+
+		foreach ( array_filter( array_merge( [], ...$patterns ), 'is_string' ) as $pattern ) {
+			$parts = Entry_Match::parts( $pattern );
+
+			// Another host stays out here (WP Rocket's copy of an external script is
+			// external_tracker_fragments()), and a bare site host has no path: as a
+			// fragment it would exclude every file on the site.
+			if ( ( $parts['host'] !== '' && Entry_Match::without_www( $parts['host'] ) !== $site ) || trim( $parts['path'], '/' ) === '' ) {
+				continue;
+			}
+
+			// WP Rocket joins these lists into one regex, where a single stray `(`
+			// voids every exclusion, the banner's included.
+			if ( preg_match( '#^[\w.~/-]+$#', $parts['path'] ) ) {
+				$paths[] = $parts['path'];
+			}
+		}
+
+		$this->tracker_paths = array_values( array_unique( $paths ) );
+
+		return $this->tracker_paths;
+	}
+
+	/**
+	 * Third-party script patterns, as the substrings WP Rocket's external-JS
+	 * exclusion list matches on.
+	 *
+	 * WP Rocket copies an external script under its own cache path when it
+	 * minifies it, so plausible.io/js/script.js reaches the blocker as
+	 * /wp-content/cache/min/1/js/script.js, matches no pattern and runs before
+	 * consent. Kept at its real URL, the host pattern still catches it.
+	 *
+	 * @since 1.6.1
+	 * @return array<int, string>
+	 */
+	private function external_tracker_fragments(): array {
+		if ( $this->external_tracker_fragments !== null ) {
+			return $this->external_tracker_fragments;
+		}
+
+		$catalog   = apply_filters( 'surecookie_known_scripts', [] );
+		$site      = Entry_Match::without_www( strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
+		$fragments = [];
+
+		foreach ( is_array( $catalog ) ? $catalog : [] as $services ) {
+			foreach ( is_array( $services ) ? $services : [] as $service ) {
+				foreach ( is_array( $service ) ? (array) ( $service['scripts'] ?? [] ) : [] as $pattern ) {
+					$pattern = is_string( $pattern ) ? strtolower( trim( $pattern ) ) : '';
+					$host    = Entry_Match::without_www( Entry_Match::parts( $pattern )['host'] );
+
+					if ( $pattern !== '' && $host !== $site && preg_match( '#^[\w.~/-]+$#', $pattern ) ) {
+						$fragments[] = $pattern;
+					}
+				}
+			}
+		}
+
+		$this->external_tracker_fragments = array_values( array_unique( $fragments ) );
+
+		return $this->external_tracker_fragments;
+	}
+
+	/**
+	 * Registered handles whose src a first-party blocking pattern matches, for
+	 * the lists that exclude by handle.
+	 *
+	 * @since 1.6.1
+	 * @return array<int, string>
+	 */
+	private function tracker_handles(): array {
+		$paths = $this->tracker_paths();
+
+		if ( $paths === [] || ! function_exists( 'wp_scripts' ) ) {
+			return [];
+		}
+
+		$handles = [];
+
+		foreach ( wp_scripts()->registered as $handle => $script ) {
+			$src = is_string( $script->src ) ? $script->src : '';
+
+			foreach ( $paths as $path ) {
+				if ( $src !== '' && stripos( $src, $path ) !== false ) {
+					$handles[] = (string) $handle;
+					break;
+				}
+			}
+		}
+
+		return $handles;
+	}
+
+	/**
 	 * Add the opt-out attributes to a tag, if not already present.
 	 *
 	 * @param string $tag        Tag HTML.
@@ -577,7 +754,8 @@ class Init {
 	}
 
 	/**
-	 * Register this plugin's assets with every known exclusion list.
+	 * Register this plugin's assets, and the first-party trackers it blocks, with
+	 * every known exclusion list.
 	 *
 	 * WordPress has no core API for "leave this asset alone", so each plugin
 	 * exposes its own filter. They differ in the shape they expect - paths,
@@ -593,10 +771,10 @@ class Init {
 		// where no script is registered yet and the dependency graph is empty.
 		$self    = $this;
 		$paths   = static function () use ( $self ) {
-			return array_merge( $self->paths, $self->dependency_paths() );
+			return array_merge( $self->paths, $self->dependency_paths(), $self->tracker_paths() );
 		};
 		$handles = static function () use ( $self ) {
-			return array_merge( $self->handles, $self->dependency_handles() );
+			return array_merge( $self->handles, $self->dependency_handles(), $self->tracker_handles() );
 		};
 
 		$append = static function ( callable $values ) {
@@ -612,6 +790,39 @@ class Init {
 		foreach ( self::FILTERS_HANDLES as $filter ) {
 			add_filter( $filter, $append( $handles ) );
 		}
+
+		add_filter(
+			'rocket_minify_excluded_external_js',
+			$append(
+				static function () use ( $self ) {
+					return $self->external_tracker_fragments();
+				}
+			)
+		);
+
+		// WP Rocket's Remove Unused CSS drops what the HTML does not use, and the banner mounts
+		// later, so it lost its z-index tokens (#1297). Keep our own tags whole, nothing else.
+		add_filter(
+			'rocket_rucss_external_exclusions',
+			$append(
+				static function () use ( $self ) {
+					return $self->paths;
+				}
+			)
+		);
+		add_filter(
+			'rocket_rucss_inline_atts_exclusions',
+			$append(
+				static function () use ( $self ) {
+					return array_map(
+						static function ( $handle ) {
+							return $handle . '-inline-css';
+						},
+						$self->handles
+					);
+				}
+			)
+		);
 
 		$selectors = static function () {
 			return self::SELECTORS;
@@ -643,6 +854,11 @@ class Init {
 						return $minify;
 					}
 
+					// W3TC's src/href regexes read a parked tag's data-surecookie-src/-href as live and would bundle it pre-consent.
+					if ( is_string( $tag ) && strpos( $tag, 'data-surecookie-category' ) !== false ) {
+						return false;
+					}
+
 					foreach ( $paths() as $path ) {
 						$needle = ltrim( (string) $path, '/' );
 
@@ -658,11 +874,29 @@ class Init {
 			);
 		}
 
-		// Hummingbird asks once per handle and wants a boolean back, not a list.
+		// Hummingbird asks once per resource and wants a boolean back. Trackers are
+		// matched on the URL it passes, so no per-handle scan of every registered script.
+		foreach ( [ 'wphb_minify_resource', 'wphb_combine_resource' ] as $filter ) {
+			add_filter(
+				$filter,
+				static function ( $value, $handle = '', $type = '', $url = '' ) use ( $self ) {
+					foreach ( is_string( $url ) && $url !== '' ? $self->tracker_paths() : [] as $path ) {
+						if ( stripos( $url, $path ) !== false ) {
+							return false;
+						}
+					}
+
+					return $value;
+				},
+				10,
+				4
+			);
+		}
+
 		add_filter(
 			'wphb_dont_combine_handles',
-			static function ( $skip, $handle = '' ) use ( $handles ) {
-				return $skip || in_array( $handle, $handles(), true );
+			static function ( $skip, $handle = '' ) use ( $self ) {
+				return $skip || in_array( $handle, array_merge( $self->handles, $self->dependency_handles() ), true );
 			},
 			10,
 			2

@@ -868,7 +868,7 @@ msgid "Current category is required."
 msgstr "当前类别为必填项。"
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "新类别为必填项。"
 
@@ -881,11 +881,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "扫描的 Cookie 中未找到当前类别。"
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "指定类别中未找到 Cookie。"
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "Cookie 类别更新成功。"
 
@@ -3590,7 +3590,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "每周一次（SureCookie）"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "此内容当前被阻止。"
 
@@ -4219,7 +4219,7 @@ msgstr "更新 cookie 分类失败："
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "接受并加载 %s 内容"
@@ -4344,28 +4344,28 @@ msgstr "无法将 Cookie 移动到正在删除的类别。"
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "所选类别已不存在。请重新加载并重试。"
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "未选择任何 Cookie。"
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "一次请求中的 Cookie 太多。请选择最多 %d 个。"
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d 个 Cookie 已移动到所选类别。"
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "无法更新任何 Cookie。"
 
@@ -6842,19 +6842,19 @@ msgstr "持续时间必须是整数天数。"
 msgid "Nothing to update."
 msgstr "无更新内容。"
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "Cookie 更新成功。"
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "必须提供 Cookie 名称和类别。"
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "在扫描的 Cookie 中未找到类别。"
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "Cookie 已移除。"
 

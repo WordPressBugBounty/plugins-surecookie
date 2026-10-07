@@ -868,7 +868,7 @@ msgid "Current category is required."
 msgstr "الفئة الحالية مطلوبة."
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "الفئة الجديدة مطلوبة."
 
@@ -881,11 +881,11 @@ msgid "Current category not found in scanned cookies."
 msgstr "لم يتم العثور على الفئة الحالية في الكوكيز الممسوحة."
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "لم يتم العثور على الكوكيز في الفئة المحددة."
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "تم تحديث فئة الكوكيز بنجاح."
 
@@ -3632,7 +3632,7 @@ msgid "Once Weekly (SureCookie)"
 msgstr "مرة واحدة أسبوعيًا (SureCookie)"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "هذا المحتوى محظور حاليًا."
 
@@ -4243,7 +4243,7 @@ msgstr "فشل تحديث فئات ملفات تعريف الارتباط:"
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "قبول وتحميل محتوى %s"
@@ -4368,22 +4368,22 @@ msgstr "لا يمكن نقل ملفات تعريف الارتباط إلى ال�
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "الفئة المحددة لم تعد موجودة. يرجى إعادة التحميل والمحاولة مرة أخرى."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "لم يتم تحديد أي ملفات تعريف ارتباط."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "عدد كبير جدًا من ملفات تعريف الارتباط في طلب واحد. يرجى اختيار حتى %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
@@ -4394,7 +4394,7 @@ msgstr[3] "تم نقل %d ملفات تعريف ارتباط إلى الفئة �
 msgstr[4] "تم نقل %d ملف تعريف ارتباط إلى الفئة المحددة."
 msgstr[5] "تم نقل %d ملف تعريف ارتباط إلى الفئة المحددة."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "لم يتم تحديث أي ملفات تعريف ارتباط."
 
@@ -6916,19 +6916,19 @@ msgstr "يجب أن تكون المدة عددًا صحيحًا من الأيا�
 msgid "Nothing to update."
 msgstr "لا يوجد شيء لتحديثه."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "تم تحديث ملف تعريف الارتباط بنجاح."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "اسم ملف تعريف الارتباط والفئة مطلوبان."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "الفئة غير موجودة في ملفات تعريف الارتباط التي تم فحصها."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "تمت إزالة ملف تعريف الارتباط."
 

@@ -1969,7 +1969,7 @@ msgstr "Cookies kan ikke flyttes til den kategori, der slettes."
 
 #: inc/services/cookie-category-service.php:275
 #: inc/services/cookie-service.php:426
-#: inc/services/cookie-service.php:572
+#: inc/services/cookie-service.php:573
 msgid "The selected category no longer exists. Please reload and try again."
 msgstr "Den valgte kategori findes ikke længere. Genindlæs venligst og prøv igen."
 
@@ -2034,7 +2034,7 @@ msgid "Current category is required."
 msgstr "Nuværende kategori er påkrævet."
 
 #: inc/services/cookie-service.php:410
-#: inc/services/cookie-service.php:546
+#: inc/services/cookie-service.php:547
 msgid "New category is required."
 msgstr "Ny kategori er påkrævet."
 
@@ -2051,49 +2051,49 @@ msgid "Current category not found in scanned cookies."
 msgstr "Nuværende kategori ikke fundet i scannede cookies."
 
 #: inc/services/cookie-service.php:461
-#: inc/services/cookie-service.php:735
+#: inc/services/cookie-service.php:736
 msgid "Cookie not found in the specified category."
 msgstr "Cookie ikke fundet i den angivne kategori."
 
-#: inc/services/cookie-service.php:515
+#: inc/services/cookie-service.php:516
 msgid "Cookie category updated successfully."
 msgstr "Cookie-kategori opdateret med succes."
 
-#: inc/services/cookie-service.php:516
+#: inc/services/cookie-service.php:517
 msgid "Cookie updated successfully."
 msgstr "Cookie opdateret med succes."
 
-#: inc/services/cookie-service.php:553
+#: inc/services/cookie-service.php:554
 msgid "No cookies selected."
 msgstr "Ingen cookies valgt."
 
 #. translators: %d: maximum number of cookies per request.
-#: inc/services/cookie-service.php:562
+#: inc/services/cookie-service.php:563
 #, php-format
 msgid "Too many cookies in one request. Please select up to %d."
 msgstr "For mange cookies i én anmodning. Vælg venligst op til %d."
 
 #. translators: %d: number of cookies updated.
-#: inc/services/cookie-service.php:681
+#: inc/services/cookie-service.php:682
 #, php-format
 msgid "%d cookie moved to the selected category."
 msgid_plural "%d cookies moved to the selected category."
 msgstr[0] "%d cookie flyttet til den valgte kategori."
 msgstr[1] "%d cookies flyttet til den valgte kategori."
 
-#: inc/services/cookie-service.php:689
+#: inc/services/cookie-service.php:690
 msgid "No cookies could be updated."
 msgstr "Ingen cookies kunne opdateres."
 
-#: inc/services/cookie-service.php:717
+#: inc/services/cookie-service.php:718
 msgid "Cookie name and category are required."
 msgstr "Cookienavn og kategori er påkrævet."
 
-#: inc/services/cookie-service.php:726
+#: inc/services/cookie-service.php:727
 msgid "Category not found in scanned cookies."
 msgstr "Kategori ikke fundet i scannede cookies."
 
-#: inc/services/cookie-service.php:745
+#: inc/services/cookie-service.php:746
 msgid "Cookie removed."
 msgstr "Cookie fjernet."
 
@@ -2216,13 +2216,13 @@ msgid "Accept & Load"
 msgstr "Accepter & Indlæs"
 
 #: inc/traits/placeholder-content.php:288
-#: inc/utils/localize-data.php:527
+#: inc/utils/localize-data.php:556
 msgid "This content is currently blocked."
 msgstr "Dette indhold er i øjeblikket blokeret."
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
 #: inc/traits/placeholder-content.php:300
-#: inc/utils/localize-data.php:529
+#: inc/utils/localize-data.php:558
 #, php-format
 msgid "Accept and load %s content"
 msgstr "Accepter og indlæs %s-indhold"
@@ -5496,13 +5496,13 @@ msgstr "Scan dit website for at finde cookies, scripts og trackere, der kræver 
 #: build/admin.js:87
 #, js-format
 msgid "%1$dh %2$dm"
-msgstr "%1$dt %2$tm"
+msgstr "%1$dt %2$dm"
 
 #. translators: %d: minutes remaining.
 #: build/admin.js:88
 #, js-format
 msgid "%dm"
-msgstr "%tm"
+msgstr "%dm"
 
 #. translators: 1: remaining scans, 2: total daily scans
 #: build/admin.js:89
