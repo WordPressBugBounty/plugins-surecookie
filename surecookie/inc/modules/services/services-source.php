@@ -47,9 +47,10 @@ class Services_Source {
 	protected const REMOTE_FILE_PATH = 'dataset/services.json';
 
 	/**
-	 * Transient key for the merged unified catalog.
+	 * Transient key for the merged unified catalog, stamped `{version, catalog}`.
+	 * Not `surecookie_services`: a rolled-back release reads that key as a bare catalog.
 	 */
-	protected const CACHE_KEY = 'surecookie_services';
+	protected const CACHE_KEY = 'surecookie_services_v2';
 
 	/**
 	 * File cache path (relative to the uploads cache dir).
@@ -271,29 +272,37 @@ class Services_Source {
 	 * @return array<string, array<string, mixed>>
 	 */
 	private function load_catalog(): array {
-		// 1. Transient already holds the merged catalog - the hot path.
+		// 1. Transient already holds the merged catalog - the hot path. It is
+		// stamped with the release whose bundled floor it was merged over, so an
+		// upgrade rebuilds it instead of serving the previous floor for a day.
 		$cached = get_transient( self::CACHE_KEY );
-		if ( $cached !== false && is_array( $cached ) && ! empty( $cached ) ) {
-			return $cached;
+		if ( is_array( $cached ) && ( $cached['version'] ?? '' ) === SURECOOKIE_VERSION && is_array( $cached['catalog'] ?? null ) && $cached['catalog'] !== [] ) {
+			return $cached['catalog'];
 		}
 
 		$bundled = $this->get_bundled_data();
 
 		// 2. File cache, merged over the bundled floor (remote wins per slug).
 		$file_cached = $this->get_file_cache();
-		if ( $file_cached !== null ) {
-			$merged = $this->merge_catalogs( $bundled, $file_cached );
-			set_transient( self::CACHE_KEY, $merged, self::CACHE_DURATION );
-			return $merged;
-		}
+		$catalog     = $file_cached !== null ? $this->merge_catalogs( $bundled, $file_cached ) : $bundled;
+
+		set_transient(
+			self::CACHE_KEY,
+			[
+				'version' => SURECOOKIE_VERSION,
+				'catalog' => $catalog,
+			],
+			self::CACHE_DURATION
+		);
 
 		// 3. Both caches cold: serve the bundled floor now and warm the remote
 		// off-request (a near-immediate one-off, so a fresh install does not wait
 		// for the daily cron) - the page load is never blocked on the network.
-		set_transient( self::CACHE_KEY, $bundled, self::CACHE_DURATION );
-		wp_schedule_single_event( time() + MINUTE_IN_SECONDS, Cron::REFRESH_HOOK );
+		if ( $file_cached === null ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, Cron::REFRESH_HOOK );
+		}
 
-		return $bundled;
+		return $catalog;
 	}
 
 	/**
@@ -377,6 +386,10 @@ class Services_Source {
 				$entry['cookieless'] = (bool) $service['cookieless'];
 			}
 
+			if ( ! empty( $service['transfer_countries'] ) ) {
+				$entry['transfer_countries'] = array_values( (array) $service['transfer_countries'] );
+			}
+
 			$view[ $category ][ $slug ] = $entry;
 		}
 
@@ -427,6 +440,13 @@ class Services_Source {
 			// not revoke the claim, but an explicit remote value still retires it.
 			if ( is_array( $entry ) && ! array_key_exists( 'cookieless', $entry ) && ! empty( $base[ $slug ]['cookieless'] ) ) {
 				$entry['cookieless'] = true;
+			}
+
+			// Same floor, same reason: a transfer disclosure narrows what the
+			// visitor is told is safe, so a remote silent about it must not be
+			// able to delete one. An explicit empty array still retires it.
+			if ( is_array( $entry ) && ! array_key_exists( 'transfer_countries', $entry ) && ! empty( $base[ $slug ]['transfer_countries'] ) ) {
+				$entry['transfer_countries'] = $base[ $slug ]['transfer_countries'];
 			}
 
 			// The mirror of that, because releasing a resource from consent gating is

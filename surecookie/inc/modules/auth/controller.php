@@ -42,6 +42,57 @@ class Controller {
 	public const FLOW_KEY_TTL = 300;
 
 	/**
+	 * Auth flow started from the admin app.
+	 *
+	 * @since 1.7.0
+	 */
+	public const ORIGIN_ADMIN = 'admin';
+
+	/**
+	 * Auth flow started from the setup wizard.
+	 *
+	 * @since 1.7.0
+	 */
+	public const ORIGIN_ONBOARDING = 'onboarding';
+
+	/**
+	 * Every screen an auth flow may return to.
+	 *
+	 * A closed enum on purpose: the value picked here is used to build a redirect.
+	 *
+	 * @since 1.7.0
+	 * @var string[]
+	 */
+	public const ORIGINS = [ self::ORIGIN_ADMIN, self::ORIGIN_ONBOARDING ];
+
+	/**
+	 * Where to send the browser when an auth flow ends.
+	 *
+	 * The wizard keeps its hash route so a returning user lands on the scan step
+	 * rather than back at the start of setup.
+	 *
+	 * @since 1.7.0
+	 * @param string $origin        One of self::ORIGINS; anything else falls back to the admin app.
+	 * @param string $status        Optional `auth` query value to append.
+	 * @param bool   $with_fragment Whether to append the wizard's hash route. Off for the
+	 *                              outbound `redirect-back`, which the billing portal owns
+	 *                              and may append its own query to.
+	 * @return string Admin URL to redirect to.
+	 */
+	public function get_return_url( string $origin, string $status = '', bool $with_fragment = true ): string {
+		$is_onboarding = $origin === self::ORIGIN_ONBOARDING;
+		$page          = $is_onboarding ? 'surecookie-onboarding' : 'surecookie';
+		$url           = admin_url( 'admin.php?page=' . $page );
+
+		if ( $status !== '' ) {
+			$url = add_query_arg( 'auth', $status, $url );
+		}
+
+		// Appended after the query string, which is where a fragment has to sit.
+		return $is_onboarding && $with_fragment ? $url . '#/scan' : $url;
+	}
+
+	/**
 	 * Encryption key.
 	 *
 	 * @since 0.0.1-beta.3
@@ -62,9 +113,10 @@ class Controller {
 	 *
 	 * @since 0.0.1-beta.3
 	 *
+	 * @param string $origin Screen that started the flow, one of self::ORIGINS.
 	 * @return array{action_url: string, method: string, fields: array<string, string>}|WP_Error
 	 */
-	public function get_auth_payload() {
+	public function get_auth_payload( string $origin = self::ORIGIN_ADMIN ) {
 		try {
 			$this->key = bin2hex( random_bytes( 32 ) );
 		} catch ( \Throwable $e ) {
@@ -75,8 +127,16 @@ class Controller {
 
 		set_transient( 'scap_auth_key_' . $flow_id, $this->key, self::FLOW_KEY_TTL );
 
+		if ( ! in_array( $origin, self::ORIGINS, true ) ) {
+			$origin = self::ORIGIN_ADMIN;
+		}
+
+		// Recorded against the flow so the inbound callback can send a
+		// popup-blocked user back to the screen they started on.
+		set_transient( Api::ORIGIN_TRANSIENT_PREFIX . $flow_id, $origin, self::FLOW_KEY_TTL );
+
 		$token_data = [
-			'redirect-back' => admin_url( 'admin.php?page=surecookie' ),
+			'redirect-back' => $this->get_return_url( $origin, '', false ),
 			'key'           => $this->key,
 			'site-url'      => site_url(),
 			'flow_id'       => $flow_id,
@@ -284,5 +344,4 @@ class Controller {
 
 		return openssl_decrypt( $encrypted, $method, $key_bytes, OPENSSL_RAW_DATA, $iv );
 	}
-
 }

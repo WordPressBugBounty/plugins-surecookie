@@ -145,7 +145,6 @@ final class Validator {
 			'grievance_officer_email' => __( 'Grievance Officer Email', 'surecookie' ),
 			'transfer_safeguard_text' => __( 'Data Transfer Safeguards', 'surecookie' ),
 			'ccpa_sells_or_shares'    => __( 'Sale or Sharing Declaration', 'surecookie' ),
-			self::JURISDICTIONS_KEY   => __( 'Applicable Privacy Regimes', 'surecookie' ),
 		];
 
 		return $labels[ $field ] ?? $field;
@@ -178,13 +177,6 @@ final class Validator {
 					'label' => self::field_label( $field ),
 				];
 			}
-		}
-
-		if ( empty( $jurisdictions ) ) {
-			$missing[] = [
-				'field' => self::JURISDICTIONS_KEY,
-				'label' => self::field_label( self::JURISDICTIONS_KEY ),
-			];
 		}
 
 		return $missing;

@@ -21,8 +21,10 @@ namespace SureCookie\Core;
 
 use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Database\Init as DB_Init;
+use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Update;
+use SureCookie\Inc\Modules\AssistedScan\Normalizer;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
 use SureCookie\Inc\Modules\Services\First_Party_Repair;
 use SureCookie\Inc\Modules\Services\Installed_Services;
@@ -111,7 +113,7 @@ class Maintenance {
 	 *
 	 * @since 1.3.0
 	 */
-	private const SCHEMA_PROBE_COLUMN = 'region';
+	private const SCHEMA_PROBE_COLUMN = 'forwarded_blog_ids';
 
 	/**
 	 * Unique index the atomic consent-log upsert depends on.
@@ -121,16 +123,18 @@ class Maintenance {
 	private const CONSENT_LOG_UNIQUE_INDEX = 'session_unique';
 
 	/**
-	 * Registry ids that repair the schema rather than backfill data.
+	 * Registry ids that must never be seeded as done on a fresh install.
 	 *
-	 * These are exempt from the fresh-install seed: a backfill has nothing to do
-	 * on a site with no history, but a schema repair is the only thing that can
-	 * rescue an install whose activation DDL failed silently. See
-	 * {@see self::seed_fresh_install()}.
+	 * Two reasons qualify. A schema repair is the only thing that can rescue an
+	 * install whose activation DDL failed silently. And on multisite an empty
+	 * saved_version does NOT mean "no history": a partner subsite that has never
+	 * served a request of its own still receives forwarded rows, because the origin
+	 * writes them under switch_to_blog(). Seeding either kind closes the only door.
+	 * See {@see self::seed_fresh_install()}.
 	 *
 	 * @since 1.3.0
 	 */
-	private const SCHEMA_REPAIRS = [ 'consent_log_unique_key' ];
+	private const NEVER_SEEDED = [ 'consent_log_unique_key', 'forwarded_origin_blog_id', 'forwarded_partner_blog_ids' ];
 
 	/**
 	 * Pre-ledger per-migration flag options, mapped to their migration id.
@@ -439,7 +443,7 @@ class Maintenance {
 	 *     writes, so their ledger entry records "attempted", not "verified". Do
 	 *     not assume the guarantee holds when adding a migration alongside them.
 	 *  5. A migration that repairs the SCHEMA rather than backfilling data must
-	 *     also be listed in {@see self::SCHEMA_REPAIRS}, so the fresh-install seed
+	 *     also be listed in {@see self::NEVER_SEEDED}, so the fresh-install seed
 	 *     does not mark it done sight unseen.
 	 *
 	 * @since 1.3.0
@@ -456,7 +460,65 @@ class Maintenance {
 			'scanned_cookie_durations'   => [ self::class, 'backfill_scanned_cookie_durations' ],
 			'installed_pattern_cookies'  => [ self::class, 'prune_installed_pattern_cookies' ],
 			'placeholder_providers'      => [ self::class, 'backfill_scanned_cookie_providers' ],
+			'site_owned_providers'       => [ self::class, 'reclaim_site_owned_cookie_providers' ],
+			'forwarded_origin_blog_id'   => [ self::class, 'backfill_forwarded_origin_blog_id' ],
+			'forwarded_partner_blog_ids' => [ self::class, 'backfill_forwarded_partner_blog_ids' ],
 		];
+	}
+
+	/**
+	 * Give first-party session cookies back to the site that sets them, once.
+	 *
+	 * Rows stored before the ingest guard carry whatever the scan API's shared
+	 * canonical claimed, so an unrelated domain is named as the provider of
+	 * PHPSESSID on the published cookie policy (#1274). The guard only covers the
+	 * next scan, and automatic scanning is off by default.
+	 *
+	 * Converges on what a fixed re-scan would write, so it consults the catalog the
+	 * same way. Idempotent: a row already carrying that value is skipped. A provider
+	 * the admin pinned is theirs, not the canonical's claim, and is left alone.
+	 *
+	 * @since 1.7.0
+	 * @throws \RuntimeException When the repaired option cannot be written.
+	 * @return void
+	 */
+	private static function reclaim_site_owned_cookie_providers(): void {
+		$stored = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+		$site   = Cookie_Identity::first_party_domain();
+
+		if ( empty( $stored ) || $site === '' ) {
+			return;
+		}
+
+		$dirty = false;
+
+		foreach ( $stored as $category => $cookies ) {
+			if ( ! is_array( $cookies ) ) {
+				continue;
+			}
+
+			foreach ( $cookies as $index => $cookie ) {
+				if ( ! is_array( $cookie )
+					|| ! Normalizer::is_site_owned_cookie( $cookie )
+					|| CookieCategoryMemory::displaced_value( $cookie, 'provider' ) !== null ) {
+					continue;
+				}
+
+				$catalog  = Declared_Cookies::get_instance()->catalog_provider_for( $cookie );
+				$provider = $catalog !== '' ? $catalog : $site;
+
+				if ( (string) ( $cookie['provider'] ?? '' ) === $provider ) {
+					continue;
+				}
+
+				$stored[ $category ][ $index ]['provider'] = $provider;
+				$dirty                                     = true;
+			}
+		}
+
+		if ( $dirty && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
+			throw new \RuntimeException( 'Could not write the reclaimed cookie providers.' );
+		}
 	}
 
 	/**
@@ -571,7 +633,7 @@ class Maintenance {
 		$ledger = [];
 
 		foreach ( array_keys( self::migrations() ) as $id ) {
-			if ( in_array( $id, self::SCHEMA_REPAIRS, true ) ) {
+			if ( in_array( $id, self::NEVER_SEEDED, true ) ) {
 				continue;
 			}
 
@@ -1091,6 +1153,138 @@ class Maintenance {
 		// 1062 duplicate-key error, so a failure is otherwise invisible.
 		if ( self::consent_log_index_count( $table ) < 1 ) {
 			throw new \RuntimeException( 'SureCookie: consent log unique key is still absent after dbDelta.' );
+		}
+	}
+
+	/**
+	 * When a blog was created, as a UTC datetime comparable to a consent timestamp.
+	 *
+	 * Falls back to the epoch so an unreadable date widens the match rather than
+	 * silently skipping every row.
+	 *
+	 * @since 1.7.0
+	 * @param int $blog_id Blog id.
+	 * @return string `Y-m-d H:i:s` in UTC.
+	 */
+	private static function blog_registered_utc( int $blog_id ): string {
+		$details = function_exists( 'get_blog_details' ) ? get_blog_details( $blog_id ) : null;
+		$value   = $details instanceof \WP_Site ? (string) $details->registered : '';
+
+		return ( $value === '' || $value === '0000-00-00 00:00:00' ) ? '1970-01-01 00:00:00' : $value;
+	}
+
+	/**
+	 * Record partner blog ids on origin rows that only list partner addresses.
+	 *
+	 * The mirror of the origin backfill, for the other end of the cascade: an origin
+	 * row names its partners by URL, so renaming a PARTNER broke erasure into it. Same
+	 * window - once a partner is renamed its stored address resolves to nothing and the
+	 * link cannot be rebuilt.
+	 *
+	 * @since 1.7.0
+	 * @throws \RuntimeException When the rows cannot be read, so the pass retries.
+	 * @return void
+	 */
+	private static function backfill_forwarded_partner_blog_ids(): void {
+		if ( ! is_multisite() ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$table = ConsentLog::get_instance()->get_tablename();
+
+		// Distinct partner lists, not rows: an origin forwards to the same few
+		// partners, so this stays a handful of statements however large the table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One-time upgrade read; %i is the WP 6.2+ identifier placeholder.
+		$lists = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT forwarded_to FROM %i WHERE is_forwarded = 0 AND forwarded_to IS NOT NULL AND forwarded_to NOT IN ( %s, %s ) AND ( forwarded_blog_ids IS NULL OR forwarded_blog_ids IN ( %s, %s ) )', $table, '', '[]', '', '[]' ) );
+
+		if ( (string) $wpdb->last_error !== '' ) {
+			throw new \RuntimeException( 'SureCookie: cannot read forwarded partners - ' . $wpdb->last_error );
+		}
+
+		foreach ( $lists as $forwarded_to ) {
+			$ids = ConsentLog::forwarded_blog_ids( [ 'forwarded_to' => (string) $forwarded_to ] );
+
+			// Every partner already renamed: nothing resolves, and the rows keep the
+			// addresses they had, which is what they matched on before this column.
+			if ( empty( $ids ) ) {
+				continue;
+			}
+
+			$json = wp_json_encode( $ids );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One-time upgrade write; %i is the WP 6.2+ identifier placeholder.
+			$wpdb->query( $wpdb->prepare( 'UPDATE %i SET forwarded_blog_ids = %s WHERE is_forwarded = 0 AND forwarded_to = %s AND ( forwarded_blog_ids IS NULL OR forwarded_blog_ids IN ( %s, %s ) )', $table, is_string( $json ) ? $json : '[]', (string) $forwarded_to, '', '[]' ) );
+		}
+	}
+
+	/**
+	 * Stamp the origin's blog id onto rows forwarded before the column existed.
+	 *
+	 * Only possible BEFORE the origin is renamed: afterwards `get_blog_id_from_url()`
+	 * returns 0 and WordPress keeps no address history, so a row still at 0 after this
+	 * runs can never be repaired by a later release (#1377).
+	 *
+	 * Operates on the current blog alone. The ledger is a per-blog option, so each
+	 * subsite repairs the copies it received when its own pass next runs - in admin,
+	 * cron or WP-CLI only ({@see self::should_run_migrations()}) - never as one
+	 * network-wide sweep.
+	 *
+	 * An address later reused by a different subsite resolves to its new occupant,
+	 * which is the same row that address already matched before this column existed.
+	 *
+	 * @since 1.7.0
+	 * @throws \RuntimeException When the rows cannot be read, so the pass retries.
+	 * @return void
+	 */
+	private static function backfill_forwarded_origin_blog_id(): void {
+		// get_blog_id_from_url() is multisite-only, and forwarding is a multisite feature.
+		if ( ! is_multisite() || ! function_exists( 'get_blog_id_from_url' ) ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$table = ConsentLog::get_instance()->get_tablename();
+
+		/*
+		 * Distinct origins, not rows: a partner receives from the few sites that
+		 * picked it, so however many rows there are this is a handful of statements.
+		 * ponytail: each one scans - is_forwarded is a two-value column, so no index
+		 * applies - which is affordable because the pass runs once per blog in admin,
+		 * cron or WP-CLI, never on a page view. Batch by primary key if a real
+		 * network makes it slow.
+		 */
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One-time upgrade read; %i is the WP 6.2+ identifier placeholder.
+		$origins = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT origin_site FROM %i WHERE is_forwarded = 1 AND origin_blog_id = 0 AND origin_site IS NOT NULL AND origin_site != %s', $table, '' ) );
+
+		// wpdb::query() flushes last_error before each query, so this reflects only the
+		// read above. A blog the schema sweep could not reach must not be recorded as
+		// migrated: its rows would stay at 0 past the point where they can be repaired.
+		if ( (string) $wpdb->last_error !== '' ) {
+			throw new \RuntimeException( 'SureCookie: cannot read forwarded origins - ' . $wpdb->last_error );
+		}
+
+		foreach ( $origins as $origin ) {
+			$blog_id = ConsentLog::origin_blog_id( (string) $origin );
+
+			// 0 means the origin has already been renamed. Nothing can recover it, and
+			// the row stays matchable by URL, which is what it was before this column.
+			if ( $blog_id <= 0 ) {
+				continue;
+			}
+
+			/*
+			 * An address can be reused: blog 7 was /alpha, was renamed, and blog 9 was
+			 * later created at /alpha. Rows predating blog 9 are not blog 9's, and
+			 * wp_blogs.registered is the one piece of history WordPress does keep.
+			 * Re-stating the 0 predicate keeps a retry after a crash a no-op.
+			 */
+			$registered = self::blog_registered_utc( $blog_id );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One-time upgrade write; %i is the WP 6.2+ identifier placeholder.
+			$wpdb->query( $wpdb->prepare( 'UPDATE %i SET origin_blog_id = %d WHERE is_forwarded = 1 AND origin_blog_id = 0 AND origin_site = %s AND timestamp >= %s', $table, $blog_id, $origin, $registered ) );
 		}
 	}
 

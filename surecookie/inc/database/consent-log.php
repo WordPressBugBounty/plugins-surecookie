@@ -94,55 +94,66 @@ class ConsentLog extends Base {
 	public function get_schema() {
 		return [
 			// Consent log ID.
-			'id'            => [
+			'id'                 => [
 				'type' => 'number',
 			],
 			// IP Address.
-			'ip_address'    => [
+			'ip_address'         => [
 				'type' => 'string',
 			],
 			// User ID.
-			'user_id'       => [
+			'user_id'            => [
 				'type' => 'number',
 			],
 			// Session ID (UUID for tracking anonymous users across visits).
-			'session_id'    => [
+			'session_id'         => [
 				'type' => 'string',
 			],
 			// Preferences.
-			'preferences'   => [
+			'preferences'        => [
 				'type' => 'string',
 			],
 			// Action.
-			'action'        => [
+			'action'             => [
 				'type' => 'string',
 			],
 			// Created timestamp.
-			'timestamp'     => [
+			'timestamp'          => [
 				'type' => 'string',
 			],
 			// Country.
-			'country'       => [
+			'country'            => [
 				'type' => 'string',
 			],
 			// ISO region name (US state, Indian state), from GeoLite2-City.
-			'region'        => [
+			'region'             => [
 				'type' => 'string',
 			],
 			// Geo preset ID (which geo preset was active when consent was recorded).
-			'geo_preset_id' => [
+			'geo_preset_id'      => [
 				'type' => 'string',
 			],
 			// Consent Forwarding: 1 when this row was written by a partner site.
-			'is_forwarded'  => [
+			'is_forwarded'       => [
 				'type' => 'boolean',
 			],
 			// Consent Forwarding: URL of the site that originally captured this consent.
-			'origin_site'   => [
+			'origin_site'        => [
 				'type' => 'string',
 			],
+			// Consent Forwarding: the origin's blog id, which survives a site
+			// address change. 0 on rows forwarded before this column existed.
+			'origin_blog_id'     => [
+				'type' => 'number',
+			],
 			// Consent Forwarding: JSON array of partner site URLs this consent was forwarded to.
-			'forwarded_to'  => [
+			'forwarded_to'       => [
+				'type' => 'string',
+			],
+			// Partner blog ids, which a site address change cannot break. Added
+			// alongside forwarded_to rather than replacing it: an older Pro reads
+			// that column and would stop cascading if its shape changed.
+			'forwarded_blog_ids' => [
 				'type' => 'string',
 			],
 		];
@@ -168,7 +179,9 @@ class ConsentLog extends Base {
 			// after they are forwarded out.
 			'is_forwarded tinyint(1) NOT NULL DEFAULT 0',
 			'origin_site varchar(255) DEFAULT NULL',
+			'origin_blog_id bigint(20) unsigned NOT NULL DEFAULT 0',
 			'forwarded_to text DEFAULT NULL',
+			'forwarded_blog_ids text DEFAULT NULL',
 			'timestamp datetime NOT NULL DEFAULT CURRENT_TIMESTAMP',
 			// Index for geo preset filtering and audit queries.
 			'KEY geo_preset_id (geo_preset_id)',
@@ -275,7 +288,7 @@ class ConsentLog extends Base {
 
 		// Pre-fetch the rows being deleted - hook listeners need forwarded_to to cascade erasures.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, session_id, timestamp, forwarded_to, is_forwarded FROM `{$table_name}` WHERE id IN ({$placeholders})", $ids ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, session_id, timestamp, forwarded_to, forwarded_blog_ids, is_forwarded FROM `{$table_name}` WHERE id IN ({$placeholders})", $ids ), ARRAY_A );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		$logs = [];
@@ -305,6 +318,7 @@ class ConsentLog extends Base {
 			 *     session_id: string,
 			 *     timestamp: string,
 			 *     forwarded_to: ?string,
+			 *     forwarded_blog_ids: ?string,
 			 *     is_forwarded: int
 			 * }> $logs Pre-delete rows indexed by id.
 			 */
@@ -693,6 +707,131 @@ class ConsentLog extends Base {
 	}
 
 	/**
+	 * Partner blog ids a row was forwarded to.
+	 *
+	 * Prefers `forwarded_blog_ids`, which a partner rename cannot break. Falls back
+	 * to resolving `forwarded_to` for rows written before that column existed, or by
+	 * an install whose free plugin predates it - that fallback is what the rename
+	 * breaks, which is why the backfill exists.
+	 *
+	 * @since 1.7.0
+	 * @param array<string, mixed> $row Consent log row.
+	 * @return array<int, int> Partner blog ids, empty when none resolve.
+	 */
+	public static function forwarded_blog_ids( array $row ): array {
+		$ids = json_decode( (string) ( $row['forwarded_blog_ids'] ?? '' ), true );
+
+		if ( is_array( $ids ) && ! empty( $ids ) ) {
+			return array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+		}
+
+		$urls     = json_decode( (string) ( $row['forwarded_to'] ?? '' ), true );
+		$resolved = [];
+
+		foreach ( is_array( $urls ) ? $urls : [] as $url ) {
+			$blog_id = is_string( $url ) ? self::origin_blog_id( $url ) : 0;
+			if ( $blog_id > 0 ) {
+				$resolved[] = $blog_id;
+			}
+		}
+
+		return array_values( array_unique( $resolved ) );
+	}
+
+	/**
+	 * Resolve a forwarded row's origin URL to its blog id.
+	 *
+	 * Mirrors Pro's `Forwarder::find_blog_id()`, which is what writes these URLs:
+	 * host lowercased, path trailingslashed, because that is the shape `wp_blogs`
+	 * stores while `origin_site` is saved untrailingslashed. Returns 0 when no site
+	 * answers to that address - an origin already renamed, or a domain-mapped one.
+	 *
+	 * @since 1.7.0
+	 * @param string $url Origin URL as stored on the row.
+	 * @return int Blog id, or 0 when it cannot be resolved.
+	 */
+	public static function origin_blog_id( string $url ): int {
+		if ( $url === '' || ! is_multisite() || ! function_exists( 'get_blog_id_from_url' ) ) {
+			return 0;
+		}
+
+		$parsed = wp_parse_url( $url );
+
+		if ( ! is_array( $parsed ) || empty( $parsed['host'] ) ) {
+			return 0;
+		}
+
+		$path = isset( $parsed['path'] ) && $parsed['path'] !== '' ? trailingslashit( (string) $parsed['path'] ) : '/';
+
+		return (int) get_blog_id_from_url( strtolower( (string) $parsed['host'] ), $path );
+	}
+
+	/**
+	 * WHERE fragment matching a forwarded row's origin, with its bindings.
+	 *
+	 * Rows forwarded before `origin_blog_id` existed carry 0 and can only be
+	 * matched on the URL, which is exactly what a site address change breaks
+	 * (#1377), so the blog id is preferred and the URL remains the fallback.
+	 *
+	 * @param string $origin_site    Origin URL as stored on the row.
+	 * @param int    $origin_blog_id Origin blog id, 0 when not known.
+	 * @since 1.7.0
+	 * @return array{0: string, 1: array<int, mixed>}
+	 */
+	private static function origin_match( string $origin_site, int $origin_blog_id ): array {
+		if ( $origin_blog_id > 0 ) {
+			return [
+				'( origin_blog_id = %d OR ( origin_blog_id = 0 AND origin_site = %s ) )',
+				[ $origin_blog_id, $origin_site ],
+			];
+		}
+
+		return [ 'origin_site = %s', [ $origin_site ] ];
+	}
+
+	/**
+	 * Delete a session's forwarded rows, optionally constrained by timestamp.
+	 *
+	 * @param string      $session_id     Session UUID.
+	 * @param string      $origin_site    Origin URL as stored on the row.
+	 * @param int         $origin_blog_id Origin blog id, 0 when not known.
+	 * @param string|null $timestamp      Timestamp to constrain on, null for the whole session.
+	 * @param bool        $except         Delete every row but $timestamp instead of only that one.
+	 * @since 1.7.0
+	 * @return bool True when at least one row was deleted.
+	 */
+	private static function delete_forwarded( string $session_id, string $origin_site, int $origin_blog_id, ?string $timestamp = null, bool $except = false ): bool {
+		global $wpdb;
+
+		[ $sql, $bindings ] = self::origin_match( $origin_site, $origin_blog_id );
+
+		$sql = 'DELETE FROM %i WHERE session_id = %s AND is_forwarded = 1 AND ' . $sql;
+
+		if ( $timestamp !== null ) {
+			$sql       .= $except ? ' AND timestamp <> %s' : ' AND timestamp = %s';
+			$bindings[] = $timestamp;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Targeted deletion on a custom table inside switch_to_blog; %i is the WP 6.2+ identifier placeholder, every fragment is built from internal placeholders only, and the cache is invalidated below.
+		$query = $wpdb->prepare( $sql, array_merge( [ self::get_instance()->get_tablename(), $session_id ], $bindings ) );
+
+		// prepare() returns void when it rejects its input, and query( null ) would
+		// report a failed erasure as "nothing matched".
+		if ( ! is_string( $query ) ) {
+			return false;
+		}
+
+		$result = $wpdb->query( $query );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( $result ) {
+			self::invalidate_query_cache();
+		}
+
+		return (bool) $result;
+	}
+
+	/**
 	 * Delete forwarded consent rows matching a session ID and origin site.
 	 *
 	 * Called by Pro's Consent Forwarding module while inside a switch_to_blog()
@@ -700,34 +839,15 @@ class ConsentLog extends Base {
 	 *
 	 * @param string $session_id  Session UUID of the row to delete.
 	 * @param string $origin_site Origin site canonical URL stored in the forwarded row.
-	 * @return bool True when at least one row was deleted.
+	 * @param int    $origin_blog_id Origin blog id; 0 falls back to matching origin_site.
 	 * @since 1.1.0
+	 * @return bool True when at least one row was deleted.
 	 */
-	public static function delete_forwarded_by_session( string $session_id, string $origin_site ): bool {
+	public static function delete_forwarded_by_session( string $session_id, string $origin_site, int $origin_blog_id = 0 ): bool {
 		if ( $session_id === '' || $origin_site === '' ) {
 			return false;
 		}
-
-		global $wpdb;
-
-		$table = self::get_instance()->get_tablename();
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Targeted deletion on custom table inside switch_to_blog context; invalidated below.
-		$result = $wpdb->delete(
-			$table,
-			[
-				'session_id'   => $session_id,
-				'is_forwarded' => 1,
-				'origin_site'  => $origin_site,
-			],
-			[ '%s', '%d', '%s' ]
-		);
-
-		if ( $result ) {
-			self::invalidate_query_cache();
-		}
-
-		return (bool) $result;
+		return self::delete_forwarded( $session_id, $origin_site, $origin_blog_id );
 	}
 
 	/**
@@ -740,33 +860,15 @@ class ConsentLog extends Base {
 	 * @param string $session_id  Session UUID whose forwarded rows to prune.
 	 * @param string $origin_site Origin site canonical URL stored in the forwarded row.
 	 * @param string $timestamp   Timestamp of the row to keep.
-	 * @return bool True when at least one row was deleted.
+	 * @param int    $origin_blog_id Origin blog id; 0 falls back to matching origin_site.
 	 * @since 1.3.0
+	 * @return bool True when at least one row was deleted.
 	 */
-	public static function delete_forwarded_by_session_except( string $session_id, string $origin_site, string $timestamp ): bool {
+	public static function delete_forwarded_by_session_except( string $session_id, string $origin_site, string $timestamp, int $origin_blog_id = 0 ): bool {
 		if ( $session_id === '' || $origin_site === '' || $timestamp === '' ) {
 			return false;
 		}
-
-		global $wpdb;
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Targeted deletion on a custom table inside switch_to_blog; %i is the WP 6.2+ identifier placeholder and the cache is invalidated below.
-		$result = $wpdb->query(
-			$wpdb->prepare(
-				'DELETE FROM %i WHERE session_id = %s AND is_forwarded = 1 AND origin_site = %s AND timestamp <> %s',
-				self::get_instance()->get_tablename(),
-				$session_id,
-				$origin_site,
-				$timestamp
-			)
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-
-		if ( $result ) {
-			self::invalidate_query_cache();
-		}
-
-		return (bool) $result;
+		return self::delete_forwarded( $session_id, $origin_site, $origin_blog_id, $timestamp, true );
 	}
 
 	/**
@@ -781,33 +883,15 @@ class ConsentLog extends Base {
 	 * @param string $session_id  Session UUID of the row to delete.
 	 * @param string $origin_site Origin site canonical URL stored in the forwarded row.
 	 * @param string $timestamp   Origin row timestamp, copied onto the forwarded row.
-	 * @return bool True when at least one row was deleted.
+	 * @param int    $origin_blog_id Origin blog id; 0 falls back to matching origin_site.
 	 * @since 1.3.0
+	 * @return bool True when at least one row was deleted.
 	 */
-	public static function delete_forwarded_by_session_event( string $session_id, string $origin_site, string $timestamp ): bool {
+	public static function delete_forwarded_by_session_event( string $session_id, string $origin_site, string $timestamp, int $origin_blog_id = 0 ): bool {
 		if ( $session_id === '' || $origin_site === '' || $timestamp === '' ) {
 			return false;
 		}
-
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Targeted deletion on custom table inside switch_to_blog context; invalidated below.
-		$result = $wpdb->delete(
-			self::get_instance()->get_tablename(),
-			[
-				'session_id'   => $session_id,
-				'is_forwarded' => 1,
-				'origin_site'  => $origin_site,
-				'timestamp'    => $timestamp,
-			],
-			[ '%s', '%d', '%s', '%s' ]
-		);
-
-		if ( $result ) {
-			self::invalidate_query_cache();
-		}
-
-		return (bool) $result;
+		return self::delete_forwarded( $session_id, $origin_site, $origin_blog_id, $timestamp );
 	}
 
 	/**
@@ -826,13 +910,29 @@ class ConsentLog extends Base {
 			return false;
 		}
 
-		$json = wp_json_encode( array_values( $site_urls ) );
+		$urls = array_values( $site_urls );
+		$json = wp_json_encode( $urls );
 		if ( ! is_string( $json ) ) {
 			return false;
 		}
 
+		// Resolved here, not by the caller, so an older Pro that only knows how to
+		// send URLs still gets rename-proof ids written for it.
+		$ids = [];
+		foreach ( $urls as $url ) {
+			$blog_id = is_string( $url ) ? self::origin_blog_id( $url ) : 0;
+			if ( $blog_id > 0 ) {
+				$ids[] = $blog_id;
+			}
+		}
+
+		$ids_json = wp_json_encode( array_values( array_unique( $ids ) ) );
+
 		$result = self::get_instance()->use_update(
-			[ 'forwarded_to' => $json ],
+			[
+				'forwarded_to'       => $json,
+				'forwarded_blog_ids' => is_string( $ids_json ) ? $ids_json : '[]',
+			],
 			[ 'id' => $log_id ]
 		);
 
@@ -877,10 +977,11 @@ class ConsentLog extends Base {
 	 * @param string|null $origin_site   Origin site URL when this is a forwarded consent.
 	 * @param string      $region        Region name for further processing.
 	 * @param bool|null   $stored        Out: whether this call actually wrote a row, as opposed to being swallowed as a same-second duplicate.
+	 * @param int         $origin_blog_id Origin blog id written onto a forwarded row; 0 for a local row.
 	 * @since 0.0.1
 	 * @return int|false Row ID of the inserted or updated entry, or false on error.
 	 */
-	public static function upsert( $ip_address, $user_id, $session_id, $preferences, $action, $country, $timestamp = null, $geo_preset_id = null, bool $is_forwarded = false, ?string $origin_site = null, string $region = '', &$stored = null ) {
+	public static function upsert( $ip_address, $user_id, $session_id, $preferences, $action, $country, $timestamp = null, $geo_preset_id = null, bool $is_forwarded = false, ?string $origin_site = null, string $region = '', &$stored = null, int $origin_blog_id = 0 ) {
 		global $wpdb;
 
 		// Per-call outcome: a listener re-entering upsert() reassigns the static.
@@ -917,6 +1018,13 @@ class ConsentLog extends Base {
 		$origin         = ! empty( $origin_site ) ? esc_url_raw( (string) $origin_site ) : null;
 		$origin_sql     = $origin === null ? 'NULL' : '%s';
 		$origin_binding = $origin === null ? [] : [ $origin ];
+		$origin_blog    = max( 0, $origin_blog_id );
+
+		// An older Pro passes none, and the one-shot backfill has already run by then,
+		// so resolving it here is what stops a new forwarded row being left behind.
+		if ( $origin_blog === 0 && $is_forwarded && $origin !== null ) {
+			$origin_blog = self::origin_blog_id( $origin );
+		}
 		$forwarded_flag = $is_forwarded ? 1 : 0;
 		$region         = sanitize_text_field( $region );
 
@@ -932,13 +1040,14 @@ class ConsentLog extends Base {
 				[ $table_name, $ip_address, (int) $user_id, $session_id, $preferences, $action, $country, $region, $timestamp ],
 				$preset_binding,
 				[ $forwarded_flag ],
-				$origin_binding
+				$origin_binding,
+				[ $origin_blog ]
 			);
 
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $preset_sql / $origin_sql are hardcoded switches between 'NULL' (literal) and '%s' (placeholder); not user-controlled.
 			$query = $wpdb->prepare(
-				'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, region, timestamp, geo_preset_id, is_forwarded, origin_site)
-				 VALUES (%s, %d, %s, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ')
+				'INSERT INTO %i (ip_address, user_id, session_id, preferences, action, country, region, timestamp, geo_preset_id, is_forwarded, origin_site, origin_blog_id)
+				 VALUES (%s, %d, %s, %s, %s, %s, %s, %s, ' . $preset_sql . ', %d, ' . $origin_sql . ', %d)
 				 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)',
 				$values
 			);
@@ -1000,17 +1109,18 @@ class ConsentLog extends Base {
 				'surecookie_consent_log_inserted',
 				$log_id,
 				[
-					'ip_address'    => $ip_address,
-					'user_id'       => (int) $user_id,
-					'session_id'    => $session_id,
-					'preferences'   => $preferences,
-					'action'        => $action,
-					'country'       => $country,
-					'region'        => $region,
-					'timestamp'     => $timestamp,
-					'geo_preset_id' => $preset,
-					'is_forwarded'  => (bool) $forwarded_flag,
-					'origin_site'   => $origin,
+					'ip_address'     => $ip_address,
+					'user_id'        => (int) $user_id,
+					'session_id'     => $session_id,
+					'preferences'    => $preferences,
+					'action'         => $action,
+					'country'        => $country,
+					'region'         => $region,
+					'timestamp'      => $timestamp,
+					'geo_preset_id'  => $preset,
+					'is_forwarded'   => (bool) $forwarded_flag,
+					'origin_site'    => $origin,
+					'origin_blog_id' => $origin_blog,
 				]
 			);
 

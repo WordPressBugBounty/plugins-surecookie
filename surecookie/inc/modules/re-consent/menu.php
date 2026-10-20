@@ -28,9 +28,10 @@ class Menu {
 
 	/**
 	 * Virtual menu item ID to avoid collision with real menu items.
-	 * Uses PHP_INT_MIN to minimise chance of conflict with other plugins.
+	 * PHP_INT_MAX, not PHP_INT_MIN: absint() turns PHP_INT_MIN into a float, so any
+	 * get_post_meta( $item->ID ) from a menu plugin logs a float-to-int deprecation.
 	 */
-	public const VIRTUAL_ITEM_ID = PHP_INT_MIN;
+	public const VIRTUAL_ITEM_ID = PHP_INT_MAX;
 
 	/**
 	 * Constructor.

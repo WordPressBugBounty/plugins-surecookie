@@ -28,7 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.0.1
  */
 class SaasClient {
-	use GetInstance, IpManager;
+	use GetInstance;
+	use IpManager;
 
 	/**
 	 * Option key for storing active scan data.
@@ -119,6 +120,37 @@ class SaasClient {
 	public const MAX_POLL_ATTEMPTS = 30;
 
 	/**
+	 * Option that claims the poll, held through result fetching so only one
+	 * poll runs. Its value is "claim time:owner token"; see acquire_poll_lock().
+	 *
+	 * @since 1.7.0
+	 */
+	public const POLL_LOCK_OPTION = 'surecookie_scan_poll_lock';
+
+	/**
+	 * A claim older than this was left by a request that died mid-poll and is
+	 * taken over. Longer than any healthy poll, short enough to retry in minutes.
+	 *
+	 * @since 1.7.0
+	 */
+	public const POLL_LOCK_TTL = 300;
+
+	/**
+	 * Marks a cloud scan that just ended, so the UI's first status read after the
+	 * active scan clears can run its completion path. The assisted walk keeps its own.
+	 *
+	 * @since 1.7.0
+	 */
+	public const JUST_FINISHED_TRANSIENT = 'surecookie_scan_just_finished';
+
+	/**
+	 * Outlives the UI's status poll interval, nothing more.
+	 *
+	 * @since 1.7.0
+	 */
+	public const JUST_FINISHED_TTL = 45;
+
+	/**
 	 * Transient that locks concurrent registration calls.
 	 *
 	 * @since 0.0.1-beta.3
@@ -161,6 +193,14 @@ class SaasClient {
 	 * @since 1.5.0
 	 */
 	public const PENDING_HANDSHAKE_TTL = DAY_IN_SECONDS;
+
+	/**
+	 * Value of the poll claim this request holds, so release removes only its own.
+	 *
+	 * @since 1.7.0
+	 * @var string
+	 */
+	private string $poll_lock_token = '';
 
 	/**
 	 * Constructor
@@ -604,6 +644,9 @@ class SaasClient {
 			'poll_attempts' => 0,
 		];
 
+		// A new run must not inherit the previous run's terminal marker.
+		$this->clear_just_finished();
+
 		// Non-autoloaded: this payload carries the full page list and is only read by the
 		// scanner UI and poll cron, so it must not bloat the alloptions cache every request.
 		Update::option( self::SCAN_OPTION_KEY, $scan_data );
@@ -907,19 +950,45 @@ class SaasClient {
 	}
 
 	/**
-	 * Poll scan status (cron callback).
+	 * Poll scan status (cron callback, also run by the on-demand sync).
+	 *
+	 * One poll at a time, held through result fetching: WP-Cron and the on-demand
+	 * sync both land here, and a second entry that also saw "completed" fetched and
+	 * processed the same results again and interleaved the progress log.
 	 *
 	 * @since 0.0.1
 	 * @return void
 	 */
 	public function poll_scan_status(): void {
-		$active_scan = $this->get_active_scan();
-
-		if ( empty( $active_scan ) || empty( $active_scan['group_id'] ) ) {
-			$this->unschedule_polling();
+		if ( ! $this->acquire_poll_lock() ) {
 			return;
 		}
 
+		try {
+			// Read the scan under the claim, from the table: the poll that just released
+			// it may have finished the scan, and this request's option cache would not know.
+			wp_cache_delete( self::SCAN_OPTION_KEY, 'options' );
+			$active_scan = $this->get_active_scan();
+
+			if ( empty( $active_scan['group_id'] ) ) {
+				$this->unschedule_polling();
+				return;
+			}
+
+			$this->run_poll( $active_scan );
+		} finally {
+			$this->release_poll_lock();
+		}
+	}
+
+	/**
+	 * One status pull for the claimed scan, through completion or failure.
+	 *
+	 * @param array<string, mixed> $active_scan The active scan option value.
+	 * @since 1.7.0
+	 * @return void
+	 */
+	private function run_poll( array $active_scan ): void {
 		$group_id      = $active_scan['group_id'];
 		$poll_attempts = $active_scan['poll_attempts'] ?? 0;
 
@@ -1044,6 +1113,73 @@ class SaasClient {
 		delete_option( self::SCAN_OPTION_KEY );
 		$this->clear_scan_bypass_token();
 		$this->unschedule_polling();
+	}
+
+	/**
+	 * Record that a cloud scan just ended. Set before the active scan clears, so
+	 * the first status read that finds it idle reports the finish.
+	 *
+	 * @param array<string, mixed>              $progress      Final progress payload.
+	 * @param array<int, array<string, string>> $error_details Per-page failures.
+	 * @since 1.7.0
+	 * @return void
+	 */
+	public function mark_just_finished( array $progress, array $error_details = [] ): void {
+		set_transient(
+			self::JUST_FINISHED_TRANSIENT,
+			[
+				'progress' => $progress,
+				'errors'   => $error_details,
+				'at'       => time(),
+			],
+			self::JUST_FINISHED_TTL
+		);
+	}
+
+	/**
+	 * Drop the terminal marker, so a new or cancelled scan cannot report an
+	 * earlier one as finished.
+	 *
+	 * @since 1.7.0
+	 * @return void
+	 */
+	public function clear_just_finished(): void {
+		delete_transient( self::JUST_FINISHED_TRANSIENT );
+	}
+
+	/**
+	 * Terminal status for a cloud scan that just ended, or null when there is none.
+	 *
+	 * Mirrors AssistedScan\Session::peek_just_finished(). Not consumed on read: two
+	 * polls landing together would otherwise report finished then idle faster than
+	 * the screen can see the transition, so it expires on its own. Status stays
+	 * `idle` so the progress bar clears; `just_finished` is what completion keys on.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, mixed>|null
+	 */
+	public function peek_just_finished(): ?array {
+		$marker = get_transient( self::JUST_FINISHED_TRANSIENT );
+
+		if ( ! is_array( $marker ) ) {
+			return null;
+		}
+
+		$progress = is_array( $marker['progress'] ?? null ) ? $marker['progress'] : [];
+		$errors   = is_array( $marker['errors'] ?? null ) ? $marker['errors'] : [];
+		$outcome  = get_transient( self::LAST_OUTCOME_TRANSIENT );
+
+		return [
+			'in_progress'   => false,
+			'status'        => 'idle',
+			'just_finished' => true,
+			'scan_mode'     => 'cloud',
+			'pages_count'   => (int) ( $progress['total_pages'] ?? 0 ),
+			'progress'      => $progress,
+			'error_details' => $errors,
+			'message'       => __( 'Scan finished.', 'surecookie' ),
+			'last_outcome'  => is_array( $outcome ) ? $outcome : null,
+		];
 	}
 
 	/**
@@ -2132,6 +2268,54 @@ class SaasClient {
 	}
 
 	/**
+	 * Claim the poll, or report that another request holds it.
+	 *
+	 * INSERT IGNORE on the options table's unique key is the atomic claim WordPress
+	 * itself uses (WP_Upgrader::create_lock) and works on MySQL and the SQLite drop-in.
+	 * The stale check reads the table: an object cache may still say the row is
+	 * missing after this request lost the insert, and acting on that steals a live claim.
+	 * The claim is only ever read raw, so the option cache is never consulted.
+	 *
+	 * @since 1.7.0
+	 * @return bool True when this request now holds the claim.
+	 */
+	private function acquire_poll_lock(): bool {
+		global $wpdb;
+
+		$token = time() . ':' . wp_generate_password( 12, false );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The row is the claim, so it is never cached.
+		if ( ! $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", self::POLL_LOCK_OPTION, $token ) ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The claim must be read from the table, see above.
+			$seen = (string) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", self::POLL_LOCK_OPTION ) );
+
+			// A claim older than the TTL was left by a request that died mid-poll. Swap
+			// only the exact value seen, so of two requests taking it over one wins.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Compare-and-swap on the claim row.
+			if ( time() - (int) $seen < self::POLL_LOCK_TTL || 1 !== (int) $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", $token, self::POLL_LOCK_OPTION, $seen ) ) ) {
+				return false;
+			}
+		}
+
+		$this->poll_lock_token = $token;
+		return true;
+	}
+
+	/**
+	 * Release the poll claim, only while it is still this request's: a poll that
+	 * outlived the TTL must not delete the claim of the poll that took over.
+	 *
+	 * @since 1.7.0
+	 * @return void
+	 */
+	private function release_poll_lock(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Conditional delete of the claim row, see acquire_poll_lock().
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", self::POLL_LOCK_OPTION, $this->poll_lock_token ) );
+	}
+
+	/**
 	 * Handle scan completion.
 	 *
 	 * @param string $group_id The completed scan group ID.
@@ -2144,6 +2328,13 @@ class SaasClient {
 		// Get results.
 		$results = $this->get_scan_results( $group_id );
 
+		// The fetch is slow: a scan cancelled (or replaced) meanwhile is not this run's to report or clean up.
+		wp_cache_delete( self::SCAN_OPTION_KEY, 'options' );
+		$active_scan = $this->get_active_scan();
+		if ( ( $active_scan['group_id'] ?? '' ) !== $group_id ) {
+			return;
+		}
+
 		if ( ! $results['success'] ) {
 			$this->handle_scan_failure( $results['message'] ?? __( 'Failed to fetch results.', 'surecookie' ) );
 			return;
@@ -2154,11 +2345,17 @@ class SaasClient {
 			$this->process_scan_results( $results['data'] );
 		}
 
-		// Cleanup local state.
-		$this->cleanup_active_scan();
-
+		// Both before the cleanup that flips the UI to idle: on its first status read
+		// after that the drawer fetches the log tail and runs its completion path.
 		Logger::get_instance()->save_log( '' ); // Blank line.
 		Logger::get_instance()->save_log( 'Cookies scanning workflow completed successfully.' );
+
+		$this->mark_just_finished(
+			is_array( $active_scan['progress'] ?? null ) ? $active_scan['progress'] : [],
+			is_array( $active_scan['error_details'] ?? null ) ? $active_scan['error_details'] : []
+		);
+
+		$this->cleanup_active_scan();
 	}
 
 	/**

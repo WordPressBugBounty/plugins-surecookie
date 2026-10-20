@@ -19,6 +19,7 @@ use SureCookie\Inc\Integrations\Elementor\Init as Elementor;
 use SureCookie\Inc\Integrations\Multilingual\Init as Multilingual;
 use SureCookie\Inc\Integrations\PixelYourSite\Init as PixelYourSite;
 use SureCookie\Inc\Integrations\PrestoPlayer\Init as Presto_Player;
+use SureCookie\Inc\Integrations\SiteHealth\Consent_Write;
 use SureCookie\Inc\Integrations\SiteHealth\Init as Site_Health;
 use SureCookie\Inc\Integrations\ThemePalette\Init as Theme_Palette;
 use SureCookie\Inc\Integrations\Wordpress\Init as Wordpress_Abilities;
@@ -84,6 +85,7 @@ class Init {
 		// weekly check, so it never boots on a front-end request.
 		if ( is_admin() || wp_doing_cron() ) {
 			Site_Health::get_instance();
+			Consent_Write::get_instance();
 		}
 	}
 }

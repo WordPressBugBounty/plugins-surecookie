@@ -296,14 +296,6 @@ class Block_Handler {
 		$out  = '<div class="' . esc_attr( $wrapper_class ) . '"';
 		$out .= ' data-surecookie-name="' . esc_attr( $service ) . '"';
 		$out .= ' data-surecookie-category="' . esc_attr( $category ) . '"';
-		// An attribute, not a <template>: a pass that re-serialises this region
-		// without the template content model lifts the template's children out,
-		// leaving the real <presto-player> loose and live behind the overlay.
-		// htmlspecialchars, not esc_attr, so the value double-encodes and one
-		// decode returns the source text rather than promoting `&lt;script&gt;`.
-		// ENT_SUBSTITUTE is not optional: without it one invalid byte encodes to
-		// '' and the player is lost, since the payload has no second carrier.
-		$out .= ' data-surecookie-restore="' . htmlspecialchars( $block_content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) . '"';
 		if ( $wrapper_style !== '' ) {
 			$out .= ' style="' . esc_attr( $wrapper_style ) . '"';
 		}
@@ -313,9 +305,48 @@ class Block_Handler {
 		// is the shared one, so the two builders can't drift apart.
 		$out .= $this->render_placeholder_overlay( $category, $provider['label'], $image, $this->placeholder_text( $provider['label'] ) );
 
+		// After the overlay so the payload cannot answer a `:first-child` rule.
+		$out .= $this->restore_payload( $block_content );
+
 		$out .= '</div>';
 
 		return $out;
+	}
+
+	/**
+	 * The gated block's markup, parked where only this plugin can have put it.
+	 *
+	 * Provenance is the whole point. `class` and `data-*` survive `wp_kses_post()`
+	 * on a div, so while the payload rode in `data-surecookie-restore` any author
+	 * without `unfiltered_html` could fabricate a carrier and have the frontend
+	 * re-create it as running script (#1345). KSES strips `<script>` from authored
+	 * content outright, so this element cannot be forged through post content.
+	 *
+	 * JSON, not markup: `JSON_HEX_TAG` escapes `<` and `>`, so a payload containing
+	 * `</script>` cannot close the element early. And unlike the `<template>` this
+	 * module used before, a script's content is text rather than child elements, so
+	 * a pass that re-serialises the region cannot lift the real `<presto-player>`
+	 * out and leave it live behind the overlay.
+	 *
+	 * @since 1.7.0
+	 * @param string $block_content Original rendered block.
+	 * @return string
+	 */
+	private function restore_payload( string $block_content ): string {
+		// JSON_INVALID_UTF8_SUBSTITUTE is not optional, for the same reason
+		// ENT_SUBSTITUTE was not: on a non-UTF-8 blog_charset one bad byte makes
+		// the whole encode fail, and a placeholder with no payload unwraps to
+		// nothing, losing the player.
+		$json = wp_json_encode(
+			$block_content,
+			JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+		);
+
+		if ( ! is_string( $json ) ) {
+			return '';
+		}
+
+		return '<script type="application/json" class="surecookie-presto-restore">' . $json . '</script>';
 	}
 
 	/**

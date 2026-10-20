@@ -35,6 +35,14 @@ class Api extends Base {
 	public const CALLBACK_ACTION = 'surecookie_auth_callback';
 
 	/**
+	 * Transient prefix recording which screen started an auth flow.
+	 *
+	 * Kept apart from the flow key transient so the shape `save_auth()` decrypts
+	 * stays untouched.
+	 */
+	public const ORIGIN_TRANSIENT_PREFIX = 'surecookie_auth_origin_';
+
+	/**
 	 * Register REST routes.
 	 *
 	 * @since 0.0.1-beta.3
@@ -48,6 +56,17 @@ class Api extends Base {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_auth_payload' ],
 				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					// Which screen to return to. An enum, never a caller-supplied
+					// URL: this value ends up in a redirect.
+					'origin' => [
+						'required'          => false,
+						'type'              => 'string',
+						'default'           => Controller::ORIGIN_ADMIN,
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => static fn( $value ): bool => in_array( $value, Controller::ORIGINS, true ),
+					],
+				],
 			]
 		);
 	}
@@ -74,7 +93,7 @@ class Api extends Base {
 			return;
 		}
 
-		$payload = $controller->get_auth_payload();
+		$payload = $controller->get_auth_payload( (string) $request->get_param( 'origin' ) );
 
 		if ( is_wp_error( $payload ) ) {
 			SendJson::error( [ 'message' => $payload->get_error_message() ] );
@@ -105,17 +124,25 @@ class Api extends Base {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- ciphertext is base64 URL-safe; sanitization would corrupt it. Validated by save_auth.
 		$access_key = isset( $_POST['access_key'] ) && is_string( $_POST['access_key'] ) ? (string) wp_unslash( $_POST['access_key'] ) : '';
 
-		$redirect_base = admin_url( 'admin.php?page=surecookie' );
+		// Return to whichever screen started the flow. A popup-blocked connect
+		// navigates the admin tab itself, so sending every return to the admin app
+		// used to drop a user out of the setup wizard with no way back into it.
+		$origin = '';
+		if ( $flow_id !== '' ) {
+			$stored = get_transient( self::ORIGIN_TRANSIENT_PREFIX . $flow_id );
+			$origin = is_string( $stored ) ? $stored : '';
+			delete_transient( self::ORIGIN_TRANSIENT_PREFIX . $flow_id );
+		}
 
 		if ( $access_key === '' || $flow_id === '' ) {
-			wp_safe_redirect( add_query_arg( 'auth', 'fail', $redirect_base ) );
+			wp_safe_redirect( Controller::get_instance()->get_return_url( $origin, 'fail' ) );
 			exit;
 		}
 
 		$result = Controller::get_instance()->save_auth( $access_key, $flow_id );
 
 		$status = is_wp_error( $result ) ? 'fail' : 'success';
-		wp_safe_redirect( add_query_arg( 'auth', $status, $redirect_base ) );
+		wp_safe_redirect( Controller::get_instance()->get_return_url( $origin, $status ) );
 		exit;
 	}
 }

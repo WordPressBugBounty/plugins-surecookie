@@ -114,7 +114,7 @@ class SureCookie_Loader {
 					// Re-add it after this specific error.
 					add_action(
 						'shutdown',
-						static function() use ( $collector ): void {
+						static function () use ( $collector ): void {
 							if ( ! has_action( 'doing_it_wrong_run', [ $collector, 'action_doing_it_wrong_run' ] ) ) {
 								add_action( 'doing_it_wrong_run', [ $collector, 'action_doing_it_wrong_run' ], 10, 3 );
 							}

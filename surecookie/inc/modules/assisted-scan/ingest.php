@@ -20,6 +20,7 @@
 
 namespace SureCookie\Inc\Modules\AssistedScan;
 
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Modules\Services\Service_Matcher;
 use SureCookie\Inc\Modules\Services\Services_Source;
 use SureCookie\Inc\Modules\SiteScanner\LoopbackScanner;
@@ -293,19 +294,19 @@ class Ingest {
 			}
 
 			foreach ( [ 'category', 'purpose', 'description' ] as $field ) {
-				if ( self::is_blank( $cookie[ $field ] ?? null ) && ! self::is_blank( $definition[ $field ] ?? null ) ) {
+				if ( Sanitize::is_blank( $cookie[ $field ] ?? null ) && ! Sanitize::is_blank( $definition[ $field ] ?? null ) ) {
 					$cookies[ $position ][ $field ] = $definition[ $field ];
 				}
 			}
 
-			if ( self::is_blank( $cookie['owner'] ?? null ) && ! self::is_blank( $definition['provider'] ?? null ) ) {
+			if ( Sanitize::is_blank( $cookie['owner'] ?? null ) && ! Sanitize::is_blank( $definition['provider'] ?? null ) ) {
 				$cookies[ $position ]['owner'] = $definition['provider'];
 			}
 
 			// A lifetime the browser could not observe; the catalog states it in days.
 			// Better than publishing a persistent cookie as a session one.
 			$days = absint( $definition['duration_days'] ?? 0 );
-			if ( self::is_blank( $cookie['expires_at'] ?? null ) && $days > 0 ) {
+			if ( Sanitize::is_blank( $cookie['expires_at'] ?? null ) && $days > 0 ) {
 				$cookies[ $position ]['expires_at'] = gmdate( 'c', (int) strtotime( "+{$days} days" ) );
 			}
 		}
@@ -341,11 +342,11 @@ class Ingest {
 				$service    = $catalog[ $slug ];
 				$vendor_key = $kind === 'scripts' ? 'vendor_name' : 'vendor';
 
-				if ( self::is_blank( $entry[ $vendor_key ] ?? null ) && ! self::is_blank( $service['label'] ?? null ) ) {
+				if ( Sanitize::is_blank( $entry[ $vendor_key ] ?? null ) && ! Sanitize::is_blank( $service['label'] ?? null ) ) {
 					$entries[ $position ][ $vendor_key ] = (string) $service['label'];
 				}
 
-				if ( self::is_blank( $entry['tracking_category'] ?? null ) && ! self::is_blank( $service['category'] ?? null ) ) {
+				if ( Sanitize::is_blank( $entry['tracking_category'] ?? null ) && ! Sanitize::is_blank( $service['category'] ?? null ) ) {
 					$entries[ $position ]['tracking_category'] = (string) $service['category'];
 				}
 			}
@@ -633,20 +634,5 @@ class Ingest {
 		$stored = get_option( SURECOOKIE_SCANNED_COOKIES_OPTION, [] );
 
 		return Normalizer::build_existing_index( is_array( $stored ) ? $stored : [] );
-	}
-
-	/**
-	 * Whether a value carries no usable content.
-	 *
-	 * @param mixed $value Value to test.
-	 * @since 1.3.0
-	 * @return bool
-	 */
-	private static function is_blank( $value ): bool {
-		if ( $value === null || $value === false ) {
-			return true;
-		}
-
-		return is_string( $value ) && trim( $value ) === '';
 	}
 }

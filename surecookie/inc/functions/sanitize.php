@@ -236,6 +236,23 @@ class Sanitize {
 	}
 
 	/**
+	 * Whether a value renders as nothing: not a string, empty, ASCII or Unicode
+	 * spaces, or invisible format characters.
+	 *
+	 * Visible copy is the test, not `=== ''`: a label of U+00A0 or U+200B survives
+	 * trim() and renders as a gap, which is how a nameless button (#957, #1421) and
+	 * a "would connect to ." placeholder (#1429) each reached visitors.
+	 *
+	 * @param mixed $value Value to test.
+	 *
+	 * @since 1.7.0
+	 * @return bool
+	 */
+	public static function is_blank( $value ): bool {
+		return ! is_string( $value ) || preg_match( '/^[\s\p{Z}\p{Cf}]*$/u', $value ) === 1;
+	}
+
+	/**
 	 * Sanitize a scanned vendor name. A classifier placeholder such as "null" names no vendor.
 	 *
 	 * @param mixed $value Raw vendor.

@@ -54,6 +54,30 @@ class Utils {
 	}
 
 	/**
+	 * Whether the consent model baked into this render was resolved for one
+	 * visitor while the browser will resolve it again for whoever reads the page.
+	 *
+	 * Pro's geographic rules answer true: the region decides the consent model,
+	 * a full-page cache hands the render to a visitor in another region, and
+	 * `geolocation.js` re-resolves it. Until it has, no layer may act on the
+	 * permissive side of that model - an opt-out default released a cached
+	 * EU page's trackers before consent (#1125). One read, so the page payload
+	 * and the DOM guard cannot disagree about it.
+	 *
+	 * @since 1.7.0
+	 * @return bool
+	 */
+	public static function is_consent_decision_provisional(): bool {
+		/**
+		 * Filter whether this render's consent model is provisional.
+		 *
+		 * @since 1.7.0
+		 * @param bool $provisional Whether the browser will re-resolve it.
+		 */
+		return (bool) apply_filters( 'surecookie_consent_decision_is_provisional', false );
+	}
+
+	/**
 	 * Whether this request is the SaaS scanner presenting a valid bypass token.
 	 *
 	 * Lives here rather than in the Blocker because gating happens in more than

@@ -205,5 +205,4 @@ class Consent_Handler {
 
 		wp_set_consent( $wp_type, $value );
 	}
-
 }

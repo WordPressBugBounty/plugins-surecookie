@@ -11,6 +11,7 @@
 
 namespace SureCookie\Inc\Modules\ReConsent;
 
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\Multilingual\Translation_Filter;
 
@@ -31,16 +32,28 @@ class Helper {
 	 * multilingual integration. Shared by the nav-menu item and the shortcode
 	 * so both render the same translated label.
 	 *
-	 * @return string Translated label, or '' when no label is configured.
+	 * @return string Translated label, the default label when none is saved.
 	 * @since 1.2.1
 	 */
 	public static function translated_reconsent_label(): string {
 		$label = Settings::get( 'reconsent_button_label' );
 
-		if ( ! is_string( $label ) || $label === '' ) {
-			return '';
+		// A saved '' beats the default in Settings::get() while the settings screen shows it.
+		if ( self::is_blank( $label ) ) {
+			$label = __( 'Cookie Preferences', 'surecookie' );
 		}
 
 		return Translation_Filter::translate_string( $label, 'surecookie_reconsent_button_label' );
+	}
+
+	/**
+	 * Whether a label renders as nothing: empty, Unicode spaces or invisible format characters (#957).
+	 *
+	 * @param mixed $label Label.
+	 * @return bool
+	 * @since 1.7.0
+	 */
+	public static function is_blank( $label ): bool {
+		return Sanitize::is_blank( $label );
 	}
 }

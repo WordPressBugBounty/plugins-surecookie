@@ -104,6 +104,12 @@ class Options {
 					'default' => 'accept_all,accept,preferences,decline',
 					'group'   => 'buttons',
 				],
+				'policy_links_order'            => [
+					// A comma string, validated by Settings::normalize_policy_links_order().
+					'type'    => 'policy_links_order',
+					'default' => 'cookie_policy,privacy_policy,legal_notice',
+					'group'   => 'banner',
+				],
 				'compliance_law'                => [
 					'type'    => 'array',
 					'default' => [
@@ -231,6 +237,10 @@ class Options {
 					'default' => 0,
 				],
 				'privacy_policy_page_id'        => [
+					'type'    => 'int',
+					'default' => 0,
+				],
+				'legal_notice_page_id'          => [
 					'type'    => 'int',
 					'default' => 0,
 				],

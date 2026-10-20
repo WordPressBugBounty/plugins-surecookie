@@ -241,12 +241,20 @@ class Settings_Metadata {
 
 			// Pages and menus.
 			'cookie_policy_page_id'        => [
-				'description' => __( 'Post ID of the cookie policy page linked from the banner. 0 means none is linked.', 'surecookie' ),
+				'description' => __( 'Post ID of the cookie policy page linked from the preferences modal. 0 means none is linked.', 'surecookie' ),
 				'hazard'      => __( 'Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page.', 'surecookie' ),
 			],
 			'privacy_policy_page_id'       => [
 				'description' => __( 'Post ID of the SureCookie-managed privacy policy page. 0 means none is linked.', 'surecookie' ),
-				'hazard'      => __( 'This is not WordPress\'s own wp_page_for_privacy_policy option. Writing it does not change the page WordPress links from the footer or the login screen; use the "Use as WordPress Privacy Policy page" action for that.', 'surecookie' ),
+				'hazard'      => __( 'This is not WordPress\'s own wp_page_for_privacy_policy option. Writing it does not change the page WordPress links from the footer or the login screen, nor the one the consent modal links, which reads core\'s option first and falls back to this only when core has no published policy; use the "Use as WordPress Privacy Policy page" action to make them agree.', 'surecookie' ),
+			],
+			'policy_links_order'           => [
+				'description' => __( 'Which legal links the preferences modal shows and in what order, as a comma-separated list of the tokens cookie_policy, privacy_policy and legal_notice. A token left out is hidden. An empty string hides all three.', 'surecookie' ),
+				'hazard'      => __( 'Hiding a link does not unpublish its page, but with the banner overlay on the consent UI is the only place a visitor can reach it.', 'surecookie' ),
+			],
+			'legal_notice_page_id'         => [
+				'description' => __( 'Post ID of the legal notice / imprint (Impressum) page linked from the preferences modal. 0 means none is linked.', 'surecookie' ),
+				'hazard'      => __( 'Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks a page several jurisdictions require to stay reachable.', 'surecookie' ),
 			],
 			'privacy_jurisdictions'        => [
 				'description' => __( 'Privacy regimes whose sections appear in the generated privacy policy. Empty means none.', 'surecookie' ),

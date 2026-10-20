@@ -67,9 +67,9 @@ class Shortcode {
 			return '';
 		}
 
-		$label = ! empty( $atts['label'] )
-			? sanitize_text_field( $atts['label'] )
-			: Helper::translated_reconsent_label();
+		// Test after sanitizing: a tag-only label sanitizes to '', and a blank one renders a nameless button.
+		$label = sanitize_text_field( $atts['label'] ?? '' );
+		$label = Helper::is_blank( $label ) ? Helper::translated_reconsent_label() : $label;
 
 		$extra_class = ! empty( $atts['class'] )
 			? ' ' . implode( ' ', array_map( 'sanitize_html_class', explode( ' ', $atts['class'] ) ) )

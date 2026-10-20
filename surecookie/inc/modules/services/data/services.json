@@ -1,7 +1,7 @@
 {
     "_meta": {
         "note": "Unified catalog floor: one entry per service with blocking patterns AND declared cookies. Offline/day-1 fallback; the remote services.json wins per slug. Each cookie keeps its own category.",
-        "version": 2
+        "version": 3
     },
     "ab-tasty": {
         "label": "AB Tasty",
@@ -62,6 +62,9 @@
         "label": "Adobe Analytics",
         "description": "Enterprise web analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -77,6 +80,9 @@
         "label": "Adobe Fonts (Typekit)",
         "description": "Loads Adobe (Typekit) web fonts.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -103,6 +109,9 @@
         "label": "Amazon Ads",
         "description": "Amazon advertising and retargeting.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -118,6 +127,9 @@
         "label": "Amplitude",
         "description": "Product and behavioral analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -144,6 +156,9 @@
         "label": "Authorize.net",
         "description": "Payment gateway and fraud detection.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -183,6 +198,9 @@
         "label": "Braintree",
         "description": "PayPal-owned payment processing.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -210,6 +228,9 @@
         "label": "Brightcove",
         "description": "Video hosting and player.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -284,6 +305,9 @@
         "label": "Calendly",
         "description": "Meeting scheduling and booking.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -299,6 +323,9 @@
         "label": "Campaign Manager 360 (Google)",
         "description": "Google ad campaign measurement.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -328,6 +355,9 @@
         "label": "cdnjs (Cloudflare CDN)",
         "description": "Cloudflare open-source library CDN.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -354,6 +384,9 @@
         "label": "Microsoft Clarity",
         "description": "Microsoft heatmaps and session replay.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -419,6 +452,9 @@
         "label": "Cloudflare Web Analytics",
         "description": "Privacy-first web analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "cookieless": true,
         "pro": true,
         "patterns": {
@@ -433,6 +469,9 @@
         "label": "Cloudflare Turnstile",
         "description": "Privacy-friendly bot protection.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -487,6 +526,9 @@
         "label": "Crazy Egg",
         "description": "Heatmaps and A/B testing.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -542,6 +584,9 @@
         "label": "Display & Video 360 (Google)",
         "description": "Google programmatic display ads.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -557,6 +602,9 @@
         "label": "Disqus",
         "description": "Embedded comment threads.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -572,6 +620,9 @@
         "label": "DoubleClick (Google)",
         "description": "Google ad serving and retargeting.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -659,6 +710,9 @@
         "label": "Facebook Embeds",
         "description": "Embeds Facebook posts and videos.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [],
@@ -672,6 +726,9 @@
         "label": "Facebook Pixel",
         "description": "Meta ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -729,6 +786,9 @@
         "label": "Firebase Analytics (Google)",
         "description": "Google app and web analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -744,6 +804,9 @@
         "label": "Floodlight (Google)",
         "description": "Google conversion and remarketing tags.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -786,6 +849,9 @@
         "label": "FullStory",
         "description": "Session replay and analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -812,6 +878,9 @@
         "label": "Google Sign-In",
         "description": "Google Sign-In authentication.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -827,6 +896,9 @@
         "label": "Google Ad Manager",
         "description": "Google ad serving platform.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -843,6 +915,9 @@
         "label": "Google Ads",
         "description": "Google Ads conversion and remarketing.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -905,6 +980,9 @@
         "label": "Google AdSense",
         "description": "Google display ads.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -921,6 +999,9 @@
         "label": "Google Analytics",
         "description": "Website traffic and audience analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": false,
         "gcm_compatible": true,
         "patterns": {
@@ -1001,6 +1082,9 @@
         "label": "Google Fonts",
         "description": "Loads Google web fonts.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": false,
         "patterns": {
@@ -1017,6 +1101,9 @@
         "label": "Google Hosted Libraries",
         "description": "Google-hosted JavaScript libraries.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1030,6 +1117,9 @@
         "label": "Google Maps",
         "description": "Embeds interactive Google Maps.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": false,
         "patterns": {
             "scripts": [
@@ -1065,6 +1155,9 @@
         "label": "Google Pay",
         "description": "Google Pay checkout button.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1078,6 +1171,9 @@
         "label": "Google Tag Manager",
         "description": "Deploys and manages marketing tags.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -1128,6 +1224,9 @@
         "label": "Heap",
         "description": "Automatic product analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1205,6 +1304,9 @@
         "label": "HubSpot",
         "description": "CRM, marketing, and analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1282,6 +1384,9 @@
         "label": "Instagram",
         "description": "Embeds Instagram posts.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1300,6 +1405,9 @@
         "label": "Intercom",
         "description": "Customer messaging and support.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1395,6 +1503,9 @@
         "label": "JW Player",
         "description": "Video hosting and player.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1451,6 +1562,9 @@
         "label": "Klaviyo",
         "description": "Ecommerce email and SMS marketing.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1464,6 +1578,9 @@
         "label": "LinkedIn Insight Tag",
         "description": "LinkedIn ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1564,6 +1681,9 @@
         "label": "Loom",
         "description": "Embeds Loom video recordings.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [],
@@ -1604,6 +1724,9 @@
         "label": "Mailchimp",
         "description": "Email marketing and automation.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1700,6 +1823,9 @@
         "label": "Microsoft Advertising (Bing Ads)",
         "description": "Bing Ads conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1713,6 +1839,9 @@
         "label": "Mixpanel",
         "description": "Product and event analytics.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1752,6 +1881,9 @@
         "label": "New Relic",
         "description": "Application performance monitoring.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1804,6 +1936,9 @@
         "label": "OneSignal",
         "description": "Web push notifications.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1843,6 +1978,9 @@
         "label": "Optimizely",
         "description": "Experimentation and A/B testing.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1869,6 +2007,9 @@
         "label": "OptinMonster",
         "description": "Lead generation and popups.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1921,6 +2062,9 @@
         "label": "PayPal",
         "description": "PayPal payments and checkout.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -1935,6 +2079,9 @@
         "label": "Pinterest Tag",
         "description": "Pinterest ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2091,6 +2238,9 @@
         "label": "Google reCAPTCHA",
         "description": "Google bot and spam protection.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": false,
         "gcm_compatible": false,
         "patterns": {
@@ -2118,6 +2268,9 @@
         "label": "Reddit Ads",
         "description": "Reddit ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2171,6 +2324,9 @@
         "label": "Search Ads 360 (Google)",
         "description": "Google search campaign management.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "gcm_compatible": true,
         "patterns": {
@@ -2186,6 +2342,9 @@
         "label": "Segment",
         "description": "Customer data platform.",
         "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2309,6 +2468,9 @@
         "label": "Snapchat Pixel",
         "description": "Snapchat ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2372,6 +2534,9 @@
         "label": "Square",
         "description": "Square payment processing.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2428,6 +2593,9 @@
         "label": "Stripe",
         "description": "Payment processing and fraud checks.",
         "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2601,6 +2769,9 @@
         "label": "Twitch",
         "description": "Embeds Twitch streams.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2616,6 +2787,9 @@
         "label": "Twitter/X Pixel",
         "description": "X (Twitter) ad conversion tracking.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2721,6 +2895,9 @@
         "label": "Vimeo",
         "description": "Embeds Vimeo videos.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": false,
         "patterns": {
             "scripts": [
@@ -2778,6 +2955,9 @@
         "label": "Wistia",
         "description": "Business video hosting.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2808,6 +2988,9 @@
         "label": "Xandr (AppNexus)",
         "description": "Programmatic ad platform.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [
@@ -2847,6 +3030,9 @@
         "label": "YouTube",
         "description": "Embeds YouTube videos.",
         "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": false,
         "patterns": {
             "scripts": [
@@ -2911,6 +3097,9 @@
         "label": "Zendesk",
         "description": "Customer support and live chat.",
         "category": "functional",
+        "transfer_countries": [
+            "US"
+        ],
         "pro": true,
         "patterns": {
             "scripts": [

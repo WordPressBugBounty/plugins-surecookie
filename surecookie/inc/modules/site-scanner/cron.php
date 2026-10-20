@@ -158,6 +158,12 @@ class Cron {
 		$active_scan = $saas_client->get_active_scan();
 
 		if ( empty( $active_scan ) ) {
+			// A cloud scan that just ended reports its finish once, like an assisted walk.
+			$just_finished = $saas_client->peek_just_finished();
+			if ( $just_finished !== null ) {
+				return $just_finished;
+			}
+
 			$last_outcome = get_transient( SaasClient::LAST_OUTCOME_TRANSIENT );
 
 			return [
@@ -218,8 +224,10 @@ class Cron {
 			return false;
 		}
 
-		// Cleanup local state.
+		// Cleanup local state. A cancelled scan must not inherit an earlier run's
+		// terminal marker and report itself as completed.
 		$saas_client->cleanup_active_scan();
+		$saas_client->clear_just_finished();
 
 		Logger::get_instance()->log( __( 'Scan cancelled by user.', 'surecookie' ) );
 

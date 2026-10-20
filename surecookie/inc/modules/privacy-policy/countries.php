@@ -64,6 +64,87 @@ final class Countries {
 	}
 
 	/**
+	 * EEA member states (the EU 27 plus Iceland, Liechtenstein and Norway) and the
+	 * EU territories with an ISO code of their own (Aland, the French outermost
+	 * regions), which would otherwise print as third countries.
+	 *
+	 * Deliberately NOT Get::eu_countries(), which is the geo-targeting list for
+	 * "show the GDPR banner here" and carries the UK, Switzerland, Russia,
+	 * Belarus and Ukraine. Reusing it would report a transfer to London or Zurich
+	 * as domestic, which is exactly the statement Art. 44 requires a site to make.
+	 *
+	 * @since 1.7.0
+	 * @return array<int, string>
+	 */
+	public static function eea(): array {
+		return [
+			'AT',
+			'BE',
+			'BG',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HU',
+			'IE',
+			'IS',
+			'IT',
+			'LI',
+			'LT',
+			'LU',
+			'LV',
+			'MT',
+			'NL',
+			'NO',
+			'PL',
+			'PT',
+			'RO',
+			'SE',
+			'SI',
+			'SK',
+			'ES',
+			'AX',
+			'GF',
+			'GP',
+			'MQ',
+			'MF',
+			'RE',
+			'YT',
+		];
+	}
+
+	/**
+	 * English names of the codes that are outside the EEA, in the order given.
+	 *
+	 * A code the shipped table does not know is dropped rather than printed
+	 * raw: a bare "ZZ" in a privacy disclosure is worse than saying nothing.
+	 *
+	 * @since 1.7.0
+	 * @param array<int, mixed> $codes ISO 3166-1 alpha-2 codes.
+	 * @return array<int, string>
+	 */
+	public static function third_country_names( array $codes ): array {
+		$eea   = self::eea();
+		$names = [];
+
+		foreach ( $codes as $code ) {
+			$code = is_string( $code ) ? strtoupper( trim( $code ) ) : '';
+			$name = $code !== '' && ! in_array( $code, $eea, true ) ? self::name( $code ) : '';
+
+			if ( $name !== '' ) {
+				$names[ $name ] = true;
+			}
+		}
+
+		return array_keys( $names );
+	}
+
+	/**
 	 * The list shaped for a force-ui select.
 	 *
 	 * @since 1.5.0

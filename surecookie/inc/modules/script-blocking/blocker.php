@@ -11,6 +11,7 @@
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
 use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
@@ -1191,11 +1192,16 @@ class Blocker {
 					continue;
 				}
 
+				// A producer may declare `label` and leave it blank; the placeholder
+				// prints it verbatim, so anything that renders as nothing is absent (#1429).
+				$label = Sanitize::scalar( $service['label'] ?? '' );
+				$label = Sanitize::is_blank( $label ) ? $service_key : $label;
+
 				foreach ( $service[ $bucket ] as $pattern ) {
 					$patterns[ $pattern ] = [
 						'name'     => $service_key,
 						'category' => $category,
-						'label'    => $service['label'] ?? $service_key,
+						'label'    => $label,
 						// Optional page-region constraint (head|body|footer).
 						'location' => $service['location'] ?? 'any',
 						// Optional narrowing constraint: the resource must

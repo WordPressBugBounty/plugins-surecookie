@@ -1199,6 +1199,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   min-width: 2.5rem;
 }.surecookie-styles .min-w-12 {
   min-width: 3rem;
+}.surecookie-styles .min-w-32 {
+  min-width: 8rem;
 }.surecookie-styles .min-w-40 {
   min-width: 10rem;
 }.surecookie-styles .min-w-52 {
@@ -1259,8 +1261,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   max-width: fit-content;
 }.surecookie-styles .max-w-full {
   max-width: 100%;
-}.surecookie-styles .max-w-lg {
-  max-width: 32rem;
 }.surecookie-styles .max-w-xl {
   max-width: 36rem;
 }.surecookie-styles .max-w-xs {
@@ -2175,8 +2175,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   padding-left: 6rem;
 }.surecookie-styles .pr-3 {
   padding-left: 0.75rem;
-}.surecookie-styles .pr-4 {
-  padding-left: 1rem;
 }.surecookie-styles .pr-8 {
   padding-left: 2rem;
 }.surecookie-styles .pr-9 {
@@ -2357,9 +2355,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .text-field-placeholder {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
-}.surecookie-styles .text-gray-900 {
-  --tw-text-opacity: 1;
-  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }.surecookie-styles .text-green-400 {
   --tw-text-opacity: 1;
   color: rgb(74 222 128 / var(--tw-text-opacity, 1));
@@ -2948,9 +2943,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-bg-opacity: 1;
   background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1));
 }.surecookie-styles .hover\:bg-field-dropzone-background-hover:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}.surecookie-styles .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
 }.surecookie-styles .hover\:bg-green-100:hover {

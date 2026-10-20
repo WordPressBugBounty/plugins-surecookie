@@ -1005,6 +1005,21 @@
 .surecookie-preferences-modal .surecookie-btn-outline-secondary {
 	border: 1px solid var(--surecookie-banner-primary-color);
 }
+
+/* These two carry no hover of their own above, so a theme's global
+   `button:hover` was the only hover declaration and won: Elementor kits set
+   white on white and flattened the radius, and both buttons vanished (#1385).
+   Restating the idle appearance at the ID specificity the banner buttons
+   already use is what no theme selector can outrank. */
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-outline:hover,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-outline:active,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-outline-secondary:hover,
+:is(#surecookie-public-root, #surecookie-preferences-root) .surecookie-preferences-modal .surecookie-btn-outline-secondary:active {
+	background-color: transparent;
+	border: 1px solid var(--surecookie-banner-primary-color);
+	border-radius: 8px;
+	color: var(--surecookie-banner-text-color, #374151);
+}
 .surecookie-preferences-modal .surecookie-btn-primary {
 	min-width: 136px;
 	height: 40px;
@@ -1053,18 +1068,30 @@
 /* Branding content wrapper - keeps the three branding elements together on
    the right. Uses the banner text color (muted) so the "Powered by SureCookie"
    line reads as branding, not as a CTA, regardless of the active palette. */
-.surecookie-modal-branding-content {
+.surecookie-preferences-modal .surecookie-modal-branding-content {
 	display: flex;
 	align-items: center;
 	gap: 4px;
+	/* Same resets as the legal links beside it: the modal is a body child, so a
+	   theme's generic `a` rule still reaches both, and only one of them being
+	   insulated left the footer row mismatched. */
+	padding: 0;
+	border: 0;
+	margin: 0;
+	background: none;
+	box-shadow: none;
 	color: var(--surecookie-banner-text-color, #6b7280);
+	font: inherit;
 	opacity: 0.75;
+	text-decoration: none;
+	text-transform: none;
 }
-.surecookie-modal-branding-content:hover {
+.surecookie-preferences-modal .surecookie-modal-branding-content:hover {
 	opacity: 1;
 }
 
-/* Cookie policy page link in preferences modal footer */
+/* Cookie policy link substituted into the modal DESCRIPTION by the
+   {cookie_policy_link} token - not the footer. */
 .surecookie-modal-policy-link {
 	color: var(--surecookie-banner-primary-color);
 	text-decoration: none;
@@ -1072,6 +1099,70 @@
 }
 .surecookie-modal-policy-link:hover {
 	text-decoration: underline;
+}
+
+/* Legal links in the preferences-modal footer, opposite the branding. They sit
+   inside the consent UI because the overlay makes the rest of the page inert,
+   so a footer imprint is unreachable while the prompt is up (#1244).
+   Everything is reset against generic theme anchor styles: the modal is a body
+   child, so a theme's `a { }` rule still reaches it. */
+.surecookie-preferences-modal .surecookie-policy-links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 2px 6px;
+	/* Pins the links left and keeps the branding at the far right, without the
+	   footer having to switch justification on whether branding is rendered. */
+	margin-left: auto;
+	padding: 0;
+	color: inherit;
+	font: inherit;
+}
+.surecookie-preferences-modal .surecookie-policy-links .surecookie-policy-link {
+	padding: 0;
+	border: 0;
+	margin: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	opacity: 0.75;
+	text-decoration: none;
+	text-transform: none;
+}
+.surecookie-preferences-modal .surecookie-policy-links .surecookie-policy-link:hover,
+.surecookie-preferences-modal .surecookie-policy-links .surecookie-policy-link:focus-visible {
+	color: inherit;
+	opacity: 1;
+	text-decoration: underline;
+}
+.surecookie-preferences-modal .surecookie-policy-link-sep {
+	opacity: 0.5;
+}
+
+/* Who receives the data in this category, and the third countries it reaches. */
+.surecookie-preferences-modal .surecookie-category-disclosure {
+	margin: 8px 0 0;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--surecookie-banner-text-color);
+	opacity: 0.85;
+}
+.surecookie-preferences-modal .surecookie-category-disclosure > div {
+	margin-bottom: 4px;
+}
+.surecookie-preferences-modal .surecookie-category-disclosure dt,
+.surecookie-preferences-modal .surecookie-category-disclosure dd {
+	display: inline;
+	margin: 0;
+}
+.surecookie-preferences-modal .surecookie-category-disclosure dt {
+	font-weight: 600;
+}
+/* Generated rather than part of the msgid, so a locale can restyle the
+   punctuation without the string itself carrying it. */
+.surecookie-preferences-modal .surecookie-category-disclosure dt::after {
+	content: ": ";
 }
 
 /* Skeleton loading placeholders for category cards */
@@ -1380,10 +1471,12 @@
    Accessibility Styles
 ========================================================================== */
 
-/* Screen-reader-only utility - visually hidden but announced by screen readers */
+/* Screen-reader-only utility - visually hidden but announced by screen readers.
+   The -1px margin keeps its box inside <body>: rendered last, it would add 1px of scroll overflow. */
 .surecookie-sr-only {
 	clip-path: inset(50%);
 	height: 1px;
+	margin: -1px;
 	overflow: hidden;
 	position: absolute;
 	white-space: nowrap;

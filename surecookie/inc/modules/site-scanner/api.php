@@ -377,5 +377,4 @@ class Api extends Base {
 			]
 		);
 	}
-
 }

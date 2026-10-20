@@ -8,6 +8,7 @@
 
 namespace SureCookie\Inc\Functions;
 
+use SureCookie\Inc\Modules\PrivacyPolicy\Countries;
 use SureCookie\Inc\Modules\ScriptBlocking\Resource_Categories;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -149,7 +150,10 @@ class Get {
 			'analytics'     => [
 				'id'          => 'analytics',
 				'name'        => __( 'Analytics Cookies', 'surecookie' ),
-				'description' => __( 'Help us understand how visitors use our site so we can improve it.', 'surecookie' ),
+				// Named for the processing purpose rather than for our benefit from
+				// it: "so we can improve it" is the vague phrasing German and EU
+				// practice rejects (#1244).
+				'description' => __( 'Measure how this site is used, such as which pages are viewed and where visitors arrive from. Also called reach measurement.', 'surecookie' ),
 				'required'    => false,
 			],
 			'marketing'     => [
@@ -688,6 +692,187 @@ class Get {
 	}
 
 	/**
+	 * Per-category disclosure for the consent UI: who receives the data when the
+	 * visitor allows a category, and which third countries it may reach (#1244).
+	 *
+	 * A sibling of category_usage_map(), not an extension of it: that one counts
+	 * and its {cookies,scripts,services} shape has other consumers. Both walk the
+	 * same per-site evidence and both file a resource under the category that
+	 * really gates it, so a recipient is never named under a toggle that would
+	 * not release it.
+	 *
+	 * Names come from the catalog by slug, never from a stored row's `provider`:
+	 * that field is the cookie's issuer ("Google") while consent is given to a
+	 * service ("Google Analytics"). A resource no catalog entry matches falls
+	 * back to its scanned vendor and then to its host, which is still honest.
+	 *
+	 * Third countries are derived here from ISO codes rather than read as prose,
+	 * so the EEA test and the visitor-facing sentence stay ours and a catalog
+	 * edit can never author either. A category with nothing to disclose is
+	 * omitted entirely.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, array{recipients: array<int, string>, transfers: array<int, string>}>
+	 */
+	public static function category_disclosure(): array {
+		$catalog   = self::blocking_catalog_entries();
+		$buckets   = [];
+		$row_slugs = [];
+
+		// Scan-detected and blocker-matched resources, after "Do not block" and
+		// after recategorization - the same display set category_usage_map()
+		// reads, and for the same reason (#1157).
+		$resources = self::scanned_resources_for_display();
+
+		foreach ( [
+			'scripts' => 'script',
+			'iframes' => 'iframe',
+		] as $bucket => $kind ) {
+			foreach ( is_array( $resources[ $bucket ] ?? null ) ? $resources[ $bucket ] : [] as $resource ) {
+				$domain = is_array( $resource ) ? trim( Sanitize::scalar( $resource['domain'] ?? '' ) ) : '';
+
+				if ( $domain === '' ) {
+					continue;
+				}
+
+				$slug               = Sanitize::scalar( $resource['service_slug'] ?? '' );
+				$row_slugs[ $slug ] = true;
+
+				if ( Resource_Categories::is_excluded_domain( $domain, $kind ) ) {
+					continue;
+				}
+
+				$entry = is_array( $catalog[ $slug ] ?? null ) ? $catalog[ $slug ] : [];
+				$label = trim( (string) ( $entry['label'] ?? '' ) );
+				$label = $label !== '' ? $label : trim( Sanitize::scalar( $resource['vendor'] ?? '' ) );
+
+				self::disclose(
+					$buckets,
+					Resource_Categories::gated_category( $domain, Sanitize::scalar( $resource['category'] ?? 'uncategorized' ), $kind ),
+					$label !== '' ? $label : $domain,
+					$entry['transfer_countries'] ?? []
+				);
+			}
+		}
+
+		// Services that declared a cookie. A service can be present with no
+		// resource row at all - an admin can install it by hand - so the rows
+		// are the only evidence its recipient exists.
+		foreach ( self::declared_cookie_slugs() as $category_id => $slugs ) {
+			foreach ( $slugs as $slug ) {
+				$entry = is_array( $catalog[ $slug ] ?? null ) ? $catalog[ $slug ] : [];
+
+				self::disclose( $buckets, $category_id, (string) ( $entry['label'] ?? '' ), $entry['transfer_countries'] ?? [] );
+			}
+		}
+
+		// Installed services with no resource row: a service may declare no cookies,
+		// so the registry is the only place it shows. A row wins, as it carries the
+		// admin's recategorization and "Do not block" that the registry never sees.
+		$registry = self::option( SURECOOKIE_INSTALLED_SERVICES_OPTION, [], 'array' );
+
+		foreach ( is_array( $registry['installed'] ?? null ) ? $registry['installed'] : [] as $slug => $service ) {
+			if ( ! is_array( $service ) || isset( $row_slugs[ (string) $slug ] ) ) {
+				continue;
+			}
+
+			$entry    = is_array( $catalog[ (string) $slug ] ?? null ) ? $catalog[ (string) $slug ] : [];
+			$category = sanitize_key( Sanitize::scalar( $service['category'] ?? '' ) );
+
+			// Same fallback category_usage_map() counts it under.
+			self::disclose(
+				$buckets,
+				$category !== '' ? $category : 'uncategorized',
+				(string) ( $entry['label'] ?? Sanitize::scalar( $service['label'] ?? '' ) ),
+				$entry['transfer_countries'] ?? []
+			);
+		}
+
+		$disclosure = [];
+
+		foreach ( $buckets as $category_id => $bucket ) {
+			$recipients = array_keys( $bucket['recipients'] );
+			$transfers  = Countries::third_country_names( array_keys( $bucket['transfers'] ) );
+
+			natcasesort( $recipients );
+			sort( $transfers );
+
+			$disclosure[ $category_id ] = [
+				'recipients' => array_values( $recipients ),
+				'transfers'  => $transfers,
+			];
+		}
+
+		return $disclosure;
+	}
+
+	/**
+	 * Record one recipient, and its transfer countries, against a category.
+	 *
+	 * @since 1.7.0
+	 * @param array<string, array<string, array<string, bool>>> $buckets   Accumulator.
+	 * @param string                                            $category  Category id.
+	 * @param string                                            $label     Recipient name.
+	 * @param mixed                                             $countries ISO 3166-1 alpha-2 codes.
+	 * @return void
+	 */
+	private static function disclose( array &$buckets, string $category, string $label, $countries ): void {
+		$category = sanitize_key( $category );
+		$label    = trim( $label );
+
+		if ( $category === '' || $label === '' ) {
+			return;
+		}
+
+		$buckets[ $category ]['recipients'][ $label ] = true;
+		$buckets[ $category ]['transfers']            = $buckets[ $category ]['transfers'] ?? [];
+
+		foreach ( is_array( $countries ) ? $countries : [] as $code ) {
+			if ( is_string( $code ) && $code !== '' ) {
+				$buckets[ $category ]['transfers'][ $code ] = true;
+			}
+		}
+	}
+
+	/**
+	 * Catalog slugs that published a cookie row, keyed by the row's category.
+	 *
+	 * Asked of what visitors are actually shown rather than of the installed
+	 * registry, for the reason Recognised_Services documents: the two diverge
+	 * whenever a service was removed after a scan had already stored its rows.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, array<int, string>>
+	 */
+	private static function declared_cookie_slugs(): array {
+		$slugs = [];
+
+		foreach ( self::scanned_cookies_for_display() as $category_id => $rows ) {
+			foreach ( is_array( $rows ) ? $rows : [] as $row ) {
+				// 'declared:{slug}:{name}', the contract reconciliation matches on.
+				$parts = is_array( $row ) ? explode( ':', Sanitize::scalar( $row['signature_id'] ?? '' ), 3 ) : [];
+
+				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
+					$slugs[ (string) $category_id ][ $parts[1] ] = true;
+				}
+			}
+		}
+
+		// Installing a service writes its cookies to `custom_cookies` instead,
+		// tagged with the slug, so those rows are declared too.
+		foreach ( (array) Settings::get( 'custom_cookies' ) as $row ) {
+			$slug     = is_array( $row ) ? Sanitize::scalar( $row['service_slug'] ?? '' ) : '';
+			$category = is_array( $row ) ? Sanitize::scalar( $row['category'] ?? '' ) : '';
+
+			if ( $slug !== '' && $category !== '' ) {
+				$slugs[ $category ][ $slug ] = true;
+			}
+		}
+
+		return array_map( 'array_keys', $slugs );
+	}
+
+	/**
 	 * Ids of the categories the consent UI may show when "hide unused" is on.
 	 *
 	 * Never used to build the consent model itself: every registered category
@@ -845,29 +1030,43 @@ class Get {
 	 * @return array<string, string>
 	 */
 	public static function blocking_service_labels(): array {
-		$catalog = apply_filters( 'surecookie_known_scripts', [] );
-		if ( ! is_array( $catalog ) ) {
-			return [];
-		}
-
 		$labels = [];
 
-		foreach ( $catalog as $services ) {
-			if ( ! is_array( $services ) ) {
-				continue;
-			}
-
-			foreach ( $services as $key => $service ) {
-				$label = is_array( $service ) ? (string) ( $service['label'] ?? '' ) : '';
-				// Only worth sending when it differs from the key the element
-				// already carries; the frontend falls back to that key.
-				if ( $label !== '' && $label !== (string) $key ) {
-					$labels[ (string) $key ] = $label;
-				}
+		foreach ( self::blocking_catalog_entries() as $slug => $service ) {
+			$label = (string) ( $service['label'] ?? '' );
+			// Only worth sending when it differs from the key the element
+			// already carries; the frontend falls back to that key.
+			if ( $label !== '' && $label !== $slug ) {
+				$labels[ $slug ] = $label;
 			}
 		}
 
 		return $labels;
+	}
+
+	/**
+	 * The blocking catalog flattened to slug => entry, categories collapsed.
+	 *
+	 * Read through `surecookie_known_scripts` rather than the catalog itself so
+	 * every contributor the blocker matches against is included, and so this
+	 * file does not have to reach into the services module.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function blocking_catalog_entries(): array {
+		$catalog = apply_filters( 'surecookie_known_scripts', [] );
+		$entries = [];
+
+		foreach ( is_array( $catalog ) ? $catalog : [] as $services ) {
+			foreach ( is_array( $services ) ? $services : [] as $slug => $service ) {
+				if ( is_array( $service ) ) {
+					$entries[ (string) $slug ] = $service;
+				}
+			}
+		}
+
+		return $entries;
 	}
 
 	/**
@@ -1027,7 +1226,27 @@ class Get {
 			'edit_url' => '',
 		];
 
-		$page_id = self::resolve_translated_policy_page_id( absint( Settings::get( $setting_key ) ) );
+		return self::policy_page_details( absint( Settings::get( $setting_key ) ) );
+	}
+
+	/**
+	 * The same resolution from a raw page id, for a page WordPress owns rather
+	 * than one of ours.
+	 *
+	 * @since 1.7.0
+	 * @param int $page_id Post ID.
+	 * @return array{id: int, url: string, title: string, status: string, edit_url: string}
+	 */
+	private static function policy_page_details( int $page_id ): array {
+		$data = [
+			'id'       => 0,
+			'url'      => '',
+			'title'    => '',
+			'status'   => '',
+			'edit_url' => '',
+		];
+
+		$page_id = self::resolve_translated_policy_page_id( $page_id );
 
 		if ( $page_id <= 0 ) {
 			return $data;
@@ -1063,16 +1282,58 @@ class Get {
 	}
 
 	/**
-	 * Get privacy policy page details (URL and title), published pages only.
+	 * The site's privacy policy page (URL and title), published pages only.
+	 *
+	 * WordPress's own `wp_page_for_privacy_policy` is asked first, because that
+	 * is the site's declared privacy policy: the page core links from the login
+	 * screen and themes link from the footer. `privacy_policy_page_id` is a
+	 * different thing - the page SureCookie GENERATED - and the two are
+	 * deliberately separate, which is why promoting one to the other is its own
+	 * admin action. Reading ours alone left every site that wrote its own policy
+	 * with no privacy link in the consent modal at all, which is the one link
+	 * CCPA requires in a notice at collection.
+	 *
+	 * Ours is the fallback rather than the ceiling, so a site that generated a
+	 * policy and never promoted it still links the only one it has. Each
+	 * candidate must be published, so a draft falls through instead of blocking.
 	 *
 	 * Shaped like cookie_policy_page_details() so token and shortcode callers
-	 * can treat the two policy pages the same way.
+	 * can treat the policy pages the same way.
 	 *
 	 * @since 1.5.0
 	 * @return array<string, string> Associative array with 'url' and 'title' keys.
 	 */
 	public static function privacy_policy_page_details(): array {
-		$page = self::managed_policy_page_details( 'privacy_policy_page_id' );
+		$candidates = [
+			absint( get_option( 'wp_page_for_privacy_policy' ) ),
+			absint( Settings::get( 'privacy_policy_page_id' ) ),
+		];
+
+		foreach ( array_filter( array_unique( $candidates ) ) as $page_id ) {
+			$page = self::policy_page_details( $page_id );
+
+			if ( $page['status'] === 'publish' && $page['url'] !== '' ) {
+				return [
+					'url'   => $page['url'],
+					'title' => $page['title'],
+				];
+			}
+		}
+
+		return [
+			'url'   => '',
+			'title' => '',
+		];
+	}
+
+	/**
+	 * Get legal notice (imprint / Impressum) page details, published pages only.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, string> Associative array with 'url' and 'title' keys.
+	 */
+	public static function legal_notice_page_details(): array {
+		$page = self::managed_policy_page_details( 'legal_notice_page_id' );
 
 		if ( $page['status'] !== 'publish' || $page['url'] === '' ) {
 			return [
@@ -1085,6 +1346,59 @@ class Get {
 			'url'   => $page['url'],
 			'title' => $page['title'],
 		];
+	}
+
+	/**
+	 * The legal pages the consent UI links to, in disclosure order.
+	 *
+	 * Rendered as first-class links in the preferences-modal footer rather than
+	 * left to the `{cookie_policy_link}` token: with the overlay on, every node
+	 * outside the plugin's own roots is made `inert`, so a theme-footer imprint
+	 * or privacy link is unreachable by mouse, keyboard and screen reader for as
+	 * long as the prompt is up (#1244).
+	 *
+	 * Order and visibility come from `policy_links_order`, where presence is
+	 * visibility, exactly as `button_order` works for the banner buttons. Each
+	 * entry carries a stable `id` so the modal can suppress the duplicate when
+	 * the admin has already placed that page's token in their own copy. Unset,
+	 * unpublished and off-host pages resolve to an empty url and are dropped
+	 * here, so a caller never has to re-check.
+	 *
+	 * @since 1.7.0
+	 * @return array<int, array{id: string, url: string, title: string}>
+	 */
+	public static function consent_policy_links(): array {
+		$order = Settings::normalize_policy_links_order( Settings::get( 'policy_links_order' ) );
+		$links = [];
+
+		// Resolved per visible id rather than all three up front: this runs on
+		// every anonymous page load, and a hidden link is a get_post() nobody reads.
+		foreach ( $order === '' ? [] : explode( ',', $order ) as $id ) {
+			if ( $id === 'cookie_policy' ) {
+				$page     = self::cookie_policy_page_details();
+				$fallback = __( 'Cookie Policy', 'surecookie' );
+			} elseif ( $id === 'privacy_policy' ) {
+				$page     = self::privacy_policy_page_details();
+				$fallback = __( 'Privacy Policy', 'surecookie' );
+			} else {
+				$page     = self::legal_notice_page_details();
+				$fallback = __( 'Legal Notice', 'surecookie' );
+			}
+
+			if ( ( $page['url'] ?? '' ) === '' ) {
+				continue;
+			}
+
+			// Decoded because WordPress decodes only top-level localized scalars, and
+			// React prints these as text: `&#038;` would show, and cut a query string.
+			$links[] = [
+				'id'    => $id,
+				'url'   => html_entity_decode( $page['url'], ENT_QUOTES, 'UTF-8' ),
+				'title' => html_entity_decode( $page['title'] !== '' ? $page['title'] : $fallback, ENT_QUOTES, 'UTF-8' ),
+			];
+		}
+
+		return $links;
 	}
 
 	/**

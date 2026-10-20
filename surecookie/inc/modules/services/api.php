@@ -212,5 +212,4 @@ class Api extends Base {
 
 		return new WP_REST_Response( $result, 200 );
 	}
-
 }

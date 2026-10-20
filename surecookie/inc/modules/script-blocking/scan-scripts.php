@@ -11,6 +11,7 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -219,9 +220,13 @@ class Scan_Scripts {
 		// Build a unique service key from the domain.
 		$service_key = 'scan_' . str_replace( [ '.', '-' ], '_', $domain );
 
-		// Add to the appropriate type array.
-		$entry = [
-			'label' => $resource['vendor'] ?? $domain,
+		// Add to the appropriate type array. The label is visitor-facing copy, so the
+		// domain fallback has to cover every way the scan says "no vendor": an empty
+		// string (`??` kept it, rendering "would connect to ."), a classifier
+		// placeholder like "Unknown", and a Unicode-blank that survives trim (#1429).
+		$vendor = Sanitize::vendor( $resource['vendor'] ?? '' );
+		$entry  = [
+			'label' => Sanitize::is_blank( $vendor ) ? $domain : $vendor,
 		];
 
 		if ( $type === 'iframes' ) {
@@ -405,5 +410,4 @@ class Scan_Scripts {
 
 		return self::$cached_resources;
 	}
-
 }

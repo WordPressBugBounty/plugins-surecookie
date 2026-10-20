@@ -1199,6 +1199,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   min-width: 2.5rem;
 }.surecookie-styles .min-w-12 {
   min-width: 3rem;
+}.surecookie-styles .min-w-32 {
+  min-width: 8rem;
 }.surecookie-styles .min-w-40 {
   min-width: 10rem;
 }.surecookie-styles .min-w-52 {
@@ -1259,8 +1261,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   max-width: fit-content;
 }.surecookie-styles .max-w-full {
   max-width: 100%;
-}.surecookie-styles .max-w-lg {
-  max-width: 32rem;
 }.surecookie-styles .max-w-xl {
   max-width: 36rem;
 }.surecookie-styles .max-w-xs {
@@ -2175,8 +2175,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   padding-left: 6rem;
 }.surecookie-styles .pr-3 {
   padding-left: 0.75rem;
-}.surecookie-styles .pr-4 {
-  padding-left: 1rem;
 }.surecookie-styles .pr-8 {
   padding-left: 2rem;
 }.surecookie-styles .pr-9 {
@@ -2357,9 +2355,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }.surecookie-styles .text-field-placeholder {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
-}.surecookie-styles .text-gray-900 {
-  --tw-text-opacity: 1;
-  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }.surecookie-styles .text-green-400 {
   --tw-text-opacity: 1;
   color: rgb(74 222 128 / var(--tw-text-opacity, 1));
@@ -2714,7 +2709,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }.surecookie-styles input[type=search][name=keyword] {
   padding-right: 1.75rem;
-}#wpcontent:has(#surecookie-admin-root){padding-right:0}#wpbody-content:has(#surecookie-admin-root){padding-bottom:0}#wpbody-content:has(#surecookie-admin-root) .wrap{margin:0;padding:0}#wpfooter{display:none}.surecookie-smooth-scrollbar::-webkit-scrollbar{width:5px}.surecookie-smooth-scrollbar::-webkit-scrollbar-thumb{background:#e8e8ed;border-radius:10px}.surecookie-smooth-scrollbar::-webkit-scrollbar-track{background:rgba(0,0,0,0)}#surecookie-admin-root *{box-sizing:border-box;font-family:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.surecookie-preview-banner{position:fixed;display:block;visibility:visible;opacity:1;pointer-events:auto}.surecookie-preview-banner-overlay{position:fixed;inset:0;background-color:rgba(0,0,0,.6);z-index:99998;pointer-events:none}.surecookie-preview-banner[data-preview=true]{box-sizing:border-box;border-top-left-radius:0}.surecookie-preview-banner.surecookie-banner-position-top{top:32px}.surecookie-preview-banner.surecookie-banner-position-top,.surecookie-preview-banner.surecookie-banner-position-bottom,.surecookie-preview-banner.surecookie-banner-position-box-base,.surecookie-preview-banner.surecookie-banner-position-bottom-center,.surecookie-preview-banner.surecookie-banner-position-middle{z-index:99999}.surecookie-preview-root-container .surecookie-accept-btn,.surecookie-preview-root-container .surecookie-accept-all-btn,.surecookie-preview-root-container .surecookie-decline-btn{background-color:var(--surecookie-banner-primary-color, #2563eb);color:#fff}.surecookie-preview-root-container .surecookie-accept-btn:hover,.surecookie-preview-root-container .surecookie-accept-all-btn:hover,.surecookie-preview-root-container .surecookie-decline-btn:hover,.surecookie-preview-root-container .surecookie-btn-primary:hover{background-color:var(--surecookie-banner-primary-hover-color, #1d4ed8);border-color:var(--surecookie-banner-primary-hover-color, #1d4ed8)}.surecookie-preview-root-container .surecookie-preferences-btn{background-color:rgba(0,0,0,0)}.surecookie-preview-root-container .surecookie-preferences-btn:hover{opacity:.8}.surecookie-styles .recharts-sector:focus,.surecookie-styles .recharts-layer:focus,.surecookie-styles .recharts-surface:focus,.surecookie-styles .recharts-wrapper svg:focus,.surecookie-styles .recharts-wrapper svg *:focus{outline:none}@keyframes surecookie-progress-stripes{from{background-position:1rem 0}to{background-position:100% 0}}.surecookie-progress-striped{background-image:linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);background-size:1rem 1rem;animation:surecookie-progress-stripes 2s linear infinite}.surecookie-styles .sc-child-w-full>*{width:100%}.surecookie-styles .file\:border-0::file-selector-button {
+}#wpcontent:has(#surecookie-admin-root){padding-right:0}#wpbody-content:has(#surecookie-admin-root){padding-bottom:0}#wpbody-content:has(#surecookie-admin-root) .wrap{margin:0;padding:0}#wpfooter{display:none}.surecookie-smooth-scrollbar::-webkit-scrollbar{width:5px}.surecookie-smooth-scrollbar::-webkit-scrollbar-thumb{background:#e8e8ed;border-radius:10px}.surecookie-smooth-scrollbar::-webkit-scrollbar-track{background:rgba(0,0,0,0)}#surecookie-admin-root *{box-sizing:border-box;font-family:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.surecookie-preview-banner{position:fixed;display:block;visibility:visible;opacity:1;pointer-events:auto}.surecookie-preview-banner-overlay{position:fixed;inset:0;background-color:rgba(0,0,0,.6);z-index:99998;pointer-events:none}.surecookie-preview-banner[data-preview=true]{box-sizing:border-box;border-top-left-radius:0}.surecookie-preview-banner.surecookie-banner-position-top{top:32px}.surecookie-preview-banner.surecookie-banner-position-top,.surecookie-preview-banner.surecookie-banner-position-bottom,.surecookie-preview-banner.surecookie-banner-position-box-base,.surecookie-preview-banner.surecookie-banner-position-bottom-center,.surecookie-preview-banner.surecookie-banner-position-middle{z-index:99999}.surecookie-preview-root-container .surecookie-preferences-btn{background-color:rgba(0,0,0,0)}.surecookie-preview-root-container .surecookie-preferences-btn:hover{opacity:.8}.surecookie-styles .recharts-sector:focus,.surecookie-styles .recharts-layer:focus,.surecookie-styles .recharts-surface:focus,.surecookie-styles .recharts-wrapper svg:focus,.surecookie-styles .recharts-wrapper svg *:focus{outline:none}@keyframes surecookie-progress-stripes{from{background-position:1rem 0}to{background-position:100% 0}}.surecookie-progress-striped{background-image:linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);background-size:1rem 1rem;animation:surecookie-progress-stripes 2s linear infinite}.surecookie-styles .sc-child-w-full>*{width:100%}.surecookie-styles .file\:border-0::file-selector-button {
   border-width: 0px;
 }.surecookie-styles .file\:bg-transparent::file-selector-button {
   background-color: transparent;
@@ -2957,9 +2952,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-bg-opacity: 1;
   background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1));
 }.surecookie-styles .hover\:bg-field-dropzone-background-hover:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}.surecookie-styles .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
 }.surecookie-styles .hover\:bg-green-100:hover {

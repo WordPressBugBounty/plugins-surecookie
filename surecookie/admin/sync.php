@@ -641,18 +641,27 @@ class Sync {
 	 *
 	 * @param array<string, mixed> $cookie Raw cookie data from API.
 	 * @since 1.3.0
+	 * @since 1.7.0 Site-owned cookies take the site's own identity over the canonical.
 	 * @return string Provider name, or an empty string when nothing is known.
 	 */
 	private function resolve_cookie_provider( array $cookie ): string {
 		// Classified vendor wins, then the bundled catalog (a real name like "Google
 		// Analytics" where set_via only has a hostname; consulting it keeps a re-scan from
 		// downgrading a row the catalog backfill resolved). set_via is the last resort.
-		$candidates = [
-			$cookie['owner'] ?? null,
-			$cookie['vendor'] ?? null,
-			Declared_Cookies::get_instance()->catalog_provider_for( $cookie ),
-			$cookie['set_via'] ?? null,
-		];
+		// A cookie only this site can own takes none of the API's three attributions: every
+		// one is keyed on the cookie NAME and shared across sites, so a single bad approval
+		// named a stranger as the provider of PHPSESSID (#1274).
+		$candidates = Normalizer::is_site_owned_cookie( $cookie )
+			? [
+				Declared_Cookies::get_instance()->catalog_provider_for( $cookie ),
+				Cookie_Identity::first_party_domain(),
+			]
+			: [
+				$cookie['owner'] ?? null,
+				$cookie['vendor'] ?? null,
+				Declared_Cookies::get_instance()->catalog_provider_for( $cookie ),
+				$cookie['set_via'] ?? null,
+			];
 
 		foreach ( $candidates as $candidate ) {
 			$provider = Sanitize::vendor( $candidate );

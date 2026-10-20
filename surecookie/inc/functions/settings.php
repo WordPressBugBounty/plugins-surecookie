@@ -29,6 +29,13 @@ class Settings {
 	public const BUTTON_TOKENS = [ 'accept_all', 'accept', 'preferences', 'decline' ];
 
 	/**
+	 * Legal links the preferences modal can offer, in shipped order.
+	 *
+	 * @since 1.7.0
+	 */
+	public const POLICY_LINK_TOKENS = [ 'cookie_policy', 'privacy_policy', 'legal_notice' ];
+
+	/**
 	 * Default values.
 	 *
 	 * @var array<string, mixed>
@@ -264,6 +271,8 @@ class Settings {
 				return Sanitize::rich_text( $value );
 			case 'button_order':
 				return self::normalize_button_order( $value );
+			case 'policy_links_order':
+				return self::normalize_policy_links_order( $value );
 			case 'string':
 			default:
 				return self::clamp_length( $key, Sanitize::text( $value ) );
@@ -298,6 +307,30 @@ class Settings {
 		}
 
 		return implode( ',', $tokens );
+	}
+
+	/**
+	 * Known, unique policy-link tokens in stored order. Presence is visibility,
+	 * exactly as it is for `button_order`.
+	 *
+	 * Unlike the buttons, an empty result is a legitimate state and is kept: a
+	 * site that links its legal pages from a theme footer may hide all three,
+	 * and forcing one back would override that. Only an absent setting falls
+	 * back to the shipped default, through `Settings::get()`.
+	 *
+	 * @param mixed $value Comma-separated order.
+	 * @since 1.7.0
+	 * @return string Normalized order.
+	 */
+	public static function normalize_policy_links_order( $value ): string {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		return implode(
+			',',
+			array_unique( array_intersect( array_map( 'trim', explode( ',', (string) $value ) ), self::POLICY_LINK_TOKENS ) )
+		);
 	}
 
 	/**

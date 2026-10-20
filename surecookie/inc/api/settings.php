@@ -1031,6 +1031,7 @@ class Settings extends Base {
 			'auto_scan_pages',
 			'consent_renewed_at',
 			'cookie_policy_page_id',
+			'legal_notice_page_id',
 			'preview_enabled',
 			'privacy_policy_page_id',
 			'reconsent_menu_id',

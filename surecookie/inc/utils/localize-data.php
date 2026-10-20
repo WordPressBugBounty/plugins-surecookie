@@ -54,6 +54,16 @@ class LocalizeData {
 	 * @since 1.6.0
 	 */
 	private const FRONTEND_WEBSITE_LINK_KEYS = [ 'banner_branding', 'preferences_modal_branding' ];
+
+	/**
+	 * Consent-log REST routes the frontend posts to.
+	 *
+	 * @since 1.7.0
+	 */
+	private const CONSENT_LOG_ROUTES = [
+		'create_log' => 'surecookie/v1/consent-logs/create-log',
+		'token'      => 'surecookie/v1/consent-logs/token',
+	];
 	/**
 	 * Get keyed map of UTM-tagged outbound marketing links.
 	 *
@@ -309,36 +319,45 @@ class LocalizeData {
 	 * @since 0.0.1
 	 */
 	public static function get_frontend_data(): array {
+		$cookie_policy = Get::cookie_policy_page_details();
+
 		$data = array_merge(
 			Settings::get_public_settings_dataset(),
 			[
-				'eu_countries'             => Get::eu_countries(),
-				'scanned_cookies'          => Get::all_scanned_cookies(),
-				'cookie_policy_page_url'   => Get::cookie_policy_page_details()['url'] ?? '',
-				'cookie_policy_page_title' => Get::cookie_policy_page_details()['title'] ?? '',
-				'locale'                   => get_locale(),
-				'siteTimezone'             => wp_timezone_string(),
-				'gmtOffset'                => (float) get_option( 'gmt_offset' ),
-				'consent_log_token'        => self::get_consent_log_token(),
+				'eu_countries'              => Get::eu_countries(),
+				'scanned_cookies'           => Get::all_scanned_cookies(),
+				'cookie_policy_page_url'    => $cookie_policy['url'] ?? '',
+				'cookie_policy_page_title'  => $cookie_policy['title'] ?? '',
+				// Rendered as first-class links inside the consent UI: with the
+				// overlay on, nothing outside it is reachable (#1244).
+				'policy_links'              => Get::consent_policy_links(),
+				// Who receives the data per category, and the third countries it
+				// may reach. Empty for a category with nothing to disclose.
+				'category_disclosure'       => Get::category_disclosure(),
+				'locale'                    => get_locale(),
+				'siteTimezone'              => wp_timezone_string(),
+				'gmtOffset'                 => (float) get_option( 'gmt_offset' ),
+				'consent_log_token'         => self::get_consent_log_token(),
 				// Full endpoint URLs (not a root to join) so the frontend fetch() works on plain-permalink sites too.
-				'api'                      => [
-					'create_log' => esc_url_raw( rest_url( 'surecookie/v1/consent-logs/create-log' ) ),
-					'token'      => esc_url_raw( rest_url( 'surecookie/v1/consent-logs/token' ) ),
-				],
+				'api'                       => self::consent_log_endpoints(),
 				// Exposed so frontend banner / preferences modal branding links carry UTM attribution.
 				// Narrowed to the keys the public bundle reads - the admin CTAs behind the rest
 				// are dead weight in every visitor's HTML.
-				'website_links'            => array_intersect_key(
+				'website_links'             => array_intersect_key(
 					self::get_website_links(),
 					array_flip( self::FRONTEND_WEBSITE_LINK_KEYS )
 				),
 				// Static UI chrome localized server-side - the public bundle
 				// ships without wp-i18n, so it cannot translate at runtime.
-				'branding_powered_by'      => __( 'Powered by', 'surecookie' ),
-				'placeholder'              => self::get_placeholder_data(),
+				'branding_powered_by'       => __( 'Powered by', 'surecookie' ),
+				'placeholder'               => self::get_placeholder_data(),
 				// Off for a scan, an excluded region or a bypassed page; vendor hand-offs follow it.
-				'blocking'                 => Blocker::get_instance()->should_process(),
-				'affiliate_carry'          => [
+				'blocking'                  => Blocker::get_instance()->should_process(),
+				// True while `consent_model` and `blocking` above were resolved for
+				// whoever primed a page cache; the runtime holds their permissive
+				// side until the browser has re-resolved them (#1125).
+				'consent_model_provisional' => Blocking_Utils::is_consent_decision_provisional(),
+				'affiliate_carry'           => [
 					'home'   => home_url( '/' ),
 					'params' => self::get_affiliate_params(),
 				],
@@ -383,6 +402,33 @@ class LocalizeData {
 		}
 
 		return $valid;
+	}
+
+	/**
+	 * Absolute consent-log endpoint URLs for the frontend.
+	 *
+	 * `create_log_fallback` carries the same route on `/index.php?rest_route=`,
+	 * and is present only where that differs from the canonical URL. Host rules
+	 * protecting `error-log`/`debug-log` match any path ending in `-log`, so
+	 * `/wp-json/.../create-log` is answered before WordPress loads and the write
+	 * is lost with nothing to log it; no such rule matches `/index.php` (#1275).
+	 *
+	 * @since 1.7.0
+	 * @return array<string, string>
+	 */
+	public static function consent_log_endpoints(): array {
+		$endpoints = [];
+		foreach ( self::CONSENT_LOG_ROUTES as $key => $route ) {
+			$endpoints[ $key ] = esc_url_raw( rest_url( $route ) );
+		}
+
+		if ( strpos( $endpoints['create_log'], 'rest_route=' ) === false ) {
+			$endpoints['create_log_fallback'] = esc_url_raw(
+				add_query_arg( 'rest_route', '/' . self::CONSENT_LOG_ROUTES['create_log'], home_url( '/index.php' ) )
+			);
+		}
+
+		return $endpoints;
 	}
 
 	/**
@@ -473,11 +519,52 @@ class LocalizeData {
 			// The Finish step offers the Cookie Preferences menu link, so the
 			// menu list has to be on this screen's blob, not the admin one.
 			'navMenus'           => Get::nav_menus(),
+			// Pre-selects the scan step's picker. Nothing was selected by default, so
+			// the usual first scan aimed at whatever page was easiest to click while
+			// the home page, which carries most sites' tags, went unscanned. Empty
+			// when the front page is the blog index, which is not a post to select.
+			'homePage'           => self::get_front_page_option(),
 			'websiteLeadDetails' => [
 				'firstName' => sanitize_text_field( $current_user->first_name ?? '' ),
 				'lastName'  => sanitize_text_field( $current_user->last_name ?? '' ),
 				'email'     => sanitize_email( $current_user->user_email ?? '' ),
 			],
+		];
+	}
+
+	/**
+	 * The site's front page, shaped like one of the scan picker's options.
+	 *
+	 * @since 1.7.0
+	 * @return array{value: int, label: string, type: string, typeLabel: string}|null Null
+	 *                                        when the front page is the blog index.
+	 */
+	private static function get_front_page_option(): ?array {
+		if ( get_option( 'show_on_front' ) !== 'page' ) {
+			return null;
+		}
+
+		$page_id = absint( get_option( 'page_on_front' ) );
+
+		if ( $page_id <= 0 ) {
+			return null;
+		}
+
+		$page = get_post( $page_id );
+
+		if ( ! $page || $page->post_status !== 'publish' ) {
+			return null;
+		}
+
+		// Same labels the search endpoint sends, so the seeded option groups with the
+		// results and reads like them (get_the_title()'s entities stay literal in this nested blob).
+		$type_object = get_post_type_object( 'page' );
+
+		return [
+			'value'     => $page_id,
+			'label'     => wp_strip_all_tags( $page->post_title ),
+			'type'      => 'page',
+			'typeLabel' => $type_object instanceof \WP_Post_Type ? $type_object->labels->name : __( 'Pages', 'surecookie' ),
 		];
 	}
 

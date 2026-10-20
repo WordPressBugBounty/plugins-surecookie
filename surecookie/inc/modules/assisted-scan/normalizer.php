@@ -23,6 +23,7 @@
 namespace SureCookie\Inc\Modules\AssistedScan;
 
 use SureCookie\Inc\Functions\Cookie_Identity;
+use SureCookie\Inc\Functions\Sanitize;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -50,6 +51,18 @@ class Normalizer {
 	 * @since 1.3.0
 	 */
 	public const SIGNATURE_PREFIX = 'assisted:';
+
+	/**
+	 * Cookie names a site's own server or CMS emits. Matched case-insensitively
+	 * against the whole stack's session, CSRF and platform cookies.
+	 *
+	 * A name belongs here when every site that sets it sets its own: the scan
+	 * API keys owner, vendor and set_via on the NAME and shares them across
+	 * sites, so one bad approval names a stranger on every site at once.
+	 *
+	 * @since 1.7.0
+	 */
+	private const SITE_EMITTED_NAMES = '/^(phpsessid|xsrf-token|csrftoken|wordpress_|wp-settings|wp_consent_|wp_woocommerce_session_|woocommerce_|edd_|_lscache_vary)/i';
 
 	/**
 	 * Cookie name prefixes that are never collected.
@@ -357,15 +370,20 @@ class Normalizer {
 		];
 
 		foreach ( $inherit_text as $incoming_key => $stored_key ) {
-			if ( self::is_blank( $cookie[ $incoming_key ] ?? null ) && ! self::is_blank( $existing[ $stored_key ] ?? null ) ) {
+			if ( Sanitize::is_blank( $cookie[ $incoming_key ] ?? null ) && ! Sanitize::is_blank( $existing[ $stored_key ] ?? null ) ) {
 				$cookie[ $incoming_key ] = $existing[ $stored_key ];
 			}
 		}
 
 		// A duration the browser did not observe. Keep whatever is already known
 		// rather than downgrading a two-year cookie to "session".
-		if ( self::is_blank( $cookie['expires_at'] ?? null ) && ! self::is_blank( $existing['expires'] ?? null ) ) {
-			$cookie['expires_at'] = $existing['expires'];
+		// Scalarised first: an older row may hold the expiry as a number, and a
+		// blank test alone would read that as nothing to inherit and downgrade a
+		// dated cookie to "session" - the one case here where skipping loses data
+		// rather than declining to copy a junk value.
+		$inherited_expiry = Sanitize::scalar( $existing['expires'] ?? '' );
+		if ( Sanitize::is_blank( $cookie['expires_at'] ?? null ) && ! Sanitize::is_blank( $inherited_expiry ) ) {
+			$cookie['expires_at'] = $inherited_expiry;
 		}
 
 		// Flags the browser cannot disprove. Never turn a true into a false.
@@ -377,7 +395,7 @@ class Normalizer {
 			$cookie['secure'] = true;
 		}
 
-		if ( empty( $cookie['same_site'] ) && ! self::is_blank( $existing['sameSite'] ?? null ) ) {
+		if ( empty( $cookie['same_site'] ) && ! Sanitize::is_blank( $existing['sameSite'] ?? null ) ) {
 			$cookie['same_site'] = $existing['sameSite'];
 		}
 
@@ -509,7 +527,7 @@ class Normalizer {
 
 			// The browser's own default, applied last: only once neither the
 			// observation nor the stored row could tell us anything.
-			if ( self::is_blank( $cookie['same_site'] ) ) {
+			if ( Sanitize::is_blank( $cookie['same_site'] ) ) {
 				$cookie['same_site'] = 'lax';
 			}
 
@@ -680,17 +698,23 @@ class Normalizer {
 	}
 
 	/**
-	 * Whether a value carries no usable content.
+	 * Whether a cookie can only be the site's own, so no third-party vendor fits.
 	 *
-	 * @param mixed $value Value to test.
-	 * @since 1.3.0
+	 * The scan API resolves `owner`, `vendor` and `set_via` from a canonical and a
+	 * signature keyed on the cookie NAME and shared by every scanned site, so one
+	 * wrong approval publishes an unrelated domain as the provider of a session
+	 * cookie on a legal disclosure page (#1274). Names a site's own stack emits
+	 * cannot have a global owner; trackers are deliberately absent, because `_ga`
+	 * is first party by domain and genuinely Google's.
+	 *
+	 * @param array<string, mixed> $cookie Cookie row carrying a name and a domain.
+	 * @since 1.7.0
 	 * @return bool
 	 */
-	private static function is_blank( $value ): bool {
-		if ( $value === null || $value === false ) {
-			return true;
-		}
+	public static function is_site_owned_cookie( array $cookie ): bool {
+		$name = Cookie_Identity::normalize_name( (string) ( $cookie['name'] ?? '' ) );
 
-		return is_string( $value ) && trim( $value ) === '';
+		return preg_match( self::SITE_EMITTED_NAMES, $name ) === 1
+			&& self::is_first_party_host( Cookie_Identity::normalize_domain( (string) ( $cookie['domain'] ?? '' ) ) );
 	}
 }

@@ -34,6 +34,7 @@ class Post_States {
 	private const PAGE_ID_SETTINGS = [
 		'cookie_policy_page_id',
 		'privacy_policy_page_id',
+		'legal_notice_page_id',
 	];
 
 	/**

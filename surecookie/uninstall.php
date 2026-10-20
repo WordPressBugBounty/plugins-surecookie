@@ -79,6 +79,7 @@ function surecookie_get_option_keys() {
 		'surecookie_do_activation_redirect',
 		'surecookie_cron_test_ok',
 		'surecookie_active_scan',
+		'surecookie_scan_poll_lock',
 		'surecookie_saved_version',
 		// BSF Analytics options.
 		'surecookie_usage_optin',
@@ -167,6 +168,7 @@ function surecookie_delete_options(): void {
  */
 function surecookie_delete_transients(): void {
 	delete_transient( 'surecookie_services' );
+	delete_transient( 'surecookie_services_v2' );
 	// Legacy key from the pre-refactor known-scripts cache; kept so an uninstall
 	// after upgrading from an older version still clears any lingering row.
 	delete_transient( 'surecookie_known_scripts' );
@@ -296,9 +298,7 @@ function surecookie_uninstall_shortcode_map( array $settings ): array {
 		$lines[] = $tail;
 	}
 
-	$page_url = static function ( string $key ) use ( $settings ): string {
-		$page_id = absint( $settings[ $key ] ?? 0 );
-
+	$page_url = static function ( int $page_id ): string {
 		if ( $page_id <= 0 || get_post_status( $page_id ) !== 'publish' ) {
 			return '';
 		}
@@ -308,6 +308,12 @@ function surecookie_uninstall_shortcode_map( array $settings ): array {
 		return is_string( $permalink ) ? $permalink : '';
 	};
 
+	// Get::privacy_policy_page_details() order, so the frozen link is the one visitors saw.
+	$privacy_url = $page_url( absint( get_option( 'wp_page_for_privacy_policy' ) ) );
+	if ( $privacy_url === '' ) {
+		$privacy_url = $page_url( absint( $settings['privacy_policy_page_id'] ?? 0 ) );
+	}
+
 	$map = [
 		'[surecookie_company_name]'       => $detail( 'legal_entity_name' ),
 		'[surecookie_contact_email]'      => $detail( 'privacy_contact_email' ),
@@ -316,8 +322,8 @@ function surecookie_uninstall_shortcode_map( array $settings ): array {
 		'[surecookie_country]'            => $country,
 		'[surecookie_grievance_officer]'  => $detail( 'grievance_officer_name' ),
 		'[surecookie_grievance_email]'    => $detail( 'grievance_officer_email' ),
-		'[surecookie_cookie_policy_url]'  => $page_url( 'cookie_policy_page_id' ),
-		'[surecookie_privacy_policy_url]' => $page_url( 'privacy_policy_page_id' ),
+		'[surecookie_cookie_policy_url]'  => $page_url( absint( $settings['cookie_policy_page_id'] ?? 0 ) ),
+		'[surecookie_privacy_policy_url]' => $privacy_url,
 	];
 
 	/*
@@ -396,6 +402,7 @@ function surecookie_preserve_policy_pages(): void {
 	$page_ids = [
 		absint( $settings['cookie_policy_page_id'] ?? 0 ),
 		absint( $settings['privacy_policy_page_id'] ?? 0 ),
+		absint( $settings['legal_notice_page_id'] ?? 0 ),
 		absint( get_option( 'wp_page_for_privacy_policy' ) ),
 	];
 

@@ -49,7 +49,11 @@ class CookieCategoryService {
 	 * Categories are NEVER filtered out of this response: the admin must be able to
 	 * see and edit a category that visitors currently cannot see.
 	 *
-	 * @return array{success: bool, message: string, categories: array<string, mixed>, count: int, usage: array<string, array{cookies: int, scripts: int, services: int}>, in_use: array<int, string>}
+	 * `disclosure` rides along for the same reason: the banner preview has to
+	 * show what a visitor is told, and `window.surecookiePublicSettings` never
+	 * resolves in wp-admin.
+	 *
+	 * @return array{success: bool, message: string, categories: array<string, mixed>, count: int, usage: array<string, array{cookies: int, scripts: int, services: int}>, in_use: array<int, string>, disclosure: array<string, mixed>}
 	 * @since 0.0.0-alpha.1
 	 */
 	public function get_categories(): array {
@@ -62,6 +66,7 @@ class CookieCategoryService {
 			'count'      => is_array( $categories ) ? count( $categories ) : 0,
 			'usage'      => Get::category_usage_map(),
 			'in_use'     => Get::categories_in_use(),
+			'disclosure' => Get::category_disclosure(),
 		];
 	}
 

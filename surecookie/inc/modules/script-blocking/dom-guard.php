@@ -105,6 +105,10 @@ class Dom_Guard {
 				't' => array_keys( $patterns['t'] ),
 				'e' => Blocking_Surface::skippable_categories(),
 				'm' => (string) Settings::get( 'consent_model' ),
+				// Set when the browser will re-resolve the consent model for the
+				// visitor actually reading this page, so the guard holds the
+				// permissive side of `m` until then (#1125).
+				'v' => Utils::is_consent_decision_provisional(),
 				'r' => (int) Settings::get( 'consent_renewed_at' ),
 				// Core prefixes plus the host they belong to, so the guard spares
 				// core exactly as Blocker::is_core_asset() does. The host is sent,

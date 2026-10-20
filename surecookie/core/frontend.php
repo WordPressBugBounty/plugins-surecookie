@@ -37,6 +37,18 @@ class Frontend {
 	private bool $root_printed = false;
 
 	/**
+	 * Shared core handles opted into `defer` so the banner's script chain can be deferred.
+	 */
+	private const SHARED_DEFER_HANDLES = [ 'react', 'react-dom', 'react-jsx-runtime', 'wp-element', 'wp-escape-html', 'wp-hooks' ];
+
+	/**
+	 * Each script's dependencies as of the head print, when WordPress caches who depends on what.
+	 *
+	 * @var array<string, array<int|string, string>>
+	 */
+	private array $head_deps = [];
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.1
@@ -136,18 +148,87 @@ class Frontend {
 		);
 
 		// A script chain only gets `defer` when every handle in it declares the intent, so opt the shared core dependencies in as well. WordPress
-		// auto-downgrades any of them to blocking if another plugin enqueues a non-deferred dependent - graceful degradation, never breakage.
+		// auto-downgrades any of them to blocking if another plugin enqueues a non-deferred dependent, but only for dependents registered before it
+		// first looks them up; release_shared_handles_for_late_scripts() covers the rest.
 		// wp-i18n is deliberately excluded: wp_set_script_translations() injects a parse-time inline script that requires the wp.i18n global. Since core
 		// wp-i18n depends on wp-hooks, wp-hooks is auto-downgraded to blocking for now - the intent below starts working once wp-i18n leaves the chain.
-		foreach ( [ 'react', 'react-dom', 'react-jsx-runtime', 'wp-element', 'wp-escape-html', 'wp-hooks' ] as $core_handle ) {
+		foreach ( self::SHARED_DEFER_HANDLES as $core_handle ) {
 			if ( wp_script_is( $core_handle, 'registered' ) ) {
 				wp_script_add_data( $core_handle, 'strategy', 'defer' );
 			}
 		}
+		add_action( 'wp_head', [ $this, 'remember_head_scripts' ], 8 );
+		add_action( 'wp_print_footer_scripts', [ $this, 'release_shared_handles_for_late_scripts' ], 9 );
 		wp_set_script_translations( 'surecookie-public', 'surecookie', SURECOOKIE_DIR . 'languages' );
 
 		// Localize frontend data using utility.
 		LocalizeData::localize_frontend_script( 'surecookie-public' );
+	}
+
+	/**
+	 * Note the registered scripts just before WordPress prints the head.
+	 *
+	 * @since 1.7.0
+	 * @return void
+	 */
+	public function remember_head_scripts(): void {
+		$this->head_deps = array_map( static fn( $script ) => (array) $script->deps, wp_scripts()->registered );
+	}
+
+	/**
+	 * Return shared handles to blocking when a script registered after the head needs them.
+	 *
+	 * WordPress never refreshes the dependents it cached for the head, so a script a shortcode or block registers during content
+	 * (the Powerful Docs search) escapes its auto-downgrade and runs before the deferred React it reads from a global.
+	 *
+	 * @since 1.7.0
+	 * @return void
+	 */
+	public function release_shared_handles_for_late_scripts(): void {
+		$scripts = wp_scripts();
+		$deps    = [];
+
+		foreach ( $scripts->registered as $handle => $script ) {
+			$deps[ $handle ] = (array) $script->deps;
+		}
+
+		// Mirrors WordPress: a script is blocking without a delay strategy, and any inline script printed after it forces that too.
+		$blocking = array_filter(
+			self::handles_reachable( $deps, (array) $scripts->queue ),
+			fn( $handle ) => ( $this->head_deps[ $handle ] ?? null ) !== $deps[ $handle ]
+				&& ! in_array( $handle, (array) $scripts->done, true )
+				&& ( $scripts->get_data( $handle, 'after' ) || ( ! empty( $scripts->registered[ $handle ]->src ) && ! $scripts->get_data( $handle, 'strategy' ) ) )
+		);
+
+		foreach ( array_intersect( self::SHARED_DEFER_HANDLES, self::handles_reachable( $deps, $blocking ) ) as $handle ) {
+			wp_script_add_data( $handle, 'strategy', false );
+		}
+	}
+
+	/**
+	 * Every handle reachable from the roots through their dependencies, roots included.
+	 *
+	 * @since 1.7.0
+	 * @param array<string, array<int|string, string>> $deps  Handle => direct dependencies, for every registered script.
+	 * @param array<int, string>                       $roots Handles to start from.
+	 * @return array<int, string>
+	 */
+	public static function handles_reachable( array $deps, array $roots ): array {
+		$seen  = [];
+		$stack = array_values( $roots );
+
+		while ( $stack ) {
+			$handle = array_pop( $stack );
+			if ( isset( $seen[ $handle ] ) || ! isset( $deps[ $handle ] ) ) {
+				continue;
+			}
+			$seen[ $handle ] = true;
+			foreach ( $deps[ $handle ] as $dep ) {
+				$stack[] = $dep;
+			}
+		}
+
+		return array_keys( $seen );
 	}
 
 	/**

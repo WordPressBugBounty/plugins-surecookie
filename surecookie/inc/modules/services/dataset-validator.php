@@ -57,6 +57,13 @@ class Dataset_Validator {
 	private const MAX_COOKIES_PER_SERVICE = 50;
 
 	/**
+	 * Maximum number of transfer countries accepted per service.
+	 *
+	 * @since 1.7.0
+	 */
+	private const MAX_TRANSFER_COUNTRIES = 10;
+
+	/**
 	 * Validate a unified services dataset (service slug => {label, category,
 	 * gcm_compatible?, cookieless?, patterns keyed by Pattern_Kinds bucket,
 	 * cookies:[...]}).
@@ -142,6 +149,15 @@ class Dataset_Validator {
 			// means "not asserted", so the merge can keep the bundled claim.
 			if ( array_key_exists( 'cookieless', $service ) ) {
 				$entry['cookieless'] = ! empty( $service['cookieless'] );
+			}
+
+			// Presence-sensitive for the same reason, and for a sharper one: an
+			// always-written key would make every remote row that has never heard
+			// of it assert "no transfer", publishing a false compliance statement
+			// on the banner. Codes only - the EEA test and the visitor-facing
+			// wording stay ours, so a catalog edit cannot author either.
+			if ( array_key_exists( 'transfer_countries', $service ) ) {
+				$entry['transfer_countries'] = self::clean_country_list( $service['transfer_countries'] );
 			}
 
 			$out[ $slug ] = $entry;
@@ -276,6 +292,33 @@ class Dataset_Validator {
 	}
 
 	/**
+	 * Reduce a raw transfer-country list to unique ISO 3166-1 alpha-2 codes.
+	 *
+	 * @param mixed $list Raw country list.
+	 * @since 1.7.0
+	 * @return array<int, string>
+	 */
+	private static function clean_country_list( $list ): array {
+		if ( ! is_array( $list ) ) {
+			return [];
+		}
+
+		$out = [];
+		foreach ( $list as $item ) {
+			$code = is_string( $item ) ? strtoupper( trim( $item ) ) : '';
+			// The table has no UK row (ISO reserves it for GB), so dropping it would hide a UK transfer.
+			$code = $code === 'UK' ? 'GB' : $code;
+			if ( preg_match( '/^[A-Z]{2}$/', $code ) === 1 ) {
+				$out[ $code ] = true;
+			}
+		}
+
+		// Shape check only. A code with no entry in the shipped country table is
+		// dropped at render, so an unknown one can never print as a bare code.
+		return array_slice( array_keys( $out ), 0, self::MAX_TRANSFER_COUNTRIES );
+	}
+
+	/**
 	 * Reduce a raw pattern list to trimmed, non-empty strings.
 	 *
 	 * @param mixed $list Raw pattern list.
@@ -301,5 +344,4 @@ class Dataset_Validator {
 
 		return $out;
 	}
-
 }

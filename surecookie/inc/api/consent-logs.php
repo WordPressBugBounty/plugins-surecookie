@@ -30,7 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handles this related REST API endpoints.
  */
 class ConsentLogs extends Base {
-	use GetInstance, IpManager;
+	use GetInstance;
+	use IpManager;
 
 	/**
 	 * Route Get Logs
@@ -63,9 +64,13 @@ class ConsentLogs extends Base {
 	protected const UNIQUE_COUNTRIES = '/consent-logs/unique-countries';
 
 	/**
-	 * Delete a log
+	 * Delete a log. The path must not end in `-log`: host rules protecting
+	 * error-log/debug-log match that suffix and answer before WordPress loads.
+	 * Unlike create-log, which is pinned by cached visitor HTML and so carries a
+	 * `?rest_route=` fallback instead, this route ships with the admin bundle and
+	 * could simply move (#1275).
 	 */
-	protected const DELETE_LOG = '/consent-logs/delete-log';
+	protected const DELETE_LOG = '/consent-logs/delete';
 
 	/**
 	 * Delete all log
@@ -510,7 +515,7 @@ class ConsentLogs extends Base {
 							$log['origin_site']  = Sanitize::text( $log['origin_site'] ?? '' );
 							$forwarded_to        = json_decode( (string) ( $log['forwarded_to'] ?? '' ), true );
 							$log['forwarded_to'] = is_array( $forwarded_to ) ? array_map( 'esc_url_raw', array_values( array_filter( $forwarded_to, 'is_string' ) ) ) : [];
-							unset( $log['session_id'] );
+							unset( $log['session_id'], $log['origin_blog_id'], $log['forwarded_blog_ids'] );
 							return $log;
 						},
 						$logs
@@ -909,7 +914,7 @@ class ConsentLogs extends Base {
 		// Pre-fetch origin rows that were forwarded to partner subsites so the
 		// cascade hook can erase forwarded copies *after* the local wipe succeeds.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One-shot admin delete; %i is a valid WP 6.2+ identifier placeholder.
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, session_id, forwarded_to, is_forwarded FROM %i WHERE is_forwarded = 0 AND forwarded_to IS NOT NULL AND forwarded_to != %s AND forwarded_to != %s', $table, '', '[]' ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, session_id, forwarded_to, forwarded_blog_ids, is_forwarded FROM %i WHERE is_forwarded = 0 AND forwarded_to IS NOT NULL AND forwarded_to != %s AND forwarded_to != %s', $table, '', '[]' ), ARRAY_A );
 
 		$ids  = [];
 		$logs = [];
@@ -981,7 +986,11 @@ class ConsentLogs extends Base {
 			return true;
 		}
 
-		$site_url  = get_site_url();
+		// The public Site Address, never the WordPress Address: `rest_url()`
+		// builds every endpoint from `home_url()`, so that is the origin the
+		// browser actually sends. Reading `siteurl` here refused the site's own
+		// frontend wherever the two differ, even by a `www` (#1348).
+		$site_url  = home_url();
 		$site_host = wp_parse_url( $site_url, PHP_URL_HOST );
 		$site_port = wp_parse_url( $site_url, PHP_URL_PORT );
 		$site_ssl  = wp_parse_url( $site_url, PHP_URL_SCHEME );
@@ -1025,7 +1034,7 @@ class ConsentLogs extends Base {
 	 * @return void
 	 */
 	private static function record_token_rejection(): void {
-		$key   = 'surecookie_token_rejections_' . gmdate( 'Ymd' );
+		$key   = self::token_rejection_key();
 		$count = (int) get_transient( $key );
 
 		if ( $count >= self::TOKEN_REJECTION_COUNTER_CAP ) {
@@ -1033,6 +1042,26 @@ class ConsentLogs extends Base {
 		}
 
 		set_transient( $key, $count + 1, 2 * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Today's rejected-token count, for Site Health to report.
+	 *
+	 * @since 1.7.0
+	 * @return int
+	 */
+	public static function get_token_rejection_count(): int {
+		return (int) get_transient( self::token_rejection_key() );
+	}
+
+	/**
+	 * Transient key for the current UTC day's rejection counter.
+	 *
+	 * @since 1.7.0
+	 * @return string
+	 */
+	private static function token_rejection_key(): string {
+		return 'surecookie_token_rejections_' . gmdate( 'Ymd' );
 	}
 
 	/**

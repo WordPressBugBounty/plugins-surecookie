@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -483,6 +483,44 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.7.0 - 20-October-2026 =
+* New: The preferences window now includes links to your Cookie Policy, Privacy Policy, and Legal Notice. You can reorder or hide them under Banner > Content > Preference Modal.
+* New: Added a Legal Notice (Imprint) page setting for countries that require one. Select the page alongside your other legal links in the preference modal settings.
+* New: The preferences window now shows which services receive data and when it is transferred outside the EU/EEA, based on your scan results and services catalog.
+* New: Added a support shortcut to the admin top bar, labels for its icons on hover, and an Enable Automatic Scanning button on the dashboard when scheduled scans are disabled.
+* Improvement: The setup wizard now stays on the scan step to show results as they arrive. You can continue at any time while the scan runs in the background.
+* Improvement: Scan results now refresh automatically when a scan finishes, even when the scanning log is closed.
+* Improvement: The setup wizard now explains when a scan is blocked by your host's firewall or finds nothing, and offers a browser-based scan instead.
+* Improvement: The setup wizard now provides a Cookie Preferences link for all themes, including block themes, which receive a shortcode to add it.
+* Improvement: The setup wizard now selects your homepage by default when scanning, since it often contains the most tracking.
+* Improvement: Licence activation errors now include clearer guidance instead of raw error messages.
+* Improvement: Added Ukrainian translations for the banner, preferences window, and admin screens.
+* Improvement: Business Details can now be saved without selecting a privacy law. Leave Applicable Privacy Regimes empty if none applies to your site.
+* Improvement: Updated the Analytics category description to better explain what its cookies do.
+* Improvement: Hardened the security of the plugin.
+* Fix: The setup wizard now lets you connect your account when SureCookie Pro is active but has no licence key.
+* Fix: If your browser blocks the account connection pop-up, you are now returned to your previous setup wizard step.
+* Fix: The dashboard tour button now correctly describes its action instead of suggesting it opens the banner designer.
+* Fix: The setup wizard now explains when scanning is paused because WP-Cron is disabled and what to ask your hosting provider.
+* Fix: Consent records are now saved on servers that block URLs ending in `-log`. Site Health also warns when the original address is blocked.
+* Fix: Deleting consent logs now works on servers that block URLs ending in `-log`.
+* Fix: Shortcode and block features that depend on WordPress React, such as Powerful Docs search, now load correctly on affected sites.
+* Fix: First-party session cookies, such as `PHPSESSID`, are now attributed to your own site in the cookie policy. Existing entries are corrected automatically.
+* Fix: Geographic Rules now work correctly with page caching. Visitors receive the rules for their own region instead of another region's cached settings. Clear your cache once after updating.
+* Fix: Consent Log selections now stay in sync with the displayed rows when changing pages or filters, preventing accidental deletion of hidden records.
+* Fix: Changes made while settings are saving are no longer lost. The Save button remains available until all changes are stored.
+* Fix: The Country list in Compliance > Business Details now includes all countries and territories, including the Cayman Islands, Bermuda, and Puerto Rico.
+* Fix: Consent sharing on multisite networks now tracks sites by their identity rather than their address, so shared records remain removable after a subsite's address changes. Existing records are repaired automatically where possible.
+* Fix: LearnDash lessons using Vimeo Video Progression now unlock the Mark Complete button after visitors accept cookies and finish watching. Added the `surecookie_scripts_restored` browser event for plugins that need to initialise scripts after they are restored.
+* Fix: Accept All and Reject All buttons in the preferences window now retain their appearance on hover, even with themes and builders that apply their own button styles.
+* Fix: Removed an extra scrollbar and unexpected page scrolling caused by a hidden screen-reader element.
+* Fix: SureCookie and LiteSpeed Cache cookies are now correctly attributed to your own domain in the cookie policy. Existing entries are corrected automatically without rescanning.
+* Fix: Consent records are now saved on sites where the WordPress Address and Site Address use different hosts, such as versions with and without `www`. Requests from other sites remain blocked.
+* Fix: The Cookie Preferences menu item no longer triggers PHP deprecation notices on sites where themes or menu plugins inspect menu item details.
+* Fix: The banner preview in the dashboard now uses the same button text color as the live banner, such as dark text on light brand colors like Astra's orange.
+* Fix: The Cookie Preferences menu item and shortcode no longer show a link with no text when the saved button label is empty. They now use the default label.
+* Fix: Blocked content placeholders now name the website they would connect to when a scan could not identify the provider, instead of reading "would connect to ." with the name missing.
+
 = 1.6.1 - 7-October-2026 =
 * Improvement: SureCart affiliates are now credited even if visitors browse a few pages before accepting cookies. The affiliate code is preserved on internal links until the tracker runs, without storing anything on the visitor’s device. Visitors who decline are still not credited.
 * Fix: Some scanned cookies showed "null" as the provider. This is now either left blank or filled correctly from the services list, and existing entries are fixed automatically after update.
