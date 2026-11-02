@@ -32,9 +32,13 @@ class Helper {
 	/**
 	 * Query vars a frontend builder sets on its own edit render.
 	 *
+	 * `builder_id` covers Avada's preview frame rather than the `builder` var it
+	 * sets alongside, which is too generic a name to claim for one plugin.
+	 *
 	 * @since 1.5.0
+	 * @since 1.8.0 Avada's editor and preview frames.
 	 */
-	private const BUILDER_QUERY_VARS = [ 'elementor-preview', 'fl_builder', 'et_fb', 'bricks', 'vc_editable' ];
+	private const BUILDER_QUERY_VARS = [ 'elementor-preview', 'fl_builder', 'et_fb', 'bricks', 'vc_editable', 'fb-edit', 'builder_id' ];
 
 	/**
 	 * The capability every SureCookie admin surface is gated on.
@@ -61,45 +65,34 @@ class Helper {
 	}
 
 	/**
-	 * Whether this request is a frontend builder's own edit render.
+	 * Whether this request is a frontend builder's own edit render, where both
+	 * blocking and the banner stand aside.
 	 *
-	 * The capability is the credential: a query var alone would let any visitor
-	 * turn blocking off and hide the banner. Blocking and asset enqueueing both
-	 * read this, so the two cannot drift into a canvas whose scripts are already
-	 * unblocked but which still gets a consent banner mounted over it.
+	 * Blocking and asset enqueueing both read this, so the two cannot drift into a
+	 * canvas whose scripts are unblocked but which still gets a banner, or the reverse.
 	 *
 	 * @since 1.5.0
+	 * @since 1.8.0 Applies the editor bypass filter and marks the render uncacheable.
 	 * @return bool
 	 */
 	public static function is_builder_edit_render(): bool {
-		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
+		/**
+		 * Filter whether logged-in users who can edit content bypass blocking.
+		 * Return false to keep consent-blocking scripts, and so the banner, for editing staff.
+		 *
+		 * @since 1.5.0
+		 * @param bool $bypass Whether editors bypass blocking. Default true.
+		 */
+		if ( ! self::has_builder_query() || ! apply_filters( 'surecookie_bypass_blocking_for_editors', true ) ) {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence-only gate; the capability above is the credential.
-		$query = wp_unslash( $_GET );
-
-		/**
-		 * Filter: query vars that mark a frontend builder's own edit render.
-		 *
-		 * No list of builders stays complete, so a site on one we do not ship can
-		 * name its own rather than turning blocking off site-wide.
-		 *
-		 * @since 1.5.0
-		 * @param array<int, string> $query_vars Builder query vars.
-		 */
-		$query_vars = apply_filters( 'surecookie_builder_query_vars', self::BUILDER_QUERY_VARS );
-		$query_vars = is_array( $query_vars ) ? array_filter( $query_vars, 'is_string' ) : self::BUILDER_QUERY_VARS;
-
-		foreach ( $query_vars as $query_var ) {
-			if ( isset( $query[ $query_var ] ) ) {
-				return true;
-			}
+		// Neither an unblocked nor a bannerless render may reach visitors from a full-page cache.
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
 		}
 
-		// Core's preview needs the id or nonce too, or a bare `?preview=1` would
-		// turn blocking off site-wide.
-		return isset( $query['preview'] ) && ( isset( $query['preview_id'] ) || isset( $query['preview_nonce'] ) );
+		return true;
 	}
 
 	/**
@@ -282,21 +275,31 @@ class Helper {
 	 * @return bool True if the Pro plugin files are present.
 	 */
 	public static function is_pro_installed(): bool {
-		if ( self::is_pro_active() ) {
-			return true;
-		}
+		return self::is_pro_active() || self::get_pro_plugin_path() !== '';
+	}
 
+	/**
+	 * The Pro plugin's basename, whether or not it is active.
+	 *
+	 * Callers that offer in-place activation need the real file name rather than a
+	 * bool, and it must not be hardcoded: the directory follows whatever the
+	 * customer's zip unpacked as.
+	 *
+	 * @since 1.8.0
+	 * @return string Basename such as 'surecookie-pro/surecookie-pro.php', empty when not installed.
+	 */
+	public static function get_pro_plugin_path(): string {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		foreach ( array_keys( get_plugins() ) as $plugin ) {
 			if ( strpos( (string) $plugin, 'surecookie-pro/' ) === 0 ) {
-				return true;
+				return (string) $plugin;
 			}
 		}
 
-		return false;
+		return '';
 	}
 
 	/**
@@ -395,5 +398,45 @@ class Helper {
 		}
 
 		return strtolower( sanitize_text_field( $host ) );
+	}
+
+	/**
+	 * Whether an editor's request carries a frontend builder's edit-render query.
+	 *
+	 * The capability is the credential: a query var alone would let any visitor
+	 * turn blocking off and hide the banner.
+	 *
+	 * @since 1.8.0
+	 * @return bool
+	 */
+	private static function has_builder_query(): bool {
+		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput -- Presence-only gate on keys, which magic quotes never slash; the capability above is the credential.
+		$query = $_GET;
+
+		/**
+		 * Filter: query vars that mark a frontend builder's own edit render.
+		 *
+		 * No list of builders stays complete, so a site on one we do not ship can
+		 * name its own rather than turning blocking off site-wide.
+		 *
+		 * @since 1.5.0
+		 * @param array<int, string> $query_vars Builder query vars.
+		 */
+		$query_vars = apply_filters( 'surecookie_builder_query_vars', self::BUILDER_QUERY_VARS );
+		$query_vars = is_array( $query_vars ) ? array_filter( $query_vars, 'is_string' ) : self::BUILDER_QUERY_VARS;
+
+		foreach ( $query_vars as $query_var ) {
+			if ( isset( $query[ $query_var ] ) ) {
+				return true;
+			}
+		}
+
+		// Core's preview needs the id or nonce too, or a bare `?preview=1` would
+		// turn blocking off site-wide.
+		return isset( $query['preview'] ) && ( isset( $query['preview_id'] ) || isset( $query['preview_nonce'] ) );
 	}
 }

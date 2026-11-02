@@ -37,7 +37,16 @@ class Shortcode {
 	 * @since 0.0.0-alpha.1
 	 */
 	private function __construct() {
-		$this->register_shortcodes( [ 'surecookie_cookie_policy_content' => 'content' ] );
+		$tags = [ 'surecookie_cookie_policy_content' => 'content' ];
+
+		// A page adopted by the WPConsent migration keeps that plugin's tag, which
+		// has no handler once WPConsent is deactivated. Modules boot at init:999,
+		// after plugins claim their tags, so a free tag means WPConsent is gone.
+		if ( ! shortcode_exists( 'wpconsent_cookie_policy' ) ) {
+			$tags['wpconsent_cookie_policy'] = 'content';
+		}
+
+		$this->register_shortcodes( $tags );
 	}
 
 	/**
@@ -175,19 +184,14 @@ class Shortcode {
 				$html .= '<p>' . esc_html( $cat['description'] ) . '</p>';
 			}
 
-			$provider_groups    = self::group_cookies_by_provider( $cat['cookies'] );
-			$has_multi_provider = count( $provider_groups ) > 1;
+			// One table per category, not per provider: a table and header each
+			// made 35 tables of 59 cookies, 22 of them a single row (#1459).
+			// Grouping still orders the rows, and Provider becomes a column.
+			$provider_groups = self::group_cookies_by_provider( $cat['cookies'] );
 
-			foreach ( $provider_groups as $provider_name => $cookies ) {
-				$html .= '<div class="surecookie-cookie-policy-provider">';
-
-				if ( $has_multi_provider ) {
-					$html .= '<h4 class="surecookie-cookie-policy-provider-name">' . esc_html( $provider_name ) . '</h4>';
-				}
-
-				$html .= self::build_single_table( $cookies );
-				$html .= '</div>';
-			}
+			$html .= '<div class="surecookie-cookie-policy-provider">';
+			$html .= self::build_single_table( array_merge( [], ...array_values( $provider_groups ) ), count( $provider_groups ) > 1 );
+			$html .= '</div>';
 
 			$html .= '</div>';
 		}
@@ -198,15 +202,17 @@ class Shortcode {
 	/**
 	 * Build a single cookie table.
 	 *
-	 * @param array<int, array<string, mixed>> $cookies Cookies to display.
+	 * @param array<int, array<string, mixed>> $cookies            Cookies to display.
+	 * @param bool                             $has_multi_provider Add the Provider column, for a category whose cookies span more than one.
 	 * @since 0.0.0-alpha.2
 	 * @return string HTML table.
 	 */
-	private static function build_single_table( array $cookies ): string {
+	private static function build_single_table( array $cookies, bool $has_multi_provider = false ): string {
 		$label_name     = esc_html__( 'Cookie Name', 'surecookie' );
 		$label_purpose  = esc_html__( 'Purpose', 'surecookie' );
 		$label_duration = esc_html__( 'Duration', 'surecookie' );
 		$label_domain   = esc_html__( 'Domain', 'surecookie' );
+		$label_provider = esc_html__( 'Provider', 'surecookie' );
 
 		$html  = '<div class="surecookie-cookie-policy-table-wrap">';
 		$html .= '<table class="surecookie-cookie-policy-table">';
@@ -214,6 +220,9 @@ class Shortcode {
 		$html .= '<th scope="col">' . $label_name . '</th>';
 		$html .= '<th scope="col">' . $label_purpose . '</th>';
 		$html .= '<th scope="col">' . $label_duration . '</th>';
+		if ( $has_multi_provider ) {
+			$html .= '<th scope="col">' . $label_provider . '</th>';
+		}
 		$html .= '<th scope="col">' . $label_domain . '</th>';
 		$html .= '</tr></thead>';
 		$html .= '<tbody>';
@@ -225,11 +234,15 @@ class Shortcode {
 			$purpose   = esc_html( $described !== '' ? $described : (string) ( $cookie['purpose'] ?? '' ) );
 			$duration  = esc_html( self::format_duration( $cookie ) );
 			$domain    = esc_html( self::format_domain( $cookie ) );
+			$provider  = esc_html( self::resolve_provider( $cookie ) );
 
 			$html .= '<tr>';
 			$html .= '<td data-label="' . esc_attr( $label_name ) . '">' . ( ! empty( $name ) ? $name : '-' ) . '</td>';
 			$html .= '<td data-label="' . esc_attr( $label_purpose ) . '">' . ( ! empty( $purpose ) ? $purpose : '-' ) . '</td>';
 			$html .= '<td data-label="' . esc_attr( $label_duration ) . '">' . ( $duration !== '' ? $duration : '-' ) . '</td>';
+			if ( $has_multi_provider ) {
+				$html .= '<td data-label="' . esc_attr( $label_provider ) . '">' . ( ! empty( $provider ) ? $provider : '-' ) . '</td>';
+			}
 			$html .= '<td data-label="' . esc_attr( $label_domain ) . '">' . ( ! empty( $domain ) ? $domain : '-' ) . '</td>';
 			$html .= '</tr>';
 		}
@@ -347,26 +360,36 @@ class Shortcode {
 		$groups = [];
 
 		foreach ( $cookies as $cookie ) {
-			// Resolved here, not trusted from the producer: this is the sink that
-			// uses the leaf as an array key, and an array one is a fatal.
-			$provider = Sanitize::scalar( $cookie['provider'] ?? '' );
-
-			if ( empty( $provider ) ) {
-				$provider = ltrim( Sanitize::scalar( $cookie['domain'] ?? '' ), '.' );
-			}
-
-			if ( empty( $provider ) ) {
-				$provider = wp_parse_url( home_url(), PHP_URL_HOST );
-
-				if ( empty( $provider ) ) {
-					$provider = __( 'This website', 'surecookie' );
-				}
-			}
-
-			$groups[ $provider ][] = $cookie;
+			$groups[ self::resolve_provider( $cookie ) ][] = $cookie;
 		}
 
 		return $groups;
+	}
+
+	/**
+	 * The provider a cookie is listed under.
+	 *
+	 * Resolved here, not trusted from the producer: this is the sink that uses
+	 * the leaf as an array key, and an array one is a fatal. The grouping and
+	 * the Provider column share it, or a row could sit under one name and print
+	 * another.
+	 *
+	 * @param array<string, mixed> $cookie Cookie row.
+	 * @since 1.8.0
+	 * @return string
+	 */
+	private static function resolve_provider( array $cookie ): string {
+		$provider = Sanitize::scalar( $cookie['provider'] ?? '' );
+
+		if ( empty( $provider ) ) {
+			$provider = ltrim( Sanitize::scalar( $cookie['domain'] ?? '' ), '.' );
+		}
+
+		if ( empty( $provider ) ) {
+			$provider = wp_parse_url( home_url(), PHP_URL_HOST );
+		}
+
+		return ! empty( $provider ) ? (string) $provider : __( 'This website', 'surecookie' );
 	}
 
 	/**
@@ -415,7 +438,11 @@ class Shortcode {
 			// A sub-day lifetime floors to zero days - true of catalog entries such as
 			// DoubleClick's test_cookie. "0" reads as an error to a visitor, and it is
 			// the same figure the old decaying count produced, so neither may ship.
-			return is_numeric( $duration ) && (float) $duration <= 0 ? $session : $duration;
+			if ( is_numeric( $duration ) ) {
+				return (float) $duration <= 0 ? $session : self::format_days( $duration );
+			}
+
+			return $duration;
 		}
 
 		// Rows stored before the day count was derived at scan time still carry only the
@@ -423,10 +450,29 @@ class Shortcode {
 		if ( ! empty( $cookie['expires'] ) ) {
 			$days = self::expires_to_days( $cookie['expires'] );
 
-			return $days === '0' ? $session : $days;
+			// Unparseable: the empty cell the table dashes, never "0 days".
+			if ( $days === '' ) {
+				return '';
+			}
+
+			return $days === '0' ? $session : self::format_days( $days );
 		}
 
 		return '';
+	}
+
+	/**
+	 * A whole-day count with its unit, so the cell reads like the admin field.
+	 *
+	 * @param string $days Whole days, already known to be a positive number.
+	 * @since 1.8.0
+	 * @return string
+	 */
+	private static function format_days( string $days ): string {
+		$count = (int) $days;
+
+		/* translators: %s: number of days a cookie is stored for. */
+		return sprintf( _n( '%s day', '%s days', $count, 'surecookie' ), number_format_i18n( $count ) );
 	}
 
 	/**

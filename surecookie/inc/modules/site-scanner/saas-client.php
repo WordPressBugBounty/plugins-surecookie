@@ -108,6 +108,15 @@ class SaasClient {
 	public const LAST_OUTCOME_TRANSIENT = 'surecookie_last_scan_outcome';
 
 	/**
+	 * How the last scan ended when it did NOT complete: failed or cancelled.
+	 * Neither leaves a history row or an outcome, so without it the UI could only
+	 * report such a run as finished or say nothing at all.
+	 *
+	 * @since 1.8.0
+	 */
+	public const LAST_END_TRANSIENT = 'surecookie_last_scan_end';
+
+	/**
 	 * Polling interval in seconds.
 	 * Backend polling via WP Cron - 60 seconds to avoid WP_CRON_LOCK_TIMEOUT conflicts.
 	 * Frontend polling (TanStack Query) still runs every 6 seconds for real-time user feedback.
@@ -495,6 +504,7 @@ class SaasClient {
 		// Reset per-scan reach + outcome so this scan's block detection is clean.
 		delete_transient( self::SCAN_REACH_TRANSIENT );
 		delete_transient( self::LAST_OUTCOME_TRANSIENT );
+		self::clear_scan_end();
 
 		$request_body = [
 			'site_id'           => $site_id,
@@ -982,128 +992,6 @@ class SaasClient {
 	}
 
 	/**
-	 * One status pull for the claimed scan, through completion or failure.
-	 *
-	 * @param array<string, mixed> $active_scan The active scan option value.
-	 * @since 1.7.0
-	 * @return void
-	 */
-	private function run_poll( array $active_scan ): void {
-		$group_id      = $active_scan['group_id'];
-		$poll_attempts = $active_scan['poll_attempts'] ?? 0;
-
-		Logger::get_instance()->save_log( sprintf( 'Status check: attempt %d of %d.', $poll_attempts + 1, self::MAX_POLL_ATTEMPTS ) );
-
-		// Check if max attempts exceeded.
-		if ( $poll_attempts >= self::MAX_POLL_ATTEMPTS ) {
-			Logger::get_instance()->save_log( 'Max polling attempts reached. Marking scan as failed.' );
-			$this->handle_scan_failure( __( 'Scan timed out. Please try again.', 'surecookie' ) );
-			return;
-		}
-
-		// Increment poll attempts.
-		$active_scan['poll_attempts'] = $poll_attempts + 1;
-		Update::option( self::SCAN_OPTION_KEY, $active_scan );
-
-		// Check status.
-		$status_result = $this->check_scan_status( $group_id );
-
-		if ( $status_result['status'] === 'error' ) {
-			Logger::get_instance()->save_log( 'Status check returned error: ' . ( $status_result['error'] ?? 'Unknown' ) );
-			// Continue polling, might be temporary network issue.
-			return;
-		}
-
-		Logger::get_instance()->save_log( sprintf( 'Current status: %s.', $status_result['status'] ) );
-
-		// Persist progress, errors, and ETA into active scan option for frontend display.
-		$needs_update = false;
-
-		if ( ! empty( $status_result['progress'] ) ) {
-			$prev_completed = $active_scan['progress']['completed_pages'] ?? 0;
-			$new_completed  = $status_result['progress']['completed_pages'] ?? 0;
-
-			$active_scan['progress'] = $status_result['progress'];
-			$needs_update            = true;
-
-			// Track when progress last changed for smart stuck detection.
-			if ( $new_completed !== $prev_completed ) {
-				$active_scan['last_progress_change_at'] = time();
-			}
-
-			// Log user-friendly progress message.
-			Logger::get_instance()->save_log(
-				sprintf(
-					/* translators: 1: completed pages count, 2: total pages count */
-					__( 'Progress: %1$d of %2$d pages scanned.', 'surecookie' ),
-					$status_result['progress']['completed_pages'],
-					$status_result['progress']['total_pages']
-				)
-			);
-
-			if ( $status_result['progress']['failed_pages'] > 0 ) {
-				Logger::get_instance()->save_log(
-					sprintf(
-						/* translators: %d: number of failed pages */
-						__( '%d page(s) failed to scan.', 'surecookie' ),
-						$status_result['progress']['failed_pages']
-					)
-				);
-			}
-		}
-
-		if ( ! empty( $status_result['error_details'] ) ) {
-			$active_scan['error_details'] = $status_result['error_details'];
-			$needs_update                 = true;
-		}
-
-		if ( ! empty( $status_result['estimated_remaining_seconds'] ) ) {
-			$active_scan['estimated_remaining_seconds'] = $status_result['estimated_remaining_seconds'];
-			$needs_update                               = true;
-		}
-
-		if ( $needs_update ) {
-			Update::option( self::SCAN_OPTION_KEY, $active_scan );
-		}
-
-		switch ( $status_result['status'] ) {
-			case 'completed':
-				Logger::get_instance()->save_log( __( 'Scan completed!', 'surecookie' ) );
-				Logger::get_instance()->save_log( '' ); // Blank line.
-				$this->handle_scan_completion( $group_id );
-				break;
-
-			case 'failed':
-				// Log per-page error details so users can see what went wrong.
-				if ( ! empty( $status_result['error_details'] ) ) {
-					foreach ( $status_result['error_details'] as $detail ) {
-						Logger::get_instance()->save_log(
-							sprintf(
-								/* translators: 1: page URL, 2: error message */
-								__( 'Page failed: %1$s - %2$s', 'surecookie' ),
-								$detail['url'],
-								$detail['error']
-							)
-						);
-					}
-				}
-				$this->handle_scan_failure( $status_result['error'] ?? __( 'Scan failed on server.', 'surecookie' ) );
-				break;
-
-			case 'queued':
-			case 'running':
-				// Continue polling.
-				Logger::get_instance()->save_log( __( 'Scan is in progress. Checking again…', 'surecookie' ) );
-				Logger::get_instance()->save_log( '' ); // Blank line.
-				break;
-
-			default:
-				Logger::get_instance()->save_log( 'Unknown status: ' . $status_result['status'] );
-				break;
-		}
-	}
-
-	/**
 	 * Cleanup active scan data.
 	 *
 	 * @since 0.0.1
@@ -1125,6 +1013,7 @@ class SaasClient {
 	 * @return void
 	 */
 	public function mark_just_finished( array $progress, array $error_details = [] ): void {
+		self::clear_scan_end();
 		set_transient(
 			self::JUST_FINISHED_TRANSIENT,
 			[
@@ -1495,6 +1384,158 @@ class SaasClient {
 			return $this->run_pending_handshake();
 		} finally {
 			delete_transient( self::REGISTERING_LOCK_TRANSIENT );
+		}
+	}
+
+	/**
+	 * Record that the last scan ended without completing.
+	 *
+	 * @param string $state   'failed' or 'cancelled'.
+	 * @param string $message What went wrong, when known.
+	 * @since 1.8.0
+	 * @return void
+	 */
+	public static function record_scan_end( string $state, string $message = '' ): void {
+		set_transient(
+			self::LAST_END_TRANSIENT,
+			[
+				'state'   => $state,
+				'message' => $message,
+				'at'      => time(),
+			],
+			DAY_IN_SECONDS
+		);
+	}
+
+	/**
+	 * Forget how the last scan ended, once a newer one starts or completes.
+	 *
+	 * @since 1.8.0
+	 * @return void
+	 */
+	public static function clear_scan_end(): void {
+		delete_transient( self::LAST_END_TRANSIENT );
+	}
+
+	/**
+	 * One status pull for the claimed scan, through completion or failure.
+	 *
+	 * @param array<string, mixed> $active_scan The active scan option value.
+	 * @since 1.7.0
+	 * @return void
+	 */
+	private function run_poll( array $active_scan ): void {
+		$group_id      = $active_scan['group_id'];
+		$poll_attempts = $active_scan['poll_attempts'] ?? 0;
+
+		Logger::get_instance()->save_log( sprintf( 'Status check: attempt %d of %d.', $poll_attempts + 1, self::MAX_POLL_ATTEMPTS ) );
+
+		// Check if max attempts exceeded.
+		if ( $poll_attempts >= self::MAX_POLL_ATTEMPTS ) {
+			Logger::get_instance()->save_log( 'Max polling attempts reached. Marking scan as failed.' );
+			$this->handle_scan_failure( __( 'Scan timed out. Please try again.', 'surecookie' ) );
+			return;
+		}
+
+		// Increment poll attempts.
+		$active_scan['poll_attempts'] = $poll_attempts + 1;
+		Update::option( self::SCAN_OPTION_KEY, $active_scan );
+
+		// Check status.
+		$status_result = $this->check_scan_status( $group_id );
+
+		if ( $status_result['status'] === 'error' ) {
+			Logger::get_instance()->save_log( 'Status check returned error: ' . ( $status_result['error'] ?? 'Unknown' ) );
+			// Continue polling, might be temporary network issue.
+			return;
+		}
+
+		Logger::get_instance()->save_log( sprintf( 'Current status: %s.', $status_result['status'] ) );
+
+		// Persist progress, errors, and ETA into active scan option for frontend display.
+		$needs_update = false;
+
+		if ( ! empty( $status_result['progress'] ) ) {
+			$prev_completed = $active_scan['progress']['completed_pages'] ?? 0;
+			$new_completed  = $status_result['progress']['completed_pages'] ?? 0;
+
+			$active_scan['progress'] = $status_result['progress'];
+			$needs_update            = true;
+
+			// Track when progress last changed for smart stuck detection.
+			if ( $new_completed !== $prev_completed ) {
+				$active_scan['last_progress_change_at'] = time();
+			}
+
+			// Log user-friendly progress message.
+			Logger::get_instance()->save_log(
+				sprintf(
+					/* translators: 1: completed pages count, 2: total pages count */
+					__( 'Progress: %1$d of %2$d pages scanned.', 'surecookie' ),
+					$status_result['progress']['completed_pages'],
+					$status_result['progress']['total_pages']
+				)
+			);
+
+			if ( $status_result['progress']['failed_pages'] > 0 ) {
+				Logger::get_instance()->save_log(
+					sprintf(
+						/* translators: %d: number of failed pages */
+						__( '%d page(s) failed to scan.', 'surecookie' ),
+						$status_result['progress']['failed_pages']
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $status_result['error_details'] ) ) {
+			$active_scan['error_details'] = $status_result['error_details'];
+			$needs_update                 = true;
+		}
+
+		if ( ! empty( $status_result['estimated_remaining_seconds'] ) ) {
+			$active_scan['estimated_remaining_seconds'] = $status_result['estimated_remaining_seconds'];
+			$needs_update                               = true;
+		}
+
+		if ( $needs_update ) {
+			Update::option( self::SCAN_OPTION_KEY, $active_scan );
+		}
+
+		switch ( $status_result['status'] ) {
+			case 'completed':
+				Logger::get_instance()->save_log( __( 'Scan completed!', 'surecookie' ) );
+				Logger::get_instance()->save_log( '' ); // Blank line.
+				$this->handle_scan_completion( $group_id );
+				break;
+
+			case 'failed':
+				// Log per-page error details so users can see what went wrong.
+				if ( ! empty( $status_result['error_details'] ) ) {
+					foreach ( $status_result['error_details'] as $detail ) {
+						Logger::get_instance()->save_log(
+							sprintf(
+								/* translators: 1: page URL, 2: error message */
+								__( 'Page failed: %1$s - %2$s', 'surecookie' ),
+								$detail['url'],
+								$detail['error']
+							)
+						);
+					}
+				}
+				$this->handle_scan_failure( $status_result['error'] ?? __( 'Scan failed on server.', 'surecookie' ) );
+				break;
+
+			case 'queued':
+			case 'running':
+				// Continue polling.
+				Logger::get_instance()->save_log( __( 'Scan is in progress. Checking again…', 'surecookie' ) );
+				Logger::get_instance()->save_log( '' ); // Blank line.
+				break;
+
+			default:
+				Logger::get_instance()->save_log( 'Unknown status: ' . $status_result['status'] );
+				break;
 		}
 	}
 
@@ -2292,7 +2333,7 @@ class SaasClient {
 			// A claim older than the TTL was left by a request that died mid-poll. Swap
 			// only the exact value seen, so of two requests taking it over one wins.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Compare-and-swap on the claim row.
-			if ( time() - (int) $seen < self::POLL_LOCK_TTL || 1 !== (int) $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", $token, self::POLL_LOCK_OPTION, $seen ) ) ) {
+			if ( time() - (int) $seen < self::POLL_LOCK_TTL || (int) $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", $token, self::POLL_LOCK_OPTION, $seen ) ) !== 1 ) {
 				return false;
 			}
 		}
@@ -2367,6 +2408,8 @@ class SaasClient {
 	 */
 	private function handle_scan_failure( string $error_message ): void {
 		Logger::get_instance()->save_log( 'Scan failed: ' . $error_message );
+
+		self::record_scan_end( 'failed', $error_message );
 
 		// Cleanup local state.
 		$this->cleanup_active_scan();

@@ -438,6 +438,32 @@ class Init {
 	}
 
 	/**
+	 * Whether a full-page cache could store this response and replay it.
+	 *
+	 * Every cache bypasses a logged-in visitor, a non-GET request and anything
+	 * carrying `DONOTCACHEPAGE`; what is left is an anonymous render whose
+	 * headers the next visitor may be served, so nothing per-visitor may ride
+	 * on one. Reading an uncacheable request as cacheable only withholds a
+	 * header, which is the safe side of a wrong answer.
+	 *
+	 * @since 1.8.0
+	 * @return bool
+	 */
+	public static function is_cacheable_request(): bool {
+		if ( is_user_logged_in() || is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+			return false;
+		}
+
+		if ( ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'DONOTCACHEPAGE' ) && DONOTCACHEPAGE ) ) {
+			return false;
+		}
+
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'GET';
+
+		return strtoupper( $method ) === 'GET';
+	}
+
+	/**
 	 * Purge page caches after settings are saved.
 	 *
 	 * Public settings are localised into the page HTML, so a cached page keeps

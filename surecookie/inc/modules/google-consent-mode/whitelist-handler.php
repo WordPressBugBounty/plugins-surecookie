@@ -248,8 +248,9 @@ class Whitelist_Handler {
 				$identifier = $src !== '' ? $src : (string) ( $resource['domain'] ?? '' );
 
 				// `gcmCompatible` is static (does the resource match a GCM-compatible Google service) so the admin UI can derive the managed state live
-				// from the in-flight gcm_enabled toggle. `gcmManaged` is that same flag gated by the saved GCM/blocking state.
-				$compatible = $identifier !== '' && $this->is_google_service( $identifier, '' );
+				// from the in-flight gcm_enabled toggle. `gcmManaged` is that same flag gated by the saved GCM/blocking state. The slug is the name
+				// runtime hands is_google_service(), and a ledger row has no URL to match a path pattern such as `googletagmanager.com/ns.html`.
+				$compatible = $this->is_google_service( $identifier, (string) ( $resource['service_slug'] ?? '' ) );
 
 				$resources[ $type ][ $index ]['gcmCompatible'] = $compatible;
 				$resources[ $type ][ $index ]['gcmManaged']    = $compatible && $managed_state;
@@ -375,8 +376,9 @@ class Whitelist_Handler {
 		// tags GCM injects. Priority 10 leaves Pro's quarantine veto (20) last.
 		add_filter( 'surecookie_guard_skip_pattern', [ $this, 'maybe_skip_guard_pattern' ], 10, 3 );
 
-		// Flag scan-detected resources that GCM manages, for the scanner UI.
-		add_filter( 'surecookie_scanned_resources', [ $this, 'annotate_scanned_resources' ] );
+		// Flag scan-detected resources that GCM manages, for the scanner UI. After the ledger and installed-service
+		// overlays (10) add their rows, or those rows carry no flag and read as Blocked beside their GCM siblings.
+		add_filter( 'surecookie_scanned_resources', [ $this, 'annotate_scanned_resources' ], 20 );
 
 		// Let other modules (e.g. the Pro auto-scan guard) ask whether GCM manages a resource, without hard-depending on this class.
 		add_filter( 'surecookie_is_gcm_managed', [ $this, 'filter_is_gcm_managed' ], 10, 2 );

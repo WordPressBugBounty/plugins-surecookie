@@ -50,6 +50,9 @@ class Init {
 	 */
 	private function __construct() {
 		add_filter( 'surecookie_admin_localize_data', [ $this, 'localize_theme_palette' ] );
+		// The onboarding banner step offers the same custom palette, and Pro's
+		// editor reads its theme suggestions straight off the localized blob.
+		add_filter( 'surecookie_onboarding_localize_data', [ $this, 'localize_theme_palette' ] );
 	}
 
 	/**

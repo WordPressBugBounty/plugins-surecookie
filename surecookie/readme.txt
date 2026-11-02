@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -483,6 +483,40 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.8.0 - 02-November-2026 =
+* New: You can now import your configuration from WPConsent under Settings > Tools > Migration, covering banner content, buttons, consent behavior, categories and cookies. SureCookie shows what will be replaced before anything changes, never deletes your WPConsent data. ( https://surecookie.com/docs/migrating-from-wpconsent-to-surecookie/ )
+* New: A "Take a Tour" button on every admin page opens a guided walkthrough of that page's features and settings.
+* New: Meta's tracking is now held until the visitor accepts Marketing, for both Meta Pixel for WordPress and Meta for WooCommerce. Those plugins previously set the _fbp cookie and sent Conversions API events while the page was built, which page caching then repeated to every later visitor.
+* Improvement: The setup wizard has been rebuilt. It opens by showing what setup covers, walks you through connecting and scanning, and ends on a screen listing what protects your site and what is still outstanding, with most of it fixable in one click.
+* Improvement: Setup now offers to keep your cookie list up to date automatically. Scheduled re-scanning was off on about three quarters of sites, which leaves the published policy describing cookies the site no longer sets.
+* Improvement: On local sites, and sites with WP-Cron switched off, setup now offers the browser-based scanner instead of a scan button that cannot work.
+* Improvement: Known Services has an "Analyzed on Your Site" section listing services detected but not yet added, and the "Services We Recognised" notice now links straight to it.
+* Improvement: Turning off "Enable Cookie Banner" no longer hides the banner and preference modal content fields, so you can write your copy before it goes live. A notice explains that blocking is paused while the banner is off.
+* Improvement: When a visitor's browser sends a "do not sell or share" privacy signal, the preference window now names the categories that signal keeps off, instead of offering switches it silently overrides.
+* Improvement: A scan now records which host set each cookie when that host is within the cookie's own domain. SureCookie Pro's Compliance Guard uses it to hold only that host instead of the whole domain.
+* Improvement: An embed held for review by SureCookie Pro's Compliance Guard now tells visitors the site owner is reviewing it, rather than only that it is blocked. Administrators also see where to approve or release it.
+* Improvement: The banner now downloads one font file instead of three, about 29 KB less per page view, and no longer replaces the site's own Figtree when a theme uses that font.
+* Improvement: While migrating from WPConsent, the pages using WPConsent's shortcodes keep working after you deactivate it.
+* Improvement: With a browser privacy signal switched on, such as Firefox's "Tell websites not to sell or share my data", accepting cookies released nothing at all. It now holds back only the categories that signal covers, and anything still held explains why. The developer consent summary matches what is actually allowed.
+* Improvement: The cookie policy now shows one table per category with a Provider column, instead of a table per provider. Cells no longer break words apart under themes that set word-break, and Duration reads "30 days" rather than a bare "30".
+* Improvement: Consent records now match what the visitor chose. Saving preferences with every category on was recorded as "Partially Accepted" rather than "Accepted", and "Only Essential" as "Partially Accepted" rather than "Declined". Existing records are unchanged.
+* Improvement: WooCommerce order attribution cookies were credited to an unrelated website on the cookie policy, and cookies our classifier could not identify published lines such as "The purpose of this cookie is unclear". Both are corrected on existing policies too.
+* Fix: The setting that disables browser-based scanning had no effect. Turning it off now hides the option on both the setup wizard and the Scanning screen.
+* Fix: If verifying your domain failed twice, the second message never appeared. It is now shown.
+* Fix: On local sites and sites with WP-Cron off, the browser-scan notice claimed your server had blocked our scanner. Nothing had been blocked, and the explanation is now accurate.
+* Fix: Changing a scanned cookie's category no longer fails when the cookie moved after the page loaded. In Automatic Scanning this left Pending Review entries that Approve All could never clear.
+* Fix: On Scripts and Embeds, setting one service's hosts to different categories could leave its embed loading forever with no placeholder, and every row read "Unknown". Rows now name their service, with a notice when categories disagree.
+* Fix: A scan could count the same cookie more than once, or report a known cookie as new. Scan totals, the change summary and the Automatic Scanning queue now count each cookie once.
+* Fix: Avada's Live editor now opens normally. The editing canvas no longer shows blocked-content placeholders, and blocking still applies everywhere else.
+* Fix: Avada videos loaded Vimeo and YouTube before consent when the Video Facade option or Avada's iframe lazy loading was on. They are now held behind the usual placeholder.
+* Fix: A third-party script, video or font link loaded before consent when its tag was written in an unusual but valid way, such as a ">" inside an attribute value or a space before the ">" of a closing tag. It is now held like any other.
+* Fix: On LearnDash lessons using Vimeo Video Progression, Mark Complete unlocked but only reloaded the lesson, so students could not progress. Finishing the video now records it as watched.
+* Fix: With Google Consent Mode on, Google tags added by another script could stay blocked in the browser after a visitor accepted, while the server had already allowed them. The two now agree.
+* Fix: On hosts whose page cache keeps the cookies a page sends, such as WP Engine, the consent shared through the WP Consent API came from whoever loaded the page first. The banner now sets it in the visitor's own browser.
+* Fix: In the preferences window, a cookie's duration showed as a bare number, and session cookies added through Known Services showed "0", also in the Cookies list. They now read "30 days" or "Session".
+* Compatibility: A Presto Player video inside a Spectra container never appeared after accepting cookies and collapsed to a thin line. It now restores correctly, and keeps the placeholder up if the stored copy cannot be read.
+* Compatibility: Presto Player videos that contact no third party, whether hosted on your own site or streamed from Bunny, are no longer held behind consent. A self-hosted video pointing at another site is still blocked until the visitor accepts.
+
 = 1.7.0 - 20-October-2026 =
 * New: The preferences window now includes links to your Cookie Policy, Privacy Policy, and Legal Notice. You can reorder or hide them under Banner > Content > Preference Modal.
 * New: Added a Legal Notice (Imprint) page setting for countries that require one. Select the page alongside your other legal links in the preference modal settings.
@@ -676,27 +710,5 @@ Initial public release of SureCookie.
 - Tweak: The Consent Logs table header now wraps on narrow screens instead of overflowing.
 - Tweak: Scans could sit at "Queued..." forever on hosts where WordPress cron does not run, even though the scan had already finished. Opening the Scanning screen now refreshes the status directly.
 - Tweak: When a hosting firewall blocked our scanner, the Scanning screen simply reported 0 cookies with no explanation. It now says the host blocked the scan, links to the allowlisting guide, and lists anything it could still detect. An invalid, expired or self-signed SSL certificate is now reported as a certificate problem rather than a firewall problem.
-
-= 1.2.4 - 21-July-2026 =
-- Improvement: The banner button order setting now displays a notice, with a shortcut to your Geographic Targeting rules, explaining that visitors matched by a region-specific rule see that region's button order instead of the global one.
-- Improvement: The admin "What's New" panel no longer loads its font from Google's servers, removing an external request while keeping its appearance unchanged.
-- Compatibility: SureCookie now blocks Presto Player video and audio embeds (YouTube, Vimeo, Bunny.net, self-hosted, and audio) until the visitor consents, showing an "Accept & Load" placeholder and restoring the player in place once the matching cookie category is accepted.
-- Fix: Licensed users no longer see a misleading "5 pages per scan" limit before their site connects with SureCookie; the cookie scanner now prompts them to run their first scan to unlock their plan's full scan limits.
-- Fix: SureCookie Pro users can now activate their license during onboarding, so their premium plan and higher scan limits are detected correctly instead of the site being set up on the free tier.
-- Fix: Re-consent entry points (the shortcode button and menu item) now open the cookie preferences even when the consent banner is turned off site-wide, instead of appearing as unresponsive controls.
-- Fix: The SureCookie review request notice in the WordPress admin now displays its logo icon at the correct, compact size instead of appearing oversized.
-- Developer note: Custom post types can now be included in the site scanner and Cookie Policy pickers (and the automatic "All Published Content" scan scope) via the `surecookie_searchable_post_types` filter, with picker results grouped by content type. ( https://surecookie.com/docs/including-custom-post-types-in-scanning-and-the-cookie-policy-picker/ )
-
-= 1.2.3 - 14-July-2026 =
-- Improvement: Added notification dot for unread consent logs in admin menu.
-- Improvement: The consent banner stylesheet now loads without blocking page render (served asynchronously), taking it off the critical rendering path and improving FCP / LCP / Lighthouse scores.
-- Improvement: The bundled Figtree fonts are now served as woff2 (about 60% smaller) and use font-display: swap, so banner text paints immediately in a fallback font and the fonts no longer sit on the critical path.
-- Fix: Accessibility issue with focus outlines for buttons and links in the banner interface.
-- Fix: Script blocking now works even if the remote list fails, using a built-in baseline of common third-party scripts.
-- Compatibility: SureCookie now activates cleanly on SQLite-based WordPress installs by skipping MySQL-only steps, fixing prior index and column errors.
-
-= 1.2.2 - 10-July-2026 =
-- Fix: Enabling Resource Blocking could break the page layout on WordPress 7.0 sites using classic themes with block-based content - block and global styles were pushed into the page body instead of the header, inverting the CSS cascade and collapsing multi-column sections. Resource Blocking no longer interferes with WordPress 7.0's on-demand block-style loading.
-- Fix: Blocked video embeds (Vimeo, YouTube, and other WordPress responsive embeds) no longer leave a large empty gap around the "content is blocked" placeholder. The placeholder now overlays the embed's reserved aspect-ratio space instead of adding its own height on top of it.
 
 For older releases, see the full SureCookie changelog [here](https://surecookie.com/changelog/).

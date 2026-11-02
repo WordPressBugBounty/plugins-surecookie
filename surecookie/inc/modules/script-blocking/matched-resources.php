@@ -101,8 +101,8 @@ class Matched_Resources {
 			return;
 		}
 
-		$pattern = $this->host_of( $subject );
-		if ( $pattern === '' || $this->is_first_party( $pattern ) ) {
+		$pattern = self::host_of( $subject );
+		if ( $pattern === '' || self::is_first_party( $pattern ) ) {
 			return;
 		}
 
@@ -343,6 +343,29 @@ class Matched_Resources {
 	}
 
 	/**
+	 * Whether a resource URL stays on this site.
+	 *
+	 * The public form of the host test, for callers holding a URL rather than a
+	 * host: a relative or root-relative src names no host, so it is this site by
+	 * definition. An empty subject is not - an unresolved src must stay gated.
+	 *
+	 * @since 1.8.0
+	 * @param string $url Resource URL.
+	 * @return bool
+	 */
+	public static function is_first_party_url( string $url ): bool {
+		$url = trim( $url );
+
+		if ( $url === '' ) {
+			return false;
+		}
+
+		$host = self::host_of( $url );
+
+		return $host === '' || self::is_first_party( $host );
+	}
+
+	/**
 	 * Whether a host belongs to this site.
 	 *
 	 * Presto's self-hosted and audio providers resolve to a local file, and a
@@ -353,7 +376,7 @@ class Matched_Resources {
 	 * @param string $host Lowercased host.
 	 * @return bool
 	 */
-	private function is_first_party( string $host ): bool {
+	private static function is_first_party( string $host ): bool {
 		$site = Blocker::without_www( strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
 		$host = Blocker::without_www( $host );
 
@@ -375,12 +398,12 @@ class Matched_Resources {
 	 * @param string $subject Resource URL, or a bare blocking pattern.
 	 * @return string Lowercased host, or '' when there is none to record.
 	 */
-	private function host_of( string $subject ): string {
+	private static function host_of( string $subject ): string {
 		$subject = trim( $subject );
 
 		// A data: URI names no host, and a root-relative path is first-party.
 		if ( $subject === '' || stripos( $subject, 'data:' ) === 0 || strpos( $subject, '/' ) === 0 ) {
-			return strpos( $subject, '//' ) === 0 ? $this->host_of( 'https:' . $subject ) : '';
+			return strpos( $subject, '//' ) === 0 ? self::host_of( 'https:' . $subject ) : '';
 		}
 
 		if ( strpos( $subject, '://' ) === false ) {

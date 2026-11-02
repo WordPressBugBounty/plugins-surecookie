@@ -13,6 +13,7 @@
 
 namespace SureCookie\Inc\Services;
 
+use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Settings;
@@ -445,15 +446,22 @@ class CookieService {
 			];
 		}
 
-		// Check if current category exists in scanned cookies.
-		if ( ! isset( $scanned_cookies[ $current_category ] ) ) {
-			return [
-				'success' => false,
-				'message' => __( 'Current category not found in scanned cookies.', 'surecookie' ),
-			];
+		$current_rows = is_array( $scanned_cookies[ $current_category ] ?? null ) ? $scanned_cookies[ $current_category ] : [];
+		$index        = $this->find_scanned_cookie( $current_rows, $cookie_name, $domain, true );
+
+		// The caller's category is a reading that goes stale (a second screen, a queued
+		// approval a sibling entry or a scan has overtaken), and refusing left the move
+		// unretryable for ever. Follow the cookie, but only to a row that is certainly it.
+		if ( $index === null && $moves ) {
+			$located = $this->locate_scanned_cookie( $scanned_cookies, $cookie_name, $domain );
+
+			if ( $located !== null ) {
+				[ $current_category, $index ] = $located;
+				$moves                        = $current_category !== $new_category;
+			}
 		}
 
-		$index = $this->find_scanned_cookie( $scanned_cookies[ $current_category ], $cookie_name, $domain );
+		$index = $index ?? $this->find_scanned_cookie( $current_rows, $cookie_name, $domain );
 
 		if ( $index === null ) {
 			return [
@@ -504,7 +512,7 @@ class CookieService {
 		}
 
 		if ( $moves ) {
-			$this->move_scanned_cookie( $scanned_cookies, $cookie_name, $current_category, $new_category, $domain );
+			$this->move_scanned_cookie( $scanned_cookies, $cookie_name, $current_category, $new_category, $domain, $index );
 		}
 
 		// Save updated scanned cookies.
@@ -831,22 +839,26 @@ class CookieService {
 	 * set by different domains are separate cookies that the scanner keeps apart
 	 * by signature, and both may be classified the same way. So the domain the
 	 * request came with is matched first, and a name-only match is the fallback
-	 * for a caller that did not send one.
+	 * for a caller that did not send one. A caller that has already resolved the
+	 * row hands over `$index` instead: re-deriving it from the request domain
+	 * takes the first namesake whenever the stored host is not written the same way.
 	 *
 	 * @param array<string, array<int, array<string, mixed>>> $scanned_cookies  Scanned cookies, grouped by category (by reference).
 	 * @param string                                          $cookie_name      Cookie to move.
 	 * @param string                                          $current_category Source category ID.
 	 * @param string                                          $new_category     Target category ID.
 	 * @param string                                          $domain           Domain that set the cookie, when known.
+	 * @param int|null                                        $index            Row already resolved by the caller, when it has one.
 	 * @return array<string, mixed>|null The moved cookie, or null when it was not found.
 	 * @since 1.3.0
+	 * @since 1.8.0 Accepts a row index the caller already resolved.
 	 */
-	private function move_scanned_cookie( array &$scanned_cookies, string $cookie_name, string $current_category, string $new_category, string $domain = '' ): ?array {
+	private function move_scanned_cookie( array &$scanned_cookies, string $cookie_name, string $current_category, string $new_category, string $domain = '', ?int $index = null ): ?array {
 		if ( ! isset( $scanned_cookies[ $current_category ] ) || ! is_array( $scanned_cookies[ $current_category ] ) ) {
 			return null;
 		}
 
-		$index = $this->find_scanned_cookie( $scanned_cookies[ $current_category ], $cookie_name, $domain );
+		$index = $index ?? $this->find_scanned_cookie( $scanned_cookies[ $current_category ], $cookie_name, $domain );
 
 		if ( $index === null ) {
 			return null;
@@ -867,6 +879,35 @@ class CookieService {
 		$scanned_cookies[ $new_category ][] = $cookie;
 
 		return $cookie;
+	}
+
+	/**
+	 * Find the one row a caller means, in whichever category it now sits.
+	 *
+	 * A domain must match exactly, and without one the name must be unique in the
+	 * store: a namesake on another domain is a different cookie, and moving or
+	 * reporting success for it releases holds on the one that was asked about.
+	 *
+	 * @param array<string, mixed> $scanned_cookies Scanned cookies by category.
+	 * @param string               $name            Cookie name.
+	 * @param string               $domain          Cookie domain, or an empty string.
+	 * @return array{0: string, 1: int}|null Category and index, or null when absent or ambiguous.
+	 * @since 1.8.0
+	 */
+	private function locate_scanned_cookie( array $scanned_cookies, string $name, string $domain ): ?array {
+		$wanted = Cookie_Identity::normalize_domain( $domain );
+		$hits   = [];
+
+		foreach ( $scanned_cookies as $category => $cookies ) {
+			foreach ( is_array( $cookies ) ? $cookies : [] as $index => $cookie ) {
+				if ( is_array( $cookie ) && ( $cookie['name'] ?? null ) === $name
+					&& ( $wanted === '' || Cookie_Identity::normalize_domain( Sanitize::cookie_domain( $cookie['domain'] ?? '' ) ) === $wanted ) ) {
+					$hits[] = [ (string) $category, (int) $index ];
+				}
+			}
+		}
+
+		return count( $hits ) === 1 ? $hits[0] : null;
 	}
 
 	/**

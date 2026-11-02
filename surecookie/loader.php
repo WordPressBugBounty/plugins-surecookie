@@ -21,6 +21,7 @@ use SureCookie\Inc\API\Init as API_Initializer;
 use SureCookie\Inc\Database\Init as DB_Initializer;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Integrations\Init as Integrations_Initializer;
+use SureCookie\Inc\Integrations\Meta\Init as Meta_Signals;
 use SureCookie\Inc\Integrations\Wordpress\Init as Wordpress_Abilities_Initializer;
 use SureCookie\Inc\Modules\GoogleConsentMode\Actions as Gcm_Actions;
 use SureCookie\Inc\Modules\Init as Modules_Initiator;
@@ -234,6 +235,13 @@ class SureCookie_Loader {
 		if ( function_exists( 'wp_register_ability' ) ) {
 			Wordpress_Abilities_Initializer::get_instance();
 		}
+
+		/*
+		 * Meta writes `_fbp` and queues its Conversions API events from the
+		 * integration it builds at init:10, so the hold has to be in place
+		 * before then; integrations auto-load at init:999.
+		 */
+		Meta_Signals::get_instance();
 
 		/* BSF Analytics */
 		Analytics::get_instance();

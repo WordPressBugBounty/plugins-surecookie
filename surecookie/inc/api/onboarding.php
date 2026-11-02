@@ -46,7 +46,10 @@ class Onboarding extends Base {
 	 *
 	 * @since 1.5.0
 	 */
-	private const COMPLETION_SOURCES = [ 'finish', 'user_details_next', 'user_details_skip', 'unknown' ];
+	// 'banner' and 'quick_setup' are the last setup screen on each path, where
+	// completion is now recorded. 'finish' stays: the done screen still records
+	// for anyone who reaches it by deep link or after a failed write.
+	private const COMPLETION_SOURCES = [ 'banner', 'quick_setup', 'finish', 'user_details_next', 'user_details_skip', 'unknown' ];
 
 	/**
 	 * Register API routes.

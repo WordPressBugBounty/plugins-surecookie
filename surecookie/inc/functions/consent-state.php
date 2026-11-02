@@ -108,7 +108,7 @@ final class ConsentState {
 			return true;
 		}
 
-		if ( self::gpc() ) {
+		if ( self::gpc() && self::gpc_withholds( $category ) ) {
 			return false;
 		}
 
@@ -121,6 +121,25 @@ final class ConsentState {
 		}
 
 		return self::$default_model_cache === 'opt-out';
+	}
+
+	/**
+	 * Whether GPC withholds a category on its own, whatever the visitor chose.
+	 *
+	 * GPC says "do not sell or share", so it withholds everything except the
+	 * categories that cannot be a sale or a share: essential, and functional,
+	 * which exists to deliver content the visitor asked for (#1409). An id we
+	 * do not know, including a site's own category, is withheld.
+	 *
+	 * Mirrored byte-for-byte in `ConsentManager.isAllowed()` and the DOM guard;
+	 * `GpcScopeContractTest` fails when they drift.
+	 *
+	 * @since 1.8.0
+	 * @param string $category SureCookie category.
+	 * @return bool
+	 */
+	public static function gpc_withholds( string $category ): bool {
+		return $category !== 'essential' && $category !== 'functional';
 	}
 
 	/**

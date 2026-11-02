@@ -165,6 +165,7 @@ class Cron {
 			}
 
 			$last_outcome = get_transient( SaasClient::LAST_OUTCOME_TRANSIENT );
+			$last_end     = get_transient( SaasClient::LAST_END_TRANSIENT );
 
 			return [
 				'in_progress'  => false,
@@ -173,6 +174,8 @@ class Cron {
 				// Lets the UI show honest guidance after a blocked/empty scan
 				// instead of a bare "0 cookies found".
 				'last_outcome' => is_array( $last_outcome ) ? $last_outcome : null,
+				// A run that failed or was cancelled, which no outcome records.
+				'last_end'     => is_array( $last_end ) ? $last_end : null,
 			];
 		}
 
@@ -213,6 +216,7 @@ class Cron {
 			// A cancelled walk must not inherit an earlier walk's terminal state and
 			// report itself as completed.
 			$assisted->clear_just_finished();
+			SaasClient::record_scan_end( 'cancelled' );
 			Logger::get_instance()->log( __( 'Assisted scan cancelled by user.', 'surecookie' ) );
 
 			return true;
@@ -228,6 +232,7 @@ class Cron {
 		// terminal marker and report itself as completed.
 		$saas_client->cleanup_active_scan();
 		$saas_client->clear_just_finished();
+		SaasClient::record_scan_end( 'cancelled' );
 
 		Logger::get_instance()->log( __( 'Scan cancelled by user.', 'surecookie' ) );
 

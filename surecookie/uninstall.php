@@ -89,6 +89,7 @@ function surecookie_get_option_keys() {
 		// completion (Admin\Onboarding, Inc\Api\Onboarding).
 		'surecookie_onboarding_opened',
 		'surecookie_onboarding_completed_source',
+		'surecookie_onboarding_flow',
 		'surecookie_first_scan_started_flag',
 		'surecookie_first_scan_pages_count',
 		'surecookie_first_scan_completed_flag',

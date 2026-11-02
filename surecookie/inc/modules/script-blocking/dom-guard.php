@@ -23,6 +23,7 @@
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\GoogleConsentMode\Whitelist_Handler;
 use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -114,6 +115,13 @@ class Dom_Guard {
 				// core exactly as Blocker::is_core_asset() does. The host is sent,
 				// not read from `location`: on a domain-mapped install (WPML
 				// domain-per-language) the two would disagree about which is ours.
+				// Patterns Google Consent Mode manages. Pro's guard exempts these
+				// from a hold on the server (`is_gcm_managed`), so the browser has
+				// to as well, or a held Google tag stays parked after Accept All
+				// while the server has already released it (surecookie-pro#522).
+				// Empty unless GCM whitelisting is on, so it costs nothing on a
+				// site that does not use it.
+				'g' => array_values( (array) ( Whitelist_Handler::get_instance()->get_whitelisted_scripts()['patterns'] ?? [] ) ),
 				'c' => array_values( array_map( static fn( array $b ): string => $b[1], Blocker::core_bases() ) ),
 				'h' => (string) ( Blocker::core_bases()[0][0] ?? '' ),
 			],

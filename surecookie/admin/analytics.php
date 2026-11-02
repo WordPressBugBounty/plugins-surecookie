@@ -544,6 +544,7 @@ class Analytics {
 		return [
 			'version'            => SURECOOKIE_VERSION,
 			'onboarding_state'   => $this->resolve_onboarding_state(),
+			'onboarding_flow'    => $this->resolve_onboarding_flow(),
 			'consent_gate'       => $this->resolve_consent_gate(),
 			'compliance_regime'  => $this->resolve_compliance_regime(),
 			'blocking_state'     => $this->resolve_blocking_state( $blocking_enabled, $scan_details ),
@@ -602,6 +603,51 @@ class Analytics {
 		}
 
 		return (int) get_option( 'surecookie_onboarding_opened', 0 ) > 0 ? 'abandoned' : 'never_opened';
+	}
+
+	/**
+	 * Which wizard this site was actually shown.
+	 *
+	 * Read from the stamp the wizard writes when it renders, never from the current
+	 * build: a site that onboarded on an older flow has to keep reporting that flow
+	 * after it upgrades, or a before/after comparison silently reclassifies its own
+	 * baseline. `unknown` covers a site that never opened the wizard and one that
+	 * onboarded before the stamp existed - split those two with `onboarding_state`.
+	 *
+	 * Exceeds the ~17-property ceiling in docs/decisions/0002 by one, deliberately and
+	 * temporarily; see that ADR. Retire this key once the pre-stamp base has cycled out.
+	 *
+	 * @since 1.8.0
+	 * @return string
+	 */
+	private function resolve_onboarding_flow(): string {
+		$flow = get_option( SURECOOKIE_ONBOARDING_FLOW_OPTION, '' );
+
+		if ( is_string( $flow ) && $flow !== '' ) {
+			return $flow;
+		}
+
+		// No stamp, but the old wizard left traces of its own. Only a build that
+		// predates the stamp could have written either of these without also
+		// writing it, so a site carrying one demonstrably saw the old flow.
+		//
+		// Derived on read rather than backfilled on upgrade, which matters: the
+		// stamp is written when the wizard RENDERS, so a site that never reopens
+		// it would otherwise report `unknown` forever and the v1 baseline would be
+		// empty. Deriving also keeps the three cohorts honest, because the moment
+		// such a site does reopen the wizard the render-time stamp claims it as
+		// `v2_rerun` and wins here.
+		//
+		// `surecookie_onboarding_opened` is written as a literal in
+		// admin/onboarding.php; keep the two in step.
+		$completed = (bool) get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false );
+		$opened    = (int) get_option( 'surecookie_onboarding_opened', 0 );
+
+		if ( $completed || $opened > 0 ) {
+			return 'v1';
+		}
+
+		return 'unknown';
 	}
 
 	/**

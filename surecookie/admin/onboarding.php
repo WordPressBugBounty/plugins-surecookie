@@ -11,6 +11,7 @@ namespace SureCookie\Admin;
 
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Helper;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Utils\LocalizeData;
@@ -26,6 +27,14 @@ defined( 'ABSPATH' ) || exit;
  */
 class Onboarding {
 	use GetInstance;
+
+	/**
+	 * The wizard this build ships. Bump when the wizard is replaced, never when it
+	 * is merely restyled - the value exists to compare one flow against another.
+	 *
+	 * @since 1.8.0
+	 */
+	public const FLOW_VERSION = 'v2';
 
 	/**
 	 * Constructor.
@@ -83,6 +92,22 @@ class Onboarding {
 			Update::option( 'surecookie_onboarding_opened', time() );
 		}
 
+		// Which wizard this site actually saw, recorded at render rather than read
+		// live: once a redesigned wizard ships, a site that onboarded on the old one
+		// must keep reporting the old one. First write wins for the same reason.
+		if ( ! is_string( get_option( SURECOOKIE_ONBOARDING_FLOW_OPTION, false ) ) ) {
+			// A site that already finished the old wizard and is now re-entering the
+			// new one is a third cohort, not a fresh install: counting it as `v2`
+			// would inflate the new flow with users the old one had already
+			// converted, and deflate the baseline it is measured against.
+			$completed = (bool) get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false );
+
+			Update::option(
+				SURECOOKIE_ONBOARDING_FLOW_OPTION,
+				$completed ? self::FLOW_VERSION . '_rerun' : self::FLOW_VERSION
+			);
+		}
+
 		?>
 		<div id="surecookie-admin-root" class="surecookie-styles"></div>
 		<?php
@@ -135,7 +160,27 @@ class Onboarding {
 			$asset['version'] ?? SURECOOKIE_VERSION
 		);
 
+		// The banner step previews the real banner, whose colours resolve against
+		// these variables. Without them the preview renders in the fallback
+		// palette and the swatch the user picked appears to do nothing.
+		$palette_css = Sanitize::stylesheet( Get::palette_root_css() );
+		if ( ! empty( $palette_css ) ) {
+			wp_add_inline_style( 'surecookie-onboarding-style', wp_strip_all_tags( $palette_css ) );
+		}
+
 		// Localize onboarding data using utility.
 		LocalizeData::localize_onboarding_script( 'surecookie-onboarding-script' );
+
+		/**
+		 * Let add-ons enqueue against the onboarding bundle, the way
+		 * `surecookie_admin_enqueue_scripts_after` already lets them enqueue
+		 * against the admin one. Pro uses it to register the custom palette the
+		 * banner step offers.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string $hook Current admin page hook suffix.
+		 */
+		do_action( 'surecookie_onboarding_enqueue_scripts_after', $hook );
 	}
 }

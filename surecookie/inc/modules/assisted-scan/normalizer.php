@@ -62,7 +62,7 @@ class Normalizer {
 	 *
 	 * @since 1.7.0
 	 */
-	private const SITE_EMITTED_NAMES = '/^(phpsessid|xsrf-token|csrftoken|wordpress_|wp-settings|wp_consent_|wp_woocommerce_session_|woocommerce_|edd_|_lscache_vary)/i';
+	private const SITE_EMITTED_NAMES = '/^(phpsessid|xsrf-token|csrftoken|wordpress_|wp-settings|wp_consent_|wp_woocommerce_session_|woocommerce_|sbjs_|edd_|_lscache_vary)/i';
 
 	/**
 	 * Cookie name prefixes that are never collected.

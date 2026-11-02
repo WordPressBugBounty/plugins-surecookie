@@ -21,6 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Sanitize {
 	/**
+	 * The subject half of a classifier non-answer: the sentence is about the
+	 * cookie's purpose.
+	 *
+	 * @since 1.8.0
+	 */
+	private const PURPOSE_SUBJECT = '/\bpurposes?\b/i';
+
+	/**
+	 * The admission half: the sentence states the purpose is not known.
+	 *
+	 * @since 1.8.0
+	 */
+	private const PURPOSE_UNRESOLVED = '/\b(?:unclear|unknown|unspecified|undetermined|not (?:clearly )?(?:defined|specified|determined|known|established)|cannot be (?:determined|identified|established|ascertained)|could not be determined|unable to determine)\b/i';
+
+	/**
 	 * Sanitize text
 	 * if the value after sanitize_text is empty, return the default value
 	 *
@@ -264,6 +279,39 @@ class Sanitize {
 		$vendor = is_string( $value ) ? trim( sanitize_text_field( $value ) ) : '';
 
 		return in_array( strtolower( $vendor ), [ 'null', 'none', 'unknown', 'n/a', 'undefined' ], true ) ? '' : $vendor;
+	}
+
+	/**
+	 * Sanitize a scanned cookie purpose. Classifier filler that only admits the
+	 * purpose is unknown describes nothing, so it names no purpose.
+	 *
+	 * The scan API sends the canonical's AI-written sentence with no confidence
+	 * score, so the admission itself is the only signal: "The specific purpose of
+	 * this cookie is unclear based on the provided information" reached visitors
+	 * as a published purpose (#1462). Both halves must match, and in the SAME
+	 * sentence: the subject alone would catch "Used for advertising purposes",
+	 * the admission alone "Stores an unspecified visitor id", and matching them
+	 * across a whole string drops a real purpose whose admission is about some
+	 * other attribute ("Used for analytics purposes. The vendor is unknown.").
+	 * Blank beats a neutral line: the policy dashes the cell, the admin field
+	 * reads as unfilled, and the catalog may still fill it.
+	 *
+	 * @param mixed $value Raw purpose.
+	 *
+	 * @since 1.8.0
+	 * @return string The purpose, or '' when it states none.
+	 */
+	public static function purpose( $value ): string {
+		$purpose = is_string( $value ) ? trim( $value ) : '';
+
+		foreach ( (array) preg_split( '/(?<=[.;!?])\s+/', $purpose ) as $sentence ) {
+			if ( preg_match( self::PURPOSE_SUBJECT, (string) $sentence ) === 1
+				&& preg_match( self::PURPOSE_UNRESOLVED, (string) $sentence ) === 1 ) {
+				return '';
+			}
+		}
+
+		return $purpose;
 	}
 
 	/**

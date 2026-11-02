@@ -384,6 +384,13 @@ class Sync {
 	private function group_cookies_by_category( array $pages ): array {
 		$cookies_by_category = array_fill_keys( Get::default_cookie_categories_keys(), [] );
 		$seen_signatures     = [];
+		$loaded              = [];
+
+		foreach ( $pages as $page ) {
+			foreach ( $page['scripts'] ?? [] as $script ) {
+				$loaded[ Normalizer::host_only( Sanitize::scalar( $script['domain'] ?? '' ) ) ] = true;
+			}
+		}
 
 		foreach ( $pages as $page ) {
 			foreach ( $page['cookies'] ?? [] as $cookie ) {
@@ -406,8 +413,24 @@ class Sync {
 				}
 
 				// Add transformed cookie.
-				$cookies_by_category[ $category ][] = $this->transform_cookie_data( $cookie, $category );
+				$cookies_by_category[ $category ][] = $this->transform_cookie_data( $cookie, $category, $loaded );
 			}
+		}
+
+		// The signature also hashes path, TTL bucket and HttpOnly, so one cookie can arrive
+		// under several, each classified on its own. Fold them in the store's category order
+		// through its own merge, so the set counts each cookie once and says what the store keeps.
+		$unique = [];
+		foreach ( $cookies_by_category as $rows ) {
+			foreach ( $rows as $row ) {
+				$key            = Cookie_Identity::key_for( $row );
+				$unique[ $key ] = isset( $unique[ $key ] ) ? self::inherit_from_replaced( $row, $unique[ $key ], false ) : $row;
+			}
+		}
+
+		$cookies_by_category = array_fill_keys( array_keys( $cookies_by_category ), [] );
+		foreach ( $unique as $row ) {
+			$cookies_by_category[ $row['category'] ][] = $row;
 		}
 
 		return $cookies_by_category;
@@ -557,12 +580,14 @@ class Sync {
 	/**
 	 * Transform cookie data to minimal required format.
 	 *
-	 * @param array<string, mixed> $cookie Raw cookie data from API.
+	 * @param array<string, mixed> $cookie   Raw cookie data from API.
 	 * @param string               $category Cookie category.
+	 * @param array<string, bool>  $loaded   Script hosts this scan's pages loaded.
 	 * @since 0.0.1
+	 * @since 1.8.0 Takes the script hosts the scan loaded, to vouch for `set_via`.
 	 * @return array<string, mixed> Minimal cookie data.
 	 */
-	private function transform_cookie_data( array $cookie, string $category ): array {
+	private function transform_cookie_data( array $cookie, string $category, array $loaded = [] ): array {
 		// Use signature_id as the unique identifier.
 		$signature_id = $cookie['signature_id'] ?? '';
 
@@ -575,6 +600,11 @@ class Sync {
 			'expires'       => $cookie['expires_at'] ?? null,
 			'duration'      => $this->scan_duration( $cookie ),
 			'expiry_bucket' => sanitize_key( (string) ( $cookie['expiry_bucket'] ?? '' ) ),
+			// The host that SET the cookie. `domain` is only its scope, so a
+			// `.google.com` scope stood in for the setter and Pro's guard held
+			// every Google subdomain on it, booking pages included
+			// (surecookie-pro#522). Internal: PUBLIC_COOKIE_FIELDS is a whitelist.
+			'set_via'       => self::vouched_setter( $cookie, $loaded ),
 			'httpOnly'      => ! empty( $cookie['http_only'] ),
 			'secure'        => ! empty( $cookie['secure'] ),
 			'sameSite'      => $cookie['same_site'] ?? 'lax',
@@ -583,9 +613,11 @@ class Sync {
 			// Cookie policy display fields.
 			// Scan API exposes the vendor as 'owner' ('vendor' kept for back-compat), never
 			// 'provider'; read those first, fall back to the setter domain ('set_via').
+			// Purpose and description both read through Sanitize::purpose(): the API sends
+			// the canonical's AI sentence, and a non-answer was published verbatim (#1462).
 			'provider'      => $this->resolve_cookie_provider( $cookie ),
-			'description'   => $cookie['description'] ?? '',
-			'purpose'       => $cookie['purpose'] ?? '',
+			'description'   => Sanitize::purpose( $cookie['description'] ?? '' ),
+			'purpose'       => Sanitize::purpose( $cookie['purpose'] ?? '' ),
 
 			// Unique identifier for deduplication.
 			'signature_id'  => $signature_id,
@@ -604,6 +636,28 @@ class Sync {
 		}
 
 		return $transformed;
+	}
+
+	/**
+	 * The scan's setter host, kept only where this scan can vouch for it.
+	 *
+	 * The API pooled one site's setter into every site's results, so Pro held strangers like cookiebot.com.
+	 * Kept: a host inside the cookie's own domain, or a script this scan loaded writing a cookie this
+	 * site's own pages can set (`_fbp` by connect.facebook.net), which Pro reads as evidence, not a hold.
+	 *
+	 * @param array<string, mixed> $cookie Raw cookie data from the scan.
+	 * @param array<string, bool>  $loaded Script hosts this scan's pages loaded.
+	 * @since 1.8.0
+	 * @return string The setter host, or an empty string.
+	 */
+	private static function vouched_setter( array $cookie, array $loaded ): string {
+		$setter = Normalizer::host_only( Sanitize::scalar( $cookie['set_via'] ?? '' ) );
+		$scope  = '.' . Cookie_Identity::normalize_domain( Sanitize::scalar( $cookie['domain'] ?? '' ) );
+		$inside = static function ( string $host ) use ( $scope ): bool {
+			return $scope !== '.' && $host !== '' && substr( '.' . $host, -strlen( $scope ) ) === $scope;
+		};
+
+		return $inside( $setter ) || ( isset( $loaded[ $setter ] ) && $inside( Normalizer::request_host() ) ) ? $setter : '';
 	}
 
 	/**
@@ -921,12 +975,15 @@ class Sync {
 	 * `uncategorized` category. Cloud-path counterpart of
 	 * {@see Normalizer::merge_without_downgrade()}, on the stored row shape.
 	 *
-	 * @param array<string, mixed> $incoming Row about to be stored.
-	 * @param array<string, mixed> $existing Row it replaces.
+	 * @param array<string, mixed> $incoming    Row about to be stored.
+	 * @param array<string, mixed> $existing    Row it replaces.
+	 * @param bool                 $honour_pins Leave a pinned cookie's category alone. Off when folding a
+	 *                                          scan's own siblings, which must stay the scanner's view.
 	 * @since 1.3.1
+	 * @since 1.8.0 Added $honour_pins.
 	 * @return array<string, mixed>
 	 */
-	private static function inherit_from_replaced( array $incoming, array $existing ): array {
+	private static function inherit_from_replaced( array $incoming, array $existing, bool $honour_pins = true ): array {
 		// 'duration' carries the catalog's authored day count, which no scan reports.
 		// Omitting it dropped that value whenever a scan replaced the row, while
 		// First_Party_Repair::CURATED_FIELDS had always carried it. A session-scoped
@@ -958,7 +1015,7 @@ class Sync {
 		if ( ( $incoming['category'] ?? '' ) === 'uncategorized'
 			&& $existing_category !== ''
 			&& $existing_category !== 'uncategorized'
-			&& CookieCategoryMemory::remembered_category( $incoming ) === ''
+			&& ( ! $honour_pins || CookieCategoryMemory::remembered_category( $incoming ) === '' )
 		) {
 			$incoming['category'] = $existing_category;
 		}

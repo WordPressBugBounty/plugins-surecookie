@@ -807,72 +807,6 @@ class Get {
 	}
 
 	/**
-	 * Record one recipient, and its transfer countries, against a category.
-	 *
-	 * @since 1.7.0
-	 * @param array<string, array<string, array<string, bool>>> $buckets   Accumulator.
-	 * @param string                                            $category  Category id.
-	 * @param string                                            $label     Recipient name.
-	 * @param mixed                                             $countries ISO 3166-1 alpha-2 codes.
-	 * @return void
-	 */
-	private static function disclose( array &$buckets, string $category, string $label, $countries ): void {
-		$category = sanitize_key( $category );
-		$label    = trim( $label );
-
-		if ( $category === '' || $label === '' ) {
-			return;
-		}
-
-		$buckets[ $category ]['recipients'][ $label ] = true;
-		$buckets[ $category ]['transfers']            = $buckets[ $category ]['transfers'] ?? [];
-
-		foreach ( is_array( $countries ) ? $countries : [] as $code ) {
-			if ( is_string( $code ) && $code !== '' ) {
-				$buckets[ $category ]['transfers'][ $code ] = true;
-			}
-		}
-	}
-
-	/**
-	 * Catalog slugs that published a cookie row, keyed by the row's category.
-	 *
-	 * Asked of what visitors are actually shown rather than of the installed
-	 * registry, for the reason Recognised_Services documents: the two diverge
-	 * whenever a service was removed after a scan had already stored its rows.
-	 *
-	 * @since 1.7.0
-	 * @return array<string, array<int, string>>
-	 */
-	private static function declared_cookie_slugs(): array {
-		$slugs = [];
-
-		foreach ( self::scanned_cookies_for_display() as $category_id => $rows ) {
-			foreach ( is_array( $rows ) ? $rows : [] as $row ) {
-				// 'declared:{slug}:{name}', the contract reconciliation matches on.
-				$parts = is_array( $row ) ? explode( ':', Sanitize::scalar( $row['signature_id'] ?? '' ), 3 ) : [];
-
-				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
-					$slugs[ (string) $category_id ][ $parts[1] ] = true;
-				}
-			}
-		}
-
-		// Installing a service writes its cookies to `custom_cookies` instead,
-		// tagged with the slug, so those rows are declared too.
-		foreach ( (array) Settings::get( 'custom_cookies' ) as $row ) {
-			$slug     = is_array( $row ) ? Sanitize::scalar( $row['service_slug'] ?? '' ) : '';
-			$category = is_array( $row ) ? Sanitize::scalar( $row['category'] ?? '' ) : '';
-
-			if ( $slug !== '' && $category !== '' ) {
-				$slugs[ $category ][ $slug ] = true;
-			}
-		}
-
-		return array_map( 'array_keys', $slugs );
-	}
-
-	/**
 	 * Ids of the categories the consent UI may show when "hide unused" is on.
 	 *
 	 * Never used to build the consent model itself: every registered category
@@ -1033,40 +967,16 @@ class Get {
 		$labels = [];
 
 		foreach ( self::blocking_catalog_entries() as $slug => $service ) {
-			$label = (string) ( $service['label'] ?? '' );
+			$label = Sanitize::scalar( $service['label'] ?? '' );
 			// Only worth sending when it differs from the key the element
-			// already carries; the frontend falls back to that key.
-			if ( $label !== '' && $label !== $slug ) {
+			// already carries; the frontend falls back to that key. A Unicode
+			// blank survives `!== ''` and would name the service as a gap (#1429).
+			if ( ! Sanitize::is_blank( $label ) && $label !== $slug ) {
 				$labels[ $slug ] = $label;
 			}
 		}
 
 		return $labels;
-	}
-
-	/**
-	 * The blocking catalog flattened to slug => entry, categories collapsed.
-	 *
-	 * Read through `surecookie_known_scripts` rather than the catalog itself so
-	 * every contributor the blocker matches against is included, and so this
-	 * file does not have to reach into the services module.
-	 *
-	 * @since 1.7.0
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function blocking_catalog_entries(): array {
-		$catalog = apply_filters( 'surecookie_known_scripts', [] );
-		$entries = [];
-
-		foreach ( is_array( $catalog ) ? $catalog : [] as $services ) {
-			foreach ( is_array( $services ) ? $services : [] as $slug => $service ) {
-				if ( is_array( $service ) ) {
-					$entries[ (string) $slug ] = $service;
-				}
-			}
-		}
-
-		return $entries;
 	}
 
 	/**
@@ -1227,58 +1137,6 @@ class Get {
 		];
 
 		return self::policy_page_details( absint( Settings::get( $setting_key ) ) );
-	}
-
-	/**
-	 * The same resolution from a raw page id, for a page WordPress owns rather
-	 * than one of ours.
-	 *
-	 * @since 1.7.0
-	 * @param int $page_id Post ID.
-	 * @return array{id: int, url: string, title: string, status: string, edit_url: string}
-	 */
-	private static function policy_page_details( int $page_id ): array {
-		$data = [
-			'id'       => 0,
-			'url'      => '',
-			'title'    => '',
-			'status'   => '',
-			'edit_url' => '',
-		];
-
-		$page_id = self::resolve_translated_policy_page_id( $page_id );
-
-		if ( $page_id <= 0 ) {
-			return $data;
-		}
-
-		$page = get_post( $page_id );
-
-		if ( ! $page instanceof \WP_Post ) {
-			return $data;
-		}
-
-		$data['id']       = $page->ID;
-		$data['status']   = $page->post_status;
-		$data['title']    = sanitize_text_field( get_the_title( $page ) );
-		$data['edit_url'] = (string) get_edit_post_link( $page->ID, 'raw' );
-
-		$permalink = get_permalink( $page );
-
-		if ( ! $permalink ) {
-			return $data;
-		}
-
-		$parsed_url = wp_parse_url( $permalink );
-		$home_url   = wp_parse_url( home_url() );
-
-		// Same-host guard, mirroring cookie_policy_page_details(): a permalink
-		// pointing off-site is never something we hand to a visitor.
-		if ( ! empty( $parsed_url['host'] ) && isset( $home_url['host'] ) && strtolower( $parsed_url['host'] ) === strtolower( $home_url['host'] ) ) {
-			$data['url'] = esc_url( $permalink );
-		}
-
-		return $data;
 	}
 
 	/**
@@ -1463,6 +1321,168 @@ class Get {
 		$against_dark  = ( $luminance + 0.05 ) / ( $dark_luminance + 0.05 );
 
 		return $against_white >= $against_dark ? '#ffffff' : '#111827';
+	}
+
+	/**
+	 * WCAG contrast ratio between two colors, or null when either is unparseable.
+	 *
+	 * @since 1.8.0
+	 * @param string $first  Color value.
+	 * @param string $second Color value.
+	 * @return float|null Ratio from 1 to 21.
+	 */
+	public static function contrast_ratio( string $first, string $second ): ?float {
+		$a = self::relative_luminance( $first );
+		$b = self::relative_luminance( $second );
+
+		if ( $a === null || $b === null ) {
+			return null;
+		}
+
+		return ( max( $a, $b ) + 0.05 ) / ( min( $a, $b ) + 0.05 );
+	}
+
+	/**
+	 * Record one recipient, and its transfer countries, against a category.
+	 *
+	 * @since 1.7.0
+	 * @param array<string, array<string, array<string, bool>>> $buckets   Accumulator.
+	 * @param string                                            $category  Category id.
+	 * @param string                                            $label     Recipient name.
+	 * @param mixed                                             $countries ISO 3166-1 alpha-2 codes.
+	 * @return void
+	 */
+	private static function disclose( array &$buckets, string $category, string $label, $countries ): void {
+		$category = sanitize_key( $category );
+		$label    = trim( $label );
+
+		if ( $category === '' || $label === '' ) {
+			return;
+		}
+
+		$buckets[ $category ]['recipients'][ $label ] = true;
+		$buckets[ $category ]['transfers']            = $buckets[ $category ]['transfers'] ?? [];
+
+		foreach ( is_array( $countries ) ? $countries : [] as $code ) {
+			if ( is_string( $code ) && $code !== '' ) {
+				$buckets[ $category ]['transfers'][ $code ] = true;
+			}
+		}
+	}
+
+	/**
+	 * Catalog slugs that published a cookie row, keyed by the row's category.
+	 *
+	 * Asked of what visitors are actually shown rather than of the installed
+	 * registry, for the reason Recognised_Services documents: the two diverge
+	 * whenever a service was removed after a scan had already stored its rows.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, array<int, string>>
+	 */
+	private static function declared_cookie_slugs(): array {
+		$slugs = [];
+
+		foreach ( self::scanned_cookies_for_display() as $category_id => $rows ) {
+			foreach ( is_array( $rows ) ? $rows : [] as $row ) {
+				// 'declared:{slug}:{name}', the contract reconciliation matches on.
+				$parts = is_array( $row ) ? explode( ':', Sanitize::scalar( $row['signature_id'] ?? '' ), 3 ) : [];
+
+				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
+					$slugs[ (string) $category_id ][ $parts[1] ] = true;
+				}
+			}
+		}
+
+		// Installing a service writes its cookies to `custom_cookies` instead,
+		// tagged with the slug, so those rows are declared too.
+		foreach ( (array) Settings::get( 'custom_cookies' ) as $row ) {
+			$slug     = is_array( $row ) ? Sanitize::scalar( $row['service_slug'] ?? '' ) : '';
+			$category = is_array( $row ) ? Sanitize::scalar( $row['category'] ?? '' ) : '';
+
+			if ( $slug !== '' && $category !== '' ) {
+				$slugs[ $category ][ $slug ] = true;
+			}
+		}
+
+		return array_map( 'array_keys', $slugs );
+	}
+
+	/**
+	 * The blocking catalog flattened to slug => entry, categories collapsed.
+	 *
+	 * Read through `surecookie_known_scripts` rather than the catalog itself so
+	 * every contributor the blocker matches against is included, and so this
+	 * file does not have to reach into the services module.
+	 *
+	 * @since 1.7.0
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function blocking_catalog_entries(): array {
+		$catalog = apply_filters( 'surecookie_known_scripts', [] );
+		$entries = [];
+
+		foreach ( is_array( $catalog ) ? $catalog : [] as $services ) {
+			foreach ( is_array( $services ) ? $services : [] as $slug => $service ) {
+				if ( is_array( $service ) ) {
+					$entries[ (string) $slug ] = $service;
+				}
+			}
+		}
+
+		return $entries;
+	}
+
+	/**
+	 * The same resolution from a raw page id, for a page WordPress owns rather
+	 * than one of ours.
+	 *
+	 * @since 1.7.0
+	 * @param int $page_id Post ID.
+	 * @return array{id: int, url: string, title: string, status: string, edit_url: string}
+	 */
+	private static function policy_page_details( int $page_id ): array {
+		$data = [
+			'id'       => 0,
+			'url'      => '',
+			'title'    => '',
+			'status'   => '',
+			'edit_url' => '',
+		];
+
+		$page_id = self::resolve_translated_policy_page_id( $page_id );
+
+		if ( $page_id <= 0 ) {
+			return $data;
+		}
+
+		$page = get_post( $page_id );
+
+		if ( ! $page instanceof \WP_Post ) {
+			return $data;
+		}
+
+		$data['id']       = $page->ID;
+		$data['status']   = $page->post_status;
+		$data['title']    = sanitize_text_field( get_the_title( $page ) );
+		$data['edit_url'] = (string) get_edit_post_link( $page->ID, 'raw' );
+
+		$permalink = get_permalink( $page );
+
+		if ( ! $permalink ) {
+			return $data;
+		}
+
+		$parsed_url = wp_parse_url( $permalink );
+		$home_url   = wp_parse_url( home_url() );
+
+		// Same-host guard, mirroring cookie_policy_page_details(): a permalink
+		// pointing off-site is never something we hand to a visitor.
+		if ( ! empty( $parsed_url['host'] ) && isset( $home_url['host'] ) && strtolower( $parsed_url['host'] ) === strtolower( $home_url['host'] ) ) {
+			$data['url'] = esc_url( $permalink );
+		}
+
+		return $data;
 	}
 
 	/**

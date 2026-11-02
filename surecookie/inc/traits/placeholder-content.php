@@ -15,6 +15,7 @@
 namespace SureCookie\Inc\Traits;
 
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\Multilingual\Translation_Filter;
 use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
@@ -276,7 +277,8 @@ trait PlaceholderContent {
 		 * quarantined trackers (Pro Guard) are never released by consent, and a
 		 * category hidden by `hide_unused_categories` has no toggle to grant it.
 		 */
-		$is_ungrantable = $category === Blocker::QUARANTINE_CATEGORY || Get::is_category_hidden( $category );
+		$is_quarantined = $category === Blocker::QUARANTINE_CATEGORY;
+		$is_ungrantable = $is_quarantined || Get::is_category_hidden( $category );
 
 		$out .= '<div class="surecookie-placeholder-content" style="' . esc_attr( 'background-color:' . $content_bg . ';' ) . '">';
 		// A <div>, NOT <p>: the admin description is rich text and usually arrives
@@ -285,7 +287,25 @@ trait PlaceholderContent {
 		// visible text into an unstyled, theme-margined one.
 		$out .= '<div class="surecookie-placeholder-text" style="' . esc_attr( 'color:' . $text_color . ';' ) . '">';
 		if ( $is_ungrantable ) {
-			$out .= esc_html__( 'This content is currently blocked.', 'surecookie' );
+			// A held embed used to render as a bare "blocked" box with no button
+			// and no reason, so a visitor on a booking page had nothing to act on
+			// and no way to tell it from a fault (surecookie-pro#522). The hold is
+			// the owner's review, so say that; still no button, because consent
+			// genuinely cannot release it.
+			$out .= $is_quarantined
+				? esc_html__( 'This content is blocked while the site owner reviews it.', 'surecookie' )
+				: esc_html__( 'This content is currently blocked.', 'surecookie' );
+
+			// Only the person who can clear the hold is told where to clear it.
+			if ( $is_quarantined && current_user_can( Helper::capability() ) ) {
+				$out .= '<span class="surecookie-placeholder-admin-hint">' . esc_html(
+					sprintf(
+						/* translators: %s: the blocked service or host name. */
+						__( 'SureCookie is holding %s for review. Approve or release it under Scanning, Pending Review.', 'surecookie' ),
+						$label
+					)
+				) . '</span>';
+			}
 		} else {
 			// wp_kses_post keeps safe inline markup while stripping anything unsafe.
 			$out .= wp_kses_post( $description !== '' ? $description : self::placeholder_description( $label ) );

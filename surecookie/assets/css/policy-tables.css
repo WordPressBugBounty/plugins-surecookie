@@ -82,6 +82,9 @@
 	width: 100%;
 	border-collapse: collapse;
 	border-spacing: 0;
+	word-break: normal;
+	overflow-wrap: break-word;
+	line-height: 1.5;
 }
 
 .surecookie-cookie-policy-table th,
@@ -89,6 +92,8 @@
 	padding: 0.625em 0.75em;
 	text-align: left;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	word-break: normal;
+	overflow-wrap: break-word;
 }
 
 .surecookie-cookie-policy-table th {
@@ -102,7 +107,8 @@
 
 .surecookie-cookie-policy-table td:first-child {
 	font-weight: 500;
-	word-break: break-all;
+	word-break: normal;
+	overflow-wrap: anywhere;
 }
 
 /* ── Last updated ──────────────────────────────── */

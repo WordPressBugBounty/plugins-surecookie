@@ -24,9 +24,9 @@
 namespace SureCookie\Inc\Integrations\PrestoPlayer;
 
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
 use SureCookie\Inc\Modules\ScriptBlocking\Matched_Resources;
 use SureCookie\Inc\Modules\ScriptBlocking\Resource_Categories;
-use SureCookie\Inc\Modules\ScriptBlocking\Utils;
 use SureCookie\Inc\Traits\GetInstance;
 use SureCookie\Inc\Traits\PlaceholderContent;
 
@@ -72,7 +72,7 @@ class Block_Handler {
 		],
 		'presto-player/bunny'       => [
 			'service'  => 'bunny',
-			'category' => 'marketing',
+			'category' => 'essential',
 			'label'    => 'Bunny.net',
 		],
 		'presto-player/self-hosted' => [
@@ -90,12 +90,14 @@ class Block_Handler {
 	/**
 	 * Presto provider key => catalog service slug, where the two differ.
 	 *
-	 * Presto calls its Bunny Stream provider `bunny`; the catalog has no service
-	 * by that name, only `bunny-stream` (bunny-cdn and bunny-fonts are different
-	 * products). Anything absent here uses the provider key as the slug.
+	 * Presto calls its Bunny provider `bunny`, but it never loads Bunny's own
+	 * iframe player (`bunny-stream`): it plays with its own and pulls HLS from
+	 * `vz-<zone>.b-cdn.net`, which is `bunny-cdn`, essential and cookieless.
+	 * Naming the wrong one rated the same video functional here and essential
+	 * on Scripts and Embeds (#1436). Anything absent here uses the provider key.
 	 */
 	private const CATALOG_SLUGS = [
-		'bunny' => 'bunny-stream',
+		'bunny' => 'bunny-cdn',
 	];
 
 	/**
@@ -154,7 +156,7 @@ class Block_Handler {
 	 * Wrap rendered Presto blocks in a consent placeholder.
 	 *
 	 * Pass-through for non-Presto blocks, popup descendants, admin/AJAX/REST
-	 * renders, and when blocking is globally off (geo-rules, etc.). Wrapping is
+	 * renders, and wherever the Blocker does not enforce consent. Wrapping is
 	 * consent-agnostic on the server (cache-safe); consentManager.js restores the
 	 * block client-side for visitors who have already consented.
 	 *
@@ -188,17 +190,9 @@ class Block_Handler {
 			return $block_content;
 		}
 
-		if ( ! Utils::is_blocking_enabled() || ! Utils::should_process_based_on_geo() ) {
-			return $block_content;
-		}
-
-		// Let the scanner see the real player. Unlike a blocked <script>/<iframe>,
-		// the placeholder below keeps only the service name and category - the
-		// provider URL is gone - so a gated Presto block is undetectable by any
-		// scan, and its host (e.g. a Bunny Stream delivery zone) never reaches the
-		// cookie catalog. The Blocker short-circuits on the same token, but that
-		// only covers the output buffer, and `render_block` runs before it.
-		if ( Utils::is_scan_bypass_request() ) {
+		// The Blocker's own gate: a scan must see the real player (the placeholder drops the
+		// provider URL), and a builder canvas loads no runtime that could restore one.
+		if ( ! Blocker::get_instance()->should_enforce_consent() ) {
 			return $block_content;
 		}
 
@@ -217,12 +211,14 @@ class Block_Handler {
 		// setting on any screen can reconcile the two.
 		$provider['category'] = $this->resolve_provider_category( $provider, $block_name, $attributes );
 
+		$src = $this->resolve_embed_src( $block_name, $attributes );
+
 		// The placeholder keeps only the service name and category, so the host is
 		// gone by the time anything else looks. Record it now or this video is
 		// invisible on every admin screen.
 		Matched_Resources::get_instance()->record(
 			'iframe',
-			$this->resolve_embed_src( $block_name, $attributes ),
+			$src,
 			self::CATALOG_SLUGS[ $provider['service'] ] ?? (string) $provider['service'],
 			(string) $provider['category']
 		);
@@ -237,6 +233,13 @@ class Block_Handler {
 		 * @param array{service: string, category: string, label: string}  $provider   Resolved provider info.
 		 */
 		if ( apply_filters( 'surecookie_skip_presto_block', false, $block_name, $attributes, $provider ) ) {
+			return $block_content;
+		}
+
+		// A self-hosted file served from this site contacts no third party, so
+		// there is no consent to collect for it. An off-site src still is one, and
+		// an unresolved src stays gated (#1466).
+		if ( $provider['service'] === 'self-hosted' && Matched_Resources::is_first_party_url( $src ) ) {
 			return $block_content;
 		}
 
@@ -449,7 +452,7 @@ class Block_Handler {
 		// Honor the admin's description only when they've actually customized it
 		// (the setting ships with a non-empty default, so compare against it);
 		// otherwise keep Presto's media-aware wording, which reads better for the
-		// generic "Video"/"Audio" labels than "requires Video cookies".
+		// generic "Video"/"Audio" labels than "would connect to Video".
 		if ( $custom !== '' && $custom !== $default ) {
 			return self::placeholder_description( $label );
 		}
@@ -487,7 +490,7 @@ class Block_Handler {
 	 * Build the translated placeholder message for a provider label.
 	 *
 	 * Generic media labels ("Video", "Audio") get a self-contained sentence so
-	 * they never read as "requires Video cookies". Brand-name labels (YouTube,
+	 * they never read as "would connect to Video". Brand-name labels (YouTube,
 	 * Vimeo, Bunny.net) are proper nouns dropped into the branded message.
 	 *
 	 * @since 1.2.4
@@ -503,9 +506,11 @@ class Block_Handler {
 			return __( 'This video is blocked until you accept cookies to load it.', 'surecookie' );
 		}
 
+		// Matches the shared default in `placeholder-content.php`. "requires %s
+		// cookies" asserted cookies we have not measured and the vendor may not set.
 		return sprintf(
-			/* translators: %s: Service name (e.g., YouTube, Vimeo, Bunny.net). */
-			__( 'This content is blocked because it requires %s cookies.', 'surecookie' ),
+			/* translators: %s: Service name (e.g., YouTube, Vimeo). */
+			__( 'This content is blocked because it would connect to %s.', 'surecookie' ),
 			$label
 		);
 	}

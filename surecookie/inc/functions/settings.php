@@ -134,6 +134,11 @@ class Settings {
 			? Get::categories_in_use()
 			: [];
 
+		// Why a blocked placeholder stays blocked for a GPC visitor. Computed here
+		// rather than stored: the server cannot read the signal behind a page
+		// cache, so the browser swaps this in when it applies (#1409).
+		$public_settings['gpc_notice'] = __( 'Your browser is set to tell websites not to sell or share your data, so this content stays blocked.', 'surecookie' );
+
 		// Empty label = translated default (#957); a pre-validation order is repaired. Done here,
 		// before the multilingual pass, so the page payload and the public REST route agree.
 		$live = null;

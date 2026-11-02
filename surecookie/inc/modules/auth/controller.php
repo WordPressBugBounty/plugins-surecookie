@@ -61,9 +61,16 @@ class Controller {
 	 * A closed enum on purpose: the value picked here is used to build a redirect.
 	 *
 	 * @since 1.7.0
-	 * @var string[]
 	 */
 	public const ORIGINS = [ self::ORIGIN_ADMIN, self::ORIGIN_ONBOARDING ];
+
+	/**
+	 * Encryption key.
+	 *
+	 * @since 0.0.1-beta.3
+	 * @var string
+	 */
+	public $key;
 
 	/**
 	 * Where to send the browser when an auth flow ends.
@@ -91,14 +98,6 @@ class Controller {
 		// Appended after the query string, which is where a fragment has to sit.
 		return $is_onboarding && $with_fragment ? $url . '#/scan' : $url;
 	}
-
-	/**
-	 * Encryption key.
-	 *
-	 * @since 0.0.1-beta.3
-	 * @var string
-	 */
-	public $key;
 
 	/**
 	 * Build the auth payload the frontend POSTs to the billing portal (issue #466).

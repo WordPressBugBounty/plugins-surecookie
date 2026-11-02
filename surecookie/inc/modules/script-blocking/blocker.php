@@ -60,6 +60,30 @@ class Blocker {
 	private const ATTR_VALUE_ANY = '(?:"[^"]*"|\'[^\']*\'|[^\s>]+)';
 
 	/**
+	 * A tag's attribute run as the browser tokenizes it: a quote opens a value only after `=`, so a
+	 * `>` inside one does not end the tag. Whitespace before `/>` is left to the caller's suffix.
+	 *
+	 * @since 1.8.0
+	 */
+	private const TAG_ATTRIBUTES = '(?:\s++(?!\/>)|\/(?!>)|[^\s\/>][^\s\/>=]*+(?:\s*+=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\s>]++))?)*+';
+
+	/**
+	 * The rest of an end tag after its name, as the browser reads it: whitespace, a `/` or ignored
+	 * attributes may come before the `>`, so `</script >` still closes the element.
+	 *
+	 * @since 1.8.0
+	 */
+	private const END_TAG_REST = '(?=[\s\/>])' . self::TAG_ATTRIBUTES . '\s*\/?>';
+
+	/**
+	 * Where an iframe keeps the URL it loads, in order. Avada, Smush and WP Rocket leave a
+	 * data: or about:blank `src` and hold the real URL in a lazy-load attribute instead.
+	 *
+	 * @since 1.8.0
+	 */
+	private const IFRAME_URL_ATTRS = [ 'src', 'data-orig-src', 'data-lazy-src', 'data-src' ];
+
+	/**
 	 * Script `type` values the browser executes. Mirrors the allowlist in
 	 * `src/utils/consentManager.js` so blocker output round-trips correctly.
 	 */
@@ -250,6 +274,7 @@ class Blocker {
 		// Block scripts and embedded content (iframe/embed/object) if blocking is enabled.
 		if ( Utils::is_blocking_enabled() ) {
 			$buffer = $this->block_scripts( $buffer );
+			$buffer = $this->block_video_facades( $buffer );
 			$buffer = $this->block_iframes( $buffer );
 			$buffer = $this->block_embeds( $buffer );
 			$buffer = $this->block_objects( $buffer );
@@ -370,7 +395,7 @@ class Blocker {
 				&& Utils::is_blocking_enabled()
 				&& Utils::should_process_based_on_geo()
 				&& ! Utils::is_scan_probe()
-				&& ! $this->is_editor_bypass();
+				&& ! Helper::is_builder_edit_render();
 
 			if ( $should_enforce ) {
 				$filtered       = apply_filters( 'surecookie_should_block_scripts', true );
@@ -381,6 +406,19 @@ class Blocker {
 		}
 
 		return $this->should_enforce_consent;
+	}
+
+	/**
+	 * Whether a blocking pattern names a path rather than only a host.
+	 *
+	 * Mirrored by `namesPath()` in src/dom-guard/index.js; the two layers must rank alike.
+	 *
+	 * @param string $pattern Blocking pattern.
+	 * @since 1.6.1
+	 * @return bool
+	 */
+	public static function names_path( string $pattern ): bool {
+		return strpos( trim( $pattern, '/' ), '/' ) !== false;
 	}
 
 	/**
@@ -455,7 +493,8 @@ class Blocker {
 			return false;
 		}
 
-		if ( $this->is_editor_bypass() ) {
+		// Skip a frontend builder's own edit render (#1033).
+		if ( Helper::is_builder_edit_render() ) {
 			return false;
 		}
 
@@ -489,41 +528,6 @@ class Blocker {
 		}
 
 		return $this->should_enforce_consent();
-	}
-
-	/**
-	 * Whether blocking is skipped for a frontend builder's own render.
-	 *
-	 * Frontend builders edit where is_admin() is false, so blocking broke their
-	 * tooling (issue #1033). Bailing turns off both the buffer rewrite and the
-	 * DOM guard, so the capability alone is not enough: staff browsing normally
-	 * are visitors, and a bypass would release even the quarantine category.
-	 *
-	 * @since 1.5.0
-	 * @return bool
-	 */
-	private function is_editor_bypass(): bool {
-		if ( ! Helper::is_builder_edit_render() ) {
-			return false;
-		}
-
-		/**
-		 * Filter whether logged-in users who can edit content bypass blocking.
-		 * Return false to keep consent-blocking scripts for editing staff.
-		 *
-		 * @since 1.5.0
-		 * @param bool $bypass Whether editors bypass blocking. Default true.
-		 */
-		if ( ! apply_filters( 'surecookie_bypass_blocking_for_editors', true ) ) {
-			return false;
-		}
-
-		// An unblocked render must never reach visitors from a full-page cache.
-		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-			define( 'DONOTCACHEPAGE', true );
-		}
-
-		return true;
 	}
 
 	/**
@@ -671,7 +675,7 @@ class Blocker {
 	 */
 	private function rewrite_script_tags( string $html, array $patterns ): string {
 		$result = preg_replace_callback(
-			'/<script\b([^>]*+)>((?:[^<]++|<(?!\/script>))*+)<\/script>/is',
+			'/<script\b(' . self::TAG_ATTRIBUTES . '\s*\/?)>((?:[^<]++|<(?!\/script[\s\/>]))*+)<\/script' . self::END_TAG_REST . '/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_script_tag( $matches, $patterns );
 			},
@@ -770,14 +774,62 @@ class Blocker {
 			return $html;
 		}
 
-		// The attribute run is lazy and the self-closed alternative comes first: a
-		// possessive run swallows the `/` of `/>` and cannot give it back, so
-		// `<iframe ... />` matched nothing while the paired form parked. HTML5 has no
+		// The run stops before `/>`, so `<iframe ... />` still matches. HTML5 has no
 		// self-closing iframe, so the browser builds the frame and fetches either way.
 		$result = preg_replace_callback(
-			'/<iframe\b([^>]*?)(?:\s*\/>|>((?:[^<]++|<(?!\/iframe>))*+)<\/iframe>)/is',
+			'/<iframe\b(' . self::TAG_ATTRIBUTES . ')(?:\s*\/>|>((?:[^<]++|<(?!\/iframe[\s\/>]))*+)<\/iframe' . self::END_TAG_REST . ')/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_iframe_tag( $matches, $patterns );
+			},
+			$html
+		);
+
+		return self::settled( $result, $html, 'iframe' );
+	}
+
+	/**
+	 * Park `<lite-vimeo>` / `<lite-youtube>` facades (Avada's Video Facade) as the iframe each stands for.
+	 *
+	 * The element builds its player through innerHTML, which neither the iframe pass nor the DOM
+	 * guard sees, so it loaded before consent (#1435). An ungated facade is returned as written.
+	 *
+	 * @param string $html HTML content.
+	 * @since 1.8.0
+	 * @return string Modified HTML.
+	 */
+	private function block_video_facades( string $html ): string {
+		$patterns = $this->get_iframe_patterns();
+
+		if ( empty( $patterns ) ) {
+			return $html;
+		}
+
+		$result = preg_replace_callback(
+			'/<lite-(vimeo|youtube)(?=[\s\/>])(' . self::TAG_ATTRIBUTES . '\s*\/?)>(?:[^<]++|<(?!\/lite-\1[\s\/>]))*+<\/lite-\1' . self::END_TAG_REST . '/is',
+			function ( $matches ) use ( $patterns ) {
+				$id = $this->link_attribute( $matches[2], 'videoid' );
+
+				if ( preg_match( '/^[\w-]+$/', $id ) !== 1 ) {
+					return $matches[0];
+				}
+
+				// Avada's facade-off iframe. The facade's own autoplay stands for the click that loads it, so it is dropped.
+				$params     = preg_replace( '/(?:^|&)autoplay=[^&]*/i', '', html_entity_decode( $this->link_attribute( $matches[2], 'params' ), ENT_QUOTES ) ) ?? ''; // phpcs:ignore Generic.PHP.ForbiddenFunctions.FoundWithAlternative -- No /e modifier used, safe replacement.
+				$base       = strtolower( $matches[1] ) === 'vimeo' ? 'https://player.vimeo.com/video/' : 'https://www.youtube.com/embed/';
+				$attributes = ' src="' . esc_url( $base . $id . '?autoplay=0' . ( $params === '' ? '' : '&' . ltrim( $params, '&' ) ) ) . '"';
+
+				foreach ( [ 'width', 'height' ] as $dimension ) {
+					$value = $this->link_attribute( $matches[2], $dimension );
+					if ( ctype_digit( $value ) ) {
+						$attributes .= ' ' . $dimension . '="' . $value . '"';
+					}
+				}
+
+				$attributes .= ' title="' . esc_attr( $this->link_attribute( $matches[2], 'title' ) ) . '" allowfullscreen allow="autoplay; fullscreen"';
+				$iframe      = '<iframe' . $attributes . '></iframe>';
+				$parked      = $this->process_iframe_tag( [ $iframe, $attributes ], $patterns );
+
+				return $parked === $iframe ? $matches[0] : $parked;
 			},
 			$html
 		);
@@ -804,7 +856,7 @@ class Blocker {
 
 		// <embed> is always self-closing in practice.
 		$result = preg_replace_callback(
-			'/<embed\b([^>]*)\/?>/is',
+			'/<embed\b(' . self::TAG_ATTRIBUTES . '\s*\/?)>/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_embed_tag( $matches, $patterns );
 			},
@@ -835,7 +887,7 @@ class Blocker {
 		// Covers both self-closed `<object … />` and full `<object …>…</object>` forms,
 		// mirroring how block_iframes() handles its two shapes.
 		$result = preg_replace_callback(
-			'/<object\b([^>]*?)(?:\s*\/>|>((?:[^<]++|<(?!\/object>))*+)<\/object>)/is',
+			'/<object\b(' . self::TAG_ATTRIBUTES . ')(?:\s*\/>|>((?:[^<]++|<(?!\/object[\s\/>]))*+)<\/object' . self::END_TAG_REST . ')/is',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_object_tag( $matches, $patterns );
 			},
@@ -906,7 +958,7 @@ class Blocker {
 		// `<link>` is a void element; the optional self-closing slash sits
 		// inside the attribute run and is preserved with the rest of them.
 		$result = preg_replace_callback(
-			'/<link\b([^>]*)>/i',
+			'/<link\b(' . self::TAG_ATTRIBUTES . '\s*\/?)>/i',
 			function ( $matches ) use ( $patterns ) {
 				return $this->process_link_tag( $matches, $patterns );
 			},
@@ -999,32 +1051,14 @@ class Blocker {
 	/**
 	 * Read one attribute out of a tag's attribute run.
 	 *
-	 * Walks name="value" pairs rather than searching for the name, so a value
-	 * that happens to contain another attribute's name cannot be mistaken for
-	 * it: `href="...?rel=canonical"` used to be read as the tag's own `rel` and
-	 * the link was then never parked. Quotes are matched to their own kind, so
-	 * an apostrophe inside a double-quoted URL no longer truncates the value.
-	 * A name is anchored by a lookbehind rather than by leading whitespace, so a
-	 * minifier's `href="a.css"rel="stylesheet"` is still read as two attributes.
-	 *
 	 * @param string $attributes Raw attributes string from the tag.
 	 * @param string $name       Attribute to read, lowercase.
 	 * @since 1.5.0
+	 * @since 1.8.0 Reads through attribute_tokens(), shared with the embed passes.
 	 * @return string Attribute value, trimmed, or '' when absent.
 	 */
 	private function link_attribute( string $attributes, string $name ): string {
-		if ( preg_match_all( '/(?<![-\w:])([-\w:]+)\s*=\s*(?|"([^"]*)"|\'([^\']*)\'|([^\s>]+))/', $attributes, $pairs, PREG_SET_ORDER ) === false ) {
-			return '';
-		}
-
-		foreach ( $pairs as $pair ) {
-			// Group 2 is absent for an empty value (`rel=""`), which is no value.
-			if ( strtolower( $pair[1] ) === $name ) {
-				return isset( $pair[2] ) ? trim( $pair[2] ) : '';
-			}
-		}
-
-		return '';
+		return trim( (string) self::attribute( self::attribute_tokens( $attributes ), $name ) );
 	}
 
 	/**
@@ -1322,17 +1356,13 @@ class Blocker {
 		$attributes = $matches[1];
 
 		// Skip if already blocked.
-		if ( strpos( $attributes, 'data-surecookie-src' ) !== false ) {
+		if ( self::attribute( self::attribute_tokens( $attributes ), 'data-surecookie-src' ) !== null ) {
 			return $full_tag;
 		}
 
-		// Extract src attribute.
-		$src = '';
-		if ( preg_match( '/src\s*=\s*' . self::ATTR_VALUE . '/i', $attributes, $src_match ) ) {
-			$src = $src_match[1];
-		}
+		$src = self::iframe_url( $attributes );
 
-		if ( empty( $src ) ) {
+		if ( $src === '' ) {
 			return $full_tag;
 		}
 
@@ -1352,12 +1382,133 @@ class Blocker {
 		// Build blocked iframe with placeholder.
 		return $this->build_embedded_placeholder(
 			'iframe',
-			$attributes,
+			self::without_lazysizes_class( $attributes ),
 			$src,
 			$match_result['name'],
 			$match_result['category'],
 			$match_result['label']
 		);
+	}
+
+	/**
+	 * The URL an iframe loads: its `src`, or a lazy loader's copy while `src` is a placeholder.
+	 *
+	 * @param string $attributes Raw iframe attributes.
+	 * @since 1.8.0
+	 * @return string Empty when the frame names no fetchable URL.
+	 */
+	private static function iframe_url( string $attributes ): string {
+		$tokens = self::attribute_tokens( $attributes );
+
+		foreach ( self::IFRAME_URL_ATTRS as $attr ) {
+			$url = trim( (string) self::attribute( $tokens, $attr ) );
+			if ( $url !== '' && preg_match( '/^(?:data|about):/i', $url ) !== 1 ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Take a parked iframe out of lazysizes' queue.
+	 *
+	 * The lazysizes loader also loads hidden elements and navigates an iframe with
+	 * location.replace(), which no `src` hook sees, so a parked frame left in its queue would load.
+	 *
+	 * @param string $attributes Raw iframe attributes.
+	 * @since 1.8.0
+	 * @return string
+	 */
+	private static function without_lazysizes_class( string $attributes ): string {
+		foreach ( self::attribute_tokens( $attributes ) as $token ) {
+			if ( $token['name'] !== 'class' ) {
+				continue;
+			}
+
+			$classes = preg_split( '/\s+/', trim( $token['value'] ), -1, PREG_SPLIT_NO_EMPTY );
+			$class   = 'class="' . esc_attr( implode( ' ', array_diff( is_array( $classes ) ? $classes : [], [ 'lazyload' ] ) ) ) . '"';
+
+			// Only the first `class` counts, for the browser and for lazysizes.
+			return substr_replace( $attributes, $class, $token['offset'], $token['length'] );
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * A tag's attributes as the browser tokenizes them.
+	 *
+	 * Each value is consumed whole with its name, so text inside one value is never read as
+	 * an attribute: `href="...?rel=canonical"` once hid a link's real `rel`, and
+	 * `data-note='src="..."'` an iframe's real `src`. `href="a.css"rel="x"` still splits.
+	 *
+	 * @param string $attributes Raw attribute string.
+	 * @since 1.8.0
+	 * @return array<int, array{name: string, value: string, offset: int, length: int}>
+	 */
+	private static function attribute_tokens( string $attributes ): array {
+		preg_match_all(
+			'/([^\s\/>][^\s\/>=]*)(?:\s*=\s*(?|"([^"]*)"|\'([^\']*)\'|([^\s>]+)))?/',
+			$attributes,
+			$matches,
+			PREG_SET_ORDER | PREG_OFFSET_CAPTURE
+		);
+
+		$tokens = [];
+		foreach ( $matches as $match ) {
+			$tokens[] = [
+				'name'   => strtolower( $match[1][0] ),
+				'value'  => isset( $match[2] ) ? $match[2][0] : '',
+				'offset' => $match[0][1],
+				'length' => strlen( $match[0][0] ),
+			];
+		}
+
+		return $tokens;
+	}
+
+	/**
+	 * The value of an attribute's first occurrence, the one the browser keeps.
+	 *
+	 * @param array<int, array{name: string, value: string, offset: int, length: int}> $tokens From attribute_tokens().
+	 * @param string                                                                   $name   Lowercase attribute name.
+	 * @since 1.8.0
+	 * @return string|null Null when the tag does not carry it.
+	 */
+	private static function attribute( array $tokens, string $name ): ?string {
+		foreach ( $tokens as $token ) {
+			if ( $token['name'] === $name ) {
+				return $token['value'];
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Drop every occurrence of the named attributes, with the whitespace before each.
+	 *
+	 * @param string             $attributes Raw attribute string.
+	 * @param array<int, string> $names      Lowercase attribute names.
+	 * @since 1.8.0
+	 * @return string
+	 */
+	private static function without_attributes( string $attributes, array $names ): string {
+		foreach ( array_reverse( self::attribute_tokens( $attributes ) ) as $token ) {
+			if ( ! in_array( $token['name'], $names, true ) ) {
+				continue;
+			}
+
+			$start = $token['offset'];
+			while ( $start > 0 && strpos( " \t\n\r\f", $attributes[ $start - 1 ] ) !== false ) {
+				--$start;
+			}
+
+			$attributes = substr_replace( $attributes, '', $start, $token['offset'] + $token['length'] - $start );
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -1372,16 +1523,14 @@ class Blocker {
 		$full_tag   = $matches[0];
 		$attributes = $matches[1];
 
+		$tokens = self::attribute_tokens( $attributes );
+
 		// Skip if already blocked.
-		if ( strpos( $attributes, 'data-surecookie-src' ) !== false ) {
+		if ( self::attribute( $tokens, 'data-surecookie-src' ) !== null ) {
 			return $full_tag;
 		}
 
-		// Extract src attribute.
-		$src = '';
-		if ( preg_match( '/src\s*=\s*' . self::ATTR_VALUE . '/i', $attributes, $src_match ) ) {
-			$src = $src_match[1];
-		}
+		$src = trim( (string) self::attribute( $tokens, 'src' ) );
 
 		if ( empty( $src ) ) {
 			return $full_tag;
@@ -1427,24 +1576,19 @@ class Blocker {
 		$attributes = $matches[1];
 		$inner      = $matches[2] ?? '';
 
+		$tokens = self::attribute_tokens( $attributes );
+
 		// Skip if already blocked.
-		if ( strpos( $attributes, 'data-surecookie-data' ) !== false ) {
+		if ( self::attribute( $tokens, 'data-surecookie-data' ) !== null ) {
 			return $full_tag;
 		}
 
 		// Extract data attribute (primary URL source).
-		$data = '';
-		if ( preg_match( '/(?<![-\w])data\s*=\s*' . self::ATTR_VALUE . '/i', $attributes, $data_match ) ) {
-			$data = $data_match[1];
-		}
+		$data = trim( (string) self::attribute( $tokens, 'data' ) );
 
 		// If no data= attribute, look for <param name="movie|src|url" value="..."> child.
 		if ( empty( $data ) && ! empty( $inner ) ) {
-			if ( preg_match( '/<param\b[^>]*\bname\s*=\s*["\'](?:movie|src|url)["\'][^>]*\bvalue\s*=\s*["\']([^"\']+)["\']/is', $inner, $param_match ) ) {
-				$data = $param_match[1];
-			} elseif ( preg_match( '/<param\b[^>]*\bvalue\s*=\s*["\']([^"\']+)["\'][^>]*\bname\s*=\s*["\'](?:movie|src|url)["\']/is', $inner, $param_match ) ) {
-				$data = $param_match[1];
-			}
+			$data = self::param_url( $inner );
 		}
 
 		if ( empty( $data ) ) {
@@ -1498,28 +1642,63 @@ class Blocker {
 		}
 
 		$result = preg_replace_callback(
-			'/<param\b([^>]*)(\/?>)/is',
+			'/<param\b(' . self::TAG_ATTRIBUTES . ')/i',
 			static function ( $matches ) {
-				$attrs   = $matches[1];
-				$closing = $matches[2];
+				$tokens = self::attribute_tokens( $matches[1] );
 
-				if ( preg_match( '/name\s*=\s*["\'](?:movie|src|url)["\']/i', $attrs ) !== 1 ) {
+				if ( ! self::is_url_param( $tokens ) ) {
 					return $matches[0];
 				}
 
-				// phpcs:ignore Generic.PHP.ForbiddenFunctions.FoundWithAlternative -- No /e modifier used, safe replacement.
-				$new_attrs = preg_replace(
-					'/(^|\s)name(\s*=)/i',
-					'$1data-surecookie-param-name$2',
-					$attrs
-				) ?? $attrs;
+				// Last first, so each rename leaves the earlier offsets valid.
+				$attributes = $matches[1];
+				foreach ( array_reverse( $tokens ) as $token ) {
+					if ( $token['name'] === 'name' ) {
+						$attributes = substr_replace( $attributes, 'data-surecookie-param-name', $token['offset'], 4 );
+					}
+				}
 
-				return '<param' . $new_attrs . $closing;
+				return '<param' . $attributes;
 			},
 			$inner
 		);
 
 		return $result ?? $inner;
+	}
+
+	/**
+	 * The URL a legacy `<param name="movie|src|url">` child carries.
+	 *
+	 * @param string $inner Inner HTML of the <object> tag.
+	 * @since 1.8.0
+	 * @return string Empty when no such param names one.
+	 */
+	private static function param_url( string $inner ): string {
+		if ( ! preg_match_all( '/<param\b(' . self::TAG_ATTRIBUTES . ')/i', $inner, $params ) ) {
+			return '';
+		}
+
+		foreach ( $params[1] as $attributes ) {
+			$tokens = self::attribute_tokens( $attributes );
+			$url    = trim( (string) self::attribute( $tokens, 'value' ) );
+
+			if ( $url !== '' && self::is_url_param( $tokens ) ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Whether a `<param>` names the object's URL.
+	 *
+	 * @param array<int, array{name: string, value: string, offset: int, length: int}> $tokens From attribute_tokens().
+	 * @since 1.8.0
+	 * @return bool
+	 */
+	private static function is_url_param( array $tokens ): bool {
+		return in_array( strtolower( (string) self::attribute( $tokens, 'name' ) ), [ 'movie', 'src', 'url' ], true );
 	}
 
 	/**
@@ -1711,25 +1890,12 @@ class Blocker {
 
 			// A pattern naming a path beats a bare host whatever the map order, so a
 			// catalogued file keeps its category under a scan row or a hold (#1313).
-			if ( null === $best || ( self::names_path( (string) $pattern ) && ! self::names_path( $best['matched_pattern'] ) ) ) {
+			if ( $best === null || ( self::names_path( (string) $pattern ) && ! self::names_path( $best['matched_pattern'] ) ) ) {
 				$best = $info;
 			}
 		}
 
 		return $best;
-	}
-
-	/**
-	 * Whether a blocking pattern names a path rather than only a host.
-	 *
-	 * Mirrored by `namesPath()` in src/dom-guard/index.js; the two layers must rank alike.
-	 *
-	 * @param string $pattern Blocking pattern.
-	 * @since 1.6.1
-	 * @return bool
-	 */
-	public static function names_path( string $pattern ): bool {
-		return strpos( trim( $pattern, '/' ), '/' ) !== false;
 	}
 
 	/**
@@ -1861,19 +2027,16 @@ class Blocker {
 
 		// Strip the URL attribute from the original attributes. <iframe>/<embed>
 		// use src=; <object> uses data=.
-		$url_attr       = $tag === 'object' ? 'data' : 'src';
-		$new_attributes = preg_replace( '/\s*(?<![-\w])' . $url_attr . '\s*=\s*' . self::ATTR_VALUE_ANY . '/i', '', $attributes ) ?? $attributes; // phpcs:ignore Generic.PHP.ForbiddenFunctions.FoundWithAlternative -- No /e modifier used, safe replacement.
+		$url_attr = $tag === 'object' ? 'data' : 'src';
+		$tokens   = self::attribute_tokens( $attributes );
 
 		// Extract any existing `style` attribute from the original tag and strip it
 		// so we can merge its value with our `display:none;` declaration. Emitting
 		// two `style` attributes is invalid HTML - the HTML parser keeps only the
 		// first, which would silently discard our `display:none;` and leave the
 		// blocked element visible.
-		$existing_style = '';
-		if ( preg_match( '/style\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/i', (string) $new_attributes, $style_match ) === 1 ) {
-			$existing_style = trim( $style_match[1] !== '' ? $style_match[1] : ( $style_match[2] ?? '' ) );
-			$new_attributes = preg_replace( '/\s*style\s*=\s*(?:"[^"]*"|\'[^\']*\')/i', '', (string) $new_attributes ) ?? $new_attributes; // phpcs:ignore Generic.PHP.ForbiddenFunctions.FoundWithAlternative -- No /e modifier used, safe replacement.
-		}
+		$existing_style = trim( (string) self::attribute( $tokens, 'style' ) );
+		$new_attributes = self::without_attributes( $attributes, [ $url_attr, 'style' ] );
 
 		// Append `display:none;` so it always wins the cascade for inline styles
 		// (later declarations override earlier ones for the same property).
@@ -1887,8 +2050,8 @@ class Blocker {
 		$data_url_attr = $tag === 'object' ? 'data-surecookie-data' : 'data-surecookie-src';
 
 		// Embed dimensions from the tag, used only as a pre-paint fallback size.
-		$original_width  = preg_match( '/(?:^|\s)width\s*=\s*["\']?(\d+)/i', $attributes, $w_match ) === 1 ? (int) $w_match[1] : 0;
-		$original_height = preg_match( '/(?:^|\s)height\s*=\s*["\']?(\d+)/i', $attributes, $h_match ) === 1 ? (int) $h_match[1] : 0;
+		$original_width  = (int) self::attribute( $tokens, 'width' );
+		$original_height = (int) self::attribute( $tokens, 'height' );
 
 		// Resolve the optional placeholder image; the overlay renderer resolves the
 		// admin-editable copy and button label itself.

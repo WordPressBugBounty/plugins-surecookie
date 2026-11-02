@@ -13,6 +13,8 @@
 
 namespace SureCookie\Inc\Modules\AutomaticScanning;
 
+use SureCookie\Inc\Functions\Cookie_Identity;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -29,7 +31,7 @@ class DiffEngine {
 	 * @param array<string, array<int, array<string, mixed>>> $cookies_by_category Reported cookies grouped by category.
 	 * @param array<int, string>                              $domains             Reported third-party domains.
 	 * @since 1.2.0
-	 * @return array{signatures: array<string, array{name:string, domain:string, category:string}>, domains: array<int, string>}
+	 * @return array{signatures: array<string, array{name:string, domain:string, set_via:string, category:string}>, domains: array<int, string>}
 	 */
 	public static function build_snapshot( array $cookies_by_category, array $domains ): array {
 		$signatures = [];
@@ -49,6 +51,11 @@ class DiffEngine {
 				$signatures[ $signature ] = [
 					'name'     => (string) ( $cookie['name'] ?? '' ),
 					'domain'   => (string) ( $cookie['domain'] ?? '' ),
+					// Carried for Pro's guard, which quarantines from this row:
+					// the cookie's scope is not the host that set it. Absent from
+					// snapshots written before this, and the identity key is
+					// name+domain, so an older one still diffs unchanged.
+					'set_via'  => (string) ( $cookie['set_via'] ?? '' ),
 					'category' => (string) ( $cookie['category'] ?? '' ),
 				];
 			}
@@ -98,25 +105,27 @@ class DiffEngine {
 		$prev_domains = isset( $previous['domains'] ) && is_array( $previous['domains'] ) ? $previous['domains'] : [];
 		$curr_domains = isset( $current['domains'] ) && is_array( $current['domains'] ) ? $current['domains'] : [];
 
+		// A signature rotates when the cookie's TTL bucket does, so keying on it reported an
+		// unchanged cookie as removed and added again. Compare on the store's identity; the
+		// stored snapshot shape is untouched, so a snapshot written before this still diffs.
+		$prev = self::by_identity( $prev_sig );
+		$curr = self::by_identity( $curr_sig );
+
 		$added         = [];
 		$recategorized = [];
 
-		foreach ( $curr_sig as $signature => $data ) {
-			if ( ! is_array( $data ) ) {
+		foreach ( $curr as $identity => $data ) {
+			if ( ! isset( $prev[ $identity ] ) ) {
+				$added[] = $data;
 				continue;
 			}
 
-			if ( ! isset( $prev_sig[ $signature ] ) ) {
-				$added[] = array_merge( [ 'signature_id' => (string) $signature ], $data );
-				continue;
-			}
-
-			$old_category = (string) ( $prev_sig[ $signature ]['category'] ?? '' );
+			$old_category = (string) ( $prev[ $identity ]['category'] ?? '' );
 			$new_category = (string) ( $data['category'] ?? '' );
 
 			if ( $old_category !== $new_category ) {
 				$recategorized[] = [
-					'signature_id' => (string) $signature,
+					'signature_id' => $data['signature_id'],
 					'name'         => (string) ( $data['name'] ?? '' ),
 					'domain'       => (string) ( $data['domain'] ?? '' ),
 					'from'         => $old_category,
@@ -125,13 +134,7 @@ class DiffEngine {
 			}
 		}
 
-		$removed = [];
-		foreach ( $prev_sig as $signature => $data ) {
-			if ( ! is_array( $data ) || isset( $curr_sig[ $signature ] ) ) {
-				continue;
-			}
-			$removed[] = array_merge( [ 'signature_id' => (string) $signature ], $data );
-		}
+		$removed = array_values( array_diff_key( $prev, $curr ) );
 
 		return [
 			'added'         => $added,
@@ -150,5 +153,35 @@ class DiffEngine {
 	 */
 	public static function has_changes( array $diff ): bool {
 		return ! empty( $diff['added'] ) || ! empty( $diff['removed'] ) || ! empty( $diff['recategorized'] ) || ! empty( $diff['domains_added'] );
+	}
+
+	/**
+	 * Index a snapshot's signature map by cookie identity, keeping each entry's id.
+	 *
+	 * @param array<string, mixed> $signatures Snapshot `signatures` map.
+	 * @since 1.8.0
+	 * @return array<string, array<string, string>>
+	 */
+	private static function by_identity( array $signatures ): array {
+		$out = [];
+
+		foreach ( $signatures as $signature => $data ) {
+			if ( ! is_array( $data ) ) {
+				continue;
+			}
+
+			$key   = Cookie_Identity::key_for( $data );
+			$entry = array_merge( [ 'signature_id' => (string) $signature ], $data );
+
+			// A snapshot from before the scan folded siblings can still hold several. Fold
+			// them the way the store does: `uncategorized` is no verdict over a sibling's.
+			if ( ( $entry['category'] ?? '' ) === 'uncategorized' && isset( $out[ $key ] ) ) {
+				$entry['category'] = $out[ $key ]['category'];
+			}
+
+			$out[ $key ] = $entry;
+		}
+
+		return $out;
 	}
 }

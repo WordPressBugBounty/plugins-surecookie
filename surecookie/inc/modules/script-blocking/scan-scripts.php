@@ -175,6 +175,44 @@ class Scan_Scripts {
 	}
 
 	/**
+	 * Whether a catalog host pattern already covers the URL this row was seen at.
+	 *
+	 * A host the catalog names (`b-cdn.net`) is already governed by its category, so a
+	 * row for one of its zones can only compete with that category. A path
+	 * (`facebook.com/tr`, `paypal.com/sdk`) governs just that file, and a row on the
+	 * same host is the only pattern for the rest of it, so it must survive (#1313).
+	 *
+	 * Public so the admin table resolves a row the same way the merge drops it.
+	 *
+	 * Patterns are indexed by host so a row tests two or three candidates
+	 * instead of the whole catalog. Measured on the shipped catalog, the naive
+	 * form cost 21.8ms per page because the filter runs several times per
+	 * request; this is 0.7ms.
+	 *
+	 * @since 1.5.0
+	 * @param array<string, mixed> $resource          Scanned resource row.
+	 * @param array<string, bool>  $existing_patterns Known-scripts pattern index.
+	 * @return bool
+	 */
+	public static function catalog_covers_observed_url( array $resource, array $existing_patterns ): bool {
+		// Iframe rows store the observed src, script rows the url.
+		$url = trim( (string) ( $resource['url'] ?? $resource['src'] ?? '' ) );
+
+		// Nothing observed to compare against, so the row still carries meaning.
+		if ( $url === '' ) {
+			return false;
+		}
+
+		foreach ( self::candidate_patterns( $existing_patterns, $url ) as $pattern ) {
+			if ( ! Blocker::names_path( $pattern ) && Entry_Match::matches( $pattern, $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Merge a single resource into the scripts array.
 	 *
 	 * @param array<mixed>         $scripts          Known scripts (by reference).
@@ -236,42 +274,6 @@ class Scan_Scripts {
 		}
 
 		$scripts[ $category ][ $service_key ] = $entry;
-	}
-
-	/**
-	 * Whether a catalog host pattern already covers the URL this row was seen at.
-	 *
-	 * A host the catalog names (`b-cdn.net`) is already governed by its category, so a
-	 * row for one of its zones can only compete with that category. A path
-	 * (`facebook.com/tr`, `paypal.com/sdk`) governs just that file, and a row on the
-	 * same host is the only pattern for the rest of it, so it must survive (#1313).
-	 *
-	 * Patterns are indexed by host so a row tests two or three candidates
-	 * instead of the whole catalog. Measured on the shipped catalog, the naive
-	 * form cost 21.8ms per page because the filter runs several times per
-	 * request; this is 0.7ms.
-	 *
-	 * @since 1.5.0
-	 * @param array<string, mixed> $resource          Scanned resource row.
-	 * @param array<string, bool>  $existing_patterns Known-scripts pattern index.
-	 * @return bool
-	 */
-	private static function catalog_covers_observed_url( array $resource, array $existing_patterns ): bool {
-		// Iframe rows store the observed src, script rows the url.
-		$url = trim( (string) ( $resource['url'] ?? $resource['src'] ?? '' ) );
-
-		// Nothing observed to compare against, so the row still carries meaning.
-		if ( $url === '' ) {
-			return false;
-		}
-
-		foreach ( self::candidate_patterns( $existing_patterns, $url ) as $pattern ) {
-			if ( ! Blocker::names_path( $pattern ) && Entry_Match::matches( $pattern, $url ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

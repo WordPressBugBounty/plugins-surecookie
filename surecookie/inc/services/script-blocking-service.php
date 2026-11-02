@@ -500,7 +500,7 @@ class ScriptBlockingService {
 	}
 
 	/**
-	 * Add `gated_category` and `unenforced_reason` to every scanned resource.
+	 * Add `gated_category`, `unenforced_reason` and `service_label` to every scanned resource.
 	 *
 	 * The stored row keeps whatever the scanner guessed, but the blocker drops a
 	 * scan row whose domain is already a catalog pattern and gates it under the
@@ -513,11 +513,21 @@ class ScriptBlockingService {
 	 * row is not evidence of blocking: scanners file a stylesheet and an image
 	 * alike as a script, and no pass rewrites an `<img>`.
 	 *
+	 * A row the catalog governs is gated under its service's live category: an
+	 * installed row's registry copy goes stale, and a catalog HOST covering the
+	 * row's URL beats the scan row's guess. A catalog PATH does not, because the
+	 * scan row's own pattern still gates the rest of that host (#1313). `service_label`
+	 * names that service, so two of its hosts stop reading as unrelated rows; a
+	 * synthetic key such as `scan_<host>` is not a service and gets neither.
+	 *
 	 * @since 1.5.0
 	 * @param array<string, mixed> $resources Scanned resources payload.
 	 * @return array<string, mixed>
 	 */
 	private function annotate_rows( array $resources ): array {
+		$service_labels = Get::blocking_service_labels();
+		$catalog        = array_fill_keys( array_keys( Resource_Categories::catalog_patterns() ), true );
+
 		foreach ( [
 			'scripts' => 'script',
 			'iframes' => 'iframe',
@@ -536,11 +546,23 @@ class ScriptBlockingService {
 					continue;
 				}
 
-				$gated = Resource_Categories::catalog_category(
+				$slug     = (string) ( $resource['service_slug'] ?? '' );
+				$service  = Resource_Categories::service_category( $slug );
+				$governed = $service !== null && (
+					( $resource['source'] ?? '' ) === 'service'
+					|| Scan_Scripts::catalog_covers_observed_url( $resource, $catalog )
+				);
+				$gated    = $governed ? $service : Resource_Categories::catalog_category(
 					$domain,
 					(string) ( $resource['category'] ?? '' ),
 					$kind
 				);
+
+				// Omitted from the map when it equals the key, so the slug is
+				// the label rather than a degraded stand-in for it.
+				if ( $service !== null ) {
+					$resources[ $bucket ][ $i ]['service_label'] = $service_labels[ $slug ] ?? $slug;
+				}
 
 				$resources[ $bucket ][ $i ]['gated_category']    = $gated;
 				$resources[ $bucket ][ $i ]['unenforced_reason'] = Blocking_Surface::unenforced_reason(

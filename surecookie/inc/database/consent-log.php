@@ -767,71 +767,6 @@ class ConsentLog extends Base {
 	}
 
 	/**
-	 * WHERE fragment matching a forwarded row's origin, with its bindings.
-	 *
-	 * Rows forwarded before `origin_blog_id` existed carry 0 and can only be
-	 * matched on the URL, which is exactly what a site address change breaks
-	 * (#1377), so the blog id is preferred and the URL remains the fallback.
-	 *
-	 * @param string $origin_site    Origin URL as stored on the row.
-	 * @param int    $origin_blog_id Origin blog id, 0 when not known.
-	 * @since 1.7.0
-	 * @return array{0: string, 1: array<int, mixed>}
-	 */
-	private static function origin_match( string $origin_site, int $origin_blog_id ): array {
-		if ( $origin_blog_id > 0 ) {
-			return [
-				'( origin_blog_id = %d OR ( origin_blog_id = 0 AND origin_site = %s ) )',
-				[ $origin_blog_id, $origin_site ],
-			];
-		}
-
-		return [ 'origin_site = %s', [ $origin_site ] ];
-	}
-
-	/**
-	 * Delete a session's forwarded rows, optionally constrained by timestamp.
-	 *
-	 * @param string      $session_id     Session UUID.
-	 * @param string      $origin_site    Origin URL as stored on the row.
-	 * @param int         $origin_blog_id Origin blog id, 0 when not known.
-	 * @param string|null $timestamp      Timestamp to constrain on, null for the whole session.
-	 * @param bool        $except         Delete every row but $timestamp instead of only that one.
-	 * @since 1.7.0
-	 * @return bool True when at least one row was deleted.
-	 */
-	private static function delete_forwarded( string $session_id, string $origin_site, int $origin_blog_id, ?string $timestamp = null, bool $except = false ): bool {
-		global $wpdb;
-
-		[ $sql, $bindings ] = self::origin_match( $origin_site, $origin_blog_id );
-
-		$sql = 'DELETE FROM %i WHERE session_id = %s AND is_forwarded = 1 AND ' . $sql;
-
-		if ( $timestamp !== null ) {
-			$sql       .= $except ? ' AND timestamp <> %s' : ' AND timestamp = %s';
-			$bindings[] = $timestamp;
-		}
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Targeted deletion on a custom table inside switch_to_blog; %i is the WP 6.2+ identifier placeholder, every fragment is built from internal placeholders only, and the cache is invalidated below.
-		$query = $wpdb->prepare( $sql, array_merge( [ self::get_instance()->get_tablename(), $session_id ], $bindings ) );
-
-		// prepare() returns void when it rejects its input, and query( null ) would
-		// report a failed erasure as "nothing matched".
-		if ( ! is_string( $query ) ) {
-			return false;
-		}
-
-		$result = $wpdb->query( $query );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-
-		if ( $result ) {
-			self::invalidate_query_cache();
-		}
-
-		return (bool) $result;
-	}
-
-	/**
 	 * Delete forwarded consent rows matching a session ID and origin site.
 	 *
 	 * Called by Pro's Consent Forwarding module while inside a switch_to_blog()
@@ -1130,6 +1065,71 @@ class ConsentLog extends Base {
 		}
 
 		return $log_id;
+	}
+
+	/**
+	 * WHERE fragment matching a forwarded row's origin, with its bindings.
+	 *
+	 * Rows forwarded before `origin_blog_id` existed carry 0 and can only be
+	 * matched on the URL, which is exactly what a site address change breaks
+	 * (#1377), so the blog id is preferred and the URL remains the fallback.
+	 *
+	 * @param string $origin_site    Origin URL as stored on the row.
+	 * @param int    $origin_blog_id Origin blog id, 0 when not known.
+	 * @since 1.7.0
+	 * @return array{0: string, 1: array<int, mixed>}
+	 */
+	private static function origin_match( string $origin_site, int $origin_blog_id ): array {
+		if ( $origin_blog_id > 0 ) {
+			return [
+				'( origin_blog_id = %d OR ( origin_blog_id = 0 AND origin_site = %s ) )',
+				[ $origin_blog_id, $origin_site ],
+			];
+		}
+
+		return [ 'origin_site = %s', [ $origin_site ] ];
+	}
+
+	/**
+	 * Delete a session's forwarded rows, optionally constrained by timestamp.
+	 *
+	 * @param string      $session_id     Session UUID.
+	 * @param string      $origin_site    Origin URL as stored on the row.
+	 * @param int         $origin_blog_id Origin blog id, 0 when not known.
+	 * @param string|null $timestamp      Timestamp to constrain on, null for the whole session.
+	 * @param bool        $except         Delete every row but $timestamp instead of only that one.
+	 * @since 1.7.0
+	 * @return bool True when at least one row was deleted.
+	 */
+	private static function delete_forwarded( string $session_id, string $origin_site, int $origin_blog_id, ?string $timestamp = null, bool $except = false ): bool {
+		global $wpdb;
+
+		[ $sql, $bindings ] = self::origin_match( $origin_site, $origin_blog_id );
+
+		$sql = 'DELETE FROM %i WHERE session_id = %s AND is_forwarded = 1 AND ' . $sql;
+
+		if ( $timestamp !== null ) {
+			$sql       .= $except ? ' AND timestamp <> %s' : ' AND timestamp = %s';
+			$bindings[] = $timestamp;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Targeted deletion on a custom table inside switch_to_blog; %i is the WP 6.2+ identifier placeholder, every fragment is built from internal placeholders only, and the cache is invalidated below.
+		$query = $wpdb->prepare( $sql, array_merge( [ self::get_instance()->get_tablename(), $session_id ], $bindings ) );
+
+		// prepare() returns void when it rejects its input, and query( null ) would
+		// report a failed erasure as "nothing matched".
+		if ( ! is_string( $query ) ) {
+			return false;
+		}
+
+		$result = $wpdb->query( $query );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnsupportedPlaceholder, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( $result ) {
+			self::invalidate_query_cache();
+		}
+
+		return (bool) $result;
 	}
 
 	/**

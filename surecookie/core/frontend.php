@@ -30,16 +30,16 @@ class Frontend {
 	use GetInstance;
 
 	/**
+	 * Shared core handles opted into `defer` so the banner's script chain can be deferred.
+	 */
+	private const SHARED_DEFER_HANDLES = [ 'react', 'react-dom', 'react-jsx-runtime', 'wp-element', 'wp-escape-html', 'wp-hooks' ];
+
+	/**
 	 * Whether the banner mount point has been printed for this request.
 	 *
 	 * @var bool
 	 */
 	private bool $root_printed = false;
-
-	/**
-	 * Shared core handles opted into `defer` so the banner's script chain can be deferred.
-	 */
-	private const SHARED_DEFER_HANDLES = [ 'react', 'react-dom', 'react-jsx-runtime', 'wp-element', 'wp-escape-html', 'wp-hooks' ];
 
 	/**
 	 * Each script's dependencies as of the head print, when WordPress caches who depends on what.
@@ -304,8 +304,12 @@ class Frontend {
 				continue;
 			}
 
-			if ( has_shortcode( (string) $maybe_post->post_content, 'surecookie_reconsent_button' ) ) {
-				return true;
+			// The WPConsent alias renders the same button, so the bundle behind it
+			// has to load on an adopted page too (see re-consent Shortcode).
+			foreach ( [ 'surecookie_reconsent_button', 'wpconsent_preferences_button' ] as $tag ) {
+				if ( has_shortcode( (string) $maybe_post->post_content, $tag ) ) {
+					return true;
+				}
 			}
 		}
 

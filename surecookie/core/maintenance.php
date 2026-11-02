@@ -23,6 +23,7 @@ use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Database\Init as DB_Init;
 use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
+use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
 use SureCookie\Inc\Modules\AssistedScan\Normalizer;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
@@ -445,6 +446,8 @@ class Maintenance {
 	 *  5. A migration that repairs the SCHEMA rather than backfilling data must
 	 *     also be listed in {@see self::NEVER_SEEDED}, so the fresh-install seed
 	 *     does not mark it done sight unseen.
+	 *  6. Widening what a SHIPPED migration repairs does not re-run it - the
+	 *     ledger runs each id once. Register the same callback under a new id.
 	 *
 	 * @since 1.3.0
 	 * @return array<string, callable(): void>
@@ -463,6 +466,10 @@ class Maintenance {
 			'site_owned_providers'       => [ self::class, 'reclaim_site_owned_cookie_providers' ],
 			'forwarded_origin_blog_id'   => [ self::class, 'backfill_forwarded_origin_blog_id' ],
 			'forwarded_partner_blog_ids' => [ self::class, 'backfill_forwarded_partner_blog_ids' ],
+			// Rule 6: `site_owned_providers` shipped in 1.7.0, before `sbjs_` joined
+			// the names it reclaims (#1462).
+			'site_owned_providers_sbjs'  => [ self::class, 'reclaim_site_owned_cookie_providers' ],
+			'unresolved_cookie_purposes' => [ self::class, 'clear_unresolved_cookie_purposes' ],
 		];
 	}
 
@@ -518,6 +525,58 @@ class Maintenance {
 
 		if ( $dirty && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
 			throw new \RuntimeException( 'Could not write the reclaimed cookie providers.' );
+		}
+	}
+
+	/**
+	 * Drop classifier filler from stored cookie purposes, once.
+	 *
+	 * Rows stored before the ingest guard carry the canonical's AI sentence, and
+	 * where that sentence only admits the purpose is unknown the policy published
+	 * it to visitors as the purpose (#1462). The guard only covers the next scan,
+	 * and automatic scanning is off by default.
+	 *
+	 * Idempotent: a blank is skipped. A purpose the admin pinned is theirs.
+	 *
+	 * @since 1.8.0
+	 * @throws \RuntimeException When the cleared option cannot be written.
+	 * @return void
+	 */
+	private static function clear_unresolved_cookie_purposes(): void {
+		$stored = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+
+		if ( empty( $stored ) ) {
+			return;
+		}
+
+		$dirty = false;
+
+		foreach ( $stored as $category => $cookies ) {
+			if ( ! is_array( $cookies ) ) {
+				continue;
+			}
+
+			foreach ( $cookies as $index => $cookie ) {
+				if ( ! is_array( $cookie ) ) {
+					continue;
+				}
+
+				foreach ( [ 'purpose', 'description' ] as $field ) {
+					$text = $cookie[ $field ] ?? '';
+
+					if ( ! is_string( $text ) || $text === '' || Sanitize::purpose( $text ) !== ''
+						|| CookieCategoryMemory::displaced_value( $cookie, $field ) !== null ) {
+						continue;
+					}
+
+					$stored[ $category ][ $index ][ $field ] = '';
+					$dirty                                   = true;
+				}
+			}
+		}
+
+		if ( $dirty && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
+			throw new \RuntimeException( 'Could not write the cleared cookie purposes.' );
 		}
 	}
 
@@ -1170,7 +1229,7 @@ class Maintenance {
 		$details = function_exists( 'get_blog_details' ) ? get_blog_details( $blog_id ) : null;
 		$value   = $details instanceof \WP_Site ? (string) $details->registered : '';
 
-		return ( $value === '' || $value === '0000-00-00 00:00:00' ) ? '1970-01-01 00:00:00' : $value;
+		return $value === '' || $value === '0000-00-00 00:00:00' ? '1970-01-01 00:00:00' : $value;
 	}
 
 	/**

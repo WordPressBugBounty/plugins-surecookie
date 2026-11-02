@@ -5,7 +5,7 @@
  * Description: Real cookie consent for WordPress. Browser-based scanning, smart categorization, strict script blocking, and consent logs stored in your database.
  * Author: SureCookie
  * Author URI: https://surecookie.com/
- * Version: 1.7.0
+ * Version: 1.8.0
  * License: GPL-2.0-or-later
  * Text Domain: surecookie
  * Domain Path: /languages
@@ -27,7 +27,7 @@ define( 'SURECOOKIE_FILE', __FILE__ );
 define( 'SURECOOKIE_BASE', plugin_basename( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_DIR', plugin_dir_path( SURECOOKIE_FILE ) );
 define( 'SURECOOKIE_URL', plugins_url( '/', SURECOOKIE_FILE ) );
-define( 'SURECOOKIE_VERSION', '1.7.0' );
+define( 'SURECOOKIE_VERSION', '1.8.0' );
 
 /**
  * Define the necessary core constants.
@@ -37,6 +37,7 @@ define( 'SURECOOKIE_CONSENT_LOG_DB', 'surecookie_consent_log' );
 define( 'SURECOOKIE_SETTINGS_OPTION', 'surecookie_settings' );
 define( 'SURECOOKIE_ONBOARDING_OPTION', 'surecookie_onboarding_user_details' );
 define( 'SURECOOKIE_ONBOARDING_COMPLETED_OPTION', 'surecookie_onboarding_completed' );
+define( 'SURECOOKIE_ONBOARDING_FLOW_OPTION', 'surecookie_onboarding_flow' );
 define( 'SURECOOKIE_SCANNED_DETAILS_OPTION', 'surecookie_scanned_details' );
 define( 'SURECOOKIE_SCANNED_COOKIES_OPTION', 'surecookie_scanned_cookies' );
 define( 'SURECOOKIE_SCANNED_LOGS_OPTION', 'surecookie_scanned_logs' );

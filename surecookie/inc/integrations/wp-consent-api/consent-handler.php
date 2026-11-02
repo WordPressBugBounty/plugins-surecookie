@@ -14,6 +14,7 @@ namespace SureCookie\Inc\Integrations\WpConsentApi;
 
 use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Settings;
+use SureCookie\Inc\Integrations\Cache\Init as Cache;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -171,12 +172,15 @@ class Consent_Handler {
 	 *
 	 * `wp_set_consent()` only calls setcookie() while `wp_has_consent()` only
 	 * reads `$_COOKIE`, so the superglobal is mirrored too or the answer stays
-	 * one request behind. Values the browser already sent are skipped, keeping
-	 * Set-Cookie off responses a page cache would otherwise refuse to store.
+	 * one request behind.
 	 *
-	 * The mirror and the cookie are deliberately separate: the mirror is always
-	 * safe, while setcookie() needs headers. Core sends them in `wp-cron.php`
-	 * before WordPress loads, so an unguarded write warns on every cron spawn.
+	 * The mirror and the cookie are deliberately separate, because only the
+	 * mirror is per-request and always safe. WP Engine stores responses that
+	 * carry Set-Cookie, so a cacheable render replayed one visitor's consent to
+	 * everyone who was served that copy (#1461): there `updateWpConsentApi()`
+	 * in `consentManager.js` is the only writer. setcookie() also needs
+	 * headers, and core sends them in `wp-cron.php` before WordPress loads, so
+	 * an unguarded write warns on every cron spawn.
 	 *
 	 * @param string $wp_type WP Consent API consent type.
 	 * @param string $value   'allow' or 'deny'.
@@ -198,8 +202,9 @@ class Consent_Handler {
 
 		$_COOKIE[ $cookie ] = $value;
 
-		// Unqualified on purpose: the test harness shadows it in this namespace.
-		if ( headers_sent() ) {
+		// headers_sent() is unqualified on purpose: the test harness shadows it
+		// in this namespace.
+		if ( headers_sent() || Cache::is_cacheable_request() ) {
 			return;
 		}
 

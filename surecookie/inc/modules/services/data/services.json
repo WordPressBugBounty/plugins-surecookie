@@ -572,10 +572,12 @@
         "pro": true,
         "patterns": {
             "scripts": [
-                "api.dmcdn.net"
+                "api.dmcdn.net",
+                "geo.dailymotion.com"
             ],
             "iframes": [
-                "dailymotion.com/embed"
+                "dailymotion.com/embed",
+                "geo.dailymotion.com"
             ]
         },
         "cookies": []
@@ -2981,6 +2983,24 @@
                 "static.woopra.com"
             ],
             "iframes": []
+        },
+        "cookies": []
+    },
+    "wordpress-org-assets": {
+        "label": "WordPress.org Assets",
+        "description": "Serves emoji, block and plugin assets from s.w.org.",
+        "category": "essential",
+        "transfer_countries": [
+            "US"
+        ],
+        "pro": false,
+        "patterns": {
+            "scripts": [
+                "s.w.org"
+            ],
+            "iframes": [
+                "s.w.org"
+            ]
         },
         "cookies": []
     },

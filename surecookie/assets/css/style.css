@@ -2,77 +2,36 @@
    SureCookie Shared Styles - Consolidated CSS for both Frontend and Admin Areas
 ========================================================================== */
 
-/* Global Font CSS */
+/*
+ * Figtree variable (self-hosted subset: Latin + Latin Extended).
+ *
+ * Upstream: https://fonts.google.com/specimen/Figtree
+ * License:  SIL Open Font License 1.1 (see ../font/Figtree/LICENSE-Figtree.txt).
+ *
+ * Bundled rather than fetched from Google Fonts so the banner does not leak
+ * visitor IPs to the Google CDN before consent. One variable face per
+ * unicode-range replaces seven static cuts (#1432); the axis floor is 300, so
+ * 100 and 200 clamp to 300 exactly as the old blocks did by pointing at Light.
+ *
+ * Registered under a private family name: a face named plain `Figtree` loads
+ * after a site's own Figtree and replaces it on the whole page.
+ */
 @font-face {
-	font-family: Figtree;
+	font-family: "SureCookie Figtree";
 	font-style: normal;
-	font-weight: 100;
+	font-weight: 300 900;
 	font-display: swap;
-	src: url("../font/Figtree/Figtree-Light.woff2") format("woff2");
+	src: url("../font/Figtree/figtree-latin.woff2") format("woff2");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-	font-family: Figtree;
+	font-family: "SureCookie Figtree";
 	font-style: normal;
-	font-weight: 200;
+	font-weight: 300 900;
 	font-display: swap;
-	src: url("../font/Figtree/Figtree-Light.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 300;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-Light.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-Regular.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 500;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-Medium.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 600;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-SemiBold.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-Bold.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-ExtraBold.woff2") format("woff2");
-}
-
-@font-face {
-	font-family: Figtree;
-	font-style: normal;
-	font-weight: 900;
-	font-display: swap;
-	src: url("../font/Figtree/Figtree-Black.woff2") format("woff2");
+	src: url("../font/Figtree/figtree-latin-ext.woff2") format("woff2");
+	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 .surecookie-styles,
@@ -82,7 +41,7 @@
 #surecookie-public-root,
 #surecookie-preferences-root,
 :is(#surecookie-public-root, #surecookie-preferences-root) * {
-	font-family: Figtree, sans-serif !important;
+	font-family: "SureCookie Figtree", sans-serif !important;
 	box-sizing: border-box;
 	letter-spacing: normal;
 	word-spacing: normal;
@@ -405,9 +364,22 @@
 .surecookie-modal-description {
 	overflow-wrap: anywhere;
 }
+/*
+ * Typography is pinned on the paragraphs, not just the wrapper: the admin
+ * preview renders inside wp-admin, whose own `p` rule (13px/1.5, margin 1em 0)
+ * otherwise wins over the inherited 14px/1.6 and made the preview disagree with
+ * the live banner. Inheriting also stops any host theme restyling it.
+ */
 .surecookie-banner-description p,
 .surecookie-modal-description p {
-	margin-bottom: 0;
+	font-size: inherit;
+	line-height: inherit;
+	margin: 0;
+}
+/* Zeroing the margin above would otherwise run two paragraphs together. */
+.surecookie-banner-description p + p,
+.surecookie-modal-description p + p {
+	margin-top: 0.75em;
 }
 
 /*
@@ -843,6 +815,12 @@
 .surecookie-preferences-modal .surecookie-categories-scroll::-webkit-scrollbar {
 	display: none;
 }
+.surecookie-preferences-modal .surecookie-gpc-notice {
+	margin: 0 0 12px;
+	font-size: 13px;
+	line-height: 1.5;
+	opacity: 0.85;
+}
 .surecookie-preferences-modal .surecookie-categories-list {
 	padding: 0;
 	display: flex;
@@ -1254,7 +1232,7 @@
 	width: 100%;
 	max-width: 100%;
 	border: 0;
-	font-family: Figtree, sans-serif;
+	font-family: "SureCookie Figtree", sans-serif;
 }
 /*
  * WordPress responsive embeds (.wp-has-aspect-ratio) reserve their height with a
@@ -1306,6 +1284,13 @@
    the toolbar, is the element ceiling, and the overlay sits on an arbitrary theme -
    so strip theme chrome off every descendant, never the author's own formatting
    (font-weight/style/decoration are deliberately absent). */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-admin-hint {
+	display: block;
+	margin-top: 8px;
+	font-size: 12px;
+	line-height: 1.5;
+	opacity: 0.75;
+}
 .surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-text * {
 	margin: 0;
 	padding: 0;
@@ -1348,7 +1333,7 @@
 	cursor: pointer;
 	font-size: 14px;
 	font-weight: 500;
-	font-family: Figtree, sans-serif;
+	font-family: "SureCookie Figtree", sans-serif;
 	transition: background-color 0.2s ease;
 	box-shadow: none;
 	text-decoration: none;

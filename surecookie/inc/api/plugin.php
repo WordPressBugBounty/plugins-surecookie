@@ -300,6 +300,11 @@ class Plugin extends Base {
 				'icon'               => "https://ps.w.org/{$slug}/assets/icon-256x256.png",
 				'isNetworkActivated' => $is_network_active,
 				'canDeactivate'      => $this->can_deactivate( $is_network_active ),
+				// Non-empty when SureCookie can import this plugin's settings, so
+				// the notice can offer that before suggesting deactivation.
+				'migrationSlug'      => class_exists( '\SureCookie\Inc\Modules\Migration\Api' )
+					? \SureCookie\Inc\Modules\Migration\Api::get_slug_for_plugin_dir( $slug )
+					: '',
 			];
 		}
 

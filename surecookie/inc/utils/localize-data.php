@@ -11,6 +11,7 @@ namespace SureCookie\Inc\Utils;
 
 use SureCookie\Admin\Live_Versions;
 use SureCookie\Admin\Product_Promotion;
+use SureCookie\Inc\API\ScanHistory;
 use SureCookie\Inc\Database\ConsentLog;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Helper;
@@ -22,6 +23,7 @@ use SureCookie\Inc\Modules\BusinessDetails\Shortcode as Business_Shortcodes;
 use SureCookie\Inc\Modules\Nudges\Utils;
 use SureCookie\Inc\Modules\PrivacyPolicy\Countries;
 use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
+use SureCookie\Inc\Modules\ScriptBlocking\Blocking_Surface;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Modules\SiteScanner\SaasClient;
 use SureCookie\Inc\Modules\SiteScanner\Utils as SiteScannerUtils;
@@ -185,6 +187,7 @@ class LocalizeData {
 			// Settings > Tools.
 			'/settings/tools/mcp'                     => 'docs/connecting-ai-assistants-mcp/',
 			'/settings/tools/import-export'           => 'docs/importing-and-exporting-surecookie-settings/',
+			'/settings/tools/migration'               => 'docs/migrating-from-wpconsent-to-surecookie/',
 
 			// Settings > License (Pro).
 			'/settings/license'                       => 'docs/installing-surecookie-pro/',
@@ -264,6 +267,10 @@ class LocalizeData {
 			],
 			'is_pro_active'              => Helper::is_pro_active(),
 			'is_pro_installed'           => Helper::is_pro_installed(),
+			// Which scan this admin has already read the dashboard notice for.
+			// On the blob rather than its own request: the notice decides whether
+			// to render at all, so a round trip would flash it and take it away.
+			'scan_notice_seen'           => ScanHistory::get_notice_seen_stamp( get_current_user_id() ),
 			'website_links'              => self::get_website_links(),
 			'page_doc_links'             => self::get_page_doc_links(),
 			'core_version'               => SURECOOKIE_VERSION,
@@ -305,6 +312,8 @@ class LocalizeData {
 			// False hides the consent-log IP and Country columns, which hold only
 			// a redaction marker on a site that opted out of IP capture.
 			'consent_log_ip_enabled'     => Helper::consent_log_ip_enabled(),
+			// Lets Scripts and Embeds judge an unsaved category the way the blocker will.
+			'skippable_categories'       => Blocking_Surface::skippable_categories(),
 		];
 
 		$filtered = apply_filters( 'surecookie_localized_admin_data', $defaults );
@@ -507,64 +516,52 @@ class LocalizeData {
 		$current_user = wp_get_current_user();
 
 		return [
-			'termsConditionsURL' => Helper::get_marketing_link( 'terms-and-conditions/', 'onboarding_terms_conditions' ),
-			'is_pro_active'      => Helper::is_pro_active(),
-			'is_pro_installed'   => Helper::is_pro_installed(),
-			'adminUrl'           => admin_url(),
-			'website_links'      => self::get_website_links(),
-			'maxScanPages'       => SiteScannerUtils::get_max_scan_pages(),
-			'isCronAvailable'    => (bool) $cron_status,
-			'cronType'           => $cron_status ? $cron_status : 'unavailable',
-			'is_local_site'      => SaasClient::is_local_site(),
-			// The Finish step offers the Cookie Preferences menu link, so the
-			// menu list has to be on this screen's blob, not the admin one.
-			'navMenus'           => Get::nav_menus(),
+			'termsConditionsURL'   => Helper::get_marketing_link( 'terms-and-conditions/', 'onboarding_terms_conditions' ),
+			'privacyPolicyURL'     => Helper::get_marketing_link( 'privacy-policy/', 'onboarding_privacy_policy' ),
+			'is_pro_active'        => Helper::is_pro_active(),
+			'is_pro_installed'     => Helper::is_pro_installed(),
+			// The finish screen activates an installed-but-inactive Pro in place,
+			// and the activate route needs the real basename.
+			'pro_plugin_path'      => Helper::get_pro_plugin_path(),
+			'adminUrl'             => admin_url(),
+			'website_links'        => self::get_website_links(),
+			'maxScanPages'         => SiteScannerUtils::get_max_scan_pages(),
+			// The scan step offers the browser walk, and on a host the cloud
+			// scanner cannot reach it is the only scanner on offer. Without these
+			// the step fell back to a hardcoded cap and the server-side kill
+			// switch had no effect at all during onboarding.
+			'assistedScanEnabled'  => AssistedScanUtils::is_enabled(),
+			'assistedMaxScanPages' => AssistedScanUtils::get_max_pages(),
+			'isCronAvailable'      => (bool) $cron_status,
+			'cronType'             => $cron_status ? $cron_status : 'unavailable',
+			'is_local_site'        => SaasClient::is_local_site(),
 			// Pre-selects the scan step's picker. Nothing was selected by default, so
 			// the usual first scan aimed at whatever page was easiest to click while
 			// the home page, which carries most sites' tags, went unscanned. Empty
 			// when the front page is the blog index, which is not a post to select.
-			'homePage'           => self::get_front_page_option(),
-			'websiteLeadDetails' => [
+			'homePage'             => self::get_front_page_option(),
+			// The banner step offers the same palette swatches the admin screen
+			// does, and shared/utils/constants.js reads them at module scope.
+			'colorPalettes'        => Get::color_palette_codes(),
+			// Setup state the hub reads before its five queries resolve. Without
+			// these the first paint claims a fully configured site has nothing set
+			// up, for as long as the slowest of them takes. Same semantics as the
+			// REST reads they stand in for, so the answer never changes when the
+			// queries land: each policy helper returns a URL only when published.
+			'bannerEnabledOn'      => (bool) Settings::get( 'banner_enabled' ),
+			// Both halves of Blocking_Utils::is_blocking_enabled(), because the
+			// banner alone holds nothing back.
+			'blockingEnabledOn'    => (bool) Settings::get( 'blocking_enabled' ),
+			'consentLoggingOn'     => (bool) Settings::get( 'consent_logging_enabled' ),
+			'autoScanOn'           => (bool) Settings::get( 'auto_scan_enabled' ),
+			'scannedCookiesOn'     => ! empty( Get::all_scanned_cookies() ),
+			'cookiePolicyOn'       => Get::cookie_policy_page_details()['url'] !== '',
+			'privacyPolicyOn'      => Get::privacy_policy_page_details()['url'] !== '',
+			'websiteLeadDetails'   => [
 				'firstName' => sanitize_text_field( $current_user->first_name ?? '' ),
 				'lastName'  => sanitize_text_field( $current_user->last_name ?? '' ),
 				'email'     => sanitize_email( $current_user->user_email ?? '' ),
 			],
-		];
-	}
-
-	/**
-	 * The site's front page, shaped like one of the scan picker's options.
-	 *
-	 * @since 1.7.0
-	 * @return array{value: int, label: string, type: string, typeLabel: string}|null Null
-	 *                                        when the front page is the blog index.
-	 */
-	private static function get_front_page_option(): ?array {
-		if ( get_option( 'show_on_front' ) !== 'page' ) {
-			return null;
-		}
-
-		$page_id = absint( get_option( 'page_on_front' ) );
-
-		if ( $page_id <= 0 ) {
-			return null;
-		}
-
-		$page = get_post( $page_id );
-
-		if ( ! $page || $page->post_status !== 'publish' ) {
-			return null;
-		}
-
-		// Same labels the search endpoint sends, so the seeded option groups with the
-		// results and reads like them (get_the_title()'s entities stay literal in this nested blob).
-		$type_object = get_post_type_object( 'page' );
-
-		return [
-			'value'     => $page_id,
-			'label'     => wp_strip_all_tags( $page->post_title ),
-			'type'      => 'page',
-			'typeLabel' => $type_object instanceof \WP_Post_Type ? $type_object->labels->name : __( 'Pages', 'surecookie' ),
 		];
 	}
 
@@ -614,6 +611,42 @@ class LocalizeData {
 			$object_name,
 			apply_filters( 'surecookie_onboarding_localize_data', self::get_onboarding_data() )
 		);
+	}
+
+	/**
+	 * The site's front page, shaped like one of the scan picker's options.
+	 *
+	 * @since 1.7.0
+	 * @return array{value: int, label: string, type: string, typeLabel: string}|null Null
+	 *                                        when the front page is the blog index.
+	 */
+	private static function get_front_page_option(): ?array {
+		if ( get_option( 'show_on_front' ) !== 'page' ) {
+			return null;
+		}
+
+		$page_id = absint( get_option( 'page_on_front' ) );
+
+		if ( $page_id <= 0 ) {
+			return null;
+		}
+
+		$page = get_post( $page_id );
+
+		if ( ! $page || $page->post_status !== 'publish' ) {
+			return null;
+		}
+
+		// Same labels the search endpoint sends, so the seeded option groups with the
+		// results and reads like them (get_the_title()'s entities stay literal in this nested blob).
+		$type_object = get_post_type_object( 'page' );
+
+		return [
+			'value'     => $page_id,
+			'label'     => wp_strip_all_tags( $page->post_title ),
+			'type'      => 'page',
+			'typeLabel' => $type_object instanceof \WP_Post_Type ? $type_object->labels->name : __( 'Pages', 'surecookie' ),
+		];
 	}
 
 	/**

@@ -619,6 +619,11 @@ class ConsentLogs extends Base {
 			return;
 		}
 
+		// An all-granted payload is what a manual Save Preferences sends when the
+		// visitor switches every category on, which is the one 'accepted' claim
+		// the gate below must not read as forged.
+		$granted_every_category = self::grants_every_category( $preferences );
+
 		$preferences = wp_json_encode( $preferences );
 
 		if ( ! is_string( $preferences ) || $preferences === '' ) {
@@ -657,7 +662,7 @@ class ConsentLogs extends Base {
 		// Reject an 'accepted' log when Accept All is disabled for this site or region.
 		// The filter lets Pro apply per-region stricter-wins (global AND region); the
 		// default value is the global setting alone.
-		if ( $action_type === 'accepted' && $consent_model !== 'opt-out' ) {
+		if ( $action_type === 'accepted' && $consent_model !== 'opt-out' && ! $granted_every_category ) {
 			$accept_all_allowed = (bool) Settings::get( 'accept_all_enabled' );
 			/**
 			 * Filter whether the Accept All action is permitted for the current request.
@@ -727,6 +732,36 @@ class ConsentLogs extends Base {
 				'message' => __( 'Failed to save consent.', 'surecookie' ),
 			]
 		);
+	}
+
+	/**
+	 * Does this payload grant every category the site has configured?
+	 *
+	 * Measured against the site's own list, not the keys the caller chose to
+	 * send: the route is unauthenticated, and every CTA handler writes an entry
+	 * per configured id, so a payload naming fewer cannot be a manual all-on
+	 * save. Strict `true` because PHP reads the string "false" as granted.
+	 *
+	 * @since 1.8.0
+	 * @param array<string, mixed> $preferences Decoded preferences payload.
+	 * @return bool
+	 */
+	private static function grants_every_category( array $preferences ): bool {
+		$categories = Settings::get( 'cookie_categories' );
+
+		if ( ! is_array( $categories ) || $categories === [] ) {
+			return false;
+		}
+
+		foreach ( $categories as $key => $category ) {
+			$id = is_array( $category ) && ! empty( $category['id'] ) ? $category['id'] : $key;
+
+			if ( ( $preferences[ $id ] ?? null ) !== true ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -952,6 +987,16 @@ class ConsentLogs extends Base {
 	}
 
 	/**
+	 * Today's rejected-token count, for Site Health to report.
+	 *
+	 * @since 1.7.0
+	 * @return int
+	 */
+	public static function get_token_rejection_count(): int {
+		return (int) get_transient( self::token_rejection_key() );
+	}
+
+	/**
 	 * Enforce same-origin when Referer or Origin headers are present.
 	 *
 	 * With neither header present this passes - the token gates in the
@@ -1042,16 +1087,6 @@ class ConsentLogs extends Base {
 		}
 
 		set_transient( $key, $count + 1, 2 * DAY_IN_SECONDS );
-	}
-
-	/**
-	 * Today's rejected-token count, for Site Health to report.
-	 *
-	 * @since 1.7.0
-	 * @return int
-	 */
-	public static function get_token_rejection_count(): int {
-		return (int) get_transient( self::token_rejection_key() );
 	}
 
 	/**

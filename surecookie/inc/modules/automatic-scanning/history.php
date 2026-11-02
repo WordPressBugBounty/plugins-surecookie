@@ -78,6 +78,17 @@ class History {
 		// and confidence (advisory in Free; consumed by Pro auto-apply).
 		$diff['added'] = array_map(
 			static function ( array $cookie ) {
+				// A pinned cookie is stored under the admin's choice whatever the scan says, so
+				// report it there and suggest nothing else: the same invariant as recategorized.
+				$pinned = CookieCategoryMemory::remembered_category( $cookie );
+
+				if ( $pinned !== '' ) {
+					$cookie['category']           = $pinned;
+					$cookie['suggested_category'] = $pinned;
+					$cookie['confidence']         = 100;
+					return $cookie;
+				}
+
 				$classification               = Classifier::classify( $cookie );
 				$cookie['suggested_category'] = $classification['category'];
 				$cookie['confidence']         = $classification['confidence'];
@@ -159,7 +170,8 @@ class History {
 	 *
 	 * A pinned cookie is re-bucketed back to the admin's choice on every scan, so
 	 * the scanner changing its mind about it is not a change to the site - and Pro
-	 * auto-apply must not be handed a suggestion that would undo the choice.
+	 * auto-apply must not be handed a suggestion that would undo the choice. The
+	 * same rule is applied to `added` in record().
 	 *
 	 * @param array<int, array<string, string>> $changes Recategorized entries from the diff.
 	 * @since 1.3.0

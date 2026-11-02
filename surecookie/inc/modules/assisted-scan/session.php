@@ -101,7 +101,9 @@ class Session {
 
 	/**
 	 * How long the marker lives. It only has to outlast one status poll (3-6s), so
-	 * this is generous already; the screen ignores it unless it saw the walk running.
+	 * this is generous already; the screen takes it as soon as the payload postdates
+	 * its own start, so this also bounds how long a finished run can be mistaken for
+	 * the next one.
 	 *
 	 * @since 1.3.0
 	 */
@@ -205,6 +207,8 @@ class Session {
 			'services'   => [],
 		];
 
+		// A new walk retires how the previous run ended, as a cloud start does.
+		SaasClient::clear_scan_end();
 		Update::option( self::STATE_OPTION, $state );
 		$this->arm_safety_net( $now );
 

@@ -599,9 +599,10 @@ class Ingest {
 	/**
 	 * Record the walk's outcome for the admin UI.
 	 *
-	 * Clears the previous cloud scan's outcome, so a successful assisted scan takes
-	 * down the stale "your host blocked the scanner" notice instead of contradicting
-	 * the results below.
+	 * Clears the previous run's outcome and how it ended, so a successful assisted
+	 * scan takes down the stale "your host blocked the scanner" or "your scan was
+	 * cancelled" notice instead of contradicting the results below. The end marker
+	 * matters most: it outranks the outcome and outlives it by 24 hours.
 	 *
 	 * @param int                   $findings Number of cookies found.
 	 * @param array<string, string> $missed   Services the browser missed, slug => label.
@@ -609,6 +610,7 @@ class Ingest {
 	 * @return void
 	 */
 	private function store_outcome( int $findings, array $missed ): void {
+		SaasClient::clear_scan_end();
 		set_transient(
 			SaasClient::LAST_OUTCOME_TRANSIENT,
 			[

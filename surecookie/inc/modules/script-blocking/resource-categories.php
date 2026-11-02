@@ -61,6 +61,13 @@ final class Resource_Categories {
 	private static ?array $catalog_buckets = null;
 
 	/**
+	 * Cached catalog service => category index.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private static ?array $service_categories = null;
+
+	/**
 	 * Split a scoped key into [ kind, domain ].
 	 *
 	 * Keys are stored as "script::host" or "iframe::host" so a script and an
@@ -257,21 +264,21 @@ final class Resource_Categories {
 			return null;
 		}
 
-		$legacy = null;
+		// An exact kind beats a legacy bare-domain key; within each, the longest matching
+		// domain wins, so a host's own override is never shadowed by its parent's.
+		$best = [];
 		foreach ( self::overrides() as $entry_key => $target ) {
 			[ $entry_kind, $domain ] = self::parse_scoped_key( (string) $entry_key );
 			if ( $domain === '' || stripos( $key, $domain ) === false ) {
 				continue;
 			}
-			if ( $entry_kind === $kind ) {
-				return $target; // Exact-kind override wins.
-			}
-			if ( $entry_kind === 'any' && $legacy === null ) {
-				$legacy = $target; // Legacy bare-domain key applies to any kind.
+			$tier = $entry_kind === $kind ? 0 : ( $entry_kind === 'any' ? 1 : null );
+			if ( $tier !== null && strlen( $domain ) > ( $best[ $tier ][0] ?? -1 ) ) {
+				$best[ $tier ] = [ strlen( $domain ), $target ];
 			}
 		}
 
-		return $legacy;
+		return $best[0][1] ?? $best[1][1] ?? null;
 	}
 
 	/**
@@ -337,6 +344,30 @@ final class Resource_Categories {
 	}
 
 	/**
+	 * Every catalog pattern with its category, whatever its kind.
+	 *
+	 * @since 1.8.0
+	 * @return array<string, string>
+	 */
+	public static function catalog_patterns(): array {
+		return self::catalog_categories()['any'];
+	}
+
+	/**
+	 * The live catalog category of a service, or null when the catalog has no
+	 * such service.
+	 *
+	 * @since 1.8.0
+	 * @param string $slug Catalog service slug.
+	 * @return string|null
+	 */
+	public static function service_category( string $slug ): ?string {
+		self::catalog_categories();
+
+		return self::$service_categories[ $slug ] ?? null;
+	}
+
+	/**
 	 * Drop the per-request caches. Called after scan results are stored.
 	 *
 	 * @since 1.4.0
@@ -347,6 +378,7 @@ final class Resource_Categories {
 		self::$overrides          = null;
 		self::$catalog_categories = null;
 		self::$catalog_buckets    = null;
+		self::$service_categories = null;
 	}
 
 	/**
@@ -370,7 +402,8 @@ final class Resource_Categories {
 	 * Catalog blocking patterns indexed as [ kind => [ pattern => category ] ],
 	 * plus an 'any' bucket mirroring the kind-blind duplicate check in
 	 * `Scan_Scripts::build_existing_pattern_index()`. Builds the pattern =>
-	 * bucket index in the same walk, so both share one cache.
+	 * bucket and service => category indexes in the same walk, so all share one
+	 * cache.
 	 *
 	 * @since 1.4.0
 	 * @return array<string, array<string, string>>
@@ -380,18 +413,20 @@ final class Resource_Categories {
 			return self::$catalog_categories;
 		}
 
-		$index   = [
+		$index    = [
 			'script' => [],
 			'iframe' => [],
 			'any'    => [],
 		];
-		$buckets = [];
+		$buckets  = [];
+		$services = [];
 
-		foreach ( Services_Source::get_instance()->get_blocking_view() as $category => $services ) {
-			if ( ! is_array( $services ) ) {
+		foreach ( Services_Source::get_instance()->get_blocking_view() as $category => $entries ) {
+			if ( ! is_array( $entries ) ) {
 				continue;
 			}
-			foreach ( $services as $service ) {
+			foreach ( $entries as $slug => $service ) {
+				$services[ (string) $slug ] = (string) $category;
 				foreach ( Pattern_Kinds::buckets() as $bucket ) {
 					$kind = Pattern_Kinds::resource_kind( $bucket );
 					foreach ( (array) ( $service[ $bucket ] ?? [] ) as $pattern ) {
@@ -408,6 +443,7 @@ final class Resource_Categories {
 
 		self::$catalog_categories = $index;
 		self::$catalog_buckets    = $buckets;
+		self::$service_categories = $services;
 
 		return $index;
 	}

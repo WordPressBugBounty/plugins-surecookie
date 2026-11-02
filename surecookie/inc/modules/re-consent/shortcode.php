@@ -33,7 +33,16 @@ class Shortcode {
 	 * @since 0.0.1
 	 */
 	private function __construct() {
-		$this->register_shortcodes( [ 'surecookie_reconsent_button' => 'button' ] );
+		$tags = [ 'surecookie_reconsent_button' => 'button' ];
+
+		// A page adopted by the WPConsent migration keeps that plugin's withdraw
+		// control, which has no handler once WPConsent is deactivated. Modules boot
+		// at init:999, after plugins claim their tags, so a free tag means it is gone.
+		if ( ! shortcode_exists( 'wpconsent_preferences_button' ) ) {
+			$tags['wpconsent_preferences_button'] = 'button';
+		}
+
+		$this->register_shortcodes( $tags );
 	}
 
 	/**
