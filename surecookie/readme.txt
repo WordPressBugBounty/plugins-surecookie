@@ -4,7 +4,7 @@ Tags: cookie consent, cookie banner, consent logs, ccpa, cookie policy
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.me/BrainstormForce
@@ -483,6 +483,17 @@ Adds AI Assistants integration, HTML support in banner content fields, improved 
 Initial public release of SureCookie.
 
 == Changelog ==
+= 1.8.1 - 09-November-2026 =
+* New: Re-Consent has a Custom Class or ID tab. Enter classes or IDs, such as .cookie-settings or #privacy-link, and clicking any element that carries one opens the preferences window, including a menu item given that class in Appearance > Menus.
+* Fix: A category added after visitors had already chosen was treated as refused, so its scripts never ran for anyone who had consented earlier. The banner now returns to ask about any category with no answer yet. On subdirectory multisites, each subsite asks about its own categories without discarding a choice made on another.
+* Fix: The cookie policy could name an unrelated website in the Provider column. A provider is now only taken from a setter that can be tied to the cookie itself, a cookie your own site sets is credited to your site, and existing entries are corrected automatically.
+* Fix: On Avada sites with Video Facade on, a Vimeo or YouTube video kept its full size after the visitor accepted, cutting off the right of the player on phones and in narrow columns. The video now fits the space it sits in and keeps its proportions.
+* Fix: Cookies from a refused category could come back and stay. Clean-up only ran at the moment of the click, so a tag writing one last time as the visitor left, such as Google Analytics, reappeared on the next page. Clean-up now also runs on every page load.
+* Fix: On cached pages using the WP Consent API, other plugins read the consent decision baked into the cache instead of the visitor's own, so WooCommerce order attribution could start tracking someone who had not answered the banner. The visitor's real decision is now reported as the page loads.
+* Fix: With Google Consent Mode on, a legacy Universal Analytics snippet (analytics.js or ga.js) still tracked before consent, because Universal Analytics predates Consent Mode and ignores it. Both files now wait for Analytics to be accepted, and are listed in Known Services as "Google Universal Analytics (Legacy)". GA4 is unaffected.
+* Compatibility: Elementor Header & Footer Builder or Ultimate Addons for Elementor - The Re-Consent "Menu Level" link did nothing in menus built with the addon's navigation widget, leaving visitors no way to reopen their preferences. Those menus now open the preferences window like any other.
+* Compatibility: FlyingPress - Saving SureCookie settings left the cache untouched, so visitors kept being served the previous banner. It is now cleared on save. FlyingPress 5 still needs its exclusions by hand, or cached pages show the preferences window in English: keep "surecookie" and "/wp-includes/js/dist/" in Delay All JavaScript and "surecookie" in Remove Unused CSS.
+
 = 1.8.0 - 02-November-2026 =
 * New: You can now import your configuration from WPConsent under Settings > Tools > Migration, covering banner content, buttons, consent behavior, categories and cookies. SureCookie shows what will be replaced before anything changes, never deletes your WPConsent data. ( https://surecookie.com/docs/migrating-from-wpconsent-to-surecookie/ )
 * New: A "Take a Tour" button on every admin page opens a guided walkthrough of that page's features and settings.

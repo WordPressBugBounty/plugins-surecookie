@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SureCookie 1.8.0\n"
+"Project-Id-Version: SureCookie 1.8.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/surecookie\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-28T10:33:43+00:00\n"
+"POT-Creation-Date: 2026-11-05T10:41:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: surecookie\n"
@@ -92,7 +92,7 @@ msgid "NEW"
 msgstr ""
 
 #: admin/onboarding.php:70
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "SureCookie Setup"
 msgstr ""
 
@@ -371,7 +371,7 @@ msgid "Plugin could not be deactivated."
 msgstr ""
 
 #: inc/api/plugin.php:228
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Plugin deactivated successfully."
 msgstr ""
 
@@ -440,7 +440,7 @@ msgid "The uploaded file does not contain any importable SureCookie settings for
 msgstr ""
 
 #: inc/api/settings.php:431
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Settings imported successfully."
 msgstr ""
 
@@ -455,7 +455,7 @@ msgstr ""
 #: inc/api/settings.php:648
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Geographic Rules"
 msgstr ""
 
@@ -465,7 +465,7 @@ msgstr ""
 
 #: inc/api/settings.php:653
 #: build/admin.js:2
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Banner"
 msgstr ""
 
@@ -508,7 +508,7 @@ msgid "Compliance law, consent model, logging and duration."
 msgstr ""
 
 #: inc/api/settings.php:680
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Cookie categories"
 msgstr ""
 
@@ -517,11 +517,11 @@ msgid "Your consent categories."
 msgstr ""
 
 #: inc/api/settings.php:686
-#: build/admin.js:69
-#: build/admin.js:128
-#: build/onboarding.js:4
-#: build/onboarding.js:20
-#: build/public.js:1
+#: build/admin.js:70
+#: build/admin.js:130
+#: build/onboarding.js:5
+#: build/onboarding.js:21
+#: build/public.js:2
 msgid "Cookies"
 msgstr ""
 
@@ -547,8 +547,8 @@ msgstr ""
 
 #: inc/api/settings.php:705
 #: build/admin.js:2
-#: build/admin.js:128
-#: build/onboarding.js:36
+#: build/admin.js:130
+#: build/onboarding.js:37
 msgid "Google Consent Mode"
 msgstr ""
 
@@ -619,10 +619,10 @@ msgstr ""
 #: build/admin.js:3
 #: build/admin.js:6
 #: build/admin.js:69
-#: build/admin.js:73
-#: build/admin.js:109
+#: build/admin.js:74
+#: build/admin.js:111
 #: build/onboarding.js:4
-#: build/onboarding.js:8
+#: build/onboarding.js:9
 #: build/public.js:1
 msgid "Cookie Policy"
 msgstr ""
@@ -631,15 +631,15 @@ msgstr ""
 #: inc/modules/privacy-policy/api.php:193
 #: build/admin.js:2
 #: build/admin.js:6
-#: build/admin.js:73
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/onboarding.js:9
 msgid "Privacy Policy"
 msgstr ""
 
 #: inc/functions/get.php:1243
 #: build/admin.js:6
-#: build/admin.js:73
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/onboarding.js:9
 msgid "Legal Notice"
 msgstr ""
 
@@ -1039,8 +1039,8 @@ msgstr ""
 #: inc/modules/business-details/shortcode.php:95
 #: inc/modules/privacy-policy/validator.php:142
 #: build/admin.js:13
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Country"
 msgstr ""
 
@@ -1065,7 +1065,7 @@ msgid "Visible to you only. Fill this in under Compliance, Business Details."
 msgstr ""
 
 #: inc/modules/cookie-policy/api.php:77
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Cookie Policy page already exists."
 msgstr ""
 
@@ -1183,9 +1183,9 @@ msgstr ""
 
 #: inc/modules/cookie-policy/shortcode.php:213
 #: build/admin.js:3
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Duration"
 msgstr ""
 
@@ -1199,9 +1199,9 @@ msgstr ""
 #: inc/modules/cookie-policy/shortcode.php:215
 #: build/admin.js:34
 #: build/admin.js:37
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Provider"
 msgstr ""
 
@@ -1218,7 +1218,10 @@ msgstr ""
 #: inc/modules/cookie-policy/shortcode.php:427
 #: build/admin.js:30
 #: build/admin.js:53
+#: build/admin.js:69
 #: build/onboarding.js:1
+#: build/onboarding.js:4
+#: build/public.js:1
 msgid "Session"
 msgstr ""
 
@@ -1291,7 +1294,7 @@ msgid "Add your business details before publishing this policy."
 msgstr ""
 
 #: inc/modules/privacy-policy/api.php:309
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Privacy Policy published."
 msgstr ""
 
@@ -1475,7 +1478,7 @@ msgstr ""
 #: build/admin.js:13
 #: build/admin.js:34
 #: build/admin.js:37
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Category"
 msgstr ""
 
@@ -1689,7 +1692,7 @@ msgstr ""
 
 #: inc/modules/privacy-policy/shortcode.php:944
 #: build/admin.js:32
-#: build/admin.js:117
+#: build/admin.js:119
 #: build/onboarding.js:3
 msgid "Uncategorized"
 msgstr ""
@@ -1816,58 +1819,58 @@ msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:139
 #: build/admin.js:3
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Legal Entity Name"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:140
 #: build/admin.js:3
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Postal Address"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:141
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Postal Code"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:143
 #: build/admin.js:3
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Privacy Contact Email"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:144
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Grievance Officer Name"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:145
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Grievance Officer Email"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:146
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Data Transfer Safeguards"
 msgstr ""
 
 #: inc/modules/privacy-policy/validator.php:147
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Sale or Sharing Declaration"
 msgstr ""
 
 #: inc/modules/re-consent/helper.php:43
 #: inc/utils/options.php:228
 #: build/admin.js:13
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Cookie Preferences"
 msgstr ""
 
@@ -1917,8 +1920,8 @@ msgid "Domain verified."
 msgstr ""
 
 #: inc/modules/site-scanner/api.php:376
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Your site is registered and can now be scanned."
 msgstr ""
 
@@ -2452,7 +2455,7 @@ msgid "That pattern is too broad. Patterns are matched as substrings, so a bare 
 msgstr ""
 
 #: inc/traits/placeholder-content.php:87
-#: inc/utils/options.php:316
+#: inc/utils/options.php:322
 msgid "Accept & Load"
 msgstr ""
 
@@ -2480,9 +2483,9 @@ msgstr ""
 
 #: inc/utils/localize-data.php:361
 #: build/admin.js:13
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Powered by"
 msgstr ""
 
@@ -2496,25 +2499,25 @@ msgstr ""
 
 #: inc/utils/options.php:73
 #: build/admin.js:8
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Only Essential"
 msgstr ""
 
 #: inc/utils/options.php:85
 #: build/admin.js:8
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Accept All"
 msgstr ""
 
 #: inc/utils/options.php:91
 #: build/admin.js:8
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Decline"
 msgstr ""
 
@@ -2526,9 +2529,9 @@ msgstr ""
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:8
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Preferences"
 msgstr ""
 
@@ -2540,7 +2543,7 @@ msgstr ""
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr ""
 
-#: inc/utils/options.php:311
+#: inc/utils/options.php:317
 msgid "This content is blocked because it would connect to {service}."
 msgstr ""
 
@@ -2863,15 +2866,15 @@ msgstr ""
 #: build/admin.js:1
 #: build/admin.js:8
 #: build/admin.js:59
-#: build/admin.js:73
-#: build/admin.js:101
-#: build/admin.js:108
-#: build/admin.js:109
-#: build/admin.js:112
-#: build/admin.js:113
-#: build/admin.js:117
-#: build/admin.js:125
-#: build/admin.js:128
+#: build/admin.js:74
+#: build/admin.js:102
+#: build/admin.js:110
+#: build/admin.js:111
+#: build/admin.js:114
+#: build/admin.js:115
+#: build/admin.js:119
+#: build/admin.js:127
+#: build/admin.js:130
 #: build/onboarding.js:1
 msgid "Failed to load settings"
 msgstr ""
@@ -2911,17 +2914,17 @@ msgid "Failed to load conflicting plugins"
 msgstr ""
 
 #: build/admin.js:1
-#: build/onboarding.js:8
+#: build/onboarding.js:9
 msgid "Failed to load cookie categories"
 msgstr ""
 
 #: build/admin.js:1
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Failed to cancel scan."
 msgstr ""
 
 #: build/admin.js:1
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Scan cancelled."
 msgstr ""
 
@@ -2935,7 +2938,7 @@ msgstr ""
 
 #: build/admin.js:1
 #: build/admin.js:37
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Unknown"
 msgstr ""
 
@@ -2981,7 +2984,7 @@ msgid "Scanning"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:118
+#: build/admin.js:120
 msgid "Manual"
 msgstr ""
 
@@ -3002,12 +3005,12 @@ msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Scripts and Embeds"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Consent Sharing"
 msgstr ""
 
@@ -3018,7 +3021,7 @@ msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Business Details"
 msgstr ""
 
@@ -3035,13 +3038,13 @@ msgid "Layout"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Visibility"
 msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Re-Consent"
 msgstr ""
 
@@ -3059,7 +3062,7 @@ msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Blocked Content UI"
 msgstr ""
 
@@ -3077,19 +3080,19 @@ msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "MCP"
 msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Import / Export"
 msgstr ""
 
 #: build/admin.js:2
 #: build/admin.js:3
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Migration"
 msgstr ""
 
@@ -3118,7 +3121,7 @@ msgstr ""
 #: build/admin.js:15
 #: build/admin.js:30
 #: build/admin.js:40
-#: build/admin.js:103
+#: build/admin.js:105
 #: build/onboarding.js:1
 msgid "Delete"
 msgstr ""
@@ -3126,7 +3129,7 @@ msgstr ""
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:40
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Save"
 msgstr ""
 
@@ -3136,8 +3139,8 @@ msgid "No options available"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:101
-#: build/admin.js:109
+#: build/admin.js:102
+#: build/admin.js:111
 msgid "Copied!"
 msgstr ""
 
@@ -3146,9 +3149,9 @@ msgid "Could not copy to clipboard. Please copy it manually."
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:77
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:78
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Copy"
 msgstr ""
 
@@ -3217,10 +3220,10 @@ msgstr ""
 #: build/admin.js:8
 #: build/admin.js:15
 #: build/admin.js:63
-#: build/admin.js:73
-#: build/admin.js:87
-#: build/admin.js:101
-#: build/onboarding.js:28
+#: build/admin.js:74
+#: build/admin.js:88
+#: build/admin.js:103
+#: build/onboarding.js:29
 msgid "Upgrade Now"
 msgstr ""
 
@@ -3229,10 +3232,10 @@ msgid "Add License"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:87
-#: build/onboarding.js:20
-#: build/onboarding.js:25
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:21
+#: build/onboarding.js:26
+#: build/onboarding.js:29
 msgid "Activate SureCookie Pro"
 msgstr ""
 
@@ -3274,7 +3277,7 @@ msgid "Install and Activate"
 msgstr ""
 
 #: build/admin.js:2
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Activate"
 msgstr ""
 
@@ -3283,9 +3286,9 @@ msgid "Activated"
 msgstr ""
 
 #: build/admin.js:2
-#: build/admin.js:73
-#: build/admin.js:125
-#: build/admin.js:139
+#: build/admin.js:74
+#: build/admin.js:127
+#: build/admin.js:141
 msgid "Learn More"
 msgstr ""
 
@@ -3301,15 +3304,15 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:56
-#: build/onboarding.js:24
-#: build/onboarding.js:28
-#: build/onboarding.js:36
-#: build/onboarding.js:38
+#: build/onboarding.js:25
+#: build/onboarding.js:29
+#: build/onboarding.js:37
+#: build/onboarding.js:39
 msgid "Back"
 msgstr ""
 
 #: build/admin.js:3
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Finish"
 msgstr ""
 
@@ -3319,7 +3322,7 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:59
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Automatic Scanning"
 msgstr ""
 
@@ -3329,7 +3332,7 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:60
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Enable Automatic Scanning"
 msgstr ""
 
@@ -3338,7 +3341,7 @@ msgid "Turn this on to schedule background scans and reveal the rest of the sett
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Scan Frequency"
 msgstr ""
 
@@ -3347,7 +3350,7 @@ msgid "How often the scheduled scan runs. Monthly is included, and Weekly is ava
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Content to Scan"
 msgstr ""
 
@@ -3356,7 +3359,7 @@ msgid "Reuse the content picked on the Cookie Scanner page, scan your newest pub
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Last Scan"
 msgstr ""
 
@@ -3473,7 +3476,7 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:8
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Position"
 msgstr ""
 
@@ -3512,7 +3515,7 @@ msgid "While a video, map, or other embed waits for consent, visitors see a plac
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Use Video Thumbnails"
 msgstr ""
 
@@ -3521,7 +3524,7 @@ msgid "Shows a YouTube video’s own thumbnail on its placeholder. The image loa
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Default Placeholder Image"
 msgstr ""
 
@@ -3530,7 +3533,7 @@ msgid "Pick an image from your Media Library for blocked embeds that have no ima
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Placeholder Text"
 msgstr ""
 
@@ -3539,7 +3542,7 @@ msgid "The message shown on the placeholder. Type {service} where the blocked se
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Button Text"
 msgstr ""
 
@@ -3584,7 +3587,7 @@ msgid "Visitors write here with privacy questions and requests. It is shown publ
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Applicable Privacy Regimes"
 msgstr ""
 
@@ -3719,7 +3722,7 @@ msgid "Give visitors a cookie policy whose tables list your scanned and custom c
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Cookie Policy Page"
 msgstr ""
 
@@ -3736,7 +3739,7 @@ msgid "Auto Generate creates a ready-made policy page for you. Shortcode gives y
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Generate Cookie Policy Page"
 msgstr ""
 
@@ -3746,7 +3749,7 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:59
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Manage Cookies"
 msgstr ""
 
@@ -3757,7 +3760,7 @@ msgstr ""
 #: build/admin.js:3
 #: build/admin.js:56
 #: build/admin.js:59
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Add from a Known Service"
 msgstr ""
 
@@ -3861,7 +3864,7 @@ msgid "Confirms what is active now. Your banner settings apply to every visitor,
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Unlock Regional Targeting"
 msgstr ""
 
@@ -3870,7 +3873,7 @@ msgid "Upgrade to show the banner only in regions you choose, give each region i
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Google Consent Mode v2"
 msgstr ""
 
@@ -3879,7 +3882,7 @@ msgid "Sends each visitor’s consent choices to Google tags such as Analytics, 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Enable Google Consent Mode"
 msgstr ""
 
@@ -3896,7 +3899,7 @@ msgid "How long Google tags wait for the visitor’s consent choice before sendi
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Active Regional Rules"
 msgstr ""
 
@@ -3905,8 +3908,8 @@ msgid "The consent Google assumes before a visitor answers the banner. Worldwide
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:123
-#: build/admin.js:124
+#: build/admin.js:125
+#: build/admin.js:126
 msgid "Add Rule"
 msgstr ""
 
@@ -3915,7 +3918,7 @@ msgid "Give one or more regions their own starting consent, such as everything d
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Quick Presets"
 msgstr ""
 
@@ -3924,7 +3927,7 @@ msgid "Fill in the form for a common privacy law in one click, such as GDPR for 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Region Codes"
 msgstr ""
 
@@ -3933,7 +3936,7 @@ msgid "Enter country or state codes separated by commas, such as GB or US-CA. EU
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Default Consent State"
 msgstr ""
 
@@ -3982,7 +3985,7 @@ msgid "Leave this off to keep current values for anything the file does not incl
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Import Settings"
 msgstr ""
 
@@ -4033,7 +4036,7 @@ msgid "Connect AI clients such as Claude or Cursor to your site so they can mana
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Enable MCP"
 msgstr ""
 
@@ -4042,7 +4045,7 @@ msgid "Turn this on to let AI clients connect to SureCookie. Turning it on also 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Connect Your AI Client"
 msgstr ""
 
@@ -4099,7 +4102,7 @@ msgid "Shows when you last imported from this plugin. Running the migration agai
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:135
+#: build/admin.js:137
 msgid "Start Migration"
 msgstr ""
 
@@ -4112,7 +4115,7 @@ msgid "Choose where SureCookie sits in your dashboard, whether visitors see its 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "SureCookie Admin Menu"
 msgstr ""
 
@@ -4121,7 +4124,7 @@ msgid "When on, SureCookie gets its own item in the WordPress sidebar, and when 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Hide SureCookie Branding"
 msgstr ""
 
@@ -4130,7 +4133,7 @@ msgid "Removes the “Powered by SureCookie” text from the banner and preferen
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Contribute to SureCookie"
 msgstr ""
 
@@ -4143,7 +4146,7 @@ msgid "Changes on this page apply only after you save."
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Privacy Policy Page"
 msgstr ""
 
@@ -4164,7 +4167,7 @@ msgid "Auto Generate builds a full policy draft for you. Shortcodes lists each s
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Generate Privacy Policy Draft"
 msgstr ""
 
@@ -4193,7 +4196,7 @@ msgid "Once the banner closes, visitors need a way to change their mind. Set up 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Button Label"
 msgstr ""
 
@@ -4202,7 +4205,7 @@ msgid "The text visitors see on the Cookie Preferences link that the menu item a
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Menu Level"
 msgstr ""
 
@@ -4211,8 +4214,8 @@ msgid "Pick one of your WordPress menus, and the link is added to it automatical
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:101
-#: build/admin.js:109
+#: build/admin.js:102
+#: build/admin.js:111
 msgid "Shortcode"
 msgstr ""
 
@@ -4221,7 +4224,7 @@ msgid "Copy the shortcode and paste it into any page or post to show the link th
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Floating Widget"
 msgstr ""
 
@@ -4230,8 +4233,8 @@ msgid "Turn on a floating button that reopens cookie preferences on every page o
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:92
-#: build/admin.js:101
+#: build/admin.js:93
+#: build/admin.js:102
 msgid "Cookie Scanner"
 msgstr ""
 
@@ -4256,8 +4259,8 @@ msgid "Shows how many scans or pages you have left today and when the count rese
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:99
-#: build/onboarding.js:34
+#: build/admin.js:100
+#: build/onboarding.js:35
 msgid "Select Content"
 msgstr ""
 
@@ -4266,8 +4269,8 @@ msgid "Pick the pages, posts, and other content to scan, up to the limit shown. 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:101
-#: build/onboarding.js:36
+#: build/admin.js:102
+#: build/onboarding.js:37
 msgid "Start Scan"
 msgstr ""
 
@@ -4284,7 +4287,7 @@ msgid "Runs the scan in a new tab of your own browser instead of our servers. Ke
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:88
+#: build/admin.js:89
 msgid "View Scan Logs"
 msgstr ""
 
@@ -4297,7 +4300,7 @@ msgid "Third-party scripts and embeds, such as analytics tags or video players, 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Block Scripts Until Consent"
 msgstr ""
 
@@ -4310,7 +4313,7 @@ msgid "Pick a service you use, such as YouTube, to add its cookies to your polic
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Detected and Managed Resources"
 msgstr ""
 
@@ -4319,7 +4322,7 @@ msgid "Every script and embed SureCookie manages, from scans, added services, an
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "New Resource"
 msgstr ""
 
@@ -4328,7 +4331,7 @@ msgid "Add a script or embed the scanner missed, using the domain it loads from.
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Behavior"
 msgstr ""
 
@@ -4338,9 +4341,9 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:34
-#: build/admin.js:84
-#: build/admin.js:103
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/admin.js:105
+#: build/onboarding.js:10
 msgid "Type"
 msgstr ""
 
@@ -4349,7 +4352,7 @@ msgid "Choose Script for a JavaScript file, or iFrame for embedded content such 
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Domain / Host"
 msgstr ""
 
@@ -4386,7 +4389,7 @@ msgid "Your settings have been successfully saved."
 msgstr ""
 
 #: build/admin.js:3
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Save failed!"
 msgstr ""
 
@@ -4395,8 +4398,8 @@ msgid "There was an error saving your settings. Please try again."
 msgstr ""
 
 #: build/admin.js:3
-#: build/onboarding.js:36
-#: build/onboarding.js:38
+#: build/onboarding.js:37
+#: build/onboarding.js:39
 msgid "Saving…"
 msgstr ""
 
@@ -4439,11 +4442,11 @@ msgid "Show %s link"
 msgstr ""
 
 #: build/admin.js:6
-#: build/admin.js:87
-#: build/admin.js:109
-#: build/admin.js:117
-#: build/onboarding.js:24
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/admin.js:111
+#: build/admin.js:119
+#: build/onboarding.js:25
+#: build/onboarding.js:29
 msgid "(no title)"
 msgstr ""
 
@@ -4452,21 +4455,21 @@ msgid "Drag to reorder and use the eye icon to show or hide. These appear in the
 msgstr ""
 
 #: build/admin.js:6
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Select a Page"
 msgstr ""
 
 #: build/admin.js:6
 #: build/admin.js:59
 #: build/admin.js:63
-#: build/admin.js:112
-#: build/onboarding.js:38
+#: build/admin.js:114
+#: build/onboarding.js:39
 msgid "Configure"
 msgstr ""
 
 #: build/admin.js:6
-#: build/admin.js:109
-#: build/admin.js:113
+#: build/admin.js:111
+#: build/admin.js:115
 msgid "View Page"
 msgstr ""
 
@@ -4544,15 +4547,15 @@ msgstr ""
 
 #: build/admin.js:8
 #: build/admin.js:59
-#: build/admin.js:73
-#: build/admin.js:101
-#: build/admin.js:108
-#: build/admin.js:109
-#: build/admin.js:112
-#: build/admin.js:113
-#: build/admin.js:117
-#: build/admin.js:125
-#: build/admin.js:128
+#: build/admin.js:74
+#: build/admin.js:102
+#: build/admin.js:110
+#: build/admin.js:111
+#: build/admin.js:114
+#: build/admin.js:115
+#: build/admin.js:119
+#: build/admin.js:127
+#: build/admin.js:130
 msgid "An error occurred while loading settings. Please refresh the page to try again."
 msgstr ""
 
@@ -4629,12 +4632,12 @@ msgid "Use this logo"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Floating Banner"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Full-width Banner"
 msgstr ""
 
@@ -4643,7 +4646,7 @@ msgid "px"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Bottom Left"
 msgstr ""
 
@@ -4652,7 +4655,7 @@ msgid "Bottom Center"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Bottom Right"
 msgstr ""
 
@@ -4661,12 +4664,12 @@ msgid "Middle"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Top"
 msgstr ""
 
 #: build/admin.js:8
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Bottom"
 msgstr ""
 
@@ -4781,7 +4784,7 @@ msgstr ""
 #: build/admin.js:9
 #: build/admin.js:10
 #: build/admin.js:13
-#: build/admin.js:139
+#: build/admin.js:141
 #: build/onboarding.js:1
 msgid "Received"
 msgstr ""
@@ -4880,7 +4883,7 @@ msgstr ""
 
 #: build/admin.js:13
 #: build/admin.js:34
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Actions"
 msgstr ""
 
@@ -4893,13 +4896,13 @@ msgid "Field"
 msgstr ""
 
 #: build/admin.js:13
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Value"
 msgstr ""
 
 #: build/admin.js:13
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Status"
 msgstr ""
 
@@ -5158,7 +5161,7 @@ msgstr ""
 
 #: build/admin.js:30
 #: build/admin.js:40
-#: build/admin.js:103
+#: build/admin.js:105
 #: build/onboarding.js:1
 msgid "Edit"
 msgstr ""
@@ -5174,13 +5177,13 @@ msgid "Declared"
 msgstr ""
 
 #: build/admin.js:30
-#: build/admin.js:103
+#: build/admin.js:105
 #: build/onboarding.js:1
 msgid "Scanned"
 msgstr ""
 
 #: build/admin.js:30
-#: build/admin.js:103
+#: build/admin.js:105
 #: build/onboarding.js:1
 msgid "Custom"
 msgstr ""
@@ -5248,12 +5251,12 @@ msgid "Select all cookies"
 msgstr ""
 
 #: build/admin.js:34
-#: build/admin.js:73
-#: build/admin.js:84
-#: build/admin.js:103
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/admin.js:85
+#: build/admin.js:105
 #: build/onboarding.js:9
-#: build/public.js:5
+#: build/onboarding.js:10
+#: build/public.js:6
 msgid "Name"
 msgstr ""
 
@@ -5330,7 +5333,7 @@ msgstr ""
 
 #: build/admin.js:37
 #: build/admin.js:40
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Select a category"
 msgstr ""
 
@@ -5465,16 +5468,16 @@ msgid "All Categories"
 msgstr ""
 
 #: build/admin.js:40
-#: build/admin.js:103
-#: build/admin.js:117
-#: build/admin.js:125
+#: build/admin.js:105
+#: build/admin.js:119
+#: build/admin.js:127
 msgid "Pro"
 msgstr ""
 
 #. translators: %d: number of cookies
 #. translators: %d: number of cookies found
 #: build/admin.js:41
-#: build/onboarding.js:17
+#: build/onboarding.js:18
 #, js-format
 msgid "%d cookie"
 msgid_plural "%d cookies"
@@ -5550,7 +5553,7 @@ msgid "No services match your search."
 msgstr ""
 
 #: build/admin.js:45
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Loads before consent"
 msgstr ""
 
@@ -5622,6 +5625,9 @@ msgstr ""
 
 #. translators: %d: number of days
 #: build/admin.js:53
+#: build/admin.js:70
+#: build/onboarding.js:5
+#: build/public.js:2
 #, js-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -5629,7 +5635,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: build/admin.js:53
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Failed to add service"
 msgstr ""
 
@@ -5843,7 +5849,7 @@ msgid "We spotted cookies from this service. Add it to declare its cookies in on
 msgstr ""
 
 #: build/admin.js:59
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Add as Service"
 msgstr ""
 
@@ -5889,7 +5895,7 @@ msgid "Write your custom CSS below. Use <strong>!important</strong> to override 
 msgstr ""
 
 #: build/admin.js:59
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "<span></span> Quick Tips:"
 msgstr ""
 
@@ -6010,7 +6016,7 @@ msgid "Access Help Center"
 msgstr ""
 
 #: build/admin.js:60
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Open Support Ticket"
 msgstr ""
 
@@ -6069,7 +6075,7 @@ msgid "You're all set! SureCookie is ready to protect your site."
 msgstr ""
 
 #: build/admin.js:63
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Go to Dashboard"
 msgstr ""
 
@@ -6168,7 +6174,7 @@ msgid "Set Up Cookie Banner"
 msgstr ""
 
 #: build/admin.js:66
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Scan My Site"
 msgstr ""
 
@@ -6215,7 +6221,7 @@ msgid "It keeps going on our servers, so you can carry on here. The results appe
 msgstr ""
 
 #: build/admin.js:67
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Working…"
 msgstr ""
 
@@ -6228,7 +6234,7 @@ msgid "It stopped before it finished, so nothing new was added. Cookies found ea
 msgstr ""
 
 #: build/admin.js:67
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Scan Again"
 msgstr ""
 
@@ -6262,8 +6268,8 @@ msgstr ""
 
 #: build/admin.js:67
 #: build/admin.js:68
-#: build/onboarding.js:13
 #: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Review"
 msgstr ""
 
@@ -6313,439 +6319,439 @@ msgstr ""
 msgid "Transferred outside the EU/EEA"
 msgstr ""
 
-#: build/admin.js:69
-#: build/onboarding.js:4
-#: build/public.js:1
+#: build/admin.js:70
+#: build/onboarding.js:5
+#: build/public.js:2
 msgid "Close privacy preferences dialog"
 msgstr ""
 
-#: build/admin.js:69
-#: build/onboarding.js:4
-#: build/public.js:1
+#: build/admin.js:70
+#: build/onboarding.js:5
+#: build/public.js:2
 msgid "Preference sections"
 msgstr ""
 
-#: build/admin.js:69
-#: build/onboarding.js:4
-#: build/public.js:1
+#: build/admin.js:70
+#: build/onboarding.js:5
+#: build/public.js:2
 msgid "Consent Forwarding"
 msgstr ""
 
 #. translators: %d: number of partner sites
-#: build/admin.js:70
-#: build/onboarding.js:5
-#: build/public.js:2
+#: build/admin.js:71
+#: build/onboarding.js:6
+#: build/public.js:3
 #, js-format
 msgid "%d connected site(s)"
 msgstr ""
 
-#: build/admin.js:70
-#: build/onboarding.js:5
-#: build/public.js:2
+#: build/admin.js:71
+#: build/onboarding.js:6
+#: build/public.js:3
 msgid "Sites that will receive your consent"
 msgstr ""
 
-#: build/admin.js:70
-#: build/onboarding.js:5
-#: build/public.js:2
+#: build/admin.js:71
+#: build/onboarding.js:6
+#: build/public.js:3
 msgid "No partner sites configured."
 msgstr ""
 
 #. translators: %s: comma-separated list of cookie category names.
-#: build/admin.js:71
-#: build/onboarding.js:6
-#: build/public.js:3
+#: build/admin.js:72
+#: build/onboarding.js:7
+#: build/public.js:4
 #, js-format
 msgid "Your browser is set to tell websites not to sell or share your data, so %s stays off on this site whatever you choose here."
 msgid_plural "Your browser is set to tell websites not to sell or share your data, so %s stay off on this site whatever you choose here."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:71
-#: build/onboarding.js:6
-#: build/public.js:3
+#: build/admin.js:72
+#: build/onboarding.js:7
+#: build/public.js:4
 msgid "Always Active"
 msgstr ""
 
 #. translators: %s: cookie category name
-#: build/admin.js:72
-#: build/onboarding.js:7
-#: build/public.js:4
+#: build/admin.js:73
+#: build/onboarding.js:8
+#: build/public.js:5
 #, js-format
 msgid "%s: always active, cannot be disabled"
 msgstr ""
 
-#: build/admin.js:72
-#: build/onboarding.js:7
-#: build/public.js:4
+#: build/admin.js:73
+#: build/onboarding.js:8
+#: build/public.js:5
 msgid "View Cookies"
 msgstr ""
 
 #. translators: %s: cookie category name
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 #, js-format
 msgid "%s cookies details"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Expiry"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "All cookies accepted."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Non-essential cookies rejected."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Reject All"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Preferences saved successfully."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Confirm My Choices"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Powered by SureCookie (opens in new tab)"
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Admin and plugin preferences for SureCookie."
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "SureCookie admin menu location toggle"
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Toggle to show SureCookie in the main menu or under Settings → SureCookie."
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Hide SureCookie branding toggle"
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Remove the \"Powered by SureCookie\" text from the consent banner and preferences modal."
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "to remove the \"Powered by SureCookie\" text from the consent banner and preferences modal."
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Contribute to SureCookie toggle"
 msgstr ""
 
-#: build/admin.js:73
+#: build/admin.js:74
 msgid "Help shape the future of SureCookie. Share how you use the plugin so we can build features that matter, fix issues faster, and make smarter decisions."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "This website uses cookies to enhance your browsing experience, personalize content, provide social media features, and analyze our traffic. You can review and manage your cookie settings at any time, or accept all cookies to proceed."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
-#: build/public.js:5
+#: build/admin.js:74
+#: build/onboarding.js:9
+#: build/public.js:6
 msgid "Cookie Consent"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/onboarding.js:9
 msgid "Buttons are for reference only in preview."
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/onboarding.js:9
 msgid "This is a worldwide banner preview"
 msgstr ""
 
-#: build/admin.js:73
-#: build/onboarding.js:8
+#: build/admin.js:74
+#: build/onboarding.js:9
 msgid "Close preview"
 msgstr ""
 
-#: build/admin.js:73
 #: build/admin.js:74
+#: build/admin.js:75
 msgid "Complete"
 msgstr ""
 
-#: build/admin.js:73
 #: build/admin.js:74
+#: build/admin.js:75
 msgid "Queued…"
 msgstr ""
 
-#: build/admin.js:73
 #: build/admin.js:74
+#: build/admin.js:75
 msgid "Starting scan…"
 msgstr ""
 
 #. translators: 1: current page index, 2: total pages
-#: build/admin.js:74
+#: build/admin.js:75
 #, js-format
 msgid "Scanning page %1$d of %2$d…"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "Scanning pages…"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "Analyzing cookies…"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "Finalizing…"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "Scan failed"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "In progress…"
 msgstr ""
 
-#: build/admin.js:74
+#: build/admin.js:75
 msgid "Scan progress"
 msgstr ""
 
 #. translators: 1: completed pages, 2: total pages
-#: build/admin.js:75
+#: build/admin.js:76
 #, js-format
 msgid "%1$d of %2$d pages scanned"
 msgstr ""
 
-#: build/admin.js:75
+#: build/admin.js:76
 msgid "Preparing scan…"
 msgstr ""
 
 #. translators: %s: estimated time remaining
-#: build/admin.js:76
+#: build/admin.js:77
 #, js-format
 msgid "· ~%s left"
 msgstr ""
 
-#: build/admin.js:76
+#: build/admin.js:77
 msgid "Scan Completed with Errors"
 msgstr ""
 
 #. translators: %d: number of failed pages
-#: build/admin.js:77
+#: build/admin.js:78
 #, js-format
 msgid "%d page(s) could not be scanned. Check the logs for details."
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Scan Completed!"
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Cookie scan has been completed successfully."
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Logs copied to clipboard!"
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Could not copy logs automatically."
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Latest Scanning Logs"
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "View logs from the most recent cookie scanning process."
 msgstr ""
 
-#: build/admin.js:77
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:78
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Copied"
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "This field contains the scanning status results only."
 msgstr ""
 
-#: build/admin.js:77
+#: build/admin.js:78
 msgid "Scan appears stuck"
 msgstr ""
 
 #. translators: 1: completed pages, 2: total pages, 3: elapsed time
-#: build/admin.js:78
+#: build/admin.js:79
 #, js-format
 msgid "%1$d of %2$d pages scanned after %3$s with no recent progress."
 msgstr ""
 
 #. translators: %s: elapsed time
-#: build/admin.js:79
+#: build/admin.js:80
 #, js-format
 msgid "No progress detected after %s."
 msgstr ""
 
-#: build/admin.js:79
+#: build/admin.js:80
 msgid "Possible causes: Scan server under heavy load, your site is unreachable from our scanner, your site has CRON issues, or a page caused a browser timeout."
 msgstr ""
 
-#: build/admin.js:79
-#: build/admin.js:88
+#: build/admin.js:80
+#: build/admin.js:89
 msgid "Cancelling…"
 msgstr ""
 
-#: build/admin.js:79
+#: build/admin.js:80
 msgid "Cancel Scan"
 msgstr ""
 
-#: build/admin.js:79
+#: build/admin.js:80
 msgid "Copy Logs for Support"
 msgstr ""
 
-#: build/admin.js:79
+#: build/admin.js:80
 msgid "Some pages could not be analyzed"
 msgstr ""
 
 #. translators: 1: scanned pages, 2: total pages, 3: failed pages
-#: build/admin.js:80
+#: build/admin.js:81
 #, js-format
 msgid "Scanned %1$d of %2$d pages - %3$d could not be analyzed. The cookies we did find are saved, and results add up across scans, so you can re-run the scan to pick up the rest."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Once the scan is complete, the cookies it found appear under <a>Cookies</a>, and the scripts and embeds under <b>Scripts and Embeds</b>."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Keep the scan tab in front until it finishes: browsers slow down background tabs."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Pages already collected are saved, so closing the tab early keeps what it found."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "An ad blocker or privacy extension in this browser can hide trackers from the scan."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Your scan limit will reset tomorrow."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "The scan runs in the background - you can safely navigate away."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Make sure your site is publicly accessible (not behind basic auth / maintenance mode)."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Check if a firewall or security plugin is blocking external requests to your site."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Heavy JavaScripts can slow scans. If scans keep failing, try fewer pages."
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "If issues persist, copy the logs and <a>contact our support team.</a>"
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "contact our support team"
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "If remote scanning fails, try Assisted Scanner method: <button></button>"
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Switch to Default Scanner"
 msgstr ""
 
-#: build/admin.js:80
+#: build/admin.js:81
 msgid "Switch to Assisted Scanner"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "Scan From This Browser"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "Your host blocked the scanner"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "Your site's firewall or bot protection served our scanner a security challenge instead of your page, so the scan completed without results. This does not affect your visitors, only automated scanners. Allowlist the SureCookie scanner (or ask your host to) and run the scan again."
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "Services we still detected on your site (via a first-party check):"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "How to allowlist the scanner"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "No cookies found in this browser scan"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "We found services on your pages that your browser did not load, which usually means an ad blocker or privacy extension is active. Try again in a browser with extensions disabled, or add the cookies manually."
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "The scan visited your pages but no cookies were set. Some services only set cookies after a visitor accepts the banner, so they may not appear. You can also add cookies manually."
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "No cookies found in this scan"
 msgstr ""
 
-#: build/admin.js:80
-#: build/onboarding.js:8
+#: build/admin.js:81
+#: build/onboarding.js:9
 msgid "The scanner reached your site but did not detect any cookies. Some services only set cookies after a visitor accepts the banner, so they may not appear in a scan. You can also add cookies manually."
 msgstr ""
 
 #. translators: %d: number of services recognised on the site.
-#: build/admin.js:81
+#: build/admin.js:82
 #, js-format
 msgid "SureCookie recognised %d service on your site."
 msgid_plural "SureCookie recognised %d services on your site."
@@ -6753,2582 +6759,2608 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of cookies the scan observed.
-#: build/admin.js:82
+#: build/admin.js:83
 #, js-format
 msgid "This scan observed %d cookie."
 msgid_plural "This scan observed %d cookies."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:82
+#: build/admin.js:83
 msgid "Their cookies are already on your cookie policy, including any the scan could not see for itself, so a low cookie count does not mean the scan failed."
 msgstr ""
 
-#: build/admin.js:82
+#: build/admin.js:83
 msgid "Some Recognised Services Are Not Declared"
 msgstr ""
 
-#: build/admin.js:82
+#: build/admin.js:83
 msgid "Services We Recognised"
 msgstr ""
 
 #. translators: %s: comma-separated service names.
-#: build/admin.js:83
+#: build/admin.js:84
 #, js-format
 msgid "%s is marked as removed in your Known Services library, so its cookies are not on your cookie policy and scanning again will not add them."
 msgid_plural "%s are marked as removed in your Known Services library, so their cookies are not on your cookie policy and scanning again will not add them."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:83
+#: build/admin.js:84
 msgid "Open Known Services"
 msgstr ""
 
-#: build/admin.js:83
+#: build/admin.js:84
 msgid "Manage Known Services"
 msgstr ""
 
-#: build/admin.js:83
-#: build/onboarding.js:8
+#: build/admin.js:84
+#: build/onboarding.js:9
 msgid "Could not copy"
 msgstr ""
 
-#: build/admin.js:83
-#: build/onboarding.js:8
+#: build/admin.js:84
+#: build/onboarding.js:9
 msgid "Copy the value manually."
 msgstr ""
 
 #. translators: %s: DNS record field name, e.g. Type, Name or Value
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 #, js-format
 msgid "Copy %s"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "We Could Not Verify Your Domain"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Verify With a DNS Record Instead"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Add this TXT record at your DNS provider, then retry. This proves you own the domain without us needing to reach your site, so a firewall cannot block it."
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Domain verified"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Still not verified"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "DNS changes can take a while to propagate. Try again shortly."
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Retry Verification"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "DNS changes usually apply within minutes, but can take up to a day."
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Scan from Your Browser (Recommended)"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "How this works"
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "This runs the scan from your own browser instead of our servers, and finds the same cookies. A new tab will open. Keep it open and in-front until the scan finishes."
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Note: This clears your site's cookies in this browser, including your consent choice. Your WordPress login remains unaffected."
 msgstr ""
 
-#: build/admin.js:84
-#: build/onboarding.js:9
+#: build/admin.js:85
+#: build/onboarding.js:10
 msgid "Results appear automatically in Tracking Manager. Some advanced detections may still require a remote scan."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:85
-#: build/admin.js:100
-#: build/onboarding.js:10
-#: build/onboarding.js:36
+#: build/admin.js:86
+#: build/admin.js:101
+#: build/onboarding.js:11
+#: build/onboarding.js:37
 #, js-format
 msgid "You have selected more than %d pages"
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:86
-#: build/onboarding.js:11
+#: build/admin.js:87
+#: build/onboarding.js:12
 #, js-format
 msgid "An assisted scan visits up to %d pages. Remove some pages to continue."
 msgstr ""
 
-#: build/admin.js:86
-#: build/onboarding.js:11
-#: build/onboarding.js:36
+#: build/admin.js:87
+#: build/onboarding.js:12
+#: build/onboarding.js:37
 msgid "Scanning in your browser…"
 msgstr ""
 
-#: build/admin.js:86
-#: build/onboarding.js:11
-#: build/onboarding.js:25
-#: build/onboarding.js:36
+#: build/admin.js:87
+#: build/onboarding.js:12
+#: build/onboarding.js:26
+#: build/onboarding.js:37
 msgid "Start Browser Scan"
 msgstr ""
 
-#: build/admin.js:86
-#: build/onboarding.js:11
+#: build/admin.js:87
+#: build/onboarding.js:12
 msgid "Switch Back"
 msgstr ""
 
-#: build/admin.js:86
+#: build/admin.js:87
 msgid "This page did not load the scanner, so it was skipped. A redirect or a login requirement usually causes this."
 msgstr ""
 
-#: build/admin.js:86
+#: build/admin.js:87
 msgid "This page took too long to respond."
 msgstr ""
 
-#: build/admin.js:86
+#: build/admin.js:87
 msgid "Skipped because the scan was cancelled."
 msgstr ""
 
-#: build/admin.js:86
+#: build/admin.js:87
 msgid "This page could not be collected."
 msgstr ""
 
-#: build/admin.js:86
+#: build/admin.js:87
 msgid "Pages In This Scan"
 msgstr ""
 
 #. translators: 1: cookie count, 2: script count
-#: build/admin.js:87
+#: build/admin.js:88
 #, js-format
 msgid "%1$d cookies, %2$d scripts"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 msgid "Collecting…"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 msgid "Waiting"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 msgid "Re-scan"
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:29
 msgid "Activate License"
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:29
 msgid "Consider Plan Upgrade"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 #: build/onboarding.js:1
 msgid "Could not start the assisted scan."
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:29
 msgid "Could not start the assisted scan"
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:24
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:25
+#: build/onboarding.js:29
 msgid "Please try again in a moment."
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:24
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:25
+#: build/onboarding.js:29
 msgid "Your browser blocked the scan window"
 msgstr ""
 
-#: build/admin.js:87
-#: build/onboarding.js:24
-#: build/onboarding.js:28
+#: build/admin.js:88
+#: build/onboarding.js:25
+#: build/onboarding.js:29
 msgid "Allow pop-ups for this site, then start the scan again."
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 #: build/onboarding.js:1
 msgid "Failed to initiate scan"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 msgid "Scan Started!"
 msgstr ""
 
-#: build/admin.js:87
+#: build/admin.js:88
 msgid "Scanning your content for cookies. This may take a few minutes."
 msgstr ""
 
 #. translators: 1: pages scanned, 2: pages submitted
-#: build/admin.js:88
+#: build/admin.js:89
 #, js-format
 msgid "Scanned %1$d of %2$d pages - your daily page budget is used up. The remaining pages will scan after it resets."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Session Expired"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Your session or license changed since this page loaded. Reload the page to reconnect, then start the scan again."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Site Verification Failed"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "The scanning service could not reach your site to verify it. A firewall, security plugin, or SSL problem is the usual cause. Check those and try again."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Couldn't Reach the Scanner"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Your site could not reach the scanning service. Check your connection and try again. Any cookies already found are saved."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scan Queued for Later"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Today's page budget is used up, so the remaining pages will scan automatically once it resets. Any cookies already found are saved. To scan sooner, run it again with fewer pages."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "No Pages Left to Scan"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "The pages you selected are no longer published, so there was nothing to scan. Choose your pages again and start a new scan."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scanning Needs a Public Address"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Our scanner reaches your site over the internet, so it cannot scan a local or private-network address. Scan from your browser instead, or run this on your live domain."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scan Already Running"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "A scan is already running on this site. Wait for it to finish, then start the next one. If nothing appears to be running, reload the page and try again."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scan Couldn't Be Started"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "SureCookie could not start the scan, usually a temporary problem reaching the scanning service. Any cookies already found are saved. Please try again in a moment."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "The scan request was rejected before it started. Reload the page and try again."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scanning Needs SureCookie Pro"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "This scan is a Pro feature. Upgrade to run it, or carry on with the cookies already found."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Daily Scan Limit Reached"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "You have used every scan allowed today. Any cookies already found are saved, and you can scan again once the limit resets."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Scan Couldn't Be Completed"
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 #: build/onboarding.js:1
 msgid "Any cookies already found have been saved, and results add up across scans, so nothing is lost. Please try again in a moment."
 msgstr ""
 
-#: build/admin.js:88
+#: build/admin.js:89
 msgid "Cancel Stuck Scan"
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:89
+#: build/admin.js:90
 #, js-format
 msgid "Your first scan can cover up to %d pages while we connect your site. Remove the extra pages to start - Your plan's full limits unlock automatically afterward."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:90
-#: build/onboarding.js:30
+#: build/admin.js:91
+#: build/onboarding.js:31
 #, js-format
 msgid "Your plan supports scanning up to %d pages. Please remove extra pages to continue."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:91
-#: build/onboarding.js:31
+#: build/admin.js:92
+#: build/onboarding.js:32
 #, js-format
 msgid "The free plan supports scanning up to %d pages. Upgrade now to scan more pages and keep your cookie list updated automatically."
 msgstr ""
 
-#: build/admin.js:91
-#: build/onboarding.js:31
+#: build/admin.js:92
+#: build/onboarding.js:32
 msgid "Checking your scan limits…"
 msgstr ""
 
-#: build/admin.js:91
-#: build/onboarding.js:31
+#: build/admin.js:92
+#: build/onboarding.js:32
 msgid "Run your first scan to connect this site with SureCookie. Your plan's full scan limits unlock automatically once the connection is established."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/admin.js:92
+#: build/admin.js:93
 #, js-format
 msgid "We'll visit the selected content to detect all cookies in use. Allowed %d pages per scan due to resource constraints."
 msgstr ""
 
-#: build/admin.js:92
-#: build/admin.js:101
+#: build/admin.js:93
+#: build/admin.js:102
 msgid "Scan your website to find cookies, scripts, and trackers that require consent."
 msgstr ""
 
 #. translators: 1: whole hours remaining, 2: remaining minutes.
-#: build/admin.js:93
+#: build/admin.js:94
 #, js-format
 msgid "%1$dh %2$dm"
 msgstr ""
 
 #. translators: %d: minutes remaining.
-#: build/admin.js:94
+#: build/admin.js:95
 #, js-format
 msgid "%dm"
 msgstr ""
 
 #. translators: 1: remaining scans, 2: total daily scans
-#: build/admin.js:95
-#: build/onboarding.js:33
+#: build/admin.js:96
+#: build/onboarding.js:34
 #, js-format
 msgid "You have %1$d of %2$d daily scans remaining"
 msgstr ""
 
 #. translators: %s: time until reset (e.g. "4h 22m")
-#: build/admin.js:96
-#: build/admin.js:98
+#: build/admin.js:97
+#: build/admin.js:99
 #, js-format
 msgid "Resets in %s"
 msgstr ""
 
 #. translators: 1: remaining pages, 2: total daily page budget
-#: build/admin.js:97
-#: build/onboarding.js:34
+#: build/admin.js:98
+#: build/onboarding.js:35
 #, js-format
 msgid "%1$d of %2$d daily pages remaining on this site"
 msgstr ""
 
-#: build/admin.js:98
-#: build/onboarding.js:34
+#: build/admin.js:99
+#: build/onboarding.js:35
 msgid "Limits refreshed."
 msgstr ""
 
-#: build/admin.js:98
-#: build/onboarding.js:34
+#: build/admin.js:99
+#: build/onboarding.js:35
 msgid "Failed to refresh limits."
 msgstr ""
 
-#: build/admin.js:98
+#: build/admin.js:99
 msgid "Your session expired. Please reload to reconnect."
 msgstr ""
 
-#: build/admin.js:98
-#: build/onboarding.js:34
+#: build/admin.js:99
+#: build/onboarding.js:35
 msgid "We couldn't fetch your limits right now. Please try again in a moment."
 msgstr ""
 
-#: build/admin.js:98
-#: build/onboarding.js:34
+#: build/admin.js:99
+#: build/onboarding.js:35
 msgid "Refreshing…"
 msgstr ""
 
-#: build/admin.js:98
+#: build/admin.js:99
 msgid "Refresh limits"
 msgstr ""
 
 #. translators: %d: maximum items
-#: build/admin.js:99
-#: build/onboarding.js:35
+#: build/admin.js:100
+#: build/onboarding.js:36
 #, js-format
 msgid "Select up to %d items to scan…"
 msgstr ""
 
-#: build/admin.js:100
+#: build/admin.js:101
 msgid "Select the content you want to scan."
 msgstr ""
 
-#: build/admin.js:100
+#: build/admin.js:101
 msgid "Daily Limit Reached"
 msgstr ""
 
 #. translators: 1: scans used, 2: scan limit
-#: build/admin.js:101
+#: build/admin.js:102
 #, js-format
 msgid "You've used %1$d of %2$d daily scans. Your credits will refresh automatically tomorrow."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "You've used all your scan credits for today. Your credits will refresh automatically tomorrow."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "This is taking a little longer than usual"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "A page is taking a while to respond, but your scan is still running in the background. Any cookies already found have been saved. You can leave this page and come back - or cancel and try again with fewer pages."
 msgstr ""
 
-#: build/admin.js:101
-#: build/onboarding.js:36
+#: build/admin.js:102
+#: build/onboarding.js:37
 msgid "Scanning…"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "<p>By scanning you accept our <a>Terms and Conditions</a>.</p>"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Terms and Conditions"
 msgstr ""
 
-#: build/admin.js:101
-#: build/onboarding.js:11
+#: build/admin.js:102
+#: build/onboarding.js:12
 msgid "Scanning is paused on this site"
 msgstr ""
 
-#: build/admin.js:101
-#: build/onboarding.js:11
+#: build/admin.js:102
+#: build/onboarding.js:12
 msgid "Your site's built-in scheduler (WP-Cron) is switched off, and SureCookie needs it to run a scan. Ask your host to turn WP-Cron back on, or to add a server cron job. Everything else works normally, and you can scan as soon as it is back."
 msgstr ""
 
-#: build/admin.js:101
-#: build/onboarding.js:11
+#: build/admin.js:102
+#: build/onboarding.js:12
 msgid "Cookie Scanning Not Available on Local Sites"
 msgstr ""
 
-#: build/admin.js:101
-#: build/onboarding.js:11
+#: build/admin.js:102
+#: build/onboarding.js:12
 msgid "This site is running on a local or development environment that our cloud scanner cannot reach. Cookie scanning will be available once your site is live on a publicly accessible domain."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Select"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Configure how the \"Cookie Preferences\" button appears on your site, allowing users to update their consent at any time."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "No re-consent method active"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Visitors won't be able to update their cookie preferences unless you add a menu item or place the shortcode on a page. You can safely ignore this if the shortcode is already added."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "The label shown on the Cookie Preferences link."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
+msgid "Custom Class or ID"
+msgstr ""
+
+#: build/admin.js:102
 msgid "Select a WordPress menu to automatically add the Cookie Preferences link to it. When clicked, it opens the consent preferences modal directly."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "No WordPress menus found."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Create a menu in Appearance > Menus."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Select Menu"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
 msgid "Use this shortcode to display the Cookie Preferences link anywhere on your site. When clicked, it opens the consent preferences modal directly."
 msgstr ""
 
-#: build/admin.js:101
-#: build/admin.js:109
-#: build/admin.js:112
-#: build/admin.js:117
+#: build/admin.js:102
+#: build/admin.js:111
+#: build/admin.js:114
+#: build/admin.js:119
 msgid "Shortcode Copied!"
 msgstr ""
 
-#: build/admin.js:101
-#: build/admin.js:109
+#: build/admin.js:102
+#: build/admin.js:111
 msgid "Could not copy to clipboard. Please copy the shortcode manually."
 msgstr ""
 
-#: build/admin.js:101
-#: build/admin.js:109
+#: build/admin.js:102
+#: build/admin.js:111
 msgid "Copy shortcode"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:102
+msgid "Enter the classes or IDs of your own links, buttons or menu items. When clicked, any element carrying one opens the consent preferences modal directly."
+msgstr ""
+
+#: build/admin.js:102
+msgid "Classes or IDs"
+msgstr ""
+
+#: build/admin.js:102
+msgid "Separate entries with commas. Each entry is one class starting with a dot or one ID starting with #."
+msgstr ""
+
+#. translators: %s: comma-separated list of the entries that will be ignored.
+#: build/admin.js:103
+#, js-format
+msgid "These entries are not a single class or ID and will be ignored: %s"
+msgstr ""
+
+#: build/admin.js:103
 msgid "Enable Floating Widget"
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:103
 msgid "to show a floating cookie preferences button on every page."
 msgstr ""
 
-#: build/admin.js:101
-#: build/admin.js:102
+#: build/admin.js:103
+#: build/admin.js:104
 msgid "Failed to deactivate plugin."
 msgstr ""
 
-#: build/admin.js:101
+#: build/admin.js:103
 msgid "Conflicting Plugins Detected."
 msgstr ""
 
 #. translators: %s: conflicting plugin name.
-#: build/admin.js:102
+#: build/admin.js:104
 #, js-format
 msgid "SureCookie can import your %s settings first, so switching it off does not lose your configuration."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "It's recommended to deactivate them to avoid issues."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Migrate and Deactivate"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Deactivate Plugin"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Conflicting Plugins Detected"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "The following plugins may conflict with SureCookie. It's recommended to deactivate them to avoid issues."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Version:"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Network-activated"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Deactivation successful. Reloading the page in 3 seconds."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "The plugin could not be deactivated. Please try again."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Deactivating…"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Deactivate"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Manage in Network Admin"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Close"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Preview:"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "ON"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "OFF"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Unlock Geo Rules, Advanced Scanning & more with SureCookie Premium."
 msgstr ""
 
-#: build/admin.js:102
-#: build/admin.js:117
+#: build/admin.js:104
+#: build/admin.js:119
 msgid "Upgrade to Premium"
 msgstr ""
 
-#: build/admin.js:102
-#: build/admin.js:103
+#: build/admin.js:104
+#: build/admin.js:105
 msgid "What's New?"
 msgstr ""
 
-#: build/admin.js:102
+#: build/admin.js:104
 msgid "Free version"
 msgstr ""
 
 #. translators: %s: SureCookie plan tier, e.g. "Business"
-#: build/admin.js:103
+#: build/admin.js:105
 #, js-format
 msgid "%s version"
 msgstr ""
 
-#: build/admin.js:103
-#: build/admin.js:117
+#: build/admin.js:105
+#: build/admin.js:119
 msgid "Knowledge Base"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Cannot be blocked"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "SureCookie cannot block this resource. It loads as an image, and blocking only rewrites script, iframe, embed, object and link tags."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "This resource is in a category that is never held back, so it loads before consent. Move it to another category to have it blocked."
 msgstr ""
 
-#: build/admin.js:103
-#: build/onboarding.js:16
+#: build/admin.js:105
+#: build/onboarding.js:17
 msgid "Script"
 msgid_plural "Scripts"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "iFrame"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Head"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Body"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Footer"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Anywhere (fallback)"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Google Consent Mode is enabled, so SureCookie allows Google's Consent Mode scripts to function correctly. As a result, this script cannot be blocked."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "This resource is whitelisted, so it always loads - even before consent."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Compliance Guard is holding this resource until you review it, so it does not load yet - not even for a visitor who has consented. Release it from Automatic Scanning, or set it to Always load here."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "This script is managed by Google Consent Mode and always loads while GCM is enabled."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "This resource matches a whitelist rule (custom entry or common service), so it always loads."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Iframe"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Script & Iframe"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Blocked until consent"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Not blocked"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Whitelisted"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Managed by GCM"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Held for review"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Source"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Managed via Known Services - its cookies are declared in your cookie policy."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Recognized Known Services catalog entry - Click \"Add as Service\" to declare its cookies."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Managed Service"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Known Service"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Always Allowed"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Category for"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Always load"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Block until consent (recommended)"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "SureCookie stops managing this resource, in the page and in the browser. Use this when it must load before consent."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "SureCookie stops managing anything matching this rule, in the page and in the browser. Use this when it must load before consent."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Edit Resource"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Add Script or Embed"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Update"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Block until consent"
 msgstr ""
 
-#: build/admin.js:103
-#: build/admin.js:104
+#: build/admin.js:105
+#: build/admin.js:106
 msgid "Managed by Google Consent Mode"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Whitelisted Resource Warning"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "If a resource sets cookies, allowing it directly can be a GDPR violation - only whitelist resources you are sure about."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Resource"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Detected by the scanner, so the value cannot be edited."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "e.g. Support chat"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "e.g. connect.facebook.net"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "The host the resource loads from. Pasting a full tag or URL also works."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Path / Pattern (advanced)"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "e.g. /fbevents.js"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Optional: narrow the rule to resources that also contain this path, so only one file on the host is blocked."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Script Keywords"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "e.g. fbq, fbq.push"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "JavaScript function names to block that depend on the main script (comma separated)."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Script Location"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Anywhere"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Where the script loads on the page. SureCookie only looks for it in this section."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "This resource stays blocked until the visitor consents to this category."
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Unlock Whitelisting"
 msgstr ""
 
-#: build/admin.js:103
+#: build/admin.js:105
 msgid "Whitelist your own scripts and common services so essential integrations keep working before consent."
 msgstr ""
 
 #. translators: %d: number of GCM-managed services.
-#: build/admin.js:104
+#: build/admin.js:106
 #, js-format
 msgid "Managed by Google Consent Mode (%d)"
 msgstr ""
 
-#: build/admin.js:104
+#: build/admin.js:106
 msgid "Allowed to load while Google Consent Mode is active, instead of being blocked before consent. Tag Manager is one of them."
 msgstr ""
 
-#: build/admin.js:104
+#: build/admin.js:106
 msgid "View services"
 msgstr ""
 
-#: build/admin.js:104
+#: build/admin.js:106
 msgid "These Google services are allowed to load while Google Consent Mode is active, instead of being blocked before consent. For Google tag products, Consent Mode then controls what they may store and which identifiers they may use. It does not stop them from contacting Google. Google Tag Manager is on this list, and Consent Mode does not reach the non-Google tags you deploy through it, so each of those needs its own consent check inside Tag Manager. They cannot be removed here."
 msgstr ""
 
-#: build/admin.js:104
+#: build/admin.js:106
 msgid "Auto-whitelisted"
 msgstr ""
 
 #. translators: 1: resource host, 2: resource kind, Script or Iframe.
-#: build/admin.js:105
+#: build/admin.js:107
 #, js-format
 msgid "%1$s (%2$s)"
 msgstr ""
 
-#: build/admin.js:105
+#: build/admin.js:107
 #, js-format
 msgid "%s always loads"
 msgstr ""
 
 #. translators: 1: resource host, 2: category name.
-#: build/admin.js:106
+#: build/admin.js:108
 #, js-format
 msgid "%1$s is %2$s"
 msgstr ""
 
-#: build/admin.js:106
+#: build/admin.js:108
 msgid "Service Split Across Categories"
 msgstr ""
 
-#: build/admin.js:106
+#: build/admin.js:108
 msgid "Resources from the same known service do not load under the same consent, so part of the service can load while the rest waits, depending on what a visitor accepts. That can leave an embed stuck loading with no placeholder. Give every row of the service the same category, and block or always load all of them alike."
 msgstr ""
 
 #. translators: 1: service name, 2: list of its resources and how each loads.
-#: build/admin.js:107
+#: build/admin.js:109
 #, js-format
 msgid "%1$s: %2$s"
 msgstr ""
 
 #. translators: 1: the list so far, 2: the next item.
-#: build/admin.js:108
+#: build/admin.js:110
 #, js-format
 msgid "%1$s, %2$s"
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Enter the script domain or host."
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Select a category."
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "A rule for this script already exists."
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Control how scripts and embeds load based on user consent - block them until allowed or mark essential ones to always run."
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Behavior: Always Allowed"
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Choose scripts and domains that should never be blocked, so essential integrations like Stripe or Cloudflare Turnstile keep working. Google Consent Mode scripts are whitelisted automatically when it is enabled."
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Block Scripts and Embeds Until Consent Switch"
 msgstr ""
 
-#: build/admin.js:108
+#: build/admin.js:110
 msgid "Prevent non-essential scripts and embeds from loading until users give consent."
 msgstr ""
 
 #. translators: 1: scanner-detected count, 2: custom rule count
-#: build/admin.js:109
+#: build/admin.js:111
 #, js-format
 msgid "%1$d detected by scanner, %2$d custom"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "All your scripts will be displayed here"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Run a scan to detect third-party resources, or add a script manually."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Add New Resource"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Unlock Custom Script Rules & Whitelisting"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Add your own scripts to block under any category, whitelist trusted scripts, and manage it all from one place."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Control where your cookie banner appears on your site."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Want More Control over Your Cookie Banner?"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Upgrade to hide it on selected pages, posts, archives, or on specific user roles."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "The previously selected page no longer exists or could not be loaded."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "The selected page is not published and will not appear to visitors."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Generate your cookie policy automatically from your settings, or display it anywhere using a shortcode."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Clear selected page"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Linked from the preferences modal, so visitors can reach it while the consent prompt is open. Order and visibility live under Banner > Content."
 msgstr ""
 
-#: build/admin.js:109
-#: build/admin.js:113
+#: build/admin.js:111
+#: build/admin.js:115
 msgid "Auto Generate"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Automatically create a published Cookie Policy page containing a dynamically generated cookie table that always stays up to date."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Cookie Policy page created successfully!"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Failed to generate page. Please try again."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "An error occurred while generating the page. Please try again."
 msgstr ""
 
-#: build/admin.js:109
-#: build/admin.js:113
+#: build/admin.js:111
+#: build/admin.js:115
 msgid "Page Already Linked"
 msgstr ""
 
-#: build/admin.js:109
-#: build/admin.js:113
+#: build/admin.js:111
+#: build/admin.js:115
 msgid "Edit Page"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Use this shortcode to display the cookie policy with a dynamically generated cookie table on any page or post. The table always reflects the latest scanned and custom cookies."
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "GDPR (European Economic Area)"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "UK GDPR"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "CCPA / CPRA (California)"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "DPDP Act (India)"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "COPPA (children, United States)"
 msgstr ""
 
-#: build/admin.js:109
-#: build/admin.js:112
+#: build/admin.js:111
+#: build/admin.js:114
 msgid "Not decided yet"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "No"
 msgstr ""
 
-#: build/admin.js:109
+#: build/admin.js:111
 msgid "Yes"
 msgstr ""
 
 #. translators: %d: number of business detail fields still empty.
-#: build/admin.js:110
+#: build/admin.js:112
 #, js-format
 msgid "%d item still needs your input"
 msgid_plural "%d items still need your input"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:110
+#: build/admin.js:112
 msgid "Your published privacy policy is incomplete"
 msgstr ""
 
-#: build/admin.js:110
+#: build/admin.js:112
 msgid "Complete your business details to improve your privacy policy"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing fields.
-#: build/admin.js:111
+#: build/admin.js:113
 #, js-format
 msgid "This page is live and still missing: %s. Visitors see nothing where those details should be."
 msgstr ""
 
 #. translators: %s: comma-separated list of missing fields.
-#: build/admin.js:112
+#: build/admin.js:114
 #, js-format
 msgid "Still needed: %s."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Who is responsible for this website. These details appear in your privacy policy and cookie policy, and are available as shortcodes anywhere in your content."
 msgstr ""
 
-#: build/admin.js:112
-#: build/admin.js:113
+#: build/admin.js:114
+#: build/admin.js:115
 msgid "Shortcodes"
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Use these anywhere shortcodes work and they are replaced with the details on the Configure tab. If a detail is empty, visitors see nothing rather than the shortcode."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Not set"
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "The registered name of the organisation running this website, not the site title."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "One line per row. Leave the rows you do not need empty."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Select a country"
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Where privacy requests should go. This is published on your policy pages, so prefer a shared address over a personal one."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Select the laws that apply"
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Only select the laws this site is actually subject to. Which law binds you depends on where you are established and who you target, not on where your visitors happen to be."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Leave it empty if none of them applies."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "What you rely on when personal data leaves your region, for example \"EU Standard Contractual Clauses\"."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "India's DPDP Act requires a named grievance officer."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Does this site sell or share personal information?"
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "As those terms are defined under California law. This is a legal determination about your business, so we cannot work it out for you."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "Enter a valid email address."
 msgstr ""
 
-#: build/admin.js:112
+#: build/admin.js:114
 msgid "This field is required."
 msgstr ""
 
 #. translators: 1: number of fields, 2: comma-separated field labels.
-#: build/admin.js:113
+#: build/admin.js:115
 #, js-format
 msgid "%1$d item still needs your input: %2$s"
 msgid_plural "%1$d items still need your input: %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Always relevant"
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "What is stored when a visitor answers the cookie banner, how long it is kept, and the country lookup that happens on server."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Your cookie categories, plus a link to the Cookie Policy page or the full table when there is no such page."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Legal entity name and registered address from Business Details."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Privacy contact address, rendered as a link."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Two dates: when the policy was last edited, and when the cookie list was last refreshed."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Situational"
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Third-party services your pages load, from the most recent scan."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "What this site sends from its own server, which browser settings cannot block."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Data subject rights, and how to exercise them on this site."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Where information is processed. Renders nothing until you set a transfer safeguard."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Region-specific consent rules. Needs SureCookie Pro to say anything beyond \"the same everywhere\"."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "One privacy regime's rights section. Accepts gdpr, uk_gdpr, cpra, dpdp or coppa."
 msgstr ""
 
-#: build/admin.js:113
-#: build/admin.js:116
+#: build/admin.js:115
+#: build/admin.js:118
 msgid "Something went wrong."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Generate a privacy policy draft from your cookie and consent settings, then review it before publishing."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "The linked privacy policy page is gone"
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "It was deleted or moved to the trash. Generate a new one to replace it."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "creates a policy based on your site's configuration. You should review and adjust it to meet your legal requirements."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Privacy Policy draft created."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Mark as Publish"
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Publishing is unavailable until your business details are complete."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "This page is a draft. Nothing is visible to visitors until you publish it."
 msgstr ""
 
-#: build/admin.js:113
+#: build/admin.js:115
 msgid "Set this as your Privacy Policy page"
 msgstr ""
 
 #. translators: 1: the address the page is published at now, 2: the address it moves to.
-#: build/admin.js:114
+#: build/admin.js:116
 #, js-format
 msgid "This page is published at /%1$s/. Switching moves it to /%2$s/, and the old address will stop working."
 msgstr ""
 
 #. translators: 1: title of the page being moved, 2: its new address, 3: the address it gives up.
-#: build/admin.js:115
+#: build/admin.js:117
 #, js-format
 msgid "The page \"%1$s\" currently uses the /%3$s/ address. Switching moves it to /%2$s/, turns it back into a draft, and gives /%3$s/ to this page. Both keep their titles."
 msgstr ""
 
 #. translators: %s: title of the page WordPress currently uses.
-#: build/admin.js:116
+#: build/admin.js:118
 #, js-format
 msgid "Your site is currently using the \"%s\" page. Switching will update it across your site."
 msgstr ""
 
-#: build/admin.js:116
+#: build/admin.js:118
 msgid "This tells WordPress, your theme and other plugins which page is your privacy policy. It also controls the login-screen link."
 msgstr ""
 
-#: build/admin.js:116
+#: build/admin.js:118
 msgid "Replace Now"
 msgstr ""
 
-#: build/admin.js:116
+#: build/admin.js:118
 msgid "Use Now"
 msgstr ""
 
-#: build/admin.js:116
+#: build/admin.js:118
 msgid "<span></span> What’s Next:"
 msgstr ""
 
 #. translators: %d: number of placeholder blocks left in the draft.
-#: build/admin.js:117
+#: build/admin.js:119
 #, js-format
 msgid "Replace the %d block marked \"Replace this block\" with your own wording, then delete the marker."
 msgid_plural "Replace the %d blocks marked \"Replace this block\" with your own wording, then delete the markers."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "No \"Replace this block\" sections are left in the draft."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Fill up the parts you know: What your own forms collect, how long you keep it, and why you are allowed to."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Keep the shortcodes. Those sections rewrite themselves when your cookie and consent settings change."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Finally have it reviewed by a qualified professional in your jurisdiction before publishing."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Each section of the generated page is its own shortcode, so you can delete or reorder them, or drop them into a page you wrote yourself. They always render your current settings."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Scan your site as a real visitor would do"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "See what loads before and after consent"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Detect scripts and trackers firing too early"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Get clear, actionable fixes"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Schedule automatic checkup"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Informing compliance report"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Connect your Site"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Compliance Check - Coming Soon"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Detect what runs on your site before consent - and fix it before it becomes a compliance risk."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Are you sure nothing loads before consent?"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Many sites unintentionally load tracking scripts before consent - even with a cookie banner enabled."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Even if your cookie banner looks correct, scripts, cookies, or embeds may still run before a visitor gives consent. Compliance Check helps you detect and fix these issues automatically."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Your site might be loading trackers too early"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "What you'll be able to do:"
 msgstr ""
 
-#: build/admin.js:117
-#: build/onboarding.js:36
+#: build/admin.js:119
+#: build/onboarding.js:37
 msgid "Connecting…"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "This check opens your live site in a real browser on our servers, so your site needs to be connected first."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Necessary"
 msgstr ""
 
-#: build/admin.js:117
-#: build/admin.js:123
+#: build/admin.js:119
+#: build/admin.js:125
 msgid "Functional"
 msgstr ""
 
-#: build/admin.js:117
-#: build/admin.js:123
+#: build/admin.js:119
+#: build/admin.js:125
 msgid "Analytics"
 msgstr ""
 
-#: build/admin.js:117
-#: build/admin.js:123
+#: build/admin.js:119
+#: build/admin.js:125
 msgid "Marketing"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "What Changed in the Last Scan"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Cookies and tracker domains that changed compared to the previous scan."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "No differences were detected compared to the previous scan."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "New Cookies"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "No Longer Detected"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Recategorized"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "New Tracker Domains"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Third-party"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Monthly"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Re-scan your site once a month."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Weekly"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Re-scan every week for faster drift detection."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Content from Manual Scan"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Reuse the Manual scan selected content."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "All Published Content"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Scan all published content, as per plan limit."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Selected Content"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Choose specific content to scan below."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Automatically re-scan your site and get notified when new cookies or trackers appear."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Run scheduled scans in the background and detect changes automatically."
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Select content to scan…"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "WordPress cron is disabled"
 msgstr ""
 
-#: build/admin.js:117
+#: build/admin.js:119
 msgid "Scheduled scans rely on cron. Ask your host to set up a real server cron job so automatic scans run on time."
 msgstr ""
 
 #. translators: %s: last scan date-time
-#: build/admin.js:118
+#: build/admin.js:120
 #, js-format
 msgid "Scanned on %s"
 msgstr ""
 
-#: build/admin.js:118
+#: build/admin.js:120
 msgid "Scheduled"
 msgstr ""
 
 #. translators: %d: number of cookies found.
-#: build/admin.js:119
+#: build/admin.js:121
 #, js-format
 msgid "%d Cookies Found"
 msgstr ""
 
 #. translators: %d: number of new cookies
-#: build/admin.js:120
+#: build/admin.js:122
 #, js-format
 msgid "%d New Cookies"
 msgstr ""
 
 #. translators: %d: number of cookies no longer detected
-#: build/admin.js:121
+#: build/admin.js:123
 #, js-format
 msgid "%d Removed"
 msgstr ""
 
 #. translators: %d: number of recategorized cookies
-#: build/admin.js:122
+#: build/admin.js:124
 #, js-format
 msgid "%d Recategorized"
 msgstr ""
 
 #. translators: %d: number of new tracker domains
-#: build/admin.js:123
+#: build/admin.js:125
 #, js-format
 msgid "%d New Tracker Domains"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "View Changes"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "No scans yet - run your first scan to start monitoring changes."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Stay Compliant Automatically"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Get weekly scans, instant alerts, smart classification, and automatic protection from new trackers."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Please enter at least one region code"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Invalid region code format. Use ISO 3166 codes like EU, US, US-CA, or GB."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "EU/EEA (GDPR)"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "California (CCPA)"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "United Kingdom"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Brazil (LGPD)"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Edit Worldwide Default"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Edit Regional Rule"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Add Regional Rule"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Set the default consent state for all visitors worldwide, before they make a choice. Regional rules override this for their regions, following each region’s law."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Set default consent state for visitors from this region. Google uses the most specific match."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Apply preset:"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Comma-separated ISO 3166 codes: EU, US, US-CA, GB, BR, etc."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Choose which categories are granted by default for visitors from this region before they interact with the banner."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Functional Storage"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Enables storage for site functionality like preferences and language."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Functional storage default"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Analytics Storage"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Enables storage for analytics purposes like visit duration and page views."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Analytics storage default"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Marketing / Ads Storage"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Enables storage for advertising purposes including ad personalization and user data."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Marketing storage default"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Essential cookies (security_storage) are always granted. These defaults apply before the visitor interacts with the consent banner."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Granted"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Denied"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Set different default consent states per region. Google uses the most specific match (e.g., US-CA overrides US)."
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Worldwide"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Edit worldwide default consent"
 msgstr ""
 
-#: build/admin.js:123
+#: build/admin.js:125
 msgid "Visitors are treated as consenting before they answer"
 msgstr ""
 
 #. translators: %s: comma-separated consent category names, e.g. "Analytics, Marketing"
-#: build/admin.js:124
+#: build/admin.js:126
 #, js-format
 msgid "The Worldwide default grants %s on the first page view, before the banner is answered. Google tags fire immediately, and a later Decline cannot recall what was already sent."
 msgstr ""
 
-#: build/admin.js:124
+#: build/admin.js:126
 msgid "Edit rule for"
 msgstr ""
 
-#: build/admin.js:124
+#: build/admin.js:126
 msgid "Delete rule for"
 msgstr ""
 
-#: build/admin.js:124
+#: build/admin.js:126
 msgid "No regional rules configured. The Worldwide default above applies to every visitor."
 msgstr ""
 
 #. translators: %s: comma-separated duplicate region codes
-#: build/admin.js:125
+#: build/admin.js:127
 #, js-format
 msgid "These region codes already exist in another rule: %s"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Delete Regional Rule"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Are you sure you want to delete this regional consent rule? Visitors from this region will use the global default."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Automatically communicate user consent preferences to Google services."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Enable Google Consent Mode Switch"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Supported services: Analytics 4, Google Ads, Tag Manager, Campaign Manager 360, Ad Manager, Floodlight, and DV360"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Wait Time (milliseconds)"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "How long Google services wait for consent before making requests. Default: 500ms. Range: 0–2000ms."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Mandatory for EU/EEA as of March 2024"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Google now requires Consent Mode v2 for all websites using Google services in the European Economic Area."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Learn more about Google Consent Mode v2 →"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Control what visitors see when third-party content (like videos or maps) is blocked until consent is given."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Use video thumbnails"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Show the video's own thumbnail (e.g. YouTube) on the placeholder. Note: this loads the thumbnail from the provider before consent."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Upload Image"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Select Placeholder Image"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Use this image"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Enter placeholder text"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Use {service} to insert the blocked service name (e.g. YouTube)."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Show your cookie banner only in regions where consent is required."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Where should the banner appear?"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Choose where the banner is shown. Visitors outside selected regions will not see it."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Show to all visitors worldwide"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Use the same experience for everyone, regardless of location."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Show only where required by law"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Target specific regions with tailored consent experiences."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Mode: Show to all visitors worldwide"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Your existing banner settings apply to all visitors. No geographic targeting is active."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Show banner only in selected regions, create custom regional rules, and control fallback behavior."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Location detection uses GeoLite2 data by MaxMind, available from <link>https://www.maxmind.com</link>."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Share visitor consent across your sites so users don’t need to give consent again."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Unlock Consent Sharing"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Automatically sync cookie consent across multiple domains and forward consent choices to connected services, without asking visitors to consent again."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Create an Application Password"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Open Application Passwords"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Add to your AI client:"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Learn more about the WordPress MCP Adapter"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Claude Code"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Claude Desktop"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Cursor"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "VS Code"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Update the environment variables"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "WP_API_USERNAME"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Your WordPress username (prefilled)."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "WP_API_PASSWORD"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Replace \"your-application-password\" with the password from Step 1."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Verify Node.js version"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "In your terminal, run:"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "The version must be 20.1 or higher."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "If it is lower, run:"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Restart your AI client and paste the copied prompt again into your AI client."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Enjoy your AI client connected to your WordPress site!"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "SureCookie Only"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Global"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Copy setup prompt for AI client"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Prompt copied! Paste it into your AI client."
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Failed to copy prompt to clipboard"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Copy JSON config"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Copied to clipboard"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "Failed to copy to clipboard"
 msgstr ""
 
-#: build/admin.js:125
+#: build/admin.js:127
 msgid "MCP Adapter plugin not detected"
 msgstr ""
 
 #. translators: %s: WP MCP Adapter plugin name.
-#: build/admin.js:128
+#: build/admin.js:130
 #, js-format
 msgid "To connect AI clients to your site, the %s plugin is required. Download the latest release from GitHub, upload it via Plugins > Add New > Upload Plugin, and activate."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Download from GitHub"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Configure AI client access to SureCookie through the Model Context Protocol."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Allow AI clients like Claude, and Cursor to manage your cookie banner, scanner, and consent settings through SureCookie. When disabled, no abilities are registered and AI clients cannot connect."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "WordPress Abilities API not available"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "MCP requires the WordPress Abilities API (WordPress 6.9 or later). Update WordPress to use this feature."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Unsaved changes"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "The MCP endpoint becomes active only after you save your settings."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Banner content and display"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Buttons and labels"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Consent behavior"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Script and content blocking"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Cookie policy page"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Hide branding (needs Pro)"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Floating preferences button (needs Pro)"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Custom banner colors (needs Pro)"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Banner layout"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Geographic / region targeting (Pro)"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Do Not Sell / CCPA form"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "GPC override messaging"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Shared-consent / cookie domain"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Cookie banner left enabled (it was off in the source plugin)"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Consent Mode URL passthrough"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Consent Mode ads data redaction"
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Since SureCookie has different features compared to the plugin you imported from, and this was an automatic migration, some settings may not have carried over. Please review and test everything to ensure it works as expected."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Could not load migration sources. Please refresh and try again."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Migration completed."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "Your settings were imported into SureCookie."
 msgstr ""
 
-#: build/admin.js:128
+#: build/admin.js:130
 msgid "The import could not be completed. Please try again."
 msgstr ""
 
 #. translators: %s: source plugin name.
-#: build/admin.js:129
+#: build/admin.js:131
 #, js-format
 msgid "%s deactivated."
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Plugin"
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Reloading the page in 3 seconds."
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "The plugin could not be deactivated. You can deactivate it from the Plugins screen."
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Import your configuration from another cookie consent plugin into SureCookie."
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Something went wrong"
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Loading migration sources…"
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "No supported plugin found"
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "SureCookie can import settings from supported cookie consent plugins such as WPConsent. Since no supported plugin is currently installed, there is nothing to migrate."
 msgstr ""
 
-#: build/admin.js:129
+#: build/admin.js:131
 msgid "Importing your settings…"
 msgstr ""
 
 #. translators: %d: migration completion percentage.
-#: build/admin.js:130
+#: build/admin.js:132
 #, js-format
 msgid "%d%% complete"
 msgstr ""
 
-#: build/admin.js:130
+#: build/admin.js:132
 msgid "We've imported your settings. Here's what's done:"
 msgstr ""
 
 #. translators: %d: number of consent-log records.
-#: build/admin.js:131
+#: build/admin.js:133
 #, js-format
 msgid "Consent logs (%d records)"
 msgstr ""
 
 #. translators: %d: number of known services.
-#: build/admin.js:132
+#: build/admin.js:134
 #, js-format
 msgid "Known services (%d added)"
 msgstr ""
 
-#: build/admin.js:132
+#: build/admin.js:134
+#: build/admin.js:138
+msgid "Skipped (Pro)"
+msgstr ""
+
+#: build/admin.js:134
+#: build/admin.js:138
+#: build/admin.js:140
+msgid "These settings need SureCookie Pro"
+msgstr ""
+
+#: build/admin.js:134
+#: build/admin.js:140
+msgid "Upgrade to Pro to use the skipped features on this site."
+msgstr ""
+
+#: build/admin.js:134
 msgid "Some consent records could not be imported. Run the import again to finish them."
 msgstr ""
 
 #. translators: %s: source plugin name.
-#: build/admin.js:133
+#: build/admin.js:135
 #, js-format
 msgid "%s is still active"
 msgstr ""
 
-#: build/admin.js:133
+#: build/admin.js:135
 msgid "Running two consent plugins at once can show visitors two banners and record conflicting consent. Your settings are now in SureCookie, so the old plugin can be switched off. Its data is left untouched."
 msgstr ""
 
-#: build/admin.js:133
-#: build/onboarding.js:14
-#: build/onboarding.js:26
+#: build/admin.js:135
+#: build/onboarding.js:15
+#: build/onboarding.js:27
 msgid "Done"
 msgstr ""
 
 #. translators: %s: source plugin name.
-#: build/admin.js:134
+#: build/admin.js:136
 #, js-format
 msgid "Deactivate %s"
 msgstr ""
 
-#: build/admin.js:134
+#: build/admin.js:136
 msgid "Import data from"
 msgstr ""
 
-#: build/admin.js:134
+#: build/admin.js:136
 msgid "Select a plugin"
 msgstr ""
 
 #. translators: %s: formatted date and time.
-#: build/admin.js:135
+#: build/admin.js:137
 #, js-format
 msgid "Last migrated: %s"
 msgstr ""
 
-#: build/admin.js:135
+#: build/admin.js:137
 msgid "Imported"
 msgstr ""
 
-#: build/admin.js:135
+#: build/admin.js:137
 msgid "Replace your current settings?"
 msgstr ""
 
 #. translators: %s: source plugin name.
-#: build/admin.js:136
+#: build/admin.js:138
 #, js-format
 msgid "Importing from %s overwrites your current SureCookie configuration, including how consent is asked for. This cannot be undone."
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "the selected plugin"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Import and Replace"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Checking what would change…"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "These areas will be replaced:"
 msgstr ""
 
-#: build/admin.js:136
 #: build/admin.js:138
+#: build/admin.js:140
 msgid "All Settings"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Your entire portable configuration in one file."
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Nothing imported"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Import complete"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "None of the settings in this file could be applied to this site."
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Your settings were imported. Here is what happened:"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Applied"
 msgstr ""
 
-#: build/admin.js:136
-msgid "Skipped (Pro)"
-msgstr ""
-
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Ignored"
 msgstr ""
 
-#: build/admin.js:136
+#: build/admin.js:138
 msgid "Not imported"
 msgstr ""
 
 #. translators: %s: comma-separated list of field names.
-#: build/admin.js:137
+#: build/admin.js:139
 #, js-format
 msgid "These had an unusable value and were reset to their default: %s"
 msgstr ""
 
 #. translators: %s: comma-separated list of field names.
-#: build/admin.js:138
+#: build/admin.js:140
 #, js-format
 msgid "These had an unusable value, so your existing settings were kept: %s"
 msgstr ""
 
-#: build/admin.js:138
-msgid "These settings need SureCookie Pro"
-msgstr ""
-
-#: build/admin.js:138
-msgid "Upgrade to Pro to use the skipped features on this site."
-msgstr ""
-
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Move your SureCookie setup between sites with a portable settings export."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Export settings"
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Choose what to include, then download a JSON file of your portable SureCookie configuration."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "What to export"
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Export your entire portable configuration."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Export more with SureCookie Pro"
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Pro adds settings like geographic targeting, consent forwarding and the floating widget to your export."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Settings exported successfully."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Failed to export settings."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Please try again."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Exporting…"
 msgstr ""
 
-#: build/admin.js:138
-#: build/admin.js:139
+#: build/admin.js:140
+#: build/admin.js:141
 msgid "Import settings"
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "Upload a SureCookie export file to merge it into the current site, or replace all transferable settings."
 msgstr ""
 
-#: build/admin.js:138
+#: build/admin.js:140
 msgid "JSON export file"
 msgstr ""
 
 #. translators: %s: selected import filename.
-#: build/admin.js:139
+#: build/admin.js:141
 #, js-format
 msgid "Selected file: %s"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Replace all settings"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "When enabled, transferable settings not present in the import file are reset to their defaults instead of keeping the current site values."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "No settings were applied from this file."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Failed to import settings."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Please check the file and try again."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Please choose a SureCookie export file first."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Importing…"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Access"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "28 days left"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Erasure"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "In progress"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "6 days left"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Portability"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "3 days overdue"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Responded"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Data Request Logs"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "One Form for Every Request"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Add the form with a shortcode, or let it appear on your Privacy Policy page. Requests arrive complete, not as vague emails."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Every Request Verified by Email"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Each submission sends a single-use link that expires in 24 hours. You only act on requests the person actually made."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "A Deadline on Every Request"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Each verified request gets a due date, 30 days by default, and the list counts down. Overdue rows turn red."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "One Reminder Email a Day"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "A daily email lists what is due within a week or already overdue. You hear before a deadline passes."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Reply With the Data Attached"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "One click gathers what WordPress, your plugins, and SureCookie hold for that email, then attaches it to your reply. Nothing to assemble by hand."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "A Record of What You Did"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Every step is timestamped: verification, your notes, the reply sent, even an email that failed. You can show what happened."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Available in SureCookie Pro"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "You Have 30 Days to Answer a Data Request"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Under GDPR and CCPA, any visitor can ask for a copy of their personal data or ask you to delete it, and you have a fixed number of days to answer. Handled by hand, that means an email thread, a spreadsheet, and an export you assemble yourself."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Upgrade to Premium:"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Finish Setup:"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Data Requests is a premium feature. Once Pro is active and licensed, this page becomes the request log itself."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "How Pro Handles Each Request"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "IAB Transparency & Consent Framework"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Make your consent banner compliant with IAB TCF 2.3 and integrate with the Global Vendor List."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Unlock IAB TCF 2.3 Compliance - Coming Soon"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Enable full TCF mode, generate TC strings, and display the IAB vendor list to your visitors."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Google Additional Consent (AC)"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Add Google Additional Consent alongside IAB TCF to handle ad-tech vendors not on the IAB Global Vendor List."
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Unlock Google Additional Consent - Coming Soon"
 msgstr ""
 
-#: build/admin.js:139
+#: build/admin.js:141
 msgid "Generate the AC string, mirror the addtl_consent cookie, and display Google's Additional Consent provider list to your visitors - required for full Google Ads / GAM monetization."
 msgstr ""
 
@@ -9340,166 +9372,166 @@ msgstr ""
 msgid "An error occurred while connecting"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Welcome"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Setting Up"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Scan"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Offer"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Offer 🎁"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Exit Setup"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your session has expired. Reload the page, then activate your license again."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "We couldn't find that license key. Check it for typos, or copy it again from your SureCookie account."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "That license has expired. Renew it in your SureCookie account, then activate again."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "That license is already active on the maximum number of sites. Deactivate it on a site you no longer use, or upgrade your plan."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "An error occurred during activation. Please try again."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Could not create the page."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Cookie policy published"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Could not create the draft."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Privacy policy draft created"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Open Compliance > Legal Pages to finish and publish it."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Could not save that. Please try again."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "This is a local site, so our scanner cannot reach it. You can still scan from your browser."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your site's scheduler (WP-Cron) is switched off. You can still scan from your browser."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Connect your account"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your account is connected"
 msgstr ""
 
-#: build/onboarding.js:11
-#: build/onboarding.js:36
+#: build/onboarding.js:12
+#: build/onboarding.js:37
 msgid "Connect"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Activate your license to unlock everything you paid for"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your license is active"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Find the cookies on your site"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "We found the cookies on your site"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Connect your account first, just above."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Publish your cookie policy"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your cookie policy is published"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Publish"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Setup your privacy policy"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your privacy policy is published"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Create Draft"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Stay ready as your site changes"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your site keeps up with its own changes"
 msgstr ""
 
-#: build/onboarding.js:11
-#: build/onboarding.js:14
+#: build/onboarding.js:12
+#: build/onboarding.js:15
 msgid "Turn It On"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Your site's scheduler (WP-Cron) is switched off, so a scheduled scan could never run."
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Keep a record of consents"
 msgstr ""
 
-#: build/onboarding.js:11
+#: build/onboarding.js:12
 msgid "Consents are being recorded"
 msgstr ""
 
 #. translators: %d: how many recognised services are not added yet
-#: build/onboarding.js:12
+#: build/onboarding.js:13
 #, js-format
 msgid "We recognised %d service we have not added yet"
 msgid_plural "We recognised %d services we have not added yet"
@@ -9507,97 +9539,97 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: how many recognised services need Pro
-#: build/onboarding.js:13
+#: build/onboarding.js:14
 #, js-format
 msgid "We recognised %d service that needs Pro"
 msgid_plural "We recognised %d services that need Pro"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:13
+#: build/onboarding.js:14
 msgid "Add the services we recognised on your site"
 msgstr ""
 
-#: build/onboarding.js:13
+#: build/onboarding.js:14
 msgid "Every service we recognised is added"
 msgstr ""
 
-#: build/onboarding.js:13
+#: build/onboarding.js:14
 msgid "Import"
 msgstr ""
 
 #. translators: %d: how many cookies are uncategorized
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 #, js-format
 msgid "%d cookie we could not identify, set to hold until consent"
 msgid_plural "%d cookies we could not identify, set to hold until consent"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Categorize the cookies we added as Uncategorized"
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Every cookie we found is categorised"
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Run a scan first, just above."
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Show your banner and hold trackers"
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "Your banner is live"
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "That did not work. Please try again."
 msgstr ""
 
-#: build/onboarding.js:14
+#: build/onboarding.js:15
 msgid "cookie on your site"
 msgid_plural "cookies on your site"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: page being scanned, 2: total pages
-#: build/onboarding.js:15
+#: build/onboarding.js:16
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
 #. translators: %d: how many pages were scanned
-#: build/onboarding.js:16
+#: build/onboarding.js:17
 #, js-format
 msgid "Checked %d page"
 msgid_plural "Checked %d pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:16
+#: build/onboarding.js:17
 msgid "Visiting your pages…"
 msgstr ""
 
-#: build/onboarding.js:16
+#: build/onboarding.js:17
 msgid "Sorting the cookies we found…"
 msgstr ""
 
-#: build/onboarding.js:16
+#: build/onboarding.js:17
 msgid "Preparing the scan…"
 msgstr ""
 
-#: build/onboarding.js:16
+#: build/onboarding.js:17
 msgid "Embed or iframe"
 msgid_plural "Embeds and iframes"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of scripts and embeds found
-#: build/onboarding.js:18
+#: build/onboarding.js:19
 #, js-format
 msgid "%d resource"
 msgid_plural "%d resources"
@@ -9605,214 +9637,214 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: cookie phrase, e.g. "32 cookies"
-#: build/onboarding.js:19
+#: build/onboarding.js:20
 #, js-format
 msgid "Your site has %s"
 msgstr ""
 
 #. translators: 1: cookie phrase e.g. "32 cookies", 2: resource phrase e.g. "40 resources"
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 #, js-format
 msgid "Your site has %1$s and %2$s"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Stopping…"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Stop Scan"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "This runs on our servers, so you can continue setup now. The scan keeps going in the background and the results appear under Tracking Manager when it finishes."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Collecting the results…"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Each one is sorted into a category so the banner can hold it back until a visitor agrees."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Resources"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "You can review and change any of this later from SureCookie Dashboard > Tracking Manager."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Scan up to 500 pages a day"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "You scanned 5 today. Premium can cover the whole site, every day."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "A cookie that never gets scanned never gets declared. The gap is what a regulator notices, not your page limit."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Daily re-scans instead of monthly"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "New cookies from a plugin or embed are caught within a day."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Most sites fall out of compliance by accident. You add a chat widget on Tuesday and the declaration is wrong until the next monthly scan catches it."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "A different rule per country"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "GDPR, CCPA and LGPD presets, served by visitor location."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "One rule means someone gets the wrong experience. Run GDPR everywhere and you lose US analytics you were allowed to collect. Run opt-out everywhere and the EU version is the one that gets fined."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Your colors, your logo, no credit line"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "It stops looking like a plugin and starts looking like your site."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "People accept banners that look like part of the site. A generic one carrying another company name reads as an ad and gets dismissed without being read."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Handle visitor data requests"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Visitors can ask for a copy of their data, or to have it deleted."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "GDPR gives a visitor one month to be answered, and the request can arrive by email with no warning. Handling it by hand means finding every record yourself, in time, every time."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "And many more!"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Priority support, floating preferences widget, unlocked known services library, network consent sharing and many more."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Go further with Pro"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Your banner is live either way. Here is what changes if you upgrade."
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Hide"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Why it matters?"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Unlock the Full Potential of SureCookie 🎉"
 msgstr ""
 
-#: build/onboarding.js:20
+#: build/onboarding.js:21
 msgid "Pro is already on this site. Activate it to switch all of this on."
 msgstr ""
 
-#: build/onboarding.js:20
-#: build/onboarding.js:25
+#: build/onboarding.js:21
+#: build/onboarding.js:26
 msgid "Could not activate SureCookie Pro"
 msgstr ""
 
 #. translators: %1$s: coupon code, e.g. SETUP10.
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 #, js-format
 msgid "Use code <code>%1$s</code> for 10%% off any SureCookie plan."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Copy the code manually"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Copied & Redirecting…"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Copy & Claim"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Failed to activate license. Please try again."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "License activated"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Your license has been successfully activated."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Activation failed"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Enter your license key"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Please enter a valid license key."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "How Would You Like to Set Up?"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Both end with a working banner, and you can change anything afterwards."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Quick Setup"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "We pick the pages to scan and turn on your banner with its default design."
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "20 seconds"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Set It Up Myself"
 msgstr ""
 
-#: build/onboarding.js:21
+#: build/onboarding.js:22
 msgid "Pick your own pages to scan, and how the banner looks."
 msgstr ""
 
 #. translators: %d: how many screens the long path has
-#: build/onboarding.js:22
+#: build/onboarding.js:23
 #, js-format
 msgid "%d step, about a minute"
 msgid_plural "%d steps, about a minute"
@@ -9820,467 +9852,467 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: package name, e.g. "SureCookie Pro"
-#: build/onboarding.js:23
+#: build/onboarding.js:24
 #, js-format
 msgid "We Detected %s on This Site"
 msgstr ""
 
-#: build/onboarding.js:23
+#: build/onboarding.js:24
 msgid "SureCookie Premium"
 msgstr ""
 
-#: build/onboarding.js:23
+#: build/onboarding.js:24
 msgid "Add your key to set up with your full scan limit, or do it later from Settings."
 msgstr ""
 
-#: build/onboarding.js:23
+#: build/onboarding.js:24
 msgid "Paste your license key here"
 msgstr ""
 
-#: build/onboarding.js:23
+#: build/onboarding.js:24
 msgid "License Key"
 msgstr ""
 
 #. translators: %d: pages a free scan covers, e.g. 5
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 #, js-format
 msgid "Free scans %d pages at a time. Your plan lifts that cap."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Don't have a license? <a>Get it here »</a>"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Skip without license"
 msgstr ""
 
-#: build/onboarding.js:24
 #: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Activating…"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Activate & Continue"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Welcome Back to SureCookie"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Welcome to SureCookie"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Get a cookie banner live on your site in short steps. If you use analytics, ads or embeds, visitors in many countries have to agree before those load."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Set Up Consent"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Takes about a minute"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Needs a connected account."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "A local site is unreachable from our scanner."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "This site's scheduler is switched off."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "Could not start the browser scan"
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "The scan was cancelled before it finished."
 msgstr ""
 
-#: build/onboarding.js:24
+#: build/onboarding.js:25
 msgid "The scan stopped before it finished."
 msgstr ""
 
 #. translators: 1: comma-separated page names, 2: how many more pages
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 #, js-format
 msgid "%1$s and %2$d more"
 msgid_plural "%1$s and %2$d more"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Our scanner could not reach your site. Scanning from your browser works where it cannot."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "We visit each page and record what it sets."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "We could not save this. You can set it from the Banner screen later."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. SureCookie Pro is installed but switched off, so turn it on and we will take care of the scan."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. Connect your account and we will take care of the scan."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. The scan did not finish, so run it again."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. The scan could not start, so finish it from your own browser."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. The scan could not start, so run it later from your dashboard."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. Our scanner could not reach this site, so finish it from your own browser."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Everything else is in place. Our scanner could not reach this site, so run the scan later from your dashboard."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Your site is scanned. One banner setting did not save, so set it from the Banner screen later."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "One banner setting did not save, so set it from the Banner screen later."
 msgstr ""
 
-#: build/onboarding.js:25
-#: build/onboarding.js:36
+#: build/onboarding.js:26
+#: build/onboarding.js:37
 msgid "Carry On Without Waiting"
 msgstr ""
 
-#: build/onboarding.js:25
-#: build/onboarding.js:36
+#: build/onboarding.js:26
+#: build/onboarding.js:37
 msgid "Continue"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Connect Account"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Starting the Scan…"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Your Site Is Set Up"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "One Thing Left"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Setting Your Site Up"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Here is what we did. Anything still outstanding is on the next screen."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "We are scanning your site, building your banner and sorting what we find into categories."
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Choosing pages to scan"
 msgstr ""
 
-#: build/onboarding.js:25
+#: build/onboarding.js:26
 msgid "Your home page first, then the rest."
 msgstr ""
 
 #. translators: %d: how many pages were chosen
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 #, js-format
 msgid "%d Page"
 msgid_plural "%d Pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Setting the region rule"
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Uses the consent rule saved for your site."
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Keeping your banner design"
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "The default layout and colors, or your own if you changed them."
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Kept"
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Turning it on"
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Trackers wait for consent where your rule asks for it."
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Live"
 msgstr ""
 
-#: build/onboarding.js:26
+#: build/onboarding.js:27
 msgid "Scanning your site"
 msgstr ""
 
 #. translators: %d: how many cookies were found
-#: build/onboarding.js:27
+#: build/onboarding.js:28
 #, js-format
 msgid "%d Cookie"
 msgid_plural "%d Cookies"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:27
+#: build/onboarding.js:28
 msgid "Sorting what we found"
 msgstr ""
 
-#: build/onboarding.js:27
+#: build/onboarding.js:28
 msgid "Known services matched, anything else held until consent."
 msgstr ""
 
 #. translators: %d: how many categories are in use
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 #, js-format
 msgid "%d Category"
 msgid_plural "%d Categories"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Starting the scan…"
 msgstr ""
 
-#: build/onboarding.js:28
-#: build/onboarding.js:36
+#: build/onboarding.js:29
+#: build/onboarding.js:37
 msgid "Skip for Now"
 msgstr ""
 
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Scan started"
 msgstr ""
 
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "SureCookie is visiting your selected pages. The results appear here as soon as it finishes."
 msgstr ""
 
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Connect your account first"
 msgstr ""
 
-#: build/onboarding.js:28
+#: build/onboarding.js:29
 msgid "Connect your SureCookie account to start scanning your pages."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/onboarding.js:29
+#: build/onboarding.js:30
 #, js-format
 msgid "Your first scan can cover up to %d pages while we connect your site. Remove the extra pages to start. Your plan's full limits unlock automatically afterward."
 msgstr ""
 
 #. translators: %d: maximum pages
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 #, js-format
 msgid "Each scan visits up to %d of your selected pages the way a real visitor would, and records the cookies they set."
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "Your Privacy Scan"
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "Run a Quick Privacy Scan"
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "SureCookie is checking the pages you chose."
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "This is what SureCookie found on the pages you chose."
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "Pick the pages you want checked. SureCookie visits them, finds the cookies they set, and sorts them into categories for you."
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "Account not connected"
 msgstr ""
 
-#: build/onboarding.js:32
+#: build/onboarding.js:33
 msgid "Connect your SureCookie account below to enable cookie scanning."
 msgstr ""
 
-#: build/onboarding.js:34
+#: build/onboarding.js:35
 msgid "Your session expired"
 msgstr ""
 
-#: build/onboarding.js:34
+#: build/onboarding.js:35
 msgid "Use Connect below to reconnect your account."
 msgstr ""
 
-#: build/onboarding.js:34
+#: build/onboarding.js:35
 msgid "Refresh Limits"
 msgstr ""
 
-#: build/onboarding.js:34
+#: build/onboarding.js:35
 msgid "Choosing pages…"
 msgstr ""
 
-#: build/onboarding.js:34
+#: build/onboarding.js:35
 msgid "Not sure? Scan my site for me"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "How the scan works"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "By scanning you accept our <a>Terms and Conditions</a>."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Skip"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Continue Anyway"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Choose How It Looks"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "This is your real banner, below. Change anything here and it updates as you go."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Shape"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Colors"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Custom colors are a premium feature."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Custom Colors"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Banner width, button order and labels, and animation can all be set later."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Could not save your banner choices"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Continue Anyway moves on without saving. Change any choice to try again."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Hide on Certain Pages"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Reword the Banner"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Colors and Layout"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "What Gets Blocked"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "How Long Consent Lasts"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Explore Known Services"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Rules per Country"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Add Your Business Details"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "You're All Set! 🚀"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Almost There"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Your banner is live and SureCookie is handling consent on your site from now on."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Turn on your banner below so SureCookie can start handling consent on your site."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Setup status not saved"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "We couldn't save your setup status. Your settings are already active. Retry so the dashboard stops asking you to finish setup."
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Retrying…"
 msgstr ""
 
-#: build/onboarding.js:36
+#: build/onboarding.js:37
 msgid "Retry"
 msgstr ""
 
 #. translators: %d: number of things already working
-#: build/onboarding.js:37
+#: build/onboarding.js:38
 #, js-format
 msgid "%d thing is already working on your site"
 msgid_plural "%d things are already working on your site"
@@ -10288,35 +10320,35 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: rows on screen, 2: rows in total
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 #, js-format
 msgid "%1$d of %2$d shown"
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Worth Doing Now"
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Set Up Later, Guides Included"
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Enter your email address"
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Stay in the loop and help shape SureCookie!"
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Get feature updates and product news from SureCookie. <a2>Privacy Policy</a2>."
 msgstr ""
 
-#: build/onboarding.js:38
+#: build/onboarding.js:39
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: build/public.js:5
+#: build/public.js:6
 msgid "Banner logo"
 msgstr ""

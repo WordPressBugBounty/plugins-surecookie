@@ -265,7 +265,8 @@ class Frontend {
 	 * @return bool
 	 */
 	private function has_active_reconsent_surface(): bool {
-		if ( Validate::not_empty( Settings::get( 'reconsent_menu_id' ) ) ) {
+		// Custom selectors match the owner's own markup, which no page scan here can see.
+		if ( Validate::not_empty( Settings::get( 'reconsent_menu_id' ) ) || Validate::not_empty( Settings::get( 'reconsent_custom_selectors' ) ) ) {
 			return true;
 		}
 

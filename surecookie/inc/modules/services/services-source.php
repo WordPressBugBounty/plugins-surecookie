@@ -545,6 +545,12 @@ class Services_Source {
 			return null;
 		}
 
+		// A merge over another release's bundled floor, whose rows would outrank this one's: a
+		// cache written before #1528's split released Universal Analytics after the upgrade.
+		if ( ( $decoded['version'] ?? '' ) !== SURECOOKIE_VERSION ) {
+			return null;
+		}
+
 		return $decoded['data'];
 	}
 
@@ -559,6 +565,7 @@ class Services_Source {
 		$payload = wp_json_encode(
 			[
 				'timestamp' => time(),
+				'version'   => SURECOOKIE_VERSION,
 				'data'      => $catalog,
 			]
 		);

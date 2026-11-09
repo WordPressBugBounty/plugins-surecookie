@@ -454,22 +454,28 @@ class Maintenance {
 	 */
 	private static function migrations(): array {
 		return [
-			'consent_log_unique_key'     => [ self::class, 'migrate_consent_log_unique_key' ],
-			'installed_services'         => [ self::class, 'backfill_installed_services' ],
-			'scanned_cookie_providers'   => [ self::class, 'backfill_scanned_cookie_providers' ],
-			'cookie_category_memory'     => [ self::class, 'backfill_cookie_category_memory' ],
-			'first_party_cookie_domains' => [ self::class, 'repair_first_party_cookie_domains' ],
-			'full_width_banner_default'  => [ self::class, 'preserve_full_width_banner_default' ],
-			'scanned_cookie_durations'   => [ self::class, 'backfill_scanned_cookie_durations' ],
-			'installed_pattern_cookies'  => [ self::class, 'prune_installed_pattern_cookies' ],
-			'placeholder_providers'      => [ self::class, 'backfill_scanned_cookie_providers' ],
-			'site_owned_providers'       => [ self::class, 'reclaim_site_owned_cookie_providers' ],
-			'forwarded_origin_blog_id'   => [ self::class, 'backfill_forwarded_origin_blog_id' ],
-			'forwarded_partner_blog_ids' => [ self::class, 'backfill_forwarded_partner_blog_ids' ],
+			'consent_log_unique_key'             => [ self::class, 'migrate_consent_log_unique_key' ],
+			'installed_services'                 => [ self::class, 'backfill_installed_services' ],
+			'scanned_cookie_providers'           => [ self::class, 'backfill_scanned_cookie_providers' ],
+			'cookie_category_memory'             => [ self::class, 'backfill_cookie_category_memory' ],
+			'first_party_cookie_domains'         => [ self::class, 'repair_first_party_cookie_domains' ],
+			'full_width_banner_default'          => [ self::class, 'preserve_full_width_banner_default' ],
+			'scanned_cookie_durations'           => [ self::class, 'backfill_scanned_cookie_durations' ],
+			'installed_pattern_cookies'          => [ self::class, 'prune_installed_pattern_cookies' ],
+			'placeholder_providers'              => [ self::class, 'backfill_scanned_cookie_providers' ],
+			'site_owned_providers'               => [ self::class, 'reclaim_site_owned_cookie_providers' ],
+			'forwarded_origin_blog_id'           => [ self::class, 'backfill_forwarded_origin_blog_id' ],
+			'forwarded_partner_blog_ids'         => [ self::class, 'backfill_forwarded_partner_blog_ids' ],
 			// Rule 6: `site_owned_providers` shipped in 1.7.0, before `sbjs_` joined
 			// the names it reclaims (#1462).
-			'site_owned_providers_sbjs'  => [ self::class, 'reclaim_site_owned_cookie_providers' ],
-			'unresolved_cookie_purposes' => [ self::class, 'clear_unresolved_cookie_purposes' ],
+			'site_owned_providers_sbjs'          => [ self::class, 'reclaim_site_owned_cookie_providers' ],
+			'unresolved_cookie_purposes'         => [ self::class, 'clear_unresolved_cookie_purposes' ],
+			// Rule 6 again: `pll_` joined the site-emitted names with #1527.
+			'site_owned_providers_pll'           => [ self::class, 'reclaim_site_owned_cookie_providers' ],
+			'stranger_cookie_providers'          => [ self::class, 'clear_stranger_cookie_providers' ],
+			// Ordered last on purpose: the catalog fills what the pass above blanked,
+			// and its own id has been in every ledger since 1.3.0.
+			'scanned_cookie_providers_strangers' => [ self::class, 'backfill_scanned_cookie_providers' ],
 		];
 	}
 
@@ -577,6 +583,52 @@ class Maintenance {
 
 		if ( $dirty && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
 			throw new \RuntimeException( 'Could not write the cleared cookie purposes.' );
+		}
+	}
+
+	/**
+	 * Drop a cookie provider naming an unrelated website, once.
+	 *
+	 * The scan API pooled one site's setter host into every site's results and the
+	 * Provider fallback published it, so a policy credited `zipwp.dev` for a Vimeo
+	 * cookie (#1527). The ingest guard only covers the next scan, and automatic
+	 * scanning is off by default. Blanking beats guessing: the catalog pass that
+	 * follows, or the next scan, can still fill the cell.
+	 *
+	 * Idempotent: a cleared row no longer matches. A provider the admin pinned is theirs.
+	 *
+	 * @since 1.8.1
+	 * @throws \RuntimeException When the cleared option cannot be written.
+	 * @return void
+	 */
+	private static function clear_stranger_cookie_providers(): void {
+		$stored = Get::option( SURECOOKIE_SCANNED_COOKIES_OPTION, [], 'array' );
+
+		if ( empty( $stored ) ) {
+			return;
+		}
+
+		$dirty = false;
+
+		foreach ( $stored as $category => $cookies ) {
+			if ( ! is_array( $cookies ) ) {
+				continue;
+			}
+
+			foreach ( $cookies as $index => $cookie ) {
+				if ( ! is_array( $cookie )
+					|| ! Normalizer::is_stranger_provider( $cookie )
+					|| CookieCategoryMemory::displaced_value( $cookie, 'provider' ) !== null ) {
+					continue;
+				}
+
+				$stored[ $category ][ $index ]['provider'] = '';
+				$dirty                                     = true;
+			}
+		}
+
+		if ( $dirty && ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
+			throw new \RuntimeException( 'Could not write the cleared cookie providers.' );
 		}
 	}
 

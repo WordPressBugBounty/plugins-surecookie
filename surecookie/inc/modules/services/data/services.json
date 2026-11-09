@@ -1008,9 +1008,7 @@
         "gcm_compatible": true,
         "patterns": {
             "scripts": [
-                "google-analytics.com/analytics.js",
-                "googletagmanager.com/gtag/js",
-                "google-analytics.com/ga.js"
+                "googletagmanager.com/gtag/js"
             ],
             "iframes": []
         },
@@ -2849,6 +2847,51 @@
             "iframes": []
         },
         "cookies": []
+    },
+    "universal-analytics": {
+        "label": "Google Universal Analytics (Legacy)",
+        "description": "Legacy Google Analytics tracker, superseded by GA4.",
+        "category": "analytics",
+        "transfer_countries": [
+            "US"
+        ],
+        "pro": false,
+        "patterns": {
+            "scripts": [
+                "google-analytics.com/analytics.js",
+                "google-analytics.com/ga.js"
+            ],
+            "iframes": []
+        },
+        "cookies": [
+            {
+                "name": "_ga",
+                "domain": ".domain.com",
+                "duration_days": 730,
+                "category": "analytics",
+                "provider": "Google Analytics",
+                "purpose": "Used to distinguish unique users by assigning a randomly generated number as a client identifier. Included in each page request and used to calculate visitor, session and campaign data.",
+                "description": null
+            },
+            {
+                "name": "_gid",
+                "domain": ".domain.com",
+                "duration_days": 1,
+                "category": "analytics",
+                "provider": "Google Analytics",
+                "purpose": "Used to store and update a unique value for each page visited. Groups user behavior across sessions within a 24-hour period.",
+                "description": null
+            },
+            {
+                "name": "_gat",
+                "domain": ".domain.com",
+                "duration_days": 0,
+                "category": "analytics",
+                "provider": "Google Analytics",
+                "purpose": "Used to throttle request rate to limit data collection on high traffic sites.",
+                "description": null
+            }
+        ]
     },
     "unpkg": {
         "label": "unpkg CDN",

@@ -62,7 +62,7 @@ class Normalizer {
 	 *
 	 * @since 1.7.0
 	 */
-	private const SITE_EMITTED_NAMES = '/^(phpsessid|xsrf-token|csrftoken|wordpress_|wp-settings|wp_consent_|wp_woocommerce_session_|woocommerce_|sbjs_|edd_|_lscache_vary)/i';
+	private const SITE_EMITTED_NAMES = '/^(phpsessid|xsrf-token|csrftoken|wordpress_|wp-settings|wp_consent_|wp_woocommerce_session_|woocommerce_|sbjs_|edd_|pll_|_lscache_vary)/i';
 
 	/**
 	 * Cookie name prefixes that are never collected.
@@ -684,17 +684,74 @@ class Normalizer {
 	 * @return bool
 	 */
 	public static function is_first_party_host( string $host ): bool {
-		$site = Cookie_Identity::first_party_domain();
-
-		if ( $site === '' || $host === '' ) {
-			return false;
-		}
-
 		if ( strncmp( $host, 'www.', 4 ) === 0 ) {
 			$host = substr( $host, 4 );
 		}
 
-		return $host === $site || substr( $host, -strlen( '.' . $site ) ) === '.' . $site;
+		return self::host_within( $host, Cookie_Identity::first_party_domain() );
+	}
+
+	/**
+	 * Whether a host is the domain itself or sits under it.
+	 *
+	 * The one definition of "inside this scope": a cookie's Domain attribute
+	 * names the set of hosts that may write it, and a suffix test without the
+	 * dot would let `evilgoogle.com` pass for `.google.com`.
+	 *
+	 * @param string $host   Lower-cased host.
+	 * @param string $domain Cookie domain or host, with or without a leading dot.
+	 * @since 1.8.1
+	 * @return bool
+	 */
+	public static function host_within( string $host, string $domain ): bool {
+		$domain = Cookie_Identity::normalize_domain( $domain );
+
+		return $host !== '' && $domain !== ''
+			&& ( $host === $domain || substr( $host, -strlen( '.' . $domain ) ) === '.' . $domain );
+	}
+
+	/**
+	 * Whether a stored row's provider names a website unrelated to the cookie.
+	 *
+	 * The scan API pooled one site's setter host into every site's results and the
+	 * Provider fallback published it, so a policy credited `zipwp.dev` for a Vimeo
+	 * cookie (#1527). Judged only where the value could have come from that fallback:
+	 * a host reaches this field already lower-cased, so any capital marks a curated
+	 * vendor NAME (`WordPress.com` on Jetpack's `tk_` cookies), which no local check
+	 * can contradict. The row's own setter cannot answer that question - 1.7.0 stored
+	 * none, and an assisted walk re-stores a poisoned provider beside a setter it
+	 * vouched for itself - but it is still the evidence for one keep case below.
+	 *
+	 * What is left is legitimate on either side of the cookie's own scope, or as the
+	 * setter of a cookie this site's pages can set - the two cases
+	 * {@see Sync::vouched_setter()} keeps, and its question, whether this site's host
+	 * sits inside the scope, not a first-party test, or a site served from a
+	 * subdomain disagrees with its own ingest. That second case needs a vouched
+	 * setter equal to the provider, which a 1.7.0 row never has and a walked row
+	 * rarely has (the walk reads its own page host), so a legitimate lower-case
+	 * setter host on one of those is blanked and the policy falls back to printing
+	 * the cookie's domain until a scan vouches a setter again. Deliberate: that row
+	 * cannot be told from a stranger beside the same page host, and neither then
+	 * names another customer's site, which is the harm this exists for.
+	 *
+	 * @param array<string, mixed> $row Stored cookie row.
+	 * @since 1.8.1
+	 * @return bool
+	 */
+	public static function is_stranger_provider( array $row ): bool {
+		$raw      = trim( Sanitize::scalar( $row['provider'] ?? '' ) );
+		$provider = self::host_only( $raw );
+		$domain   = Cookie_Identity::normalize_domain( Sanitize::scalar( $row['domain'] ?? '' ) );
+
+		if ( $provider === '' || $provider !== $raw || strpos( $provider, '.' ) === false ) {
+			return false;
+		}
+
+		$setter = self::host_only( Sanitize::scalar( $row['set_via'] ?? '' ) );
+
+		return ! self::host_within( $provider, $domain )
+			&& ! self::host_within( $domain, $provider )
+			&& ! ( $setter === $provider && self::host_within( self::request_host(), $domain ) );
 	}
 
 	/**

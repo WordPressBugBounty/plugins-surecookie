@@ -795,6 +795,7 @@ class Blocker {
 	 *
 	 * @param string $html HTML content.
 	 * @since 1.8.0
+	 * @since 1.8.1 Emits the iframe fluid at the facade's ratio, not at its stated box (#1529).
 	 * @return string Modified HTML.
 	 */
 	private function block_video_facades( string $html ): string {
@@ -818,12 +819,19 @@ class Blocker {
 				$base       = strtolower( $matches[1] ) === 'vimeo' ? 'https://player.vimeo.com/video/' : 'https://www.youtube.com/embed/';
 				$attributes = ' src="' . esc_url( $base . $id . '?autoplay=0' . ( $params === '' ? '' : '&' . ltrim( $params, '&' ) ) ) . '"';
 
+				// The facade is CSS-sized and fluid, so its width/height state a ratio, not a box: as bare
+				// attributes they cut the restored player off in a narrower column (#1529). They stay on the
+				// tag because the overlay is sized from them; border-box keeps the UA iframe border inside.
+				$box = [];
 				foreach ( [ 'width', 'height' ] as $dimension ) {
 					$value = $this->link_attribute( $matches[2], $dimension );
-					if ( ctype_digit( $value ) ) {
+					if ( ctype_digit( $value ) && (int) $value > 0 ) {
+						$box[]       = $value;
 						$attributes .= ' ' . $dimension . '="' . $value . '"';
 					}
 				}
+
+				$attributes .= ' style="box-sizing:border-box;width:100%;height:auto;aspect-ratio:' . ( count( $box ) === 2 ? implode( '/', $box ) : '16/9' ) . ';"';
 
 				$attributes .= ' title="' . esc_attr( $this->link_attribute( $matches[2], 'title' ) ) . '" allowfullscreen allow="autoplay; fullscreen"';
 				$iframe      = '<iframe' . $attributes . '></iframe>';

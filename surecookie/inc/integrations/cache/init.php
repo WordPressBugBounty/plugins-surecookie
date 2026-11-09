@@ -109,8 +109,6 @@ class Init {
 		'rocket_excluded_inline_js_content',
 		'perfmatters_delay_js_exclusions',
 		'perfmatters_defer_js_exclusions',
-		'flying_press_exclude_from_delay_js',
-		'flying_press_exclude_from_defer_js',
 		'wphb_delay_js_exclusions',
 		// With aggregation on, Autoptimize still minifies an excluded file under a new name.
 		'autoptimize_filter_js_consider_minified',
@@ -130,6 +128,26 @@ class Init {
 		'sgo_js_minify_exclude',
 		'sgo_css_combine_exclude',
 		'sgo_css_minify_exclude',
+	];
+
+	/**
+	 * Exclusion filters taking an array of keywords matched as a case-insensitive
+	 * substring of the whole script tag, src, id and inline body alike.
+	 *
+	 * FlyingPress 4.16.x ONLY. 5.0.0 folded defer into one delay pass with no
+	 * filter on its exclude list, and reads none of the `data-no-*` attributes
+	 * above, so a 5.x site is not covered automatically yet and still needs the
+	 * keywords typed into Delay All JavaScript by hand. Not impossible, only
+	 * unbuilt: 5.x reads its exclude list from the public static `Config::$config`
+	 * at optimize time, which another consent plugin already appends to per
+	 * request. Tracked in #1477. Kept because they are correct on 4.16.x and cost
+	 * nothing where nobody applies them.
+	 *
+	 * @since 1.8.1
+	 */
+	private const FILTERS_TAG_KEYWORDS = [
+		'flying_press_exclude_from_defer:js',
+		'flying_press_exclude_from_delay:js',
 	];
 
 	/**
@@ -191,11 +209,10 @@ class Init {
 		'swift_performance_clear_all_cache',
 		'wpo_cache_flush',
 		'nitropack_sdk_purge_all',
-		'flying_press_purge_everything',
 	];
 
 	/**
-	 * Page caches that clear via a function.
+	 * Page caches that clear via a callable.
 	 *
 	 * Typed loosely on purpose: these belong to plugins that may not be
 	 * installed, so they must stay unresolved names rather than known symbols.
@@ -207,6 +224,9 @@ class Init {
 		'w3tc_flush_all',
 		'wp_cache_clear_cache',
 		'wpfc_clear_all_cache',
+		// FlyingPress exposes no purge action: it fires only
+		// `flying_press_purge_everything:before`/`:after` around this call (#1477).
+		'\FlyingPress\Purge::purge_everything',
 	];
 
 	/**
@@ -815,6 +835,28 @@ class Init {
 
 		foreach ( self::FILTERS_HANDLES as $filter ) {
 			add_filter( $filter, $append( $handles ) );
+		}
+
+		// Keyword lists see the whole tag, so the handle is what reaches our inline
+		// payloads: core names them `{handle}-js-extra`/`-translations`, which no
+		// path matches. Leaving those deferred while the bundle is not is what threw
+		// `wp is not defined` and showed English labels on a cached page (#1477).
+		foreach ( self::FILTERS_TAG_KEYWORDS as $filter ) {
+			add_filter(
+				$filter,
+				$append(
+					static function () use ( $handles, $paths ) {
+						return array_filter(
+							array_merge( $handles(), $paths() ),
+							// A substring match, so an empty keyword matches every
+							// script on the page and voids the exclusion list.
+							static function ( $keyword ) {
+								return is_string( $keyword ) && $keyword !== '';
+							}
+						);
+					}
+				)
+			);
 		}
 
 		add_filter(

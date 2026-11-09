@@ -590,6 +590,7 @@ class Sync {
 	private function transform_cookie_data( array $cookie, string $category, array $loaded = [] ): array {
 		// Use signature_id as the unique identifier.
 		$signature_id = $cookie['signature_id'] ?? '';
+		$setter       = self::vouched_setter( $cookie, $loaded );
 
 		$transformed = [
 			// Cookie properties.
@@ -604,7 +605,7 @@ class Sync {
 			// `.google.com` scope stood in for the setter and Pro's guard held
 			// every Google subdomain on it, booking pages included
 			// (surecookie-pro#522). Internal: PUBLIC_COOKIE_FIELDS is a whitelist.
-			'set_via'       => self::vouched_setter( $cookie, $loaded ),
+			'set_via'       => $setter,
 			'httpOnly'      => ! empty( $cookie['http_only'] ),
 			'secure'        => ! empty( $cookie['secure'] ),
 			'sameSite'      => $cookie['same_site'] ?? 'lax',
@@ -612,10 +613,10 @@ class Sync {
 
 			// Cookie policy display fields.
 			// Scan API exposes the vendor as 'owner' ('vendor' kept for back-compat), never
-			// 'provider'; read those first, fall back to the setter domain ('set_via').
+			// 'provider'; read those first, fall back to the setter this scan vouched for.
 			// Purpose and description both read through Sanitize::purpose(): the API sends
 			// the canonical's AI sentence, and a non-answer was published verbatim (#1462).
-			'provider'      => $this->resolve_cookie_provider( $cookie ),
+			'provider'      => $this->resolve_cookie_provider( $cookie, $setter ),
 			'description'   => Sanitize::purpose( $cookie['description'] ?? '' ),
 			'purpose'       => Sanitize::purpose( $cookie['purpose'] ?? '' ),
 
@@ -652,12 +653,11 @@ class Sync {
 	 */
 	private static function vouched_setter( array $cookie, array $loaded ): string {
 		$setter = Normalizer::host_only( Sanitize::scalar( $cookie['set_via'] ?? '' ) );
-		$scope  = '.' . Cookie_Identity::normalize_domain( Sanitize::scalar( $cookie['domain'] ?? '' ) );
-		$inside = static function ( string $host ) use ( $scope ): bool {
-			return $scope !== '.' && $host !== '' && substr( '.' . $host, -strlen( $scope ) ) === $scope;
-		};
+		$scope  = Sanitize::scalar( $cookie['domain'] ?? '' );
 
-		return $inside( $setter ) || ( isset( $loaded[ $setter ] ) && $inside( Normalizer::request_host() ) ) ? $setter : '';
+		return Normalizer::host_within( $setter, $scope )
+			|| ( isset( $loaded[ $setter ] ) && Normalizer::host_within( Normalizer::request_host(), $scope ) )
+			? $setter : '';
 	}
 
 	/**
@@ -690,18 +690,21 @@ class Sync {
 	 * Resolve the display provider for a scanned cookie.
 	 *
 	 * The scan API reports the vendor under 'owner' (mirrored in 'vendor'); both are null
-	 * when no approved canonical exists yet. 'set_via' (the setter script's domain) is a
-	 * usable last resort so the column is not left blank.
+	 * when no approved canonical exists yet. The setter host is a usable last resort so
+	 * the column is not left blank, but only the VOUCHED one: the API pooled other sites'
+	 * setters, and the raw value named strangers on a legal disclosure page (#1527).
 	 *
 	 * @param array<string, mixed> $cookie Raw cookie data from API.
+	 * @param string               $setter Setter host this scan vouched for, or ''.
 	 * @since 1.3.0
 	 * @since 1.7.0 Site-owned cookies take the site's own identity over the canonical.
+	 * @since 1.8.1 Falls back to the vouched setter, never the API's raw one.
 	 * @return string Provider name, or an empty string when nothing is known.
 	 */
-	private function resolve_cookie_provider( array $cookie ): string {
+	private function resolve_cookie_provider( array $cookie, string $setter = '' ): string {
 		// Classified vendor wins, then the bundled catalog (a real name like "Google
-		// Analytics" where set_via only has a hostname; consulting it keeps a re-scan from
-		// downgrading a row the catalog backfill resolved). set_via is the last resort.
+		// Analytics" where the setter only has a hostname; consulting it keeps a re-scan
+		// from downgrading a row the catalog backfill resolved). The setter is the last resort.
 		// A cookie only this site can own takes none of the API's three attributions: every
 		// one is keyed on the cookie NAME and shared across sites, so a single bad approval
 		// named a stranger as the provider of PHPSESSID (#1274).
@@ -714,7 +717,7 @@ class Sync {
 				$cookie['owner'] ?? null,
 				$cookie['vendor'] ?? null,
 				Declared_Cookies::get_instance()->catalog_provider_for( $cookie ),
-				$cookie['set_via'] ?? null,
+				$setter,
 			];
 
 		foreach ( $candidates as $candidate ) {
@@ -989,6 +992,13 @@ class Sync {
 		// First_Party_Repair::CURATED_FIELDS had always carried it. A session-scoped
 		// observation is a retraction, so it must not inherit a day count back.
 		$fields = [ 'provider', 'purpose', 'description', 'expires', 'duration', 'expiry_bucket' ];
+
+		// A stored provider naming an unrelated website must not outlive the scan that
+		// wrote it: inheriting it kept a stranger on the policy forever (#1527). Blank is
+		// deliberate - the catalog or the next scan can still fill the cell.
+		if ( Normalizer::is_stranger_provider( $existing ) ) {
+			$fields = array_diff( $fields, [ 'provider' ] );
+		}
 
 		if ( ( $incoming['expiry_bucket'] ?? '' ) === 'session' ) {
 			$fields = array_diff( $fields, [ 'duration' ] );

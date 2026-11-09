@@ -232,6 +232,12 @@ class Options {
 					'type'    => 'string',
 					'default' => '',
 				],
+				'reconsent_custom_selectors'    => [
+					// A comma string, validated by Settings::normalize_reconsent_custom_selectors().
+					'type'    => 'reconsent_custom_selectors',
+					'default' => '',
+					'group'   => 'buttons',
+				],
 				'cookie_policy_page_id'         => [
 					'type'    => 'int',
 					'default' => 0,
@@ -394,6 +400,7 @@ class Options {
 				'banner_animation',
 				'banner_overlay_enabled',
 				'reconsent_button_label',
+				'reconsent_custom_selectors',
 				'consent_model',
 			]
 		);

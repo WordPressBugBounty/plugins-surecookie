@@ -278,6 +278,8 @@ class Settings {
 				return self::normalize_button_order( $value );
 			case 'policy_links_order':
 				return self::normalize_policy_links_order( $value );
+			case 'reconsent_custom_selectors':
+				return self::normalize_reconsent_custom_selectors( $value );
 			case 'string':
 			default:
 				return self::clamp_length( $key, Sanitize::text( $value ) );
@@ -336,6 +338,31 @@ class Settings {
 			',',
 			array_unique( array_intersect( array_map( 'trim', explode( ',', (string) $value ) ), self::POLICY_LINK_TOKENS ) )
 		);
+	}
+
+	/**
+	 * Re-consent triggers the site owner names: each entry is one class or one ID, since a bare
+	 * tag or combinator would turn every link or button on the site into a trigger.
+	 * Mirrored by src/shared/utils/reconsentSelectors.js; keep the two identical.
+	 *
+	 * @param mixed $value Comma-separated classes and IDs.
+	 * @since x.x.x
+	 * @return string Valid, unique entries, at most 20, joined with ', '.
+	 */
+	public static function normalize_reconsent_custom_selectors( $value ): string {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		$entries = [];
+		foreach ( explode( ',', (string) $value ) as $entry ) {
+			// The space around an entry is exactly what JS trim() strips, so the admin warns about what this drops.
+			if ( preg_match( '/^[\t\n\x0B\f\r\p{Z}\x{FEFF}]*([.#]-?[A-Za-z_][A-Za-z0-9_-]*)[\t\n\x0B\f\r\p{Z}\x{FEFF}]*$/u', $entry, $match ) === 1 && strlen( $match[1] ) <= 100 ) {
+				$entries[] = $match[1];
+			}
+		}
+
+		return implode( ', ', array_slice( array_unique( $entries ), 0, 20 ) );
 	}
 
 	/**
