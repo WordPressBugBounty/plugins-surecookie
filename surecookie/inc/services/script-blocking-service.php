@@ -141,6 +141,9 @@ class ScriptBlockingService {
 					'service_slug'       => (string) ( $resource['service_slug'] ?? '' ),
 					// A row is not proof of blocking; say when no pass reaches it.
 					'unenforced_reason'  => (string) ( $resource['unenforced_reason'] ?? '' ),
+					// The one URL the scan sampled for this host names an image,
+					// and an image is never held back.
+					'image_sample'       => ! empty( $resource['image_sample'] ),
 					'enforced'           => ( $resource['unenforced_reason'] ?? '' ) === '',
 				];
 			}
@@ -500,7 +503,7 @@ class ScriptBlockingService {
 	}
 
 	/**
-	 * Add `gated_category`, `unenforced_reason` and `service_label` to every scanned resource.
+	 * Add `gated_category`, `unenforced_reason`, `image_sample` and `service_label` to every scanned resource.
 	 *
 	 * The stored row keeps whatever the scanner guessed, but the blocker drops a
 	 * scan row whose domain is already a catalog pattern and gates it under the
@@ -511,7 +514,10 @@ class ScriptBlockingService {
 	 *
 	 * `unenforced_reason` says whether the blocker will gate the row at all. A
 	 * row is not evidence of blocking: scanners file a stylesheet and an image
-	 * alike as a script, and no pass rewrites an `<img>`.
+	 * alike as a script, and no pass rewrites an `<img>`. `image_sample` qualifies
+	 * that verdict where the row's one sampled URL names an image: a note beside
+	 * the verdict, never part of it, because one sample cannot speak for every
+	 * tag on a host.
 	 *
 	 * A row the catalog governs is gated under its service's live category: an
 	 * installed row's registry copy goes stale, and a catalog HOST covering the
@@ -564,13 +570,26 @@ class ScriptBlockingService {
 					$resources[ $bucket ][ $i ]['service_label'] = $service_labels[ $slug ] ?? $slug;
 				}
 
-				$resources[ $bucket ][ $i ]['gated_category']    = $gated;
-				$resources[ $bucket ][ $i ]['unenforced_reason'] = Blocking_Surface::unenforced_reason(
+				$reason = Blocking_Surface::unenforced_reason(
 					$domain,
 					// The override is what actually gates, and the screen shows
 					// its own unsaved edits on top of this.
 					Resource_Categories::resolve( $domain, $gated, $kind )
 				);
+
+				$resources[ $bucket ][ $i ]['gated_category']    = $gated;
+				$resources[ $bucket ][ $i ]['unenforced_reason'] = $reason;
+				// A note beside that verdict, never in it, and derived FROM it so
+				// the two cannot drift: the claim worth qualifying is exactly the
+				// one the badge is making. Scripts only, because an iframe row's
+				// `url` IS its `<iframe src>`, a carrier the iframe pass rewrites,
+				// so the sample proves the opposite there. An overlay row is out
+				// too: its `url` is a catalog pattern or empty, never an address
+				// a page served.
+				$resources[ $bucket ][ $i ]['image_sample'] = $reason === ''
+					&& $kind === 'script'
+					&& ! isset( $resource['source'] )
+					&& Blocking_Surface::names_an_image( (string) ( $resource['url'] ?? '' ) );
 			}
 		}
 

@@ -81,6 +81,7 @@ function surecookie_get_option_keys() {
 		'surecookie_active_scan',
 		'surecookie_scan_poll_lock',
 		'surecookie_saved_version',
+		'surecookie_payload_purge_attempts',
 		// BSF Analytics options.
 		'surecookie_usage_optin',
 		'surecookie_usage_installed_time',
@@ -123,6 +124,10 @@ function surecookie_get_option_keys() {
 		'surecookie_services_backfill_v1',
 		'surecookie_cookie_provider_backfill_v1',
 		'surecookie_cookie_category_memory_backfill_v1',
+		// Retired before release: written only by 1.9.0 pre-release builds, by an
+		// upgrade-purge marker the migration ledger replaced. Listed so those sites
+		// still clean up. Safe to drop once no pre-release install remains.
+		'surecookie_cached_payload_version',
 		// Known Services installed registry (Modules\Services\Installed_Services).
 		'surecookie_installed_services',
 		// BSF Analytics event queue + schema version.
@@ -136,6 +141,13 @@ function surecookie_get_option_keys() {
 		'surecookie_pro_redirect_on_activation',
 		// Rolling record of resources this site actually blocked.
 		'surecookie_matched_resources',
+		// Per-source migration marker (Modules\Migration\Base_Importer) and the
+		// WPConsent consent-log resume cursor. The marker holds the pre-import
+		// settings snapshot, cookies and categories included, so it must go on an
+		// uninstall-with-data. One literal per importer: keep in sync with
+		// api.php's get_importers().
+		'surecookie_migrated_wpconsent',
+		'surecookie_migrated_wpconsent_logs_max_id',
 	];
 }
 

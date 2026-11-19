@@ -101,28 +101,27 @@ class Recognised_Services {
 	/**
 	 * Slugs contributing at least one cookie row to what visitors are shown.
 	 *
+	 * The declared half is flattened from `Get::declared_cookie_slugs()`, the one
+	 * authority on which slug published a row, so this report and the preferences
+	 * window can never name a different set. It keeps a row a custom row shadows,
+	 * because that row is still published under the admin's own wording (#1608).
+	 *
+	 * An installed service's own `custom_cookies` row is swept separately: that
+	 * getter files by category and so skips a row saved without one, while
+	 * declaring a cookie needs no category to be true.
+	 *
 	 * @since 1.5.1
 	 * @return array<string, bool>
 	 */
 	private function publishing_slugs(): array {
 		$slugs = [];
 
-		foreach ( Get::scanned_cookies_for_display() as $rows ) {
-			foreach ( (array) $rows as $row ) {
-				if ( ! is_array( $row ) || ( $row['source'] ?? '' ) !== 'declared' ) {
-					continue;
-				}
-
-				// 'declared:{slug}:{name}', the contract reconciliation matches on.
-				$parts = explode( ':', (string) ( $row['signature_id'] ?? '' ), 3 );
-				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
-					$slugs[ $parts[1] ] = true;
-				}
+		foreach ( Get::declared_cookie_slugs() as $list ) {
+			foreach ( $list as $slug ) {
+				$slugs[ $slug ] = true;
 			}
 		}
 
-		// Installing a service writes its cookies to `custom_cookies` instead,
-		// tagged with the slug, so those rows are declared too.
 		foreach ( (array) Settings::get( 'custom_cookies' ) as $row ) {
 			$slug = is_array( $row ) ? (string) ( $row['service_slug'] ?? '' ) : '';
 			if ( $slug !== '' ) {

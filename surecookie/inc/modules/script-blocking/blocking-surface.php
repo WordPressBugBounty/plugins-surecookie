@@ -42,6 +42,15 @@ final class Blocking_Surface {
 	public const SKIPPABLE_CATEGORY = 'skippable_category';
 
 	/**
+	 * Raster formats only, because their ordinary carrier is the one tag no pass
+	 * rewrites. `svg` is absent because `<object>` and `<embed>` carry one just
+	 * as ordinarily, and both passes reach it. Never a reachability oracle
+	 * either way: a `.gif` on a `<script src>` is parked like any other script,
+	 * and `<link rel=preload as=image>` is parked too.
+	 */
+	private const IMAGE_EXTENSIONS = [ 'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'bmp' ];
+
+	/**
 	 * Why the blocker will not gate this resource, or '' when it will.
 	 *
 	 * Reachability is decided first: a resource no pass can rewrite stays
@@ -99,6 +108,25 @@ final class Blocking_Surface {
 	 */
 	public static function is_skippable_category( string $category ): bool {
 		return in_array( $category, self::skippable_categories(), true );
+	}
+
+	/**
+	 * Whether a URL's own path names an image file.
+	 *
+	 * Advisory, and deliberately outside {@see self::unenforced_reason()}: one
+	 * sampled URL cannot speak for every tag on a host, so it may never decide
+	 * enforcement. The caller decides which rows may carry it.
+	 *
+	 * @since 1.9.0
+	 * @param string $url Resource URL.
+	 * @return bool
+	 */
+	public static function names_an_image( string $url ): bool {
+		// Path only, so a query string cannot supply the extension and an
+		// extensionless CDN URL stays unclaimed rather than guessed at.
+		$extension = pathinfo( (string) wp_parse_url( $url, PHP_URL_PATH ), PATHINFO_EXTENSION );
+
+		return in_array( strtolower( (string) $extension ), self::IMAGE_EXTENSIONS, true );
 	}
 
 	/**

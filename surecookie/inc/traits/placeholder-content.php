@@ -268,7 +268,16 @@ trait PlaceholderContent {
 
 		// Decorative; the dialog below conveys the message.
 		if ( $image !== '' ) {
-			$out .= '<img class="surecookie-placeholder-image" src="' . esc_url( $image ) . '" alt="" loading="lazy" aria-hidden="true" />';
+			// The admin's global fallback is a service logo, not a video still, so
+			// it is shown whole rather than cropped to fill the embed box (#1097).
+			// A thumbnail or a Presto poster keeps the crop: hqdefault.jpg is 4:3
+			// and would otherwise letterbox.
+			$class = 'surecookie-placeholder-image';
+			if ( $image === (string) Settings::get( 'placeholder_image' ) ) {
+				$class .= ' surecookie-placeholder-image-fallback';
+			}
+
+			$out .= '<img class="' . esc_attr( $class ) . '" src="' . esc_url( $image ) . '" alt="" loading="lazy" aria-hidden="true" />';
 		}
 
 		/*

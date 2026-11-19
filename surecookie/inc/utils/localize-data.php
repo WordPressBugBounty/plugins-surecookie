@@ -13,6 +13,7 @@ use SureCookie\Admin\Live_Versions;
 use SureCookie\Admin\Product_Promotion;
 use SureCookie\Inc\API\ScanHistory;
 use SureCookie\Inc\Database\ConsentLog;
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Sanitize;
@@ -20,6 +21,7 @@ use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Integrations\WpConsentApi\Consent_Handler;
 use SureCookie\Inc\Modules\AssistedScan\Utils as AssistedScanUtils;
 use SureCookie\Inc\Modules\BusinessDetails\Shortcode as Business_Shortcodes;
+use SureCookie\Inc\Modules\Nudges\Promotion;
 use SureCookie\Inc\Modules\Nudges\Utils;
 use SureCookie\Inc\Modules\PrivacyPolicy\Countries;
 use SureCookie\Inc\Modules\ScriptBlocking\Blocker;
@@ -267,6 +269,7 @@ class LocalizeData {
 			],
 			'is_pro_active'              => Helper::is_pro_active(),
 			'is_pro_installed'           => Helper::is_pro_installed(),
+			'promotion'                  => Promotion::get_instance()->get_for_current_user(),
 			// Which scan this admin has already read the dashboard notice for.
 			// On the blob rather than its own request: the notice decides whether
 			// to render at all, so a round trip would flash it and take it away.
@@ -303,6 +306,9 @@ class LocalizeData {
 			'wp_dashboard_url'           => admin_url( 'admin.php' ),
 			'onboarding_complete_status' => get_option( SURECOOKIE_ONBOARDING_COMPLETED_OPTION, false ) ? 'yes' : 'no',
 			'can_manage_settings'        => current_user_can( Helper::capability() ),
+			// False renders the Custom CSS editor read-only: the save is refused
+			// without this cap, which on multisite means all but a Super Admin.
+			'can_edit_custom_css'        => current_user_can( 'unfiltered_html' ),
 			// Core maps this to manage_network on multisite, where
 			// the plugin capability does not reach, so the UI hides the
 			// "use as WordPress privacy page" action instead of failing it.
@@ -332,6 +338,8 @@ class LocalizeData {
 
 		$data = array_merge(
 			Settings::get_public_settings_dataset(),
+			// The bundle never spells a cookie name: one site, one scope, named here (#1347).
+			ConsentState::browser_contract(),
 			[
 				'eu_countries'              => Get::eu_countries(),
 				'scanned_cookies'           => Get::all_scanned_cookies(),

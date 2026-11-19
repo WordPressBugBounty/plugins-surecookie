@@ -25,6 +25,7 @@ use SureCookie\Inc\Modules\ScriptBlocking\Entry_Match;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
 use SureCookie\Inc\Modules\Services\Pattern_Kinds;
 use SureCookie\Inc\Traits\GetInstance;
+use SureCookie\Inc\Utils\Logger;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -55,13 +56,25 @@ class Init {
 	private const PATHS = [ 'surecookie/build/public', 'surecookie/assets/css/' ];
 
 	/**
+	 * The one token every SureCookie tag carries somewhere: a handle, an inline
+	 * script id, a URL or a `data-surecookie-*` attribute. Only for lists matched
+	 * against the whole tag, where it is the only keyword reaching the DOM guard's
+	 * inline script and Pro's own handles, both of which carry no path of ours.
+	 *
+	 * @since 1.9.0
+	 */
+	private const TAG_TOKEN = 'surecookie';
+
+	/**
 	 * CSS selectors covering everything the banner renders, for optimisers whose
-	 * allowlists match selectors rather than files. Every rule we ship is
-	 * namespaced, so the two prefixes below cover all of them.
+	 * allowlists match selectors rather than files. The class prefix ships in both
+	 * forms because the consumers disagree: LiteSpeed globs it (7.9.3 prints
+	 * "Wildcard * supported" under both allowlists), while FlyingPress matches each
+	 * entry as a plain substring, where a trailing `*` covers nothing.
 	 *
 	 * @since 1.4.0
 	 */
-	private const SELECTORS = [ '#surecookie-public-root', '#surecookie-preferences-root', '.surecookie-*' ];
+	private const SELECTORS = [ '#surecookie-public-root', '#surecookie-preferences-root', '.surecookie-', '.surecookie-*' ];
 
 	/**
 	 * Opt-out attributes for our own assets.
@@ -135,19 +148,30 @@ class Init {
 	 * substring of the whole script tag, src, id and inline body alike.
 	 *
 	 * FlyingPress 4.16.x ONLY. 5.0.0 folded defer into one delay pass with no
-	 * filter on its exclude list, and reads none of the `data-no-*` attributes
-	 * above, so a 5.x site is not covered automatically yet and still needs the
-	 * keywords typed into Delay All JavaScript by hand. Not impossible, only
-	 * unbuilt: 5.x reads its exclude list from the public static `Config::$config`
-	 * at optimize time, which another consent plugin already appends to per
-	 * request. Tracked in #1477. Kept because they are correct on 4.16.x and cost
-	 * nothing where nobody applies them.
+	 * filter over its exclude list and reads none of the `data-no-*` attributes
+	 * above; 5.x is covered by extend_flyingpress_config() instead. Kept because
+	 * they are correct on 4.16.x and cost nothing where nobody applies them.
 	 *
 	 * @since 1.8.1
 	 */
 	private const FILTERS_TAG_KEYWORDS = [
 		'flying_press_exclude_from_defer:js',
 		'flying_press_exclude_from_delay:js',
+	];
+
+	/**
+	 * FlyingPress 5 exclusion lists, read off its public static config rather than
+	 * a filter, mapped to the shape each one takes. Names read from 5.6.7:
+	 * `src/Optimizer/JavaScript.php:115` and `:140` for the two delay lists,
+	 * `src/CloudOptimizer.php:102` for the selectors, all declared in
+	 * `src/Config.php:23-28`.
+	 *
+	 * @since 1.9.0
+	 */
+	private const FLYINGPRESS_CONFIG_LISTS = [
+		'js_delay_excludes'             => 'keywords',
+		'js_delay_third_party_excludes' => 'keywords',
+		'css_rucss_include_selectors'   => 'selectors',
 	];
 
 	/**
@@ -279,6 +303,16 @@ class Init {
 	private $external_tracker_fragments = null;
 
 	/**
+	 * What this request appended to FlyingPress's in-memory config, keyed by
+	 * config key, so the pre-update guard can subtract exactly that and leave the
+	 * site owner's own entries standing.
+	 *
+	 * @var array<string, array<int, string>>
+	 * @since 1.9.0
+	 */
+	private $flyingpress_injected = [];
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.4.0
@@ -306,7 +340,7 @@ class Init {
 		add_filter( 'rest_post_dispatch', [ $this, 'no_store_rest' ], 10, 3 );
 		add_filter( 'wp_headers', [ $this, 'no_store_scan' ], PHP_INT_MAX );
 
-		add_action( 'surecookie_admin_settings_after_processing', [ $this, 'purge' ] );
+		add_action( 'surecookie_admin_settings_after_processing', [ self::class, 'purge' ] );
 
 		$this->register_exclusions();
 	}
@@ -315,7 +349,8 @@ class Init {
 	 * Keep the banner script out of defer/delay/combine passes.
 	 *
 	 * `data-cfasync` covers Cloudflare Rocket Loader, the `data-no-*` trio is
-	 * honoured by LiteSpeed, WP Rocket, Perfmatters and SG Optimizer.
+	 * honoured by LiteSpeed, WP Rocket and SG Optimizer. Perfmatters documents no
+	 * `data-no-*` attribute on any asset: its own filters are its only lever.
 	 *
 	 * @param mixed $tag    Script tag HTML.
 	 * @param mixed $handle Script handle.
@@ -484,17 +519,39 @@ class Init {
 	}
 
 	/**
-	 * Purge page caches after settings are saved.
+	 * Purge page caches after settings are saved, and once after an upgrade.
 	 *
 	 * Public settings are localised into the page HTML, so a cached page keeps
-	 * serving the previous banner configuration until its TTL expires.
+	 * serving the previous banner configuration until its TTL expires. Static
+	 * because it holds no state: the upgrade migration purges through
+	 * purge_all() from cron at init:10, and constructing this class that early
+	 * would freeze its asset filters before Pro has booted.
 	 *
 	 * @since 1.4.0
 	 * @return void
 	 */
-	public function purge(): void {
+	public static function purge(): void {
+		self::purge_all();
+	}
+
+	/**
+	 * Purge every known page cache, each on its own so one that throws cannot
+	 * stop the rest. Separate from purge() because an action callback must not
+	 * return a value, and the upgrade migration needs to know the outcome.
+	 *
+	 * @since 1.9.0
+	 * @return bool False when any cache threw. Nothing propagates to the caller.
+	 */
+	public static function purge_all(): bool {
+		$purged = true;
+
 		foreach ( self::PURGE_ACTIONS as $hook ) {
-			do_action( $hook );
+			$purged = self::purge_one(
+				$hook,
+				static function () use ( $hook ) {
+					do_action( $hook );
+				}
+			) && $purged;
 		}
 
 		/**
@@ -507,7 +564,7 @@ class Init {
 
 		foreach ( (array) $functions as $function ) {
 			if ( is_string( $function ) && is_callable( $function ) ) {
-				call_user_func( $function );
+				$purged = self::purge_one( $function, $function ) && $purged;
 			}
 		}
 
@@ -515,20 +572,44 @@ class Init {
 		// treated as a known symbol at analysis time.
 		$autoptimize = '\autoptimizeCache';
 		if ( class_exists( $autoptimize ) && is_callable( [ $autoptimize, 'clearall' ] ) ) {
-			call_user_func( [ $autoptimize, 'clearall' ] );
+			$purged = self::purge_one( 'autoptimizeCache::clearall', [ $autoptimize, 'clearall' ] ) && $purged;
 		}
 
 		// Deliberately no wp_cache_flush(): that empties the whole site's object
 		// cache, and update_option() has already invalidated our own entry.
 		// Page caches are handled above.
 
-		/**
-		 * Fires after SureCookie has asked the known caches to purge, for hosts
-		 * and plugins not covered above.
-		 *
-		 * @since 1.4.0
-		 */
-		do_action( 'surecookie_purge_caches' );
+		return self::purge_one(
+			'surecookie_purge_caches',
+			static function () {
+				/**
+				 * Fires after SureCookie has asked the known caches to purge, for hosts
+				 * and plugins not covered above.
+				 *
+				 * @since 1.4.0
+				 */
+				do_action( 'surecookie_purge_caches' );
+			}
+		) && $purged;
+	}
+
+	/**
+	 * Run one cache's purge, logging a failure instead of propagating it.
+	 *
+	 * @since 1.9.0
+	 * @param string   $name  Hook or callable, for the log.
+	 * @param callable $purge The purge to run.
+	 * @return bool False when it threw.
+	 */
+	private static function purge_one( string $name, callable $purge ): bool {
+		try {
+			call_user_func( $purge );
+			return true;
+		} catch ( \Throwable $e ) {
+			// A warning: Logger routes 'error' to WP_CLI::error(), which halts the command.
+			Logger::get_instance()->log( sprintf( 'SureCookie: cache purge "%1$s" failed - %2$s', $name, $e->getMessage() ), 'warning' );
+			return false;
+		}
 	}
 
 	/**
@@ -732,6 +813,113 @@ class Init {
 	}
 
 	/**
+	 * Every keyword a whole-tag exclusion list needs.
+	 *
+	 * Handles and paths both, because such a list is matched against the whole
+	 * tag: the handle is the only thing reaching our inline payloads, which core
+	 * names `{handle}-js-extra`/`-translations`.
+	 *
+	 * @since 1.9.0
+	 * @return array<int, string>
+	 */
+	private function tag_keywords(): array {
+		$keywords = array_merge(
+			[ self::TAG_TOKEN ],
+			$this->handles,
+			$this->dependency_handles(),
+			$this->tracker_handles(),
+			$this->paths,
+			$this->dependency_paths(),
+			$this->tracker_paths()
+		);
+
+		return array_values(
+			array_filter(
+				$keywords,
+				// A substring match, so an empty keyword matches every script on the
+				// page and voids the exclusion list.
+				static function ( $keyword ) {
+					return is_string( $keyword ) && $keyword !== '';
+				}
+			)
+		);
+	}
+
+	/**
+	 * Append our keywords to FlyingPress 5's in-memory exclusion lists.
+	 *
+	 * 5.0.0 dropped the 4.16 exclusion filters, so the config array read at
+	 * optimize time is the only lever left. Hung on the last gate of
+	 * `Caching::is_current_request_cacheable()` (5.6.7 `src/Caching.php:264`),
+	 * which `Optimizer::process_output()` calls before any pass
+	 * (`src/Optimizer.php:18`): that fires once per optimised render and never in
+	 * admin or REST, so the appended values cannot reach a settings screen.
+	 * FlyingPress's own verdict is returned untouched.
+	 *
+	 * @param mixed $cacheable FlyingPress's cacheability verdict.
+	 * @since 1.9.0
+	 * @return mixed
+	 */
+	public function extend_flyingpress_config( $cacheable = null ) {
+		// Variable class name: the optional plugin must not become a known symbol.
+		$config_class = '\FlyingPress\Config';
+
+		if ( ! class_exists( $config_class ) || ! is_array( $config_class::$config ) ) {
+			return $cacheable;
+		}
+
+		$config   = $config_class::$config;
+		$keywords = $this->tag_keywords();
+
+		foreach ( self::FLYINGPRESS_CONFIG_LISTS as $key => $shape ) {
+			// Only lists this FlyingPress build actually ships: inventing a key
+			// leaves junk in a config its own settings screen round-trips.
+			if ( ! isset( $config[ $key ] ) || ! is_array( $config[ $key ] ) ) {
+				continue;
+			}
+
+			$new = array_values( array_diff( 'selectors' === $shape ? self::SELECTORS : $keywords, $config[ $key ] ) );
+
+			if ( [] === $new ) {
+				continue;
+			}
+
+			$config[ $key ]                     = array_merge( $config[ $key ], $new );
+			$this->flyingpress_injected[ $key ] = array_merge( $this->flyingpress_injected[ $key ] ?? [], $new );
+		}
+
+		$config_class::$config = $config;
+
+		return $cacheable;
+	}
+
+	/**
+	 * Keep what we appended out of FlyingPress's stored settings.
+	 *
+	 * `Config::update_config()` merges into the same in-memory array and writes it
+	 * (5.6.7 `src/Config.php:179-180`), so without this a save could silently
+	 * adopt our keywords as the owner's own configuration and leave them behind
+	 * when SureCookie is gone. Subtracts only what this request added.
+	 *
+	 * @param mixed $value Option value about to be written.
+	 * @since 1.9.0
+	 * @return mixed
+	 */
+	public function strip_flyingpress_config( $value = null ) {
+		if ( ! is_array( $value ) ) {
+			return $value;
+		}
+
+		foreach ( $this->flyingpress_injected as $key => $injected ) {
+			if ( isset( $value[ $key ] ) && is_array( $value[ $key ] ) ) {
+				$value[ $key ] = array_values( array_diff( $value[ $key ], $injected ) );
+			}
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Registered handles whose src a first-party blocking pattern matches, for
 	 * the lists that exclude by handle.
 	 *
@@ -841,23 +1029,19 @@ class Init {
 		// payloads: core names them `{handle}-js-extra`/`-translations`, which no
 		// path matches. Leaving those deferred while the bundle is not is what threw
 		// `wp is not defined` and showed English labels on a cached page (#1477).
+		$keywords = static function () use ( $self ) {
+			return $self->tag_keywords();
+		};
+
 		foreach ( self::FILTERS_TAG_KEYWORDS as $filter ) {
-			add_filter(
-				$filter,
-				$append(
-					static function () use ( $handles, $paths ) {
-						return array_filter(
-							array_merge( $handles(), $paths() ),
-							// A substring match, so an empty keyword matches every
-							// script on the page and voids the exclusion list.
-							static function ( $keyword ) {
-								return is_string( $keyword ) && $keyword !== '';
-							}
-						);
-					}
-				)
-			);
+			add_filter( $filter, $append( $keywords ) );
 		}
+
+		// FlyingPress 5 fires none of those and reads the same lists off its public
+		// static config instead, so ours are appended in memory for the render and
+		// subtracted again before anything can store them (#1567).
+		add_filter( 'flying_press_is_cacheable', [ $this, 'extend_flyingpress_config' ] );
+		add_filter( 'pre_update_option_FLYING_PRESS_CONFIG', [ $this, 'strip_flyingpress_config' ] );
 
 		add_filter(
 			'rocket_minify_excluded_external_js',
@@ -868,16 +1052,17 @@ class Init {
 			)
 		);
 
-		// WP Rocket's Remove Unused CSS drops what the HTML does not use, and the banner mounts
-		// later, so it lost its z-index tokens (#1297). Keep our own tags whole, nothing else.
-		add_filter(
-			'rocket_rucss_external_exclusions',
-			$append(
-				static function () use ( $self ) {
-					return $self->paths;
-				}
-			)
-		);
+		// Remove Unused CSS drops what the HTML does not use, and the banner mounts later:
+		// it lost its z-index tokens on WP Rocket (#1297) and every rule it has on
+		// Perfmatters, which had no CSS lever at all (#1042). Our own asset paths only,
+		// because both lists keep a whole matching stylesheet.
+		$own_paths = static function () use ( $self ) {
+			return $self->paths;
+		};
+
+		add_filter( 'rocket_rucss_external_exclusions', $append( $own_paths ) );
+		add_filter( 'perfmatters_rucss_excluded_stylesheets', $append( $own_paths ) );
+
 		add_filter(
 			'rocket_rucss_inline_atts_exclusions',
 			$append(

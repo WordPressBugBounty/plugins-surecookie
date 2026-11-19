@@ -202,6 +202,24 @@ class Settings extends Base {
 			return;
 		}
 
+		// Answer honestly rather than drop the key and report success: the admin UI
+		// refetches on success, which is what wiped the editor the user typed in (#1470).
+		$denied = $this->denied_keys( $data );
+		if ( ! empty( $denied ) ) {
+			SendJson::error(
+				[
+					'message' => sprintf(
+						/* translators: %s: comma-separated setting keys */
+						__( 'Nothing was saved. These settings need the unfiltered_html capability: %s.', 'surecookie' ),
+						implode( ', ', $denied )
+					),
+					'denied'  => $denied,
+				],
+				403
+			);
+			return;
+		}
+
 		$previous_top_level = FunctionsSettings::get( 'top_level_menu_enabled' );
 		$sanitized_settings = $this->apply_settings_update( $data );
 
@@ -364,6 +382,11 @@ class Settings extends Base {
 			ARRAY_FILTER_USE_BOTH
 		);
 
+		// Refused on permission, not on content, so it belongs in neither `invalid`
+		// (unusable value) nor `ignored` (unrecognized field).
+		$denied_keys       = $this->denied_keys( $filtered_settings );
+		$filtered_settings = array_diff_key( $filtered_settings, array_flip( $denied_keys ) );
+
 		// Standalone options this install knows how to apply (sanitized at
 		// the boundary below); unknown option names are ignored.
 		$imported_options     = isset( $payload['options'] ) && is_array( $payload['options'] ) ? $payload['options'] : [];
@@ -375,7 +398,7 @@ class Settings extends Base {
 
 		// summarize_import() buckets everything unapplied as unrecognized; these were
 		// recognized, so they belong in their own bucket.
-		$summary['ignored'] = array_values( array_diff( $summary['ignored'], $invalid_keys ) );
+		$summary['ignored'] = array_values( array_diff( $summary['ignored'], $invalid_keys, $denied_keys ) );
 
 		// Nothing this install can apply. If the file carries Pro sections, guide
 		// the user to upgrade instead of failing; otherwise the file is unusable.
@@ -389,6 +412,7 @@ class Settings extends Base {
 						'skipped_pro'      => $summary['skipped_pro'],
 						'ignored'          => $summary['ignored'],
 						'invalid'          => $invalid_keys,
+						'denied'           => $denied_keys,
 						'upgrade_required' => true,
 						'replaced'         => $replace,
 					]
@@ -397,7 +421,14 @@ class Settings extends Base {
 
 			SendJson::error(
 				[
-					'message' => __( 'The uploaded file does not contain any importable SureCookie settings for this site.', 'surecookie' ),
+					'message' => empty( $denied_keys )
+						? __( 'The uploaded file does not contain any importable SureCookie settings for this site.', 'surecookie' )
+						: sprintf(
+							/* translators: %s: comma-separated setting keys */
+							__( 'Nothing was imported. These settings need the unfiltered_html capability: %s.', 'surecookie' ),
+							implode( ', ', $denied_keys )
+						),
+					'denied'  => $denied_keys,
 				],
 				400
 			);
@@ -435,6 +466,7 @@ class Settings extends Base {
 			'skipped_pro'      => $summary['skipped_pro'],
 			'ignored'          => $summary['ignored'],
 			'invalid'          => $invalid_keys,
+			'denied'           => $denied_keys,
 			'upgrade_required' => ! empty( $summary['skipped_pro'] ),
 			'skipped'          => $skipped_keys,
 			'replaced'         => $replace,
@@ -495,10 +527,9 @@ class Settings extends Base {
 	 * @return array<string, mixed>
 	 */
 	private function apply_settings_update( array $data, bool $replace = false ): array {
-		// Defense-in-depth: custom CSS is inlined to every frontend page, so treat it like WP Core treats Customizer Additional CSS - require unfiltered_html. On multisite, sub-admins without the cap keep the previously saved value; the sanitizer is the fallback line.
-		if ( array_key_exists( 'custom_css', $data ) && ! current_user_can( 'unfiltered_html' ) ) {
-			unset( $data['custom_css'] );
-		}
+		// Last line of enforcement. Callers ask denied_keys() first so they can report
+		// the refusal, but the write must never depend on them having done so.
+		$data = array_diff_key( $data, array_flip( $this->denied_keys( $data ) ) );
 
 		// Before processing plugin settings data compatibility.
 		do_action( 'surecookie_admin_settings_before_processing', $data );
@@ -519,6 +550,23 @@ class Settings extends Base {
 		do_action( 'surecookie_admin_settings_after_processing', $settings_to_save );
 
 		return $settings_to_save;
+	}
+
+	/**
+	 * Keys in this patch the current user may not write. Custom CSS is inlined on
+	 * every frontend page, so it needs unfiltered_html the way Core guards
+	 * Customizer Additional CSS; on multisite that is Super Admins only.
+	 *
+	 * @since 1.9.0
+	 * @param array<string, mixed> $data Settings patch.
+	 * @return array<int, string>
+	 */
+	private function denied_keys( array $data ): array {
+		if ( array_key_exists( 'custom_css', $data ) && ! current_user_can( 'unfiltered_html' ) ) {
+			return [ 'custom_css' ];
+		}
+
+		return [];
 	}
 
 	/**

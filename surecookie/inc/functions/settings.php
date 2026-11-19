@@ -116,11 +116,16 @@ class Settings {
 		}
 
 		// Repairs sites already holding a 0, which reaches the page as the truthy
-		// string "0" and renders the banner at 0px.
+		// string "0" and renders the banner, or the logo, at 0px.
 		$defaults = self::get_settings_defaults();
 		if ( (int) ( $public_settings['banner_width'] ?? 0 ) <= 0 ) {
 			$public_settings['banner_width'] = $defaults['banner_width'] ?? 650;
 		}
+		if ( (int) ( $public_settings['banner_logo_height'] ?? 0 ) <= 0 ) {
+			$public_settings['banner_logo_height'] = $defaults['banner_logo_height'] ?? 24;
+		}
+
+		$public_settings['banner_logo'] = self::https_for_local_media( $public_settings['banner_logo'] ?? '' );
 
 		/*
 		 * Display-only companion to `hide_unused_categories`: the ids the consent UI
@@ -168,6 +173,30 @@ class Settings {
 		}
 
 		return apply_filters( 'surecookie_public_settings', $public_settings );
+	}
+
+	/**
+	 * Upgrade an http:// media URL on this site, or on its uploads host, when the page is https.
+	 *
+	 * The media modal saves wp-admin's attachment URL, which stays http:// while the site address is
+	 * saved as http; core upgrades its own images on the front end, and this does the same. Any other
+	 * host is left alone, since it may not serve https, and nothing is ever downgraded.
+	 *
+	 * @param mixed $url Stored media URL.
+	 * @since 1.9.0
+	 * @return mixed
+	 */
+	private static function https_for_local_media( $url ) {
+		if ( ! is_ssl() || ! is_string( $url ) || stripos( $url, 'http://' ) !== 0 ) {
+			return $url;
+		}
+
+		$uploads = wp_get_upload_dir();
+		$local   = array_filter( [ wp_parse_url( home_url(), PHP_URL_HOST ), wp_parse_url( (string) ( $uploads['baseurl'] ?? '' ), PHP_URL_HOST ) ] );
+
+		return in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), array_map( 'strtolower', $local ), true )
+			? set_url_scheme( $url, 'https' )
+			: $url;
 	}
 
 	/**
@@ -346,7 +375,7 @@ class Settings {
 	 * Mirrored by src/shared/utils/reconsentSelectors.js; keep the two identical.
 	 *
 	 * @param mixed $value Comma-separated classes and IDs.
-	 * @since x.x.x
+	 * @since 1.9.0
 	 * @return string Valid, unique entries, at most 20, joined with ', '.
 	 */
 	public static function normalize_reconsent_custom_selectors( $value ): string {

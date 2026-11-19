@@ -18,6 +18,7 @@
 
 namespace SureCookie\Inc\Modules\PrivacyPolicy;
 
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
@@ -76,20 +77,6 @@ class Shortcode {
 	 * @since 1.5.0
 	 */
 	public const GEO_LOOKUP_CDN_REGION = 'United States';
-
-	/**
-	 * Cookie set to remember a visitor's answer.
-	 *
-	 * @since 1.5.0
-	 */
-	private const CONSENT_COOKIE = 'surecookie_user_consent';
-
-	/**
-	 * Cookie holding the pseudonymous session identifier.
-	 *
-	 * @since 1.5.0
-	 */
-	private const SESSION_COOKIE = 'surecookie_session_id';
 
 	/**
 	 * Hard-coded lifetime of the session cookie, in days.
@@ -321,9 +308,9 @@ class Shortcode {
 		$cookie_paragraph = sprintf(
 			/* translators: 1: consent cookie name, 2: number of days, 3: session cookie name, 4: session cookie lifetime in days. */
 			__( 'When you choose which cookies to allow, this site stores that choice in two cookies in your browser. %1$s holds the choice itself and lasts %2$d days. %3$s holds a randomly generated identifier and lasts %4$d days regardless of that setting; it is created the first time you load a page, before you have chosen anything, so that a choice you make later can be matched to the same browser.', 'surecookie' ),
-			'<code>' . self::CONSENT_COOKIE . '</code>',
+			'<code>' . ConsentState::cookie_name() . '</code>',
 			$duration,
-			'<code>' . self::SESSION_COOKIE . '</code>',
+			'<code>' . ConsentState::session_cookie_name() . '</code>',
 			self::SESSION_COOKIE_DAYS
 		);
 
@@ -558,14 +545,20 @@ class Shortcode {
 			return '';
 		}
 
-		$country = Countries::name( (string) ( $details['country'] ?? '' ) );
+		$code    = (string) ( $details['country'] ?? '' );
+		$country = Countries::name( $code );
 
 		$out = '<h2 class="wp-block-heading">' . esc_html__( 'Where your information is processed', 'surecookie' ) . '</h2>';
 
+		// Two whole sentences rather than a glued-on article: a translator needs
+		// the article inside the string to place it their language's way.
 		$out .= '<p>' . ( $country !== ''
 			? sprintf(
-				/* translators: %s: country of establishment. */
-				esc_html__( 'We are based in %s. Some of the services listed above process information in other countries.', 'surecookie' ),
+				Countries::takes_definite_article( $code )
+					/* translators: %s: country of establishment whose English name takes "the", for example United Kingdom. Country names are not translated, matching the English country list the plugin uses elsewhere. */
+					? esc_html__( 'We are based in the %s. Some of the services listed above process information in other countries.', 'surecookie' )
+					/* translators: %s: country of establishment whose English name takes no article, for example Germany. Country names are not translated, matching the English country list the plugin uses elsewhere. */
+					: esc_html__( 'We are based in %s. Some of the services listed above process information in other countries.', 'surecookie' ),
 				esc_html( $country )
 			)
 			: esc_html__( 'Some of the services listed above process information in other countries.', 'surecookie' )
@@ -647,7 +640,7 @@ class Shortcode {
 				: esc_html__( 'You can make any of these requests using the data request form on this site.', 'surecookie' )
 			) . '</p>';
 		} else {
-			$out .= '<p>' . esc_html__( 'To make any of these requests, use the contact details at the end of this policy. We will not charge you for a request and we will not treat you differently for making one.', 'surecookie' ) . '</p>';
+			$out .= '<p>' . esc_html__( 'To make any of these requests, use the contact details at the end of this policy. We will normally respond to requests without charge, although applicable data protection law allows fees or refusal in certain limited circumstances. We will not treat you differently for making a request.', 'surecookie' ) . '</p>';
 		}
 
 		$out .= '<p>' . esc_html__( 'Some requests are limited by law. We may have to keep particular records to meet legal, accounting or security obligations, and where that applies to your request we will tell you which records and why.', 'surecookie' ) . '</p>';

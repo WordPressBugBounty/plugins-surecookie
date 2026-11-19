@@ -22,6 +22,7 @@
 
 namespace SureCookie\Inc\Modules\ScriptBlocking;
 
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\GoogleConsentMode\Whitelist_Handler;
 use SureCookie\Inc\Modules\Services\Pattern_Kinds;
@@ -92,7 +93,9 @@ class Dom_Guard {
 			ARRAY_FILTER_USE_BOTH
 		);
 
-		$config = wp_json_encode(
+		// Site identity, byte-identical for every visitor, so the block stays cacheable.
+		$payload = array_merge(
+			ConsentState::reader_names(),
 			[
 				'a' => $shared,
 				'p' => array_diff_key( $patterns['s'], $shared ),
@@ -124,7 +127,11 @@ class Dom_Guard {
 				'g' => array_values( (array) ( Whitelist_Handler::get_instance()->get_whitelisted_scripts()['patterns'] ?? [] ) ),
 				'c' => array_values( array_map( static fn( array $b ): string => $b[1], Blocker::core_bases() ) ),
 				'h' => (string) ( Blocker::core_bases()[0][0] ?? '' ),
-			],
+			]
+		);
+
+		$config = wp_json_encode(
+			$payload,
 			// HEX_TAG keeps a pattern from closing the script tag; slashes stay
 			// unescaped because every pattern is a URL fragment and `\/` would
 			// add roughly half a kilobyte to every page for nothing.

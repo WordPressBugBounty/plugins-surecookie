@@ -55,6 +55,38 @@ class Api extends Base {
 				],
 			]
 		);
+
+		register_rest_route(
+			$this->get_api_namespace(),
+			'/nudges/dismiss-promotion',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'dismiss_promotion' ],
+				'permission_callback' => [ $this, 'validate_permission' ],
+				'args'                => [
+					'id' => [
+						'required' => true,
+						'type'     => 'string',
+						'enum'     => [ Promotion::ID ],
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Hide the promotion bar for the current user, for good.
+	 *
+	 * @since 1.9.0
+	 * @return void
+	 */
+	public function dismiss_promotion(): void {
+		if ( ! Promotion::get_instance()->dismiss( get_current_user_id() ) ) {
+			SendJson::error( [ 'message' => __( 'Could not dismiss the promotion. Please try again.', 'surecookie' ) ] );
+			return;
+		}
+
+		SendJson::success( [ 'message' => __( 'Promotion dismissed.', 'surecookie' ) ] );
 	}
 
 	/**

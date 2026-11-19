@@ -22,6 +22,7 @@ namespace SureCookie\Inc\Modules\ScriptBlocking;
 use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
+use SureCookie\Inc\Modules\Services\Service_Matcher;
 use SureCookie\Inc\Traits\GetInstance;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -136,6 +137,7 @@ class Matched_Resources {
 		}
 
 		$stored = $this->stored();
+		$owners = ! empty( $stored['script'] ) || ! empty( $stored['iframe'] ) ? $this->catalog_host_owners() : [];
 
 		foreach ( [
 			'script' => 'scripts',
@@ -162,7 +164,7 @@ class Matched_Resources {
 					'url'          => '',
 					'category'     => (string) ( $entry['category'] ?? 'uncategorized' ),
 					'source'       => 'catalog',
-					'service_slug' => (string) ( $entry['service'] ?? '' ),
+					'service_slug' => self::current_owner( $pattern, (string) ( $entry['service'] ?? '' ), $owners ),
 				];
 			}
 
@@ -245,14 +247,25 @@ class Matched_Resources {
 		$this->dirty = false;
 		$stored      = $this->stored();
 		$changed     = false;
+		$owners      = null;
 
 		foreach ( $this->seen as $kind => $patterns ) {
 			foreach ( $patterns as $pattern => $entry ) {
 				if ( isset( $stored[ $kind ][ $pattern ] ) ) {
-					// Only a src sighting rewrites an entry. A row stored before this
-					// option carried provenance is a real load, and nothing downgrades
-					// one: withdrawing a cookie the site really sets is the worse error.
-					if ( ( $stored[ $kind ][ $pattern ]['via'] ?? '' ) !== 'content' || $entry['via'] !== 'src' ) {
+					// Only a src sighting rewrites an entry, and then only to raise provenance
+					// from content or to repair a service the catalog has since moved off this
+					// host. Provenance never falls: withdrawing a cookie the site really sets is
+					// the worse error, and a row stored before this option carried `via` is a real load.
+					$was     = $stored[ $kind ][ $pattern ];
+					$service = (string) ( $was['service'] ?? '' );
+					$rewrite = 'src' === $entry['via'] && 'content' === ( $was['via'] ?? '' );
+
+					if ( ! $rewrite && 'src' === $entry['via'] && $service !== $entry['service'] ) {
+						$owners  = $owners ?? $this->catalog_host_owners();
+						$rewrite = self::current_owner( $pattern, $service, $owners ) !== $service;
+					}
+
+					if ( ! $rewrite ) {
 						continue;
 					}
 				} elseif ( count( $stored[ $kind ] ?? [] ) >= self::MAX_PER_KIND ) {
@@ -267,6 +280,49 @@ class Matched_Resources {
 		if ( $changed ) {
 			update_option( self::OPTION, $stored, false );
 		}
+	}
+
+	/**
+	 * Current catalog services grouped by their host claims.
+	 *
+	 * @since 1.9.0
+	 * @return array<string, array<string, true>>
+	 */
+	private function catalog_host_owners(): array {
+		$owners = [];
+		foreach ( Service_Matcher::get_instance()->get_service_patterns() as $service => $patterns ) {
+			foreach ( $patterns as $pattern ) {
+				$host = Entry_Match::without_www( Entry_Match::parts( $pattern )['host'] );
+				if ( $host !== '' ) {
+					$owners[ $host ][ $service ] = true;
+				}
+			}
+		}
+		return $owners;
+	}
+
+	/**
+	 * Retain a valid owner, or use an unambiguous current replacement.
+	 *
+	 * @since 1.9.0
+	 * @param string                             $host Recorded resource host.
+	 * @param string                             $previous Previously recorded service.
+	 * @param array<string, array<string, true>> $owners Current catalog host claims.
+	 * @return string Service slug, or empty when a replacement is ambiguous.
+	 */
+	private static function current_owner( string $host, string $previous, array $owners ): string {
+		$candidates = [];
+		$host       = Entry_Match::without_www( strtolower( $host ) );
+		do {
+			$candidates += $owners[ $host ] ?? [];
+			$dot         = strpos( $host, '.' );
+			$host        = $dot === false ? '' : substr( $host, $dot + 1 );
+		} while ( $host !== '' );
+
+		if ( empty( $candidates ) || isset( $candidates[ $previous ] ) ) {
+			return $previous;
+		}
+		return count( $candidates ) === 1 ? (string) array_key_first( $candidates ) : '';
 	}
 
 	/**

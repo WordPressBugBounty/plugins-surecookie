@@ -116,7 +116,8 @@ interface Importer {
 	public function import(): array;
 
 	/**
-	 * Reset every managed setting back to its SureCookie default.
+	 * Undo the import: restore every managed setting to its pre-import value.
+	 * Returns success false when there is no snapshot to restore from.
 	 *
 	 * @since 1.8.0
 	 * @return array<string, mixed>

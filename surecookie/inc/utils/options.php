@@ -68,6 +68,15 @@ class Options {
 					'default' => '',
 					'group'   => 'banner',
 				],
+				'banner_logo_height'            => [
+					'type'    => 'int',
+					'default' => 24,
+					'group'   => 'banner',
+					// Enforced on write by Settings::get_cleaned_value(); the public
+					// dataset repairs an already-stored 0 the same way banner_width does.
+					'min'     => 16,
+					'max'     => 120,
+				],
 				'accept_btn_text'               => [
 					'type'    => 'string',
 					'default' => __( 'Only Essential', 'surecookie' ),
@@ -219,6 +228,11 @@ class Options {
 					'group'   => 'banner',
 				],
 				'banner_overlay_enabled'        => [
+					'type'    => 'bool',
+					'default' => false,
+					'group'   => 'banner',
+				],
+				'use_site_fonts'                => [
 					'type'    => 'bool',
 					'default' => false,
 					'group'   => 'banner',
@@ -383,6 +397,7 @@ class Options {
 				'banner_width',
 				'banner_enabled',
 				'banner_logo',
+				'banner_logo_height',
 				'accept_all_enabled',
 				'accept_btn_text',
 				'accept_all_btn_text',

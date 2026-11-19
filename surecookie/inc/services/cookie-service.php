@@ -53,7 +53,7 @@ class CookieService {
 	 * @since 0.0.0-alpha.1
 	 */
 	public function get_scanned_cookies(): array {
-		$scanned_cookies       = Get::scanned_cookies_unshadowed();
+		$scanned_cookies       = Get::scanned_cookies_for_display();
 		$cookie_categories     = Settings::get( 'cookie_categories' );
 		$final_cookies_dataset = [];
 

@@ -408,6 +408,31 @@ class Installed_Services {
 	}
 
 	/**
+	 * Drop a service's registry entry without suppressing it.
+	 *
+	 * Unlike uninstall(), this is not the admin saying the service is gone: it
+	 * undoes an entry some other write path added, so the service must stay
+	 * eligible to be added or auto-declared again. Its cookie rows are not
+	 * touched here, because the caller that added them owns putting them back
+	 * (the migration undo restores `custom_cookies` wholesale).
+	 *
+	 * @param string $slug Catalog service slug.
+	 * @since 1.9.0
+	 * @return bool True when an entry was removed.
+	 */
+	public function forget( string $slug ): bool {
+		$data = $this->get_data();
+		if ( ! isset( $data['installed'][ $slug ] ) ) {
+			return false;
+		}
+
+		unset( $data['installed'][ $slug ] );
+		$this->save( $data );
+
+		return true;
+	}
+
+	/**
 	 * Read-time overlay: inject an installed service's script/iframe patterns as
 	 * non-interactive info rows, and tag scanner-detected rows with the matching
 	 * catalog slug (for the "Add as Service" CTA). Never persisted - runs on the

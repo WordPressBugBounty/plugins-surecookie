@@ -15,6 +15,7 @@ namespace SureCookie\Inc\Modules\Migration;
 
 use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
+use SureCookie\Inc\Modules\Services\Installed_Services;
 use SureCookie\Inc\Utils\Options;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -174,14 +175,28 @@ abstract class Base_Importer implements Importer {
 	 * Run the import: split the patch into writable vs unavailable keys, write the
 	 * writable ones through the sanitized settings path, stamp the migrated marker.
 	 *
+	 * The marker also carries the pre-import snapshot reset() restores from. It is
+	 * written on the FIRST import only: a second run would otherwise record the
+	 * half-migrated state the first left behind as the state to undo to.
+	 *
 	 * @since 1.8.0
 	 * @return array<string, mixed>
 	 */
 	public function import(): array {
-		$patch  = $this->build_settings_patch();
+		$marker   = $this->get_marker();
+		$patch    = $this->build_settings_patch();
+		$snapshot = $this->capture_snapshot();
+		$services = array_keys( Installed_Services::get_instance()->get_installed() );
+
 		$result = $this->apply( $patch );
 		$extras = $this->import_extras();
 		$now    = time();
+
+		// Diffed rather than reported by the importer, so any importer that
+		// installs known services is undone by this one write path.
+		$snapshot['services'] = array_values(
+			array_diff( array_keys( Installed_Services::get_instance()->get_installed() ), $services )
+		);
 
 		update_option(
 			$this->get_migrated_option_key(),
@@ -189,6 +204,7 @@ abstract class Base_Importer implements Importer {
 				'version' => SURECOOKIE_VERSION,
 				'applied' => $result['applied'],
 				'at'      => $now,
+				'before'  => isset( $marker['before'] ) && is_array( $marker['before'] ) ? $marker['before'] : $snapshot,
 			],
 			false
 		);
@@ -217,36 +233,160 @@ abstract class Base_Importer implements Importer {
 	}
 
 	/**
-	 * Reset every setting this importer manages back to its SureCookie default,
-	 * and clear the migrated marker. Removing the keys from the saved option lets
-	 * the registered defaults apply again (Settings::get() merges defaults).
+	 * Undo the import: put every managed key back to the value the site held
+	 * before it, drop the services the run installed, and clear the marker.
+	 *
+	 * Refuses without a snapshot (any site imported before 1.9.0): the import folds
+	 * source categories onto SureCookie's own ids, so nothing left in the settings
+	 * can tell an imported value from one the admin wrote. Refuses too when a
+	 * snapshot key is no longer registered, rather than clear what it cannot put
+	 * back. Consent-log rows stay: legal records, in a table that already existed.
 	 *
 	 * @since 1.8.0
 	 * @return array<string, mixed>
 	 */
 	public function reset(): array {
-		$registered = Options::get_all_configurations();
-		$settings   = get_option( SURECOOKIE_SETTINGS_OPTION, [] );
-		$settings   = is_array( $settings ) ? $settings : [];
-		$reset      = [];
+		$marker = $this->get_marker();
+		$before = isset( $marker['before'] ) && is_array( $marker['before'] ) ? $marker['before'] : null;
 
-		foreach ( $this->get_managed_keys() as $key ) {
-			if ( array_key_exists( $key, $registered ) && array_key_exists( $key, $settings ) ) {
+		if ( $before === null ) {
+			return $this->refuse_reset( $marker );
+		}
+
+		$values = isset( $before['values'] ) && is_array( $before['values'] ) ? $before['values'] : [];
+
+		// All or nothing. apply() cannot write a key this site no longer registers
+		// (Pro deactivated since the import), so clearing it here would destroy the
+		// snapshot's only copy when the marker goes.
+		$unrestorable = array_values( array_diff( array_keys( $values ), array_keys( Options::get_all_configurations() ) ) );
+		if ( ! empty( $unrestorable ) ) {
+			return [
+				'success' => false,
+				'slug'    => $this->get_slug(),
+				'keys'    => $unrestorable,
+				'message' => sprintf(
+					/* translators: %s: comma separated list of setting names. */
+					__( 'This import replaced settings that are not available on this site right now, most likely because SureCookie Pro is inactive. Activate it and undo again: undoing now would clear these without being able to put them back. %s', 'surecookie' ),
+					implode( ', ', $unrestorable )
+				),
+			];
+		}
+
+		$settings = get_option( SURECOOKIE_SETTINGS_OPTION, [] );
+		$settings = is_array( $settings ) ? $settings : [];
+		$reset    = [];
+
+		// The snapshot's own key set, not get_managed_keys() as it reads today: a
+		// key that became managed after the import was never part of it.
+		$managed = array_merge(
+			array_keys( $values ),
+			isset( $before['absent'] ) && is_array( $before['absent'] ) ? $before['absent'] : []
+		);
+
+		foreach ( $managed as $key ) {
+			if ( array_key_exists( $key, $settings ) ) {
 				unset( $settings[ $key ] );
 				$reset[] = $key;
 			}
 		}
 
+		// Two steps: Sanitize::settings() merges onto the stored option and can only
+		// set a key, so a key the site never had must be gone before the restore.
 		Update::option( SURECOOKIE_SETTINGS_OPTION, $settings );
-		do_action( 'surecookie_admin_settings_after_processing', $settings );
+		$restored = $this->apply( $values )['applied'];
+
+		// apply() is silent on an empty snapshot, but keys were still removed above.
+		if ( empty( $restored ) ) {
+			do_action( 'surecookie_admin_settings_after_processing', $settings );
+		}
+
+		$services = isset( $before['services'] ) && is_array( $before['services'] ) ? $before['services'] : [];
+		foreach ( $services as $slug ) {
+			// forget(), not uninstall(): the admin never removed these, so they must
+			// stay eligible to be added again.
+			Installed_Services::get_instance()->forget( (string) $slug );
+		}
+
 		delete_option( $this->get_migrated_option_key() );
 
 		return [
 			'success'  => true,
 			'slug'     => $this->get_slug(),
 			'reset'    => $reset,
+			'restored' => $restored,
 			'migrated' => false,
 		];
+	}
+
+	/**
+	 * Pre-import value of every managed key this site can store, with the keys that
+	 * had no stored value listed separately: restoring one of those must leave it
+	 * unset, because an explicit copy of a default stops tracking that default.
+	 *
+	 * @since 1.9.0
+	 * @return array{values: array<string, mixed>, absent: array<int, string>, services: array<int, string>}
+	 */
+	private function capture_snapshot(): array {
+		$registered = Options::get_all_configurations();
+		$settings   = get_option( SURECOOKIE_SETTINGS_OPTION, [] );
+		$settings   = is_array( $settings ) ? $settings : [];
+		$values     = [];
+		$absent     = [];
+
+		foreach ( $this->get_managed_keys() as $key ) {
+			if ( ! array_key_exists( $key, $registered ) ) {
+				continue;
+			}
+
+			if ( array_key_exists( $key, $settings ) ) {
+				$values[ $key ] = $settings[ $key ];
+			} else {
+				$absent[] = $key;
+			}
+		}
+
+		return [
+			'values'   => $values,
+			'absent'   => $absent,
+			'services' => [],
+		];
+	}
+
+	/**
+	 * Refuse an undo there is no snapshot for, naming what the import replaced so
+	 * the admin can put it back by hand.
+	 *
+	 * @param array<string, mixed> $marker Stored migration marker.
+	 * @since 1.9.0
+	 * @return array<string, mixed>
+	 */
+	private function refuse_reset( array $marker ): array {
+		$applied = isset( $marker['applied'] ) && is_array( $marker['applied'] ) ? array_values( $marker['applied'] ) : [];
+
+		return [
+			'success' => false,
+			'slug'    => $this->get_slug(),
+			'keys'    => $applied,
+			'message' => empty( $applied )
+				? __( 'There is nothing to undo: SureCookie has no record of an import from this source.', 'surecookie' )
+				: sprintf(
+					/* translators: %s: comma separated list of setting names. */
+					__( 'This import ran before undo was available, so SureCookie did not record what these settings held beforehand. Restore them by hand: %s', 'surecookie' ),
+					implode( ', ', $applied )
+				),
+		];
+	}
+
+	/**
+	 * Stored migration marker for this source, normalized to an array.
+	 *
+	 * @since 1.9.0
+	 * @return array<string, mixed>
+	 */
+	private function get_marker(): array {
+		$marker = get_option( $this->get_migrated_option_key(), [] );
+
+		return is_array( $marker ) ? $marker : [];
 	}
 
 	/**
@@ -268,8 +408,7 @@ abstract class Base_Importer implements Importer {
 	 * @return array{migrated: bool, migrated_at: string, applied: array<int, string>}
 	 */
 	public function get_status(): array {
-		$marker = get_option( $this->get_migrated_option_key(), [] );
-		$marker = is_array( $marker ) ? $marker : [];
+		$marker = $this->get_marker();
 		$at     = isset( $marker['at'] ) ? (int) $marker['at'] : 0;
 
 		return [

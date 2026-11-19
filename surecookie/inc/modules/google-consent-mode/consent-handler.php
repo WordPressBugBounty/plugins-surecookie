@@ -10,6 +10,7 @@
 
 namespace SureCookie\Inc\Modules\GoogleConsentMode;
 
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Helper;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Modules\ScriptBlocking\Utils as Blocking_Utils;
@@ -279,7 +280,7 @@ class Consent_Handler {
 		// A scan has no choice to correct. The renewal time is the same for every
 		// visitor, so the block stays cacheable.
 		if ( ! $is_scan ) {
-			$output .= 'window.surecookieGcm = ' . wp_json_encode( [ 'r' => (int) Settings::get( 'consent_renewed_at' ) ] ) . ';' . "\n";
+			$output .= 'window.surecookieGcm = ' . wp_json_encode( array_merge( [ 'r' => (int) Settings::get( 'consent_renewed_at' ) ], ConsentState::reader_names() ) ) . ';' . "\n";
 			$output .= $this->head_source() . "\n";
 		}
 

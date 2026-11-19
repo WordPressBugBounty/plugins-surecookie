@@ -186,8 +186,9 @@ class Api extends Base {
 	}
 
 	/**
-	 * POST /migration/{slug}/reset -- reset the source's managed settings to
-	 * SureCookie defaults.
+	 * POST /migration/{slug}/reset -- undo the import, restoring the source's
+	 * managed settings to their pre-import values. Errors when there is no
+	 * snapshot to restore from.
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Request.
 	 * @since 1.8.0
@@ -200,7 +201,16 @@ class Api extends Base {
 			return;
 		}
 
-		SendJson::success( $importer->reset() );
+		$result = $importer->reset();
+
+		// An undo with no snapshot to restore from is refused, and the payload
+		// carries the keys the admin now has to put back by hand.
+		if ( empty( $result['success'] ) ) {
+			SendJson::error( $result );
+			return;
+		}
+
+		SendJson::success( $result );
 	}
 
 	/**

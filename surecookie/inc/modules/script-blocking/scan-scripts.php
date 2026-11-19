@@ -255,8 +255,10 @@ class Scan_Scripts {
 			$scripts[ $category ] = [];
 		}
 
-		// Build a unique service key from the domain.
-		$service_key = 'scan_' . str_replace( [ '.', '-' ], '_', $domain );
+		// The host goes in verbatim, because this key is the only thing telling one scanned
+		// resource from another: collapsing `.` and `-` onto `_` filed `a-b.com` and `a.b.com`
+		// under one key, and the assignment below dropped whichever arrived first (#1613).
+		$service_key = 'scan_' . $domain;
 
 		// Add to the appropriate type array. The label is visitor-facing copy, so the
 		// domain fallback has to cover every way the scan says "no vendor": an empty

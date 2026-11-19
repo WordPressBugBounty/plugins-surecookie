@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SureCookie 1.8.1\n"
+"Project-Id-Version: SureCookie 1.9.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/surecookie\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-05T10:41:14+00:00\n"
+"POT-Creation-Date: 2026-11-18T13:10:49+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: surecookie\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #. Author of the plugin
 #: surecookie.php
-#: inc/integrations/wp-consent-api/actions.php:66
-#: inc/integrations/wp-consent-api/actions.php:74
+#: inc/integrations/wp-consent-api/actions.php:67
+#: inc/integrations/wp-consent-api/actions.php:75
 msgid "SureCookie"
 msgstr ""
 
@@ -403,120 +403,132 @@ msgstr ""
 msgid "No data found"
 msgstr ""
 
-#: inc/api/settings.php:209
+#. translators: %s: comma-separated setting keys
+#: inc/api/settings.php:213
+#, php-format
+msgid "Nothing was saved. These settings need the unfiltered_html capability: %s."
+msgstr ""
+
+#: inc/api/settings.php:227
 msgid "Settings updated"
 msgstr ""
 
-#: inc/api/settings.php:289
+#: inc/api/settings.php:307
 msgid "Please upload a SureCookie export file to import."
 msgstr ""
 
-#: inc/api/settings.php:298
+#: inc/api/settings.php:316
 msgid "The selected file is too large to import."
 msgstr ""
 
-#: inc/api/settings.php:309
+#: inc/api/settings.php:327
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
-#: inc/api/settings.php:318
+#: inc/api/settings.php:336
 msgid "The uploaded file is not a valid SureCookie settings export."
 msgstr ""
 
-#: inc/api/settings.php:327
+#: inc/api/settings.php:345
 msgid "This settings export uses an unsupported schema version."
 msgstr ""
 
-#: inc/api/settings.php:338
+#: inc/api/settings.php:356
 msgid "The uploaded file does not contain a valid settings payload."
 msgstr ""
 
-#: inc/api/settings.php:386
+#: inc/api/settings.php:409
 msgid "No settings were imported. This export contains Pro features that are not available on this site."
 msgstr ""
 
-#: inc/api/settings.php:400
+#: inc/api/settings.php:425
 msgid "The uploaded file does not contain any importable SureCookie settings for this site."
 msgstr ""
 
-#: inc/api/settings.php:431
+#. translators: %s: comma-separated setting keys
+#: inc/api/settings.php:428
+#, php-format
+msgid "Nothing was imported. These settings need the unfiltered_html capability: %s."
+msgstr ""
+
+#: inc/api/settings.php:462
 #: build/admin.js:141
 msgid "Settings imported successfully."
 msgstr ""
 
-#: inc/api/settings.php:643
+#: inc/api/settings.php:691
 msgid "Cookies & Scripts"
 msgstr ""
 
-#: inc/api/settings.php:644
+#: inc/api/settings.php:692
 msgid "Cookie categories, custom cookies, known services, script blocking and scanning."
 msgstr ""
 
-#: inc/api/settings.php:648
+#: inc/api/settings.php:696
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:127
 msgid "Geographic Rules"
 msgstr ""
 
-#: inc/api/settings.php:649
+#: inc/api/settings.php:697
 msgid "Region-based banner rules."
 msgstr ""
 
-#: inc/api/settings.php:653
+#: inc/api/settings.php:701
 #: build/admin.js:2
 #: build/onboarding.js:12
 msgid "Banner"
 msgstr ""
 
-#: inc/api/settings.php:654
+#: inc/api/settings.php:702
 msgid "Banner content, layout, colors, buttons and display."
 msgstr ""
 
-#: inc/api/settings.php:658
+#: inc/api/settings.php:706
 #: build/admin.js:2
 msgid "General"
 msgstr ""
 
-#: inc/api/settings.php:659
+#: inc/api/settings.php:707
 msgid "Consent model, logging, preferences, custom CSS and other plugin settings."
 msgstr ""
 
-#: inc/api/settings.php:663
+#: inc/api/settings.php:711
 #: build/admin.js:2
 msgid "Consent Frameworks"
 msgstr ""
 
-#: inc/api/settings.php:664
+#: inc/api/settings.php:712
 msgid "Google Consent Mode and other consent integrations."
 msgstr ""
 
-#: inc/api/settings.php:668
+#: inc/api/settings.php:716
 msgid "Buttons & labels"
 msgstr ""
 
-#: inc/api/settings.php:669
+#: inc/api/settings.php:717
 msgid "Button visibility, order and label text."
 msgstr ""
 
-#: inc/api/settings.php:674
+#: inc/api/settings.php:722
 msgid "Consent & compliance"
 msgstr ""
 
-#: inc/api/settings.php:675
+#: inc/api/settings.php:723
 msgid "Compliance law, consent model, logging and duration."
 msgstr ""
 
-#: inc/api/settings.php:680
+#: inc/api/settings.php:728
 #: build/admin.js:130
 msgid "Cookie categories"
 msgstr ""
 
-#: inc/api/settings.php:681
+#: inc/api/settings.php:729
 msgid "Your consent categories."
 msgstr ""
 
-#: inc/api/settings.php:686
+#: inc/api/settings.php:734
 #: build/admin.js:70
 #: build/admin.js:130
 #: build/onboarding.js:5
@@ -525,51 +537,51 @@ msgstr ""
 msgid "Cookies"
 msgstr ""
 
-#: inc/api/settings.php:687
+#: inc/api/settings.php:735
 msgid "Custom cookie definitions."
 msgstr ""
 
-#: inc/api/settings.php:693
+#: inc/api/settings.php:741
 msgid "Script blocking"
 msgstr ""
 
-#: inc/api/settings.php:694
+#: inc/api/settings.php:742
 msgid "Blocking rules and scan resource overrides."
 msgstr ""
 
-#: inc/api/settings.php:699
+#: inc/api/settings.php:747
 msgid "Known services"
 msgstr ""
 
-#: inc/api/settings.php:700
+#: inc/api/settings.php:748
 msgid "Services you added or removed for cookie declarations and blocking."
 msgstr ""
 
-#: inc/api/settings.php:705
+#: inc/api/settings.php:753
 #: build/admin.js:2
 #: build/admin.js:130
 #: build/onboarding.js:37
 msgid "Google Consent Mode"
 msgstr ""
 
-#: inc/api/settings.php:706
+#: inc/api/settings.php:754
 msgid "GCM toggle and region defaults."
 msgstr ""
 
-#: inc/api/settings.php:711
+#: inc/api/settings.php:759
 msgid "Automatic scanning"
 msgstr ""
 
-#: inc/api/settings.php:712
+#: inc/api/settings.php:760
 msgid "Scan frequency and scope."
 msgstr ""
 
-#: inc/api/settings.php:717
+#: inc/api/settings.php:765
 #: build/admin.js:2
 msgid "Advanced"
 msgstr ""
 
-#: inc/api/settings.php:718
+#: inc/api/settings.php:766
 msgid "Custom CSS, integrations and tool settings."
 msgstr ""
 
@@ -613,7 +625,7 @@ msgstr ""
 msgid "Cookies that haven't been categorized yet."
 msgstr ""
 
-#: inc/functions/get.php:1237
+#: inc/functions/get.php:1344
 #: inc/modules/cookie-policy/api.php:91
 #: build/admin.js:2
 #: build/admin.js:3
@@ -627,7 +639,7 @@ msgstr ""
 msgid "Cookie Policy"
 msgstr ""
 
-#: inc/functions/get.php:1240
+#: inc/functions/get.php:1347
 #: inc/modules/privacy-policy/api.php:193
 #: build/admin.js:2
 #: build/admin.js:6
@@ -636,14 +648,14 @@ msgstr ""
 msgid "Privacy Policy"
 msgstr ""
 
-#: inc/functions/get.php:1243
+#: inc/functions/get.php:1350
 #: build/admin.js:6
 #: build/admin.js:74
 #: build/onboarding.js:9
 msgid "Legal Notice"
 msgstr ""
 
-#: inc/functions/settings.php:140
+#: inc/functions/settings.php:145
 msgid "Your browser is set to tell websites not to sell or share your data, so this content stays blocked."
 msgstr ""
 
@@ -823,19 +835,19 @@ msgstr ""
 msgid "Theme Colors"
 msgstr ""
 
-#: inc/integrations/wp-consent-api/actions.php:62
+#: inc/integrations/wp-consent-api/actions.php:63
 msgid "days"
 msgstr ""
 
-#: inc/integrations/wp-consent-api/actions.php:69
+#: inc/integrations/wp-consent-api/actions.php:70
 msgid "Stores the user's cookie consent preferences."
 msgstr ""
 
-#: inc/integrations/wp-consent-api/actions.php:76
+#: inc/integrations/wp-consent-api/actions.php:77
 msgid "1 year"
 msgstr ""
 
-#: inc/integrations/wp-consent-api/actions.php:77
+#: inc/integrations/wp-consent-api/actions.php:78
 msgid "Tracks consent log sessions for audit purposes."
 msgstr ""
 
@@ -1175,7 +1187,7 @@ msgid "Cookie Name"
 msgstr ""
 
 #: inc/modules/cookie-policy/shortcode.php:212
-#: inc/modules/privacy-policy/shortcode.php:476
+#: inc/modules/privacy-policy/shortcode.php:463
 #: build/admin.js:3
 #: build/admin.js:37
 msgid "Purpose"
@@ -1190,7 +1202,7 @@ msgid "Duration"
 msgstr ""
 
 #: inc/modules/cookie-policy/shortcode.php:214
-#: inc/modules/privacy-policy/shortcode.php:478
+#: inc/modules/privacy-policy/shortcode.php:465
 #: build/admin.js:34
 #: build/admin.js:37
 msgid "Domain"
@@ -1233,11 +1245,11 @@ msgid_plural "%s days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/modules/google-consent-mode/consent-handler.php:148
+#: inc/modules/google-consent-mode/consent-handler.php:149
 msgid "SureCookie:"
 msgstr ""
 
-#: inc/modules/google-consent-mode/consent-handler.php:150
+#: inc/modules/google-consent-mode/consent-handler.php:151
 msgid "Google Site Kit's Consent Mode is active. Please disable it in Site Kit settings to use SureCookie's implementation."
 msgstr ""
 
@@ -1251,7 +1263,7 @@ msgstr ""
 
 #: inc/modules/migration/api.php:144
 #: inc/modules/migration/api.php:166
-#: inc/modules/migration/api.php:199
+#: inc/modules/migration/api.php:200
 msgid "Unknown migration source."
 msgstr ""
 
@@ -1259,18 +1271,86 @@ msgstr ""
 msgid "The source plugin is not installed."
 msgstr ""
 
-#: inc/modules/nudges/api.php:70
+#. translators: %s: comma separated list of setting names.
+#: inc/modules/migration/base-importer.php:269
+#, php-format
+msgid "This import replaced settings that are not available on this site right now, most likely because SureCookie Pro is inactive. Activate it and undo again: undoing now would clear these without being able to put them back. %s"
+msgstr ""
+
+#: inc/modules/migration/base-importer.php:371
+msgid "There is nothing to undo: SureCookie has no record of an import from this source."
+msgstr ""
+
+#. translators: %s: comma separated list of setting names.
+#: inc/modules/migration/base-importer.php:374
+#, php-format
+msgid "This import ran before undo was available, so SureCookie did not record what these settings held beforehand. Restore them by hand: %s"
+msgstr ""
+
+#: inc/modules/nudges/api.php:85
+msgid "Could not dismiss the promotion. Please try again."
+msgstr ""
+
+#: inc/modules/nudges/api.php:89
+msgid "Promotion dismissed."
+msgstr ""
+
+#: inc/modules/nudges/api.php:102
 msgid "Invalid type provided."
 msgstr ""
 
-#: inc/modules/nudges/api.php:94
+#: inc/modules/nudges/api.php:126
 msgid "Could not disable the nudge. Please try again."
 msgstr ""
 
 #. translators: %s: nudge type
-#: inc/modules/nudges/api.php:100
+#: inc/modules/nudges/api.php:132
 #, php-format
 msgid "\"%s\" has been disabled."
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:82
+msgid "Live now"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:85
+msgid "Grab the Deal"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:154
+msgid "Black Friday Sale"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:160
+msgid "Up to 34% OFF"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:164
+#: build/admin.js:3
+msgid "SureCookie Pro"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:170
+#: inc/modules/nudges/promotion.php:210
+#: build/admin.js:40
+#: build/admin.js:105
+#: build/admin.js:119
+#: build/admin.js:127
+msgid "Pro"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:182
+#: inc/modules/nudges/promotion.php:200
+msgid "first year"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:188
+#: inc/modules/nudges/promotion.php:222
+msgid "Business"
+msgstr ""
+
+#: inc/modules/nudges/promotion.php:206
+msgid "Lifetime"
 msgstr ""
 
 #: inc/modules/privacy-policy/api.php:155
@@ -1359,121 +1439,121 @@ msgid "This privacy policy cannot be published yet. Add the following under Comp
 msgstr ""
 
 #. translators: %s: date the policy page was last edited.
-#: inc/modules/privacy-policy/shortcode.php:166
+#: inc/modules/privacy-policy/shortcode.php:153
 #, php-format
 msgid "Policy last updated: %s"
 msgstr ""
 
 #. translators: %s: date of the most recent cookie scan.
-#: inc/modules/privacy-policy/shortcode.php:176
+#: inc/modules/privacy-policy/shortcode.php:163
 #, php-format
 msgid "Cookie and service list last updated: %s"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:208
+#: inc/modules/privacy-policy/shortcode.php:195
 msgid "The organisation responsible for this website has not been named yet."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:209
+#: inc/modules/privacy-policy/shortcode.php:196
 msgid "Add your legal entity name, address and country under Compliance, Business Details."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:237
+#: inc/modules/privacy-policy/shortcode.php:224
 msgid "A contact address for privacy questions has not been set yet."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:238
+#: inc/modules/privacy-policy/shortcode.php:225
 msgid "Add a privacy contact email under Compliance, Business Details."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:245
+#: inc/modules/privacy-policy/shortcode.php:232
 msgid "Email:"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:268
+#: inc/modules/privacy-policy/shortcode.php:255
 msgid "No cookies have been identified on this site, so there is nothing to list here yet."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:296
+#: inc/modules/privacy-policy/shortcode.php:283
 msgid "See the full list of cookies used on this site"
 msgstr ""
 
 #. translators: 1: consent cookie name, 2: number of days, 3: session cookie name, 4: session cookie lifetime in days.
-#: inc/modules/privacy-policy/shortcode.php:323
+#: inc/modules/privacy-policy/shortcode.php:310
 #, php-format
 msgid "When you choose which cookies to allow, this site stores that choice in two cookies in your browser. %1$s holds the choice itself and lasts %2$d days. %3$s holds a randomly generated identifier and lasts %4$d days regardless of that setting; it is created the first time you load a page, before you have chosen anything, so that a choice you make later can be matched to the same browser."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:334
+#: inc/modules/privacy-policy/shortcode.php:321
 msgid "Your choice is stored in your own browser and nowhere else. This site keeps no record of it on the server, so there is nothing for us to look up, export or delete, and clearing your browser cookies removes it."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:335
+#: inc/modules/privacy-policy/shortcode.php:322
 msgid "You can change your choice at any time using the cookie preferences control on this site."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:347
+#: inc/modules/privacy-policy/shortcode.php:334
 msgid "We also keep a record of the choice on this site, so that we can show, if we are ever asked, that you were given a choice and what you chose. Each record holds the date and time, which categories you allowed and which you refused, the random identifier from the cookie above, a shortened form of your IP address, and the country your visit appeared to come from. If you were signed in, it also holds your user account ID."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:348
+#: inc/modules/privacy-policy/shortcode.php:335
 msgid "We also keep a record of the choice on this site, so that we can show, if we are ever asked, that you were given a choice and what you chose. Each record holds the date and time, which categories you allowed and which you refused, and the random identifier from the cookie above. If you were signed in, it also holds your user account ID."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:352
+#: inc/modules/privacy-policy/shortcode.php:339
 msgid "The IP address in the record is shortened before it is stored: for a normal IPv4 address the last part is replaced with a zero. We do not store your full IP address in these records, and there is no setting that would make us."
 msgstr ""
 
 #. translators: 1: hostname of the geolocation service, 2: country it is hosted in, 3: country the CDN operator is based in. Country names are not translated, matching the English country list the plugin uses elsewhere.
-#: inc/modules/privacy-policy/shortcode.php:356
+#: inc/modules/privacy-policy/shortcode.php:343
 #, php-format
 msgid "To work out which country your visit came from, this site sends your full IP address to a geolocation service operated by Brainstorm Force, the maker of the consent tool used on this site, at %1$s. The address is sent as part of the web address of that request, only the country comes back, and only the shortened address is stored here. That service is hosted in %2$s. Requests reach it through a content delivery network run by a company based in the %3$s, so that step can involve a transfer outside the European Economic Area. The result is cached for 24 hours, so a repeat visit within that time does not send it again."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:362
+#: inc/modules/privacy-policy/shortcode.php:349
 msgid "This site does not put your IP address in the record at all, not even a shortened form of it, and does not work out which country you are visiting from. Nothing about your address is sent anywhere when you answer the banner."
 msgstr ""
 
 #. translators: %d: number of days a stored choice lasts before the banner returns.
-#: inc/modules/privacy-policy/shortcode.php:369
+#: inc/modules/privacy-policy/shortcode.php:356
 #, php-format
 msgid "Separately from how long that record is kept, the choice saved in your browser lasts %d days. After that it expires and you will be asked again. If we ever need to ask everyone again sooner, for example because the categories on this site have changed, the banner will reappear and your previous choice stops applying."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:374
+#: inc/modules/privacy-policy/shortcode.php:361
 msgid "This site is set up so that non-essential cookies may run before you have answered the banner, and stop once you refuse them. Your record shows the point at which you refused, not the moment you arrived."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:377
+#: inc/modules/privacy-policy/shortcode.php:364
 msgid "These consent records are not covered by the personal-data erasure tool built into this site. Erasing your other data leaves the consent record in place, because it is the evidence that you were given a choice. If you want the record itself removed, ask us and we will remove it by hand."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:380
+#: inc/modules/privacy-policy/shortcode.php:367
 msgid "Your choice is also passed to Google's tags on this site as a consent signal, so that they can adjust what they do before any of them run."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:385
+#: inc/modules/privacy-policy/shortcode.php:372
 msgid "You can change or withdraw your choice at any time using the cookie preferences control on this site. Withdrawing does not undo anything that happened while your permission was in place."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:411
+#: inc/modules/privacy-policy/shortcode.php:398
 msgid "This site has not been scanned yet, so the third-party services it loads have not been identified."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:412
+#: inc/modules/privacy-policy/shortcode.php:399
 msgid "Run a scan under Tracking Manager, Scanning to fill this in."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:418
-#: inc/modules/privacy-policy/shortcode.php:470
+#: inc/modules/privacy-policy/shortcode.php:405
+#: inc/modules/privacy-policy/shortcode.php:457
 msgid "The most recent scan of this site found no third-party scripts or embedded content."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:475
+#: inc/modules/privacy-policy/shortcode.php:462
 msgid "Service"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:477
+#: inc/modules/privacy-policy/shortcode.php:464
 #: build/admin.js:3
 #: build/admin.js:13
 #: build/admin.js:34
@@ -1483,214 +1563,220 @@ msgid "Category"
 msgstr ""
 
 #. translators: %s: hostname of the geolocation service.
-#: inc/modules/privacy-policy/shortcode.php:501
+#: inc/modules/privacy-policy/shortcode.php:488
 #, php-format
 msgid "Your IP address is sent to %s to work out which country you are visiting from, so the right consent rules can be applied and recorded. Only the country comes back."
 msgstr ""
 
 #. translators: %s: hostname of the geolocation service.
-#: inc/modules/privacy-policy/shortcode.php:512
+#: inc/modules/privacy-policy/shortcode.php:499
 #, php-format
 msgid "Your IP address is sent to %s on page views to work out which country you are visiting from, so the right consent rules can be applied. Only the country comes back, and your address is not kept."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:518
+#: inc/modules/privacy-policy/shortcode.php:505
 msgid "The addresses of pages on this site are sent to our cookie scanning service on a schedule, so the cookie list above stays current. This is information about the site, not about you."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:522
+#: inc/modules/privacy-policy/shortcode.php:509
 msgid "Technical information about this site and its server is shared with the maker of the consent tool, because the site owner opted in to usage tracking. This is information about the site, not about you."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:527
+#: inc/modules/privacy-policy/shortcode.php:514
 msgid "Separately from what your browser loads, this site does not send any information about your visit to another service from its own server."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:531
+#: inc/modules/privacy-policy/shortcode.php:518
 msgid "Separately from the files your browser loads, this site sends a small amount of information to other services from its own server while handling your visit. Because this happens on our side, your browser settings cannot control it."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:563
+#: inc/modules/privacy-policy/shortcode.php:551
 msgid "Where your information is processed"
 msgstr ""
 
-#. translators: %s: country of establishment.
-#: inc/modules/privacy-policy/shortcode.php:568
+#. translators: %s: country of establishment whose English name takes "the", for example United Kingdom. Country names are not translated, matching the English country list the plugin uses elsewhere.
+#: inc/modules/privacy-policy/shortcode.php:559
+#, php-format
+msgid "We are based in the %s. Some of the services listed above process information in other countries."
+msgstr ""
+
+#. translators: %s: country of establishment whose English name takes no article, for example Germany. Country names are not translated, matching the English country list the plugin uses elsewhere.
+#: inc/modules/privacy-policy/shortcode.php:561
 #, php-format
 msgid "We are based in %s. Some of the services listed above process information in other countries."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:571
+#: inc/modules/privacy-policy/shortcode.php:564
 msgid "Some of the services listed above process information in other countries."
 msgstr ""
 
 #. translators: %s: the safeguard relied on for international transfers.
-#: inc/modules/privacy-policy/shortcode.php:576
+#: inc/modules/privacy-policy/shortcode.php:569
 #, php-format
 msgid "Where personal information is transferred out of your region, we rely on the following safeguard: %s"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:612
+#: inc/modules/privacy-policy/shortcode.php:605
 msgid "This site applies different cookie rules depending on the country you are visiting from, so the choices offered to you may differ from those offered elsewhere."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:615
+#: inc/modules/privacy-policy/shortcode.php:608
 msgid "This site applies the same cookie and privacy practices to every visitor, wherever they are."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:621
+#: inc/modules/privacy-policy/shortcode.php:614
 msgid "This site applies different cookie rules depending on where you are visiting from:"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:633
+#: inc/modules/privacy-policy/shortcode.php:626
 msgid "You can ask us what personal information we hold about you and ask for a copy of it. You can ask us to correct it if it is wrong, ask us to delete it, and object to us using it in a particular way. Where we rely on your permission, you can take that permission back at any time."
 msgstr ""
 
 #. translators: %d: number of days to respond to a request.
-#: inc/modules/privacy-policy/shortcode.php:644
+#: inc/modules/privacy-policy/shortcode.php:637
 #, php-format
 msgid "You can make any of these requests using the data request form on this site, and we aim to respond within %d days."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:647
+#: inc/modules/privacy-policy/shortcode.php:640
 msgid "You can make any of these requests using the data request form on this site."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:650
-msgid "To make any of these requests, use the contact details at the end of this policy. We will not charge you for a request and we will not treat you differently for making one."
+#: inc/modules/privacy-policy/shortcode.php:643
+msgid "To make any of these requests, use the contact details at the end of this policy. We will normally respond to requests without charge, although applicable data protection law allows fees or refusal in certain limited circumstances. We will not treat you differently for making a request."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:653
+#: inc/modules/privacy-policy/shortcode.php:646
 msgid "Some requests are limited by law. We may have to keep particular records to meet legal, accounting or security obligations, and where that applies to your request we will tell you which records and why."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:685
+#: inc/modules/privacy-policy/shortcode.php:678
 msgid "A section for this privacy law is switched on but is not finished yet."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:686
+#: inc/modules/privacy-policy/shortcode.php:679
 msgid "Complete the details this law requires under Compliance, Business Details, or turn the law off."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:704
+#: inc/modules/privacy-policy/shortcode.php:697
 msgid "Your California privacy rights"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:705
+#: inc/modules/privacy-policy/shortcode.php:698
 msgid "If you live in California, the California Consumer Privacy Act, as amended by the California Privacy Rights Act, gives you the right to know what personal information we collect about you and to get a copy of it, to have it corrected, to have it deleted, to limit how we use sensitive personal information, and not to be treated differently for asking."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:708
+#: inc/modules/privacy-policy/shortcode.php:701
 msgid "You also have the right to opt out of the sale or sharing of your personal information. This site does sell or share personal information as those terms are defined under California law, and you can opt out using the cookie preferences control on this site or by contacting us."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:709
+#: inc/modules/privacy-policy/shortcode.php:702
 msgid "You also have the right to opt out of the sale or sharing of your personal information. This site does not sell or share personal information as those terms are defined under California law."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:712
+#: inc/modules/privacy-policy/shortcode.php:705
 msgid "To make any of these requests, use the contact details at the end of this policy. We will confirm who you are before we act, and we will respond within the time the law allows. You can also appoint someone to make a request for you, as long as we can confirm they are acting for you."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:728
+#: inc/modules/privacy-policy/shortcode.php:721
 msgid "Your rights under India's Digital Personal Data Protection Act"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:729
+#: inc/modules/privacy-policy/shortcode.php:722
 msgid "If you are in India, the Digital Personal Data Protection Act, 2023 gives you the right to a summary of the personal data we hold about you and what we do with it, the right to have it corrected or erased, the right to have your grievance heard, the right to nominate someone to act for you if you die or become unable to act, and the right to withdraw your consent at any time."
 msgstr ""
 
 #. translators: 1: grievance officer name, 2: grievance officer email link.
-#: inc/modules/privacy-policy/shortcode.php:733
+#: inc/modules/privacy-policy/shortcode.php:726
 #, php-format
 msgid "Grievance Officer: %1$s. You can reach them at %2$s."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:748
+#: inc/modules/privacy-policy/shortcode.php:741
 msgid "Your rights under the GDPR"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:749
+#: inc/modules/privacy-policy/shortcode.php:742
 msgid "If you are in the European Economic Area, the General Data Protection Regulation gives you the right of access to your personal data, the right to have it corrected or erased, the right to restrict or object to how we use it, the right to receive it in a portable form, and the right to withdraw consent at any time without affecting anything done before you withdrew it."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:750
+#: inc/modules/privacy-policy/shortcode.php:743
 msgid "You also have the right to lodge a complaint with the data protection authority in the country where you live or work."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:762
+#: inc/modules/privacy-policy/shortcode.php:755
 msgid "Your rights in the United Kingdom"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:763
+#: inc/modules/privacy-policy/shortcode.php:756
 msgid "If you are in the United Kingdom, the UK GDPR gives you the right of access to your personal data, the right to have it corrected or erased, the right to restrict or object to how we use it, the right to receive it in a portable form, and the right to withdraw consent at any time."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:764
+#: inc/modules/privacy-policy/shortcode.php:757
 msgid "You can also complain to the Information Commissioner's Office, which is the UK supervisory authority for data protection."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:779
+#: inc/modules/privacy-policy/shortcode.php:772
 msgid "Children's privacy"
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:780
+#: inc/modules/privacy-policy/shortcode.php:773
 msgid "Whether and how this site collects information from children depends on what the site does, so the site owner describes it here."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:796
+#: inc/modules/privacy-policy/shortcode.php:789
 msgid "This site does not currently ask visitors for a cookie choice."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:800
+#: inc/modules/privacy-policy/shortcode.php:793
 msgid "Non-essential cookies may be set before you answer the banner, and stop once you refuse them."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:804
+#: inc/modules/privacy-policy/shortcode.php:797
 msgid "You are asked for a choice before non-essential cookies are used. Note that scripts are not blocked automatically, so some may run before you answer."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:807
+#: inc/modules/privacy-policy/shortcode.php:800
 msgid "Non-essential cookies are only set after you allow them through the cookie banner."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:821
+#: inc/modules/privacy-policy/shortcode.php:814
 msgid "These records are not deleted automatically. They stay on this site until someone removes them by hand. If you want yours removed, ask us using the contact details at the end of this policy."
 msgstr ""
 
 #. translators: %d: number of days consent records are kept.
-#: inc/modules/privacy-policy/shortcode.php:826
+#: inc/modules/privacy-policy/shortcode.php:819
 #, php-format
 msgid "These records are stored on this website and are deleted automatically once they are %d days old."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:841
+#: inc/modules/privacy-policy/shortcode.php:834
 msgid "If you are not happy with how we handle your request, you can complain to the Information Commissioner's Office in the United Kingdom, or to the data protection authority for your own country."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:844
+#: inc/modules/privacy-policy/shortcode.php:837
 msgid "If you are not happy with how we handle your request, you can complain to the data protection authority for your country."
 msgstr ""
 
 #. translators: %s: hostname of the geolocation service.
-#: inc/modules/privacy-policy/shortcode.php:867
+#: inc/modules/privacy-policy/shortcode.php:860
 #, php-format
 msgid "Because this site applies different cookie rules in different countries, your full IP address is sent to %s on page views as well, not only when you make a choice, so that the right rules can be applied before the banner is shown."
 msgstr ""
 
 #. translators: %s: hostname of the geolocation service.
-#: inc/modules/privacy-policy/shortcode.php:870
+#: inc/modules/privacy-policy/shortcode.php:863
 #, php-format
 msgid "Because this site applies different cookie rules in different countries, your full IP address is sent to %s on page views, so that the right rules can be applied before the banner is shown. It is not kept, and it is not part of the record of your choice."
 msgstr ""
 
 #. translators: %s: comma-separated list of partner sites.
-#: inc/modules/privacy-policy/shortcode.php:882
+#: inc/modules/privacy-policy/shortcode.php:875
 #, php-format
 msgid "Your choice is also passed to these related sites so that you do not have to answer the same question again: %s. The record sent contains the same fields listed above."
 msgstr ""
 
-#: inc/modules/privacy-policy/shortcode.php:944
+#: inc/modules/privacy-policy/shortcode.php:937
 #: build/admin.js:32
 #: build/admin.js:119
 #: build/onboarding.js:3
@@ -1868,7 +1954,7 @@ msgid "Sale or Sharing Declaration"
 msgstr ""
 
 #: inc/modules/re-consent/helper.php:43
-#: inc/utils/options.php:228
+#: inc/utils/options.php:242
 #: build/admin.js:13
 #: build/admin.js:102
 msgid "Cookie Preferences"
@@ -2380,108 +2466,108 @@ msgstr ""
 msgid "Catalog refreshed."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:166
+#: inc/services/script-blocking-service.php:169
 msgid "A resource domain and a target category are both required."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:179
-#: inc/services/script-blocking-service.php:438
+#: inc/services/script-blocking-service.php:182
+#: inc/services/script-blocking-service.php:441
 msgid "That category does not exist. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:196
+#: inc/services/script-blocking-service.php:199
 msgid "Resource category updated."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:235
+#: inc/services/script-blocking-service.php:238
 msgid "That resource was already excluded from blocking."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:236
+#: inc/services/script-blocking-service.php:239
 msgid "Resource excluded from blocking. Note this covers scripts and iframes only, not embed or object tags."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:258
+#: inc/services/script-blocking-service.php:261
 msgid "A resource domain is required."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:285
+#: inc/services/script-blocking-service.php:288
 msgid "Resource will be blocked again until consent."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:286
+#: inc/services/script-blocking-service.php:289
 msgid "That resource was not excluded, so nothing changed."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:366
+#: inc/services/script-blocking-service.php:369
 msgid "A valid category is required. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:373
+#: inc/services/script-blocking-service.php:376
 msgid "A rule for that pattern already exists. Use \"update_rule\" instead."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:382
+#: inc/services/script-blocking-service.php:385
 msgid "Blocking rule created."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:404
-#: inc/services/script-blocking-service.php:470
+#: inc/services/script-blocking-service.php:407
+#: inc/services/script-blocking-service.php:473
 msgid "No blocking rule matches that pattern. Use \"list_rules\" to see the current rules."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:422
+#: inc/services/script-blocking-service.php:425
 msgid "Another rule already uses that pattern."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:434
+#: inc/services/script-blocking-service.php:437
 msgid "That category is not a valid ID. Use surecookie/cookie-categories with action \"list\" to see valid IDs."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:449
+#: inc/services/script-blocking-service.php:452
 msgid "Blocking rule updated."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:480
+#: inc/services/script-blocking-service.php:483
 msgid "Blocking rule deleted. The resources it covered are no longer blocked by it."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:659
+#: inc/services/script-blocking-service.php:678
 msgid "A domain or URL pattern is required."
 msgstr ""
 
-#: inc/services/script-blocking-service.php:666
+#: inc/services/script-blocking-service.php:685
 msgid "That pattern is too broad. Patterns are matched as substrings, so a bare token like \"com\" would match nearly every third-party resource on the site. Use a full domain such as \"example.com\" or a URL path."
 msgstr ""
 
 #: inc/traits/placeholder-content.php:87
-#: inc/utils/options.php:322
+#: inc/utils/options.php:336
 msgid "Accept & Load"
 msgstr ""
 
-#: inc/traits/placeholder-content.php:296
+#: inc/traits/placeholder-content.php:305
 msgid "This content is blocked while the site owner reviews it."
 msgstr ""
 
-#: inc/traits/placeholder-content.php:297
-#: inc/utils/localize-data.php:676
+#: inc/traits/placeholder-content.php:306
+#: inc/utils/localize-data.php:684
 msgid "This content is currently blocked."
 msgstr ""
 
 #. translators: %s: the blocked service or host name.
-#: inc/traits/placeholder-content.php:304
+#: inc/traits/placeholder-content.php:313
 #, php-format
 msgid "SureCookie is holding %s for review. Approve or release it under Scanning, Pending Review."
 msgstr ""
 
 #. translators: %s: Service name (e.g., YouTube, Google Maps)
-#: inc/traits/placeholder-content.php:320
-#: inc/utils/localize-data.php:678
+#: inc/traits/placeholder-content.php:329
+#: inc/utils/localize-data.php:686
 #, php-format
 msgid "Accept and load %s content"
 msgstr ""
 
-#: inc/utils/localize-data.php:361
+#: inc/utils/localize-data.php:369
 #: build/admin.js:13
 #: build/admin.js:74
 #: build/onboarding.js:9
@@ -2489,7 +2575,7 @@ msgstr ""
 msgid "Powered by"
 msgstr ""
 
-#: inc/utils/localize-data.php:648
+#: inc/utils/localize-data.php:656
 msgid "Pages"
 msgstr ""
 
@@ -2497,7 +2583,7 @@ msgstr ""
 msgid "We use cookies to improve your experience. You can change your choice at any time."
 msgstr ""
 
-#: inc/utils/options.php:73
+#: inc/utils/options.php:82
 #: build/admin.js:8
 #: build/admin.js:74
 #: build/onboarding.js:9
@@ -2505,7 +2591,7 @@ msgstr ""
 msgid "Only Essential"
 msgstr ""
 
-#: inc/utils/options.php:85
+#: inc/utils/options.php:94
 #: build/admin.js:8
 #: build/admin.js:74
 #: build/onboarding.js:9
@@ -2513,7 +2599,7 @@ msgstr ""
 msgid "Accept All"
 msgstr ""
 
-#: inc/utils/options.php:91
+#: inc/utils/options.php:100
 #: build/admin.js:8
 #: build/admin.js:74
 #: build/onboarding.js:9
@@ -2521,11 +2607,11 @@ msgstr ""
 msgid "Decline"
 msgstr ""
 
-#: inc/utils/options.php:97
+#: inc/utils/options.php:106
 msgid "Cookie Settings"
 msgstr ""
 
-#: inc/utils/options.php:188
+#: inc/utils/options.php:197
 #: build/admin.js:2
 #: build/admin.js:3
 #: build/admin.js:8
@@ -2535,15 +2621,15 @@ msgstr ""
 msgid "Preferences"
 msgstr ""
 
-#: inc/utils/options.php:194
+#: inc/utils/options.php:203
 msgid "Privacy Preference"
 msgstr ""
 
-#: inc/utils/options.php:199
+#: inc/utils/options.php:208
 msgid "We use cookies and similar technologies to help personalize content, tailor and measure ads, and provide a better experience."
 msgstr ""
 
-#: inc/utils/options.php:317
+#: inc/utils/options.php:331
 msgid "This content is blocked because it would connect to {service}."
 msgstr ""
 
@@ -2588,278 +2674,286 @@ msgid "Forces a consent choice before the site can be used, which conflicts with
 msgstr ""
 
 #: inc/utils/settings-metadata.php:97
+msgid "Render the banner, the preferences window and every blocked-embed placeholder in the theme's own font instead of the bundled one, and stop both bundled font files from being downloaded. The banner then inherits whatever the theme sets, including a decorative display face; Custom CSS still overrides it."
+msgstr ""
+
+#: inc/utils/settings-metadata.php:100
 msgid "Master switch for the consent banner."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:98
+#: inc/utils/settings-metadata.php:101
 msgid "Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:101
+#: inc/utils/settings-metadata.php:104
 msgid "Absolute URL of an image shown at the top of the banner. Empty string removes it."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:104
+#: inc/utils/settings-metadata.php:107
+msgid "Rendered height of the banner logo in pixels, 16 to 120. The width follows the image's own proportions."
+msgstr ""
+
+#: inc/utils/settings-metadata.php:110
 msgid "Plain-text headline above the banner message. HTML is stripped. Empty renders no heading."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:107
+#: inc/utils/settings-metadata.php:113
 msgid "Banner body copy. Accepts post-level HTML such as links and emphasis."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:113
+#: inc/utils/settings-metadata.php:119
 msgid "Site-wide consent model: \"opt-in\" (GDPR style, nothing non-essential runs before consent) or \"opt-out\" (CCPA style, allowed until the visitor declines)."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:114
+#: inc/utils/settings-metadata.php:120
 msgid "Legally load-bearing. \"opt-out\" lets non-essential trackers fire before any consent, which is unlawful for EU and UK visitors, and it removes the Preferences and Accept All buttons. Confirm the site's jurisdiction with the user before changing it."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:117
+#: inc/utils/settings-metadata.php:123
 msgid "An {id, name} object naming the regulation the site declares it follows. Only \"name\" is read, and only for usage telemetry, so this does not change banner or blocking behaviour."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:121
+#: inc/utils/settings-metadata.php:127
 msgid "How long consent log rows are kept before the daily cleanup cron deletes them. Note the token format is \"<days>_days\", not a bare number."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:122
+#: inc/utils/settings-metadata.php:128
 msgid "Destructive. Shortening this makes the next cron run permanently delete every consent row older than the new window, erasing the proof-of-consent evidence GDPR Article 7(1) requires. Read the current value and confirm before lowering it."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:125
+#: inc/utils/settings-metadata.php:131
 msgid "Master switch for pre-consent script and iframe blocking."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:126
+#: inc/utils/settings-metadata.php:132
 msgid "Turning this off lets analytics and marketing tags fire before consent is collected. It is the single most compliance-significant setting after consent_model."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:129
+#: inc/utils/settings-metadata.php:135
 msgid "Whether the banner offers an Accept All button."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:130
+#: inc/utils/settings-metadata.php:136
 msgid "Not cosmetic: with it off the consent-log endpoint rejects every accept-all record with HTTP 422, so existing integrations that post one will start failing."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:133
+#: inc/utils/settings-metadata.php:139
 msgid "Whether uninstalling the plugin also deletes its data."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:134
+#: inc/utils/settings-metadata.php:140
 msgid "Arms an irreversible action: on uninstall it drops the consent-log table and deletes every SureCookie option. Never enable it without explicit user confirmation."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:137
+#: inc/utils/settings-metadata.php:143
 msgid "UNIX timestamp in seconds of the last \"re-request consent\" action. Any consent recorded before this instant is treated as stale."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:138
+#: inc/utils/settings-metadata.php:144
 msgid "Writing the current time invalidates every visitor's existing consent and shows the banner again site-wide. Only set it when the user explicitly asks to re-collect consent."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:141
+#: inc/utils/settings-metadata.php:147
 msgid "Whether SureCookie registers its WordPress Abilities and MCP server."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:142
+#: inc/utils/settings-metadata.php:148
 msgid "Self-locking: writing false through this ability deregisters every SureCookie ability on the next request, so no AI client can turn it back on. It can only be re-enabled from wp-admin."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:147
+#: inc/utils/settings-metadata.php:153
 msgid "Whether SureCookie emits Google Consent Mode v2 signals (a gtag consent default in the head, and a consent update once the visitor chooses)."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:148
+#: inc/utils/settings-metadata.php:154
 msgid "Turning this on also exempts Google services, Tag Manager included, from script blocking, because Consent Mode is expected to restrain them instead. Non-Google tags deployed inside Tag Manager are not covered by that and will load before consent unless each one carries its own consent check."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:151
+#: inc/utils/settings-metadata.php:157
 msgid "Milliseconds Google services wait for a consent update before acting on the default. Clamped to 0-2000."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:154
+#: inc/utils/settings-metadata.php:160
 msgid "A {functional, analytics, marketing} map giving the consent state Google services assume for a visitor who has not answered the banner yet. Marketing drives four signals: ad_storage, ad_user_data, ad_personalization and personalization_storage."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:155
+#: inc/utils/settings-metadata.php:161
 msgid "Legally load-bearing, and ships all-denied for a reason. Granting a category here tells Google the visitor consented before they were asked, so tags fire on the first page view and a later decline cannot undo it. The banner still looks like it is working, which is what makes this the easiest setting to get wrong."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:158
+#: inc/utils/settings-metadata.php:164
 msgid "Per-region overrides of gcm_default_consent, each an {region[], functional, analytics, marketing} entry. Google applies the most specific match, so US-CA beats US. Ships with one EU rule denying everything."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:159
+#: inc/utils/settings-metadata.php:165
 msgid "Deleting the shipped EU rule drops EU and EEA visitors onto the worldwide baseline in gcm_default_consent, which is unlawful there if that baseline grants anything. Removing a rule is silent, with no warning in the UI."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:164
+#: inc/utils/settings-metadata.php:170
 msgid "Order of the banner buttons in reading order (mirrored on right-to-left pages), as a comma-separated list of the tokens accept_all, accept (essential only), preferences and decline. A token left out is hidden. Keep accept_all in the order and hide it with accept_all_enabled, which Geographic Targeting rules and the consent log also read."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:165
+#: inc/utils/settings-metadata.php:171
 msgid "Preferences and at least one of accept or decline are always kept: a value without them has them appended, and unknown or repeated tokens are dropped. A value naming no known token is refused and the stored order kept."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:168
+#: inc/utils/settings-metadata.php:174
 msgid "Label for the essential-only button. Empty falls back to the translated \"Only Essential\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:169
+#: inc/utils/settings-metadata.php:175
 msgid "This is not the Accept All button, which is accept_all_btn_text. Labelling it \"Accept\" misrepresents what the visitor is consenting to."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:172
+#: inc/utils/settings-metadata.php:178
 msgid "Label for the Accept All button. Empty falls back to the translated \"Accept All\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:175
+#: inc/utils/settings-metadata.php:181
 msgid "Label for the Decline button. Empty falls back to the translated \"Decline\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:178
+#: inc/utils/settings-metadata.php:184
 msgid "Label for the Preferences button, which opens the category choices. Empty falls back to the translated \"Preferences\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:183
+#: inc/utils/settings-metadata.php:189
 msgid "Pro banner colour override, shaped {mode, colors}. Send mode \"custom\" together with the colors map."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:184
+#: inc/utils/settings-metadata.php:190
 msgid "Writing colors while mode stays \"preset\" is a silent no-op: color_palette continues to win and the write still reports success."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:187
+#: inc/utils/settings-metadata.php:193
 msgid "Raw CSS inlined on every frontend page to restyle the banner and preferences modal. Requires the unfiltered_html capability."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:192
+#: inc/utils/settings-metadata.php:198
 msgid "The consent-category registry the whole consent model derives from. Readable here, but edit it with the surecookie/cookie-categories ability."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:195
+#: inc/utils/settings-metadata.php:201
 msgid "The manually declared cookie registry shown in the preferences modal. Readable here, but edit it with the surecookie/cookie-management ability."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:200
+#: inc/utils/settings-metadata.php:206
 msgid "Saved manual scan selection, as {label, value} rows whose value is a published post ID. Prefer the surecookie/site-scanner ability with action \"start\", which resolves and validates the rows for you."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:203
+#: inc/utils/settings-metadata.php:209
 msgid "Master switch for unattended scheduled scanning. Enabling it schedules the WP-Cron event."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:206
+#: inc/utils/settings-metadata.php:212
 msgid "Cadence of the automatic scan. \"monthly\" always works; \"weekly\" requires SureCookie Pro. A theme or plugin can register more."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:207
+#: inc/utils/settings-metadata.php:213
 msgid "The clamp is silent: an unsupported value, including \"weekly\" without Pro, is reported as saved but stores \"monthly\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:211
+#: inc/utils/settings-metadata.php:217
 msgid "What the automatic scan crawls: \"same_as_manual\" reuses scan_pages, \"all_published\" walks published content up to the plan limit, \"selected\" uses auto_scan_pages."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:214
+#: inc/utils/settings-metadata.php:220
 msgid "Content the automatic scan crawls when auto_scan_scope is \"selected\". Accepts picker rows or bare post IDs, and is ignored under any other scope."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:219
+#: inc/utils/settings-metadata.php:225
 msgid "Scan-detected resources marked \"do not block\", keyed per kind as \"script::example.com\" or \"iframe::example.com\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:222
+#: inc/utils/settings-metadata.php:228
 msgid "Category reassignment for scan-detected scripts and iframes, mapping the same scoped key format as excluded_scan_resources to a cookie category ID."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:225
+#: inc/utils/settings-metadata.php:231
 msgid "Admin-authored blocking rules. Each row needs a non-empty \"value\" URL or domain pattern and a \"category\", optionally narrowed by type, location, path and keywords."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:230
+#: inc/utils/settings-metadata.php:236
 msgid "Absolute URL of the fallback image on the placeholder that replaces blocked embeds. Empty renders a text-only placeholder."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:233
+#: inc/utils/settings-metadata.php:239
 msgid "Body copy of the blocked-content placeholder. Keep the literal token {service}, which is replaced with the vendor name at render time."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:236
+#: inc/utils/settings-metadata.php:242
 msgid "Label of the consent button on the blocked-content placeholder. Empty renders the built-in \"Accept & Load\"."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:239
+#: inc/utils/settings-metadata.php:245
 msgid "Show a blocked video's own thumbnail on the placeholder. Currently resolves YouTube URLs only."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:244
+#: inc/utils/settings-metadata.php:250
 msgid "Post ID of the cookie policy page linked from the preferences modal. 0 means none is linked."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:245
+#: inc/utils/settings-metadata.php:251
 msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks the policy page."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:248
+#: inc/utils/settings-metadata.php:254
 msgid "Post ID of the SureCookie-managed privacy policy page. 0 means none is linked."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:249
+#: inc/utils/settings-metadata.php:255
 msgid "This is not WordPress's own wp_page_for_privacy_policy option. Writing it does not change the page WordPress links from the footer or the login screen, nor the one the consent modal links, which reads core's option first and falls back to this only when core has no published policy; use the \"Use as WordPress Privacy Policy page\" action to make them agree."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:252
+#: inc/utils/settings-metadata.php:258
 msgid "Which legal links the preferences modal shows and in what order, as a comma-separated list of the tokens cookie_policy, privacy_policy and legal_notice. A token left out is hidden. An empty string hides all three."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:253
+#: inc/utils/settings-metadata.php:259
 msgid "Hiding a link does not unpublish its page, but with the banner overlay on the consent UI is the only place a visitor can reach it."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:256
+#: inc/utils/settings-metadata.php:262
 msgid "Post ID of the legal notice / imprint (Impressum) page linked from the preferences modal. 0 means none is linked."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:257
+#: inc/utils/settings-metadata.php:263
 msgid "Sanitized with absint, so a non-numeric or negative value becomes 0 and silently unlinks a page several jurisdictions require to stay reachable."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:260
+#: inc/utils/settings-metadata.php:266
 msgid "Privacy regimes whose sections appear in the generated privacy policy. Empty means none."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:262
+#: inc/utils/settings-metadata.php:268
 msgid "A legal declaration, not a display toggle. Enabling a regime the site is not subject to publishes commitments it may not be able to meet."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:265
+#: inc/utils/settings-metadata.php:271
 msgid "Controller identity shown as \"Business Details\": legal entity name, postal address lines, postal code, country, privacy contact email, grievance officer, transfer safeguard text and the CCPA sale/share declaration."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:266
+#: inc/utils/settings-metadata.php:272
 msgid "Stored as one nested value, so a partial write replaces every sibling field. Read, merge, then write. Clearing the entity name, address, country or contact email blocks publishing the generated policy and escalates the in-product notice on an already published one."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:269
+#: inc/utils/settings-metadata.php:275
 msgid "Term ID of the nav menu that receives the virtual \"Cookie Preferences\" item, as a numeric string. Empty string injects nothing."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:272
+#: inc/utils/settings-metadata.php:278
 msgid "Whether SureCookie gets its own top-level admin menu rather than living under Settings."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:278
+#: inc/utils/settings-metadata.php:284
 msgid "Admin-only preview panel state. No effect on the public site."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:282
+#: inc/utils/settings-metadata.php:288
 msgid "Unused."
 msgstr ""
 
-#: inc/utils/settings-metadata.php:286
+#: inc/utils/settings-metadata.php:292
 msgid "Internal counter mirroring the consent-log table."
 msgstr ""
 
@@ -2868,6 +2962,7 @@ msgstr ""
 #: build/admin.js:59
 #: build/admin.js:74
 #: build/admin.js:102
+#: build/admin.js:105
 #: build/admin.js:110
 #: build/admin.js:111
 #: build/admin.js:114
@@ -3457,6 +3552,10 @@ msgid "Pick an image from your Media Library to show in the banner, so visitors 
 msgstr ""
 
 #: build/admin.js:3
+msgid "Use Logo Height to set how tall it appears, from 16 to 120 pixels."
+msgstr ""
+
+#: build/admin.js:3
 #: build/admin.js:8
 msgid "Banner Type"
 msgstr ""
@@ -3508,6 +3607,15 @@ msgstr ""
 
 #: build/admin.js:3
 msgid "Darkens the page behind the banner and stops scrolling until the visitor makes a choice. Check that this suits the consent rules in your region."
+msgstr ""
+
+#: build/admin.js:3
+#: build/admin.js:8
+msgid "Use Site Fonts"
+msgstr ""
+
+#: build/admin.js:3
+msgid "Let the banner take your theme’s font instead of the one SureCookie bundles, which also saves your visitors the font download."
 msgstr ""
 
 #: build/admin.js:3
@@ -3609,10 +3717,6 @@ msgstr ""
 
 #: build/admin.js:3
 msgid "The check will scan your site like a visitor, show what loads before consent, and suggest fixes. Items marked Pro need SureCookie Pro."
-msgstr ""
-
-#: build/admin.js:3
-msgid "SureCookie Pro"
 msgstr ""
 
 #: build/admin.js:3
@@ -4225,6 +4329,16 @@ msgstr ""
 
 #: build/admin.js:3
 #: build/admin.js:102
+msgid "Custom Class or ID"
+msgstr ""
+
+#: build/admin.js:3
+#: build/admin.js:102
+msgid "Enter the classes or IDs of your own links, buttons or menu items. When clicked, any element carrying one opens the consent preferences modal directly."
+msgstr ""
+
+#: build/admin.js:3
+#: build/admin.js:102
 msgid "Floating Widget"
 msgstr ""
 
@@ -4549,6 +4663,7 @@ msgstr ""
 #: build/admin.js:59
 #: build/admin.js:74
 #: build/admin.js:102
+#: build/admin.js:105
 #: build/admin.js:110
 #: build/admin.js:111
 #: build/admin.js:114
@@ -4632,6 +4747,14 @@ msgid "Use this logo"
 msgstr ""
 
 #: build/admin.js:8
+msgid "Logo Height"
+msgstr ""
+
+#: build/admin.js:8
+msgid "px"
+msgstr ""
+
+#: build/admin.js:8
 #: build/onboarding.js:37
 msgid "Floating Banner"
 msgstr ""
@@ -4639,10 +4762,6 @@ msgstr ""
 #: build/admin.js:8
 #: build/onboarding.js:37
 msgid "Full-width Banner"
-msgstr ""
-
-#: build/admin.js:8
-msgid "px"
 msgstr ""
 
 #: build/admin.js:8
@@ -4700,6 +4819,10 @@ msgstr ""
 
 #: build/admin.js:8
 msgid "This layout highlights the consent banner and may affect user experience. Ensure it aligns with your regional consent requirements."
+msgstr ""
+
+#: build/admin.js:8
+msgid "Show the banner, the preferences window and blocked embed placeholders in your theme’s font instead of the one SureCookie bundles. This also stops the bundled font files from being downloaded."
 msgstr ""
 
 #: build/admin.js:8
@@ -5467,13 +5590,6 @@ msgstr ""
 msgid "All Categories"
 msgstr ""
 
-#: build/admin.js:40
-#: build/admin.js:105
-#: build/admin.js:119
-#: build/admin.js:127
-msgid "Pro"
-msgstr ""
-
 #. translators: %d: number of cookies
 #. translators: %d: number of cookies found
 #: build/admin.js:41
@@ -5880,6 +5996,14 @@ msgstr ""
 
 #: build/admin.js:59
 msgid "Add custom CSS to style your cookie banner. Changes will be reflected in both preview and frontend after saving."
+msgstr ""
+
+#: build/admin.js:59
+msgid "You cannot edit custom CSS on this account"
+msgstr ""
+
+#: build/admin.js:59
+msgid "Saving custom CSS needs the unfiltered_html permission, which this account does not have. Any CSS already saved still applies to your banner, and a Super Admin can change it for you."
 msgstr ""
 
 #: build/admin.js:59
@@ -7313,10 +7437,6 @@ msgid "The label shown on the Cookie Preferences link."
 msgstr ""
 
 #: build/admin.js:102
-msgid "Custom Class or ID"
-msgstr ""
-
-#: build/admin.js:102
 msgid "Select a WordPress menu to automatically add the Cookie Preferences link to it. When clicked, it opens the consent preferences modal directly."
 msgstr ""
 
@@ -7351,10 +7471,6 @@ msgstr ""
 #: build/admin.js:102
 #: build/admin.js:111
 msgid "Copy shortcode"
-msgstr ""
-
-#: build/admin.js:102
-msgid "Enter the classes or IDs of your own links, buttons or menu items. When clicked, any element carrying one opens the consent preferences modal directly."
 msgstr ""
 
 #: build/admin.js:102
@@ -7447,6 +7563,14 @@ msgid "Close"
 msgstr ""
 
 #: build/admin.js:104
+msgid "Promotion"
+msgstr ""
+
+#: build/admin.js:104
+msgid "Dismiss promotion"
+msgstr ""
+
+#: build/admin.js:104
 msgid "Shows your default banner, the one visitors see when no Geographic Rule applies. Turning this on closes any rule preview."
 msgstr ""
 
@@ -7492,6 +7616,11 @@ msgid "Knowledge Base"
 msgstr ""
 
 #: build/admin.js:105
+#: build/onboarding.js:37
+msgid "Retry"
+msgstr ""
+
+#: build/admin.js:105
 msgid "Cannot be blocked"
 msgstr ""
 
@@ -7501,6 +7630,14 @@ msgstr ""
 
 #: build/admin.js:105
 msgid "This resource is in a category that is never held back, so it loads before consent. Move it to another category to have it blocked."
+msgstr ""
+
+#: build/admin.js:105
+msgid "May load as an image"
+msgstr ""
+
+#: build/admin.js:105
+msgid "This row's recorded address ends in an image file, and SureCookie never holds back an image. Check how this one loads on your site before you record it as blocked."
 msgstr ""
 
 #: build/admin.js:105
@@ -9061,7 +9198,7 @@ msgstr ""
 #. translators: %s: source plugin name.
 #: build/admin.js:138
 #, js-format
-msgid "Importing from %s overwrites your current SureCookie configuration, including how consent is asked for. This cannot be undone."
+msgid "Importing from %s overwrites your current SureCookie configuration, including how consent is asked for. SureCookie saves what it replaces first, so your previous settings are not lost."
 msgstr ""
 
 #: build/admin.js:138
@@ -10305,10 +10442,6 @@ msgstr ""
 
 #: build/onboarding.js:37
 msgid "Retrying…"
-msgstr ""
-
-#: build/onboarding.js:37
-msgid "Retry"
 msgstr ""
 
 #. translators: %d: number of things already working

@@ -41,7 +41,6 @@
 #surecookie-public-root,
 #surecookie-preferences-root,
 :is(#surecookie-public-root, #surecookie-preferences-root) * {
-	font-family: "SureCookie Figtree", sans-serif !important;
 	box-sizing: border-box;
 	letter-spacing: normal;
 	word-spacing: normal;
@@ -314,8 +313,11 @@
 	display: block;
 	flex-shrink: 0;
 }
+/* Deliberately left unscoped, unlike the container-scoped rules around it: at
+   one class of specificity a site owner's own .surecookie-banner-logo rule
+   still wins, which is the whole point of offering the height as a setting. */
 .surecookie-banner-logo {
-	height: 24px;
+	height: var(--surecookie-banner-logo-height, 24px);
 	width: auto;
 	margin-bottom: 20px;
 	display: block;
@@ -1232,7 +1234,6 @@
 	width: 100%;
 	max-width: 100%;
 	border: 0;
-	font-family: "SureCookie Figtree", sans-serif;
 }
 /*
  * WordPress responsive embeds (.wp-has-aspect-ratio) reserve their height with a
@@ -1333,7 +1334,6 @@
 	cursor: pointer;
 	font-size: 14px;
 	font-weight: 500;
-	font-family: "SureCookie Figtree", sans-serif;
 	transition: background-color 0.2s ease;
 	box-shadow: none;
 	text-decoration: none;
@@ -1363,6 +1363,12 @@
 	padding: 0;
 	display: none;
 	z-index: 1;
+}
+/* The admin's own fallback image is a service logo, not a video still, so it is
+   shown whole. `scale-down` rather than `contain`: the box is the embed's size,
+   and `contain` would blow a small logo up to fill it. */
+.surecookie-placeholder.surecookie-placeholder .surecookie-placeholder-image-fallback {
+	object-fit: scale-down;
 }
 .surecookie-placeholder.surecookie-pending .surecookie-placeholder-image {
 	display: block;

@@ -459,10 +459,29 @@ class Get {
 	 * blocker gated it reaches All Cookies AND the public cookie policy. Read
 	 * the option directly where you intend to write it back.
 	 *
+	 * Shadowing is applied here, after the filter, so every surface that LISTS or
+	 * COUNTS cookies shares one answer and a moved cookie is neither printed nor
+	 * tallied twice (#1237, #1608). Service attribution must not read this set:
+	 * a shadowed row still proves its service receives data, so
+	 * {@see self::declared_cookie_slugs()} reads the unshadowed set instead.
+	 *
 	 * @since 1.5.0
 	 * @return array<string, mixed> Cookies grouped by category id.
 	 */
 	public static function scanned_cookies_for_display(): array {
+		return self::unshadowed( self::scanned_cookies_filtered() );
+	}
+
+	/**
+	 * The scan-observed set with `surecookie_scanned_cookies` applied, nothing dropped.
+	 *
+	 * Private because no display surface may read it: it is the input to shadowing,
+	 * and the one thing service attribution needs that the shadowed set cannot give.
+	 *
+	 * @since 1.9.0
+	 * @return array<string, mixed> Cookies grouped by category id.
+	 */
+	private static function scanned_cookies_filtered(): array {
 		/**
 		 * Filter: the scan-observed cookie set, grouped by category id.
 		 *
@@ -482,30 +501,94 @@ class Get {
 	}
 
 	/**
-	 * The scan-observed set without any cookie a custom row already describes.
+	 * Custom-row categories, keyed by every identity a scanned row can be shadowed on.
 	 *
 	 * A custom cookie is the admin's own record, whether authored by hand or added by a
 	 * Known Service, so on the same identity (name and domain, leading dot ignored) it
 	 * wins wherever it sits and in whichever category. The same name on another domain is
 	 * another cookie and stays. A first-party catalog row is matched on name alone, as a
-	 * site has one `_ga` whichever label of its host the scanner saw it on. One rule for
-	 * the cookie policy, All Cookies and the public payload, or each lists its own
-	 * duplicates (#1237).
+	 * site has one `_ga` whichever label of its host the scanner saw it on.
 	 *
-	 * @since 1.6.1
-	 * @return array<string, mixed> Cookies grouped by category id.
+	 * @since 1.9.0
+	 * @return array{0: array<string, string>, 1: array<string, string>} Full keys, then name-only keys.
 	 */
-	public static function scanned_cookies_unshadowed(): array {
-		$scanned = self::scanned_cookies_for_display();
-		$keys    = [];
-		$names   = [];
+	private static function custom_shadow_index(): array {
+		$registered = self::registered_category_ids();
+		$keys       = [];
+		$names      = [];
 
-		foreach ( self::formatted_custom_cookies() as $rows ) {
+		foreach ( self::formatted_custom_cookies() as $category_id => $rows ) {
+			// A row filed under an id no category has (deleted, or mis-cased) renders
+			// nowhere, so it may not hide the scanned row that still does. Left to
+			// shadow, it took the cookie off the policy and its category out of
+			// categories_in_use() while the cookie was still being set.
+			if ( ! isset( $registered[ (string) $category_id ] ) ) {
+				continue;
+			}
+
 			foreach ( $rows as $row ) {
-				$keys[ Cookie_Identity::key_for( $row ) ]                    = true;
-				$names[ Cookie_Identity::name_key( (string) $row['name'] ) ] = true;
+				$keys[ Cookie_Identity::key_for( $row ) ]                    = (string) $category_id;
+				$names[ Cookie_Identity::name_key( (string) $row['name'] ) ] = (string) $category_id;
 			}
 		}
+
+		return [ $keys, $names ];
+	}
+
+	/**
+	 * Configured cookie-category ids, as a lookup.
+	 *
+	 * @since 1.9.0
+	 * @return array<string, true>
+	 */
+	private static function registered_category_ids(): array {
+		$ids = [];
+
+		foreach ( (array) Settings::get( 'cookie_categories' ) as $key => $category ) {
+			$id         = is_array( $category ) ? Sanitize::scalar( $category['id'] ?? '' ) : '';
+			$id         = $id !== '' ? $id : (string) $key;
+			$ids[ $id ] = true;
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * The category a custom row has claimed this scanned row under, or null when none has.
+	 *
+	 * @since 1.9.0
+	 * @param mixed                 $row   Scanned cookie row.
+	 * @param array<string, string> $keys  Full identity keys to category.
+	 * @param array<string, string> $names Name-only keys to category.
+	 * @return string|null
+	 */
+	private static function shadow_category( $row, array $keys, array $names ): ?string {
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+
+		$key = Cookie_Identity::key_for( $row );
+		if ( isset( $keys[ $key ] ) ) {
+			return $keys[ $key ];
+		}
+
+		$name = Cookie_Identity::name_key( (string) ( $row['name'] ?? '' ) );
+
+		return Cookie_Identity::is_first_party( $row ) && isset( $names[ $name ] ) ? $names[ $name ] : null;
+	}
+
+	/**
+	 * Drop any scanned row a custom cookie row already describes.
+	 *
+	 * One rule for the cookie policy, All Cookies and the public payload, or each lists
+	 * its own duplicates (#1237).
+	 *
+	 * @since 1.6.1
+	 * @param array<string, mixed> $scanned Cookies grouped by category id.
+	 * @return array<string, mixed> Cookies grouped by category id.
+	 */
+	private static function unshadowed( array $scanned ): array {
+		[ $keys, $names ] = self::custom_shadow_index();
 
 		if ( $keys === [] ) {
 			return $scanned;
@@ -519,11 +602,7 @@ class Get {
 			$scanned[ $category_id ] = array_values(
 				array_filter(
 					$rows,
-					static function ( $row ) use ( $keys, $names ): bool {
-						return ! is_array( $row )
-							|| ! ( isset( $keys[ Cookie_Identity::key_for( $row ) ] )
-								|| ( Cookie_Identity::is_first_party( $row ) && isset( $names[ Cookie_Identity::name_key( (string) ( $row['name'] ?? '' ) ) ] ) ) );
-					}
+					static fn( $row ) => self::shadow_category( $row, $keys, $names ) === null
 				)
 			);
 		}
@@ -572,7 +651,7 @@ class Get {
 	 * @return array<int, array<string, mixed>> Flat array of scanned cookies.
 	 */
 	public static function all_scanned_cookies(): array {
-		$scanned_raw = self::scanned_cookies_unshadowed();
+		$scanned_raw = self::scanned_cookies_for_display();
 
 		$flat = [];
 
@@ -873,6 +952,34 @@ class Get {
 	 */
 	public static function clear_category_usage_cache(): void {
 		self::$category_usage_memo = null;
+	}
+
+	/**
+	 * The frontend's only declaration of the banner font family.
+	 *
+	 * Nothing in the stylesheet names the bundled family, so an optimiser that
+	 * moves or injects `style.css` cannot decide the font by source order (#1638).
+	 * Always emits: `style.css` resets the banner root with `all: initial`, so this
+	 * is the only thing giving the banner a font, and the `!important` is what
+	 * beats that reset at equal specificity. Keep the bare `.surecookie-styles`
+	 * arm - every blocked-embed placeholder carries that class, outside both roots.
+	 * The `#surecookie-admin-root` arms stay out: wp-admin has no theme font and
+	 * takes the bundled family from `src/shared/_base.scss`.
+	 * Guarded by BannerFontCssTest.
+	 *
+	 * @since 1.9.0
+	 * @return string
+	 */
+	public static function banner_font_css(): string {
+		$family = empty( Settings::get( 'use_site_fonts' ) ) ? '"SureCookie Figtree", sans-serif' : 'inherit';
+
+		return ".surecookie-styles,\n"
+			. ".surecookie-styles *,\n"
+			. "#surecookie-public-root,\n"
+			. "#surecookie-preferences-root,\n"
+			. ":is(#surecookie-public-root, #surecookie-preferences-root) * {\n"
+			. "\tfont-family: {$family} !important;\n"
+			. '}';
 	}
 
 	/**
@@ -1377,19 +1484,29 @@ class Get {
 	 * registry, for the reason Recognised_Services documents: the two diverge
 	 * whenever a service was removed after a scan had already stored its rows.
 	 *
+	 * Reads the UNSHADOWED set and re-files, because a custom row replaces how a
+	 * cookie is presented, never the fact that its service receives data. Reading
+	 * the shadowed set instead dropped the recipient and its transfer countries
+	 * from the preferences window as soon as an admin edited that cookie, even
+	 * without recategorizing it (#1608).
+	 *
 	 * @since 1.7.0
 	 * @return array<string, array<int, string>>
 	 */
-	private static function declared_cookie_slugs(): array {
-		$slugs = [];
+	public static function declared_cookie_slugs(): array {
+		$slugs            = [];
+		[ $keys, $names ] = self::custom_shadow_index();
 
-		foreach ( self::scanned_cookies_for_display() as $category_id => $rows ) {
+		foreach ( self::scanned_cookies_filtered() as $category_id => $rows ) {
 			foreach ( is_array( $rows ) ? $rows : [] as $row ) {
 				// 'declared:{slug}:{name}', the contract reconciliation matches on.
 				$parts = is_array( $row ) ? explode( ':', Sanitize::scalar( $row['signature_id'] ?? '' ), 3 ) : [];
 
 				if ( count( $parts ) === 3 && $parts[0] === 'declared' && $parts[1] !== '' ) {
-					$slugs[ (string) $category_id ][ $parts[1] ] = true;
+					// The custom row's category wins: it is where this cookie now sits,
+					// so it is the toggle that really governs the service.
+					$effective                        = self::shadow_category( $row, $keys, $names ) ?? (string) $category_id;
+					$slugs[ $effective ][ $parts[1] ] = true;
 				}
 			}
 		}

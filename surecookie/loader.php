@@ -19,6 +19,7 @@ use SureCookie\Core\Frontend as Frontend_App;
 use SureCookie\Core\Maintenance;
 use SureCookie\Inc\API\Init as API_Initializer;
 use SureCookie\Inc\Database\Init as DB_Initializer;
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Integrations\Init as Integrations_Initializer;
 use SureCookie\Inc\Integrations\Meta\Init as Meta_Signals;
@@ -206,6 +207,10 @@ class SureCookie_Loader {
 	 * @return void
 	 */
 	public function register_settings_dataset(): void {
+		// Early, and on plugins_loaded rather than init, so an add-on asking for a
+		// cookie name during a REST request gets this site's answer (#1347).
+		ConsentState::publish_cookie_names();
+
 		add_filter( 'surecookie_plugin_settings_dataset', [ Gcm_Actions::class, 'add_gcm_settings_to_dataset' ] );
 
 		// Priority 20 so every contributor has added its keys first; the

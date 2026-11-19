@@ -47,6 +47,13 @@ final class Resource_Categories {
 	private static ?array $overrides = null;
 
 	/**
+	 * Cached admin-authored path rules ([ [ kind, pattern ] ]).
+	 *
+	 * @var array<int, array{0: string, 1: string}>|null
+	 */
+	private static ?array $custom_paths = null;
+
+	/**
 	 * Cached catalog pattern index ([ kind => [ pattern => category ] ]).
 	 *
 	 * @var array<string, array<string, string>>|null
@@ -213,8 +220,8 @@ final class Resource_Categories {
 		$stored          = Settings::get( 'resource_category_overrides' );
 		if ( is_array( $stored ) ) {
 			foreach ( $stored as $domain => $category ) {
-				// Integer keys mean a list-shaped store; find_override() matches keys as
-				// substrings, so '0' would recategorize every URL containing a zero.
+				// Integer keys mean a list-shaped store; a dotless key still matches as
+				// a substring, so '0' would recategorize every URL containing a zero.
 				if ( ! is_string( $domain ) ) {
 					continue;
 				}
@@ -254,6 +261,10 @@ final class Resource_Categories {
 	 * Separate from resolve() so a caller can tell "no entry matched" from "an
 	 * entry matched and named the category we already had".
 	 *
+	 * Both sides are parsed by {@see Entry_Match}, never compared as raw strings: the
+	 * server pass asks about a resource URL and the guard builder about the bare
+	 * pattern it matched on, and a substring only matched the longer of the two (#1591).
+	 *
 	 * @since 1.5.0
 	 * @param string $key  Resource URL, or a bare domain.
 	 * @param string $kind Resource kind ('script'|'iframe').
@@ -264,21 +275,83 @@ final class Resource_Categories {
 			return null;
 		}
 
-		// An exact kind beats a legacy bare-domain key; within each, the longest matching
-		// domain wins, so a host's own override is never shadowed by its parent's.
-		$best = [];
+		// An exact kind beats a legacy bare-domain key; within each the longest matching
+		// domain wins. A host-level entry yields to an admin-authored rule naming a path,
+		// the narrowest claim made about the resource and the one the table shows (#1583).
+		$ruled = null;
+		$best  = [];
 		foreach ( self::overrides() as $entry_key => $target ) {
 			[ $entry_kind, $domain ] = self::parse_scoped_key( (string) $entry_key );
-			if ( $domain === '' || stripos( $key, $domain ) === false ) {
+			$tier                    = $entry_kind === $kind ? 0 : ( $entry_kind === 'any' ? 1 : null );
+			if ( $tier === null || $domain === '' || ! Entry_Match::matches( $domain, $key ) ) {
 				continue;
 			}
-			$tier = $entry_kind === $kind ? 0 : ( $entry_kind === 'any' ? 1 : null );
-			if ( $tier !== null && strlen( $domain ) > ( $best[ $tier ][0] ?? -1 ) ) {
+			if ( strpos( $domain, '/' ) === false ) {
+				$ruled ??= self::claimed_by_custom_rule( $key, $kind );
+				if ( $ruled ) {
+					continue;
+				}
+			}
+			if ( strlen( $domain ) > ( $best[ $tier ][0] ?? -1 ) ) {
 				$best[ $tier ] = [ strlen( $domain ), $target ];
 			}
 		}
 
 		return $best[0][1] ?? $best[1][1] ?? null;
+	}
+
+	/**
+	 * Whether an admin-authored rule naming a path claims this resource.
+	 *
+	 * @since 1.9.0
+	 * @param string $key  Resource URL, or a bare blocking pattern.
+	 * @param string $kind Resource kind ('script'|'iframe').
+	 * @return bool
+	 */
+	private static function claimed_by_custom_rule( string $key, string $kind ): bool {
+		foreach ( self::custom_path_rules() as [ $rule_kind, $pattern ] ) {
+			if ( ( $rule_kind === 'any' || $kind === 'any' || $rule_kind === $kind )
+				&& Entry_Match::matches( $pattern, $key ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Admin-authored blocking rules that name a path, as [ kind, pattern ].
+	 *
+	 * Read from the setting rather than through `surecookie_known_scripts`, because
+	 * the question is who authored the claim and the flattened catalog does not say.
+	 * A dotless keyword rule is left out: it is matched as a bare substring and
+	 * would shield far more than the admin named.
+	 *
+	 * @since 1.9.0
+	 * @return array<int, array{0: string, 1: string}>
+	 */
+	private static function custom_path_rules(): array {
+		if ( self::$custom_paths !== null ) {
+			return self::$custom_paths;
+		}
+
+		self::$custom_paths = [];
+		$stored             = Settings::get( 'custom_blocked_scripts' );
+		foreach ( is_array( $stored ) ? $stored : [] as $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+
+			$value = strtolower( trim( Sanitize::scalar( $entry['value'] ?? '' ) ) );
+			if ( strpos( $value, '/' ) === false || Entry_Match::parts( $value )['path'] === '' ) {
+				continue;
+			}
+
+			$type                 = Sanitize::scalar( $entry['type'] ?? '' );
+			self::$custom_paths[] = [ in_array( $type, [ 'script', 'iframe' ], true ) ? $type : 'any', $value ];
+		}
+
+		return self::$custom_paths;
 	}
 
 	/**
@@ -376,6 +449,7 @@ final class Resource_Categories {
 	public static function clear_cache(): void {
 		self::$excluded           = null;
 		self::$overrides          = null;
+		self::$custom_paths       = null;
 		self::$catalog_categories = null;
 		self::$catalog_buckets    = null;
 		self::$service_categories = null;

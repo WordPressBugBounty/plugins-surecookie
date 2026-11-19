@@ -93,12 +93,18 @@ class Settings_Metadata {
 				'description' => __( 'Dim the page behind the banner and block interaction until the visitor chooses.', 'surecookie' ),
 				'hazard'      => __( 'Forces a consent choice before the site can be used, which conflicts with the freely-given consent requirement in some regions. Confirm with the user before enabling.', 'surecookie' ),
 			],
+			'use_site_fonts'               => [
+				'description' => __( 'Render the banner, the preferences window and every blocked-embed placeholder in the theme\'s own font instead of the bundled one, and stop both bundled font files from being downloaded. The banner then inherits whatever the theme sets, including a decorative display face; Custom CSS still overrides it.', 'surecookie' ),
+			],
 			'banner_enabled'               => [
 				'description' => __( 'Master switch for the consent banner.', 'surecookie' ),
 				'hazard'      => __( 'Also disables script and iframe blocking, whatever blocking_enabled says, so turning it off lets trackers fire before consent.', 'surecookie' ),
 			],
 			'banner_logo'                  => [
 				'description' => __( 'Absolute URL of an image shown at the top of the banner. Empty string removes it.', 'surecookie' ),
+			],
+			'banner_logo_height'           => [
+				'description' => __( 'Rendered height of the banner logo in pixels, 16 to 120. The width follows the image\'s own proportions.', 'surecookie' ),
 			],
 			'message_heading'              => [
 				'description' => __( 'Plain-text headline above the banner message. HTML is stripped. Empty renders no heading.', 'surecookie' ),

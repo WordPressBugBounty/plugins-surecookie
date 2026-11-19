@@ -1247,11 +1247,18 @@ class ConsentLog extends Base {
 		$where_parts = [];
 		$values      = [];
 
-		if ( ! empty( $search ) ) {
-			$search_like   = '%' . $wpdb->esc_like( $search ) . '%';
-			$where_parts[] = '(ip_address LIKE %s OR session_id LIKE %s)';
-			$values[]      = $search_like;
-			$values[]      = $search_like;
+		// A data request stores up to two comma-separated session ids, and its drawer
+		// sends the admin here to confirm them, so any listed term matches.
+		$terms = array_slice( array_filter( array_map( 'trim', explode( ',', $search ) ) ), 0, 2 );
+		if ( ! empty( $terms ) ) {
+			$matches = [];
+			foreach ( $terms as $term ) {
+				$like      = '%' . $wpdb->esc_like( $term ) . '%';
+				$matches[] = '(ip_address LIKE %s OR session_id LIKE %s)';
+				$values[]  = $like;
+				$values[]  = $like;
+			}
+			$where_parts[] = '(' . implode( ' OR ', $matches ) . ')';
 		}
 
 		if ( ! empty( $country ) ) {

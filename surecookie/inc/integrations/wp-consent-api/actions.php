@@ -11,6 +11,7 @@
 
 namespace SureCookie\Inc\Integrations\WpConsentApi;
 
+use SureCookie\Inc\Functions\ConsentState;
 use SureCookie\Inc\Functions\Settings;
 use SureCookie\Inc\Traits\GetInstance;
 
@@ -62,7 +63,7 @@ class Actions {
 		$consent_expiry   = ( ! empty( $consent_duration ) ? absint( $consent_duration ) : 365 ) . ' ' . __( 'days', 'surecookie' );
 
 		wp_add_cookie_info(
-			'surecookie_user_consent',
+			ConsentState::cookie_name(),
 			__( 'SureCookie', 'surecookie' ),
 			'functional',
 			$consent_expiry,
@@ -70,7 +71,7 @@ class Actions {
 		);
 
 		wp_add_cookie_info(
-			'surecookie_session_id',
+			ConsentState::session_cookie_name(),
 			__( 'SureCookie', 'surecookie' ),
 			'functional',
 			__( '1 year', 'surecookie' ),

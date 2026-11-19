@@ -64,6 +64,59 @@ final class Countries {
 	}
 
 	/**
+	 * Whether the English name of a country reads with "the" in front of it.
+	 *
+	 * An explicit set, because the name alone cannot decide it: Honduras,
+	 * Cyprus and Barbados all end in an s and take no article. Kept out of
+	 * name() because the same name ends an address line, where "the" is wrong.
+	 *
+	 * @since 1.9.0
+	 * @param string $code ISO 3166-1 alpha-2 code.
+	 * @return bool
+	 */
+	public static function takes_definite_article( string $code ): bool {
+		return in_array(
+			strtoupper( $code ),
+			[
+				'AE',
+				'AX',
+				'BQ',
+				'BS',
+				'CC',
+				'CD',
+				'CF',
+				'CG',
+				'CK',
+				'CZ',
+				'DO',
+				'FK',
+				'FO',
+				'GB',
+				'GM',
+				'IM',
+				'IO',
+				'KM',
+				'KY',
+				'MH',
+				'MP',
+				'MV',
+				'NL',
+				'PH',
+				'PN',
+				'SB',
+				'SC',
+				'TC',
+				'TF',
+				'UM',
+				'US',
+				'VG',
+				'VI',
+			],
+			true
+		);
+	}
+
+	/**
 	 * EEA member states (the EU 27 plus Iceland, Liechtenstein and Norway) and the
 	 * EU territories with an ISO code of their own (Aland, the French outermost
 	 * regions), which would otherwise print as third countries.

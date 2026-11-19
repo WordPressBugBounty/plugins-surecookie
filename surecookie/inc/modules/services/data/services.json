@@ -626,7 +626,6 @@
             "US"
         ],
         "pro": true,
-        "gcm_compatible": true,
         "patterns": {
             "scripts": [
                 "stats.g.doubleclick.net",
@@ -908,6 +907,23 @@
                 "securepubads.g.doubleclick.net",
                 "pubads.g.doubleclick.net",
                 "googletagservices.com/tag/js/gpt.js"
+            ],
+            "iframes": []
+        },
+        "cookies": []
+    },
+    "google-ad-serving": {
+        "label": "Google Ad Serving",
+        "description": "Serves Google ads and reads the Consent Mode signal.",
+        "category": "marketing",
+        "transfer_countries": [
+            "US"
+        ],
+        "pro": true,
+        "gcm_compatible": true,
+        "patterns": {
+            "scripts": [
+                "adservice.google.com"
             ],
             "iframes": []
         },

@@ -25,6 +25,7 @@ use SureCookie\Inc\Functions\Cookie_Identity;
 use SureCookie\Inc\Functions\Get;
 use SureCookie\Inc\Functions\Sanitize;
 use SureCookie\Inc\Functions\Update;
+use SureCookie\Inc\Integrations\Cache\Init as Cache;
 use SureCookie\Inc\Modules\AssistedScan\Normalizer;
 use SureCookie\Inc\Modules\Services\Declared_Cookies;
 use SureCookie\Inc\Modules\Services\First_Party_Repair;
@@ -89,6 +90,22 @@ class Maintenance {
 	 * @since 1.3.0
 	 */
 	private const LOCK_TTL = 5 * MINUTE_IN_SECONDS;
+
+	/**
+	 * Failed scoped-names purges counted so far, while the version is held for
+	 * a retry. Written only then, so the hot path never reads it.
+	 *
+	 * @since 1.9.0
+	 */
+	private const PURGE_ATTEMPTS_OPTION = 'surecookie_payload_purge_attempts';
+
+	/**
+	 * Passes that may try the scoped-names purge before the version is recorded
+	 * anyway, so a cache that always throws is not purged on every request.
+	 *
+	 * @since 1.9.0
+	 */
+	private const PURGE_MAX_ATTEMPTS = 3;
 
 	/**
 	 * Throttle applied after a failed schema upgrade.
@@ -245,6 +262,8 @@ class Maintenance {
 		 */
 		do_action( 'surecookie_update_before', $saved_version, SURECOOKIE_VERSION );
 
+		self::rearm_scoped_cookie_payload_purge( $saved_version );
+
 		/*
 		 * A contended lock means this request did no work, so it must not record
 		 * the upgrade as applied. Bumping here would strand every pending migration:
@@ -260,7 +279,13 @@ class Maintenance {
 		 * Bumped even when an individual migration failed: the failed one stays
 		 * out of the ledger and retries on the next version change. Pinning the
 		 * version here instead would retry a broken step on every request.
+		 * The one exception is the scoped-names purge, which retries a few times
+		 * first: until it succeeds, cached pages cannot store consent at all.
 		 */
+		if ( self::hold_version_for_purge_retry() ) {
+			return;
+		}
+
 		self::store_saved_version();
 
 		/**
@@ -473,9 +498,11 @@ class Maintenance {
 			// Rule 6 again: `pll_` joined the site-emitted names with #1527.
 			'site_owned_providers_pll'           => [ self::class, 'reclaim_site_owned_cookie_providers' ],
 			'stranger_cookie_providers'          => [ self::class, 'clear_stranger_cookie_providers' ],
-			// Ordered last on purpose: the catalog fills what the pass above blanked,
-			// and its own id has been in every ledger since 1.3.0.
+			// After `stranger_cookie_providers` on purpose: the catalog fills what
+			// that pass blanked, and its own id has been in every ledger since 1.3.0.
 			'scanned_cookie_providers_strangers' => [ self::class, 'backfill_scanned_cookie_providers' ],
+			// Last, so caches are emptied only after every write above has landed.
+			'scoped_cookie_payload_purge'        => [ self::class, 'purge_scoped_cookie_payload' ],
 		];
 	}
 
@@ -709,6 +736,79 @@ class Maintenance {
 		if ( ! Update::option( SURECOOKIE_SCANNED_COOKIES_OPTION, $stored ) ) {
 			throw new \RuntimeException( 'Could not write back-filled cookie durations.' );
 		}
+	}
+
+	/**
+	 * Empty page caches filled before the consent cookie names were scoped.
+	 *
+	 * From 1.9.0 the names reach the page in the localized payload instead of as
+	 * JS literals, so a page cached by 1.8.x names neither cookie and the bundle
+	 * fails closed: the banner returns on every cached view and stores nothing.
+	 * Seeded on a fresh install, which has no such page cached (#1347).
+	 *
+	 * @since 1.9.0
+	 * @return void
+	 * @throws \RuntimeException When a cache failed to purge, so the step retries.
+	 */
+	private static function purge_scoped_cookie_payload(): void {
+		if ( ! Cache::purge_all() ) {
+			throw new \RuntimeException( 'a page cache failed to purge' );
+		}
+	}
+
+	/**
+	 * Whether a failed scoped-names purge should hold the version back, so the
+	 * next ready request runs the pass again.
+	 *
+	 * @since 1.9.0
+	 * @return bool True while the purge is pending and attempts remain.
+	 */
+	private static function hold_version_for_purge_retry(): bool {
+		// Once the id is retired, write_ledger() drops it, so it must not hold upgrades.
+		if ( ! isset( self::migrations()['scoped_cookie_payload_purge'] ) || isset( self::read_ledger()['scoped_cookie_payload_purge'] ) ) {
+			delete_option( self::PURGE_ATTEMPTS_OPTION );
+			return false;
+		}
+
+		$attempts = absint( get_option( self::PURGE_ATTEMPTS_OPTION, 0 ) ) + 1;
+
+		if ( $attempts >= self::PURGE_MAX_ATTEMPTS ) {
+			delete_option( self::PURGE_ATTEMPTS_OPTION );
+			return false;
+		}
+
+		Update::option( self::PURGE_ATTEMPTS_OPTION, $attempts, false );
+		return true;
+	}
+
+	/**
+	 * Run the scoped-names purge again whenever a pre-scope build may have
+	 * refilled the page caches since the last one.
+	 *
+	 * The ledger runs each id once, but a rollback to 1.8.x lets the caches fill
+	 * with the old payload again, and the downgrade path never touches the
+	 * ledger. Any upgrade from below 1.9.0 therefore drops the id so the pass
+	 * reruns it. On a first upgrade the id is not recorded yet, so this is a no-op.
+	 *
+	 * @since 1.9.0
+	 * @param string $saved_version Version recorded before this run.
+	 * @return void
+	 */
+	private static function rearm_scoped_cookie_payload_purge( string $saved_version ): void {
+		if ( version_compare( $saved_version, '1.9.0', '>=' ) ) {
+			return;
+		}
+
+		$ledger = self::read_ledger();
+		if ( ! isset( $ledger['scoped_cookie_payload_purge'] ) ) {
+			return;
+		}
+
+		unset( $ledger['scoped_cookie_payload_purge'] );
+
+		// Direct write: write_ledger() merges in the stored row on purpose so a
+		// partial set can never erase a record, which would undo this removal.
+		Update::option( self::LEDGER_OPTION, $ledger );
 	}
 
 	/**

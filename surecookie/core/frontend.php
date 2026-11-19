@@ -118,6 +118,13 @@ class Frontend {
 			wp_add_inline_style( 'surecookie-public', wp_strip_all_tags( $palette_css ) );
 		}
 
+		// The only place the frontend names a banner font family, so stylesheet
+		// order cannot decide it; custom_css still lands after it.
+		$font_css = Sanitize::stylesheet( Get::banner_font_css() );
+		if ( ! empty( $font_css ) ) {
+			wp_add_inline_style( 'surecookie-public', wp_strip_all_tags( $font_css ) );
+		}
+
 		// Add custom CSS if available.
 		$custom_css = Sanitize::stylesheet( (string) Settings::get( 'custom_css' ) );
 		if ( Validate::not_empty( $custom_css ) ) {
